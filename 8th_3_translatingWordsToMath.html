@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translating Words to Math & Basic Algebraic Thinking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #fdfdff;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .controls-container {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .controls-container button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 10px;
+        }
+        #showSolutionsButton { background-color: #28a745; }
+        #showSolutionsButton:hover { background-color: #218838; }
+        #showSolutionsButton:disabled {
+            background-color: #6c757d; /* Gray when disabled */
+            cursor: not-allowed;
+        }
+
+        .problem-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .problem-list li {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .problem-number {
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+        .problem-text-container {
+            font-family: 'Georgia', serif;
+            font-size: 1.1em;
+            color: #444;
+            display: block;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+        .answer-space {
+            display: block;
+            margin-top: 10px;
+            font-style: italic;
+            color: #777;
+        }
+
+        .problem-list li.solutions-shown .problem-text-container,
+        .problem-list li.solutions-shown .answer-space,
+        .problem-list li.solutions-shown .problem-number {
+            /* color: #aaa; Optional: Keep full color if preferred */
+        }
+
+        .solution-steps {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e9f5ff; /* Light blue background */
+            border: 1px dashed #5bc0de; /* Info blue border */
+            border-radius: 4px;
+            font-family: 'Arial', sans-serif; /* Clear font for solutions */
+            font-size: 1.0em;
+            line-height: 1.5;
+        }
+        .solution-steps p {
+            margin: 8px 0;
+            word-wrap: break-word;
+        }
+        .solution-steps .final-answer {
+            font-weight: bold;
+            color: #007bff; /* Primary blue for final answer */
+            margin-top:10px;
+            padding-top:5px;
+            border-top: 1px solid #ccc;
+        }
+        .highlight-op {
+            color: #d9534f;
+            font-weight: bold;
+            background-color: #f9e6e5;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        @media print {
+            body { margin: 0.5in; }
+            .controls-container { display: none; }
+            h1 { font-size: 18pt; }
+            .problem-list li { page-break-inside: avoid; }
+             .problem-list li.solutions-shown .problem-text-container,
+            .problem-list li.solutions-shown .answer-space,
+            .problem-list li.solutions-shown .problem-number {
+                 color: #444 !important; /* Keep original color for print */
+            }
+            .solution-steps {
+                background-color: #fff !important;
+                border: 1px solid #ccc !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Translating Words to Math & Basic Algebraic Thinking</h1>
+
+    <div class="controls-container">
+        <button id="showSolutionsButton">Show Solutions</button>
+    </div>
+
+    <ol class="problem-list" id="problemListContainer">
+        <!-- Problems will be dynamically inserted here -->
+    </ol>
+
+    <script>
+        const problemListContainer = document.getElementById('problemListContainer');
+        const showSolutionsBtn = document.getElementById('showSolutionsButton');
+
+        const problemsData = [
+            // Category: Consecutive Integers
+            {
+                problemText: "The sum of three consecutive even integers is 138. What is the largest of these integers?",
+                solutionStepsHTML: `
+                    <p>Let the three consecutive even integers be x, x + 2, and x + 4.</p>
+                    <p><strong>Step 1: Set up the equation based on the sum.</strong></p>
+                    <p>x + (x + 2) + (x + 4) = 138</p>
+                    <p><strong>Step 2: Solve for x.</strong></p>
+                    <p>3x + 6 = 138</p>
+                    <p>3x = 138 - 6</p>
+                    <p>3x = 132</p>
+                    <p>x = 132 / 3</p>
+                    <p>x = 44</p>
+                    <p><strong>Step 3: Find the three integers.</strong></p>
+                    <p>Smallest integer (x): 44</p>
+                    <p>Middle integer (x + 2): 44 + 2 = 46</p>
+                    <p>Largest integer (x + 4): 44 + 4 = 48</p>
+                    <p class="final-answer">Final Answer: The largest integer is 48.</p>
+                `
+            },
+            {
+                problemText: "The sum of three consecutive odd integers is 81. What is the middle integer?",
+                solutionStepsHTML: `
+                    <p>Let the three consecutive odd integers be n, n + 2, and n + 4.</p>
+                    <p><strong>Step 1: Set up the equation.</strong></p>
+                    <p>n + (n + 2) + (n + 4) = 81</p>
+                    <p><strong>Step 2: Solve for n.</strong></p>
+                    <p>3n + 6 = 81</p>
+                    <p>3n = 81 - 6</p>
+                    <p>3n = 75</p>
+                    <p>n = 75 / 3</p>
+                    <p>n = 25</p>
+                    <p><strong>Step 3: Identify the integers.</strong></p>
+                    <p>First integer: 25</p>
+                    <p>Middle integer: 25 + 2 = 27</p>
+                    <p>Third integer: 25 + 4 = 29</p>
+                    <p class="final-answer">Final Answer: The middle integer is 27.</p>
+                `
+            },
+            {
+                problemText: "The sum of four consecutive integers is 90. What is the smallest of these integers?",
+                solutionStepsHTML: `
+                    <p>Let the four consecutive integers be x, x + 1, x + 2, and x + 3.</p>
+                    <p><strong>Step 1: Set up the equation.</strong></p>
+                    <p>x + (x + 1) + (x + 2) + (x + 3) = 90</p>
+                    <p><strong>Step 2: Solve for x.</strong></p>
+                    <p>4x + 6 = 90</p>
+                    <p>4x = 90 - 6</p>
+                    <p>4x = 84</p>
+                    <p>x = 84 / 4</p>
+                    <p>x = 21</p>
+                    <p>The integers are 21, 22, 23, 24.</p>
+                    <p class="final-answer">Final Answer: The smallest integer is 21.</p>
+                `
+            },
+            {
+                problemText: "The product of two consecutive positive integers is 72. What are the integers?",
+                solutionStepsHTML: `
+                    <p>Let the two consecutive positive integers be x and x + 1.</p>
+                    <p><strong>Step 1: Set up the equation.</strong></p>
+                    <p>x(x + 1) = 72</p>
+                    <p><strong>Step 2: Solve for x.</strong> This can be solved by inspection or by expanding and solving the quadratic equation x² + x - 72 = 0.</p>
+                    <p>By inspection, we look for two consecutive numbers that multiply to 72.</p>
+                    <p>Consider factors of 72: 1x72, 2x36, 3x24, 4x18, 6x12, 8x9.</p>
+                    <p>The pair 8 and 9 are consecutive.</p>
+                    <p>So, x = 8.</p>
+                    <p>The integers are x = 8 and x + 1 = 9.</p>
+                    <p class="final-answer">Final Answer: The integers are 8 and 9.</p>
+                `
+            },
+            {
+                problemText: "For three consecutive integers, the sum of the smallest and the largest is 50. What is the middle integer?",
+                solutionStepsHTML: `
+                    <p>Let the three consecutive integers be n, n + 1, and n + 2.</p>
+                    <p>Smallest integer: n</p>
+                    <p>Largest integer: n + 2</p>
+                    <p><strong>Step 1: Set up the equation based on the sum of the smallest and largest.</strong></p>
+                    <p>n + (n + 2) = 50</p>
+                    <p><strong>Step 2: Solve for n.</strong></p>
+                    <p>2n + 2 = 50</p>
+                    <p>2n = 50 - 2</p>
+                    <p>2n = 48</p>
+                    <p>n = 48 / 2</p>
+                    <p>n = 24</p>
+                    <p><strong>Step 3: Find the middle integer.</strong></p>
+                    <p>The integers are: Smallest (n) = 24, Middle (n + 1) = 25, Largest (n + 2) = 26.</p>
+                    <p>The middle integer is n + 1.</p>
+                    <p>Middle integer = 24 + 1 = 25.</p>
+                    <p class="final-answer">Final Answer: The middle integer is 25.</p>
+                `
+            },
+            {
+                problemText: "The sum of two consecutive even integers is 74. Find the integers.",
+                solutionStepsHTML: `
+                    <p>Let the two consecutive even integers be x and x + 2.</p>
+                    <p><strong>Step 1: Set up the equation.</strong></p>
+                    <p>x + (x + 2) = 74</p>
+                    <p><strong>Step 2: Solve for x.</strong></p>
+                    <p>2x + 2 = 74</p>
+                    <p>2x = 74 - 2</p>
+                    <p>2x = 72</p>
+                    <p>x = 72 / 2</p>
+                    <p>x = 36</p>
+                    <p><strong>Step 3: Identify the integers.</strong></p>
+                    <p>First integer: x = 36</p>
+                    <p>Second integer: x + 2 = 36 + 2 = 38</p>
+                    <p class="final-answer">Final Answer: The integers are 36 and 38.</p>
+                `
+            },
+            // Category: Geometric Formulas
+            {
+                problemText: "A rectangle's length is 3 cm less than twice its width. If its perimeter is 54 cm, find the dimensions of the rectangle.",
+                solutionStepsHTML: `
+                    <p>Let W be the width of the rectangle and L be its length.</p>
+                    <p><strong>Step 1: Translate the word problem into algebraic expressions.</strong></p>
+                    <p>Length is 3 cm less than twice its width: L = 2W - 3</p>
+                    <p>Perimeter of a rectangle: P = 2(L + W)</p>
+                    <p>Given perimeter: P = 54 cm</p>
+                    <p><strong>Step 2: Set up the equation for the perimeter.</strong></p>
+                    <p>2(L + W) = 54</p>
+                    <p><strong>Step 3: Substitute the expression for L into the perimeter equation.</strong></p>
+                    <p>2((2W - 3) + W) = 54</p>
+                    <p><strong>Step 4: Solve for W.</strong></p>
+                    <p>2(3W - 3) = 54</p>
+                    <p>6W - 6 = 54</p>
+                    <p>6W = 54 + 6</p>
+                    <p>6W = 60</p>
+                    <p>W = 60 / 6 = 10 cm</p>
+                    <p><strong>Step 5: Calculate L.</strong></p>
+                    <p>L = 2W - 3 = 2(10) - 3 = 20 - 3 = 17 cm</p>
+                    <p class="final-answer">Final Answer: Width = 10 cm, Length = 17 cm.</p>
+                `
+            },
+            {
+                problemText: "The length of a rectangle is 5 m more than its width. If the perimeter is 60 m, find the area of the rectangle.",
+                solutionStepsHTML: `
+                    <p>Let W be the width and L be the length.</p>
+                    <p><strong>Step 1: Express L in terms of W.</strong></p>
+                    <p>L = W + 5</p>
+                    <p><strong>Step 2: Use the perimeter formula P = 2(L + W).</strong></p>
+                    <p>60 = 2((W + 5) + W)</p>
+                    <p>60 = 2(2W + 5)</p>
+                    <p>60 = 4W + 10</p>
+                    <p><strong>Step 3: Solve for W.</strong></p>
+                    <p>60 - 10 = 4W</p>
+                    <p>50 = 4W</p>
+                    <p>W = 50 / 4 = 12.5 m</p>
+                    <p><strong>Step 4: Find L.</strong></p>
+                    <p>L = W + 5 = 12.5 + 5 = 17.5 m</p>
+                    <p><strong>Step 5: Calculate the Area (A = L * W).</strong></p>
+                    <p>Area = 17.5 m * 12.5 m = 218.75 m²</p>
+                    <p class="final-answer">Final Answer: Area = 218.75 m².</p>
+                `
+            },
+            {
+                problemText: "The width of a rectangle is one-third its length. If the perimeter is 96 cm, find the length.",
+                solutionStepsHTML: `
+                    <p>Let L be the length and W be the width.</p>
+                    <p><strong>Step 1: Express W in terms of L.</strong></p>
+                    <p>W = L / 3</p>
+                    <p><strong>Step 2: Use the perimeter formula P = 2(L + W).</strong></p>
+                    <p>96 = 2(L + L/3)</p>
+                    <p><strong>Step 3: Solve for L.</strong></p>
+                    <p>96 = 2( (3L/3) + (L/3) )</p>
+                    <p>96 = 2(4L / 3)</p>
+                    <p>96 = 8L / 3</p>
+                    <p>Multiply by 3: 96 * 3 = 8L</p>
+                    <p>288 = 8L</p>
+                    <p>L = 288 / 8</p>
+                    <p>L = 36 cm</p>
+                    <p>(Width would be 36/3 = 12 cm. Check: 2(36+12) = 2(48) = 96. Correct.)</p>
+                    <p class="final-answer">Final Answer: The length is 36 cm.</p>
+                `
+            },
+            {
+                problemText: "A square has a perimeter of 48 inches. What is the length of one side?",
+                solutionStepsHTML: `
+                    <p>Let 's' be the length of one side of the square.</p>
+                    <p><strong>Step 1: Recall the formula for the perimeter of a square.</strong></p>
+                    <p>Perimeter (P) = 4s</p>
+                    <p><strong>Step 2: Substitute the given perimeter into the formula.</strong></p>
+                    <p>48 inches = 4s</p>
+                    <p><strong>Step 3: Solve for s.</strong></p>
+                    <p>s = 48 / 4</p>
+                    <p>s = 12 inches</p>
+                    <p class="final-answer">Final Answer: The length of one side is 12 inches.</p>
+                `
+            },
+            {
+                problemText: "The base of a triangle is 4 cm more than its height. If the height is 'h' cm, write an expression for the area of the triangle in terms of 'h'. (You do not need to solve for 'h').",
+                solutionStepsHTML: `
+                    <p>Let 'h' be the height of the triangle.</p>
+                    <p><strong>Step 1: Express the base in terms of 'h'.</strong></p>
+                    <p>Base (b) = h + 4 cm</p>
+                    <p><strong>Step 2: Recall the formula for the area of a triangle.</strong></p>
+                    <p>Area (A) = (1/2) * base * height</p>
+                    <p><strong>Step 3: Substitute the expressions for base and height into the formula.</strong></p>
+                    <p>A = (1/2) * (h + 4) * h</p>
+                    <p>This can also be written as A = 0.5h(h + 4) or A = (h² + 4h) / 2.</p>
+                    <p class="final-answer">Final Answer: The expression for the area is A = (1/2) * (h + 4) * h (or equivalent forms).</p>
+                `
+            },
+            {
+                problemText: "The length of a rectangular garden is twice its width. If the area is 72 square meters, what are its dimensions?",
+                solutionStepsHTML: `
+                    <p>Let W be the width and L be the length of the garden.</p>
+                    <p><strong>Step 1: Express L in terms of W.</strong></p>
+                    <p>L = 2W</p>
+                    <p><strong>Step 2: Use the area formula A = L * W.</strong></p>
+                    <p>72 = L * W</p>
+                    <p><strong>Step 3: Substitute the expression for L into the area equation.</strong></p>
+                    <p>72 = (2W) * W</p>
+                    <p>72 = 2W²</p>
+                    <p><strong>Step 4: Solve for W.</strong></p>
+                    <p>W² = 72 / 2</p>
+                    <p>W² = 36</p>
+                    <p>W = √36 (Since width must be positive)</p>
+                    <p>W = 6 meters</p>
+                    <p><strong>Step 5: Find L.</strong></p>
+                    <p>L = 2W = 2 * 6 = 12 meters</p>
+                    <p class="final-answer">Final Answer: Width = 6 meters, Length = 12 meters.</p>
+                `
+            },
+            // Category: Coin Problems
+            {
+                problemText: "Maria has q quarters and d dimes. She has 5 more dimes than quarters, and the total value of her coins is $3.30. Find the number of quarters and dimes Maria has.",
+                solutionStepsHTML: `
+                    <p>Let q be the number of quarters and d be the number of dimes.</p>
+                    <p><strong>Step 1: Set up equations based on the given information.</strong></p>
+                    <p>She has 5 more dimes than quarters: d = q + 5 (Equation 1)</p>
+                    <p>Total value of coins: 0.25q + 0.10d = $3.30 (Equation 2)</p>
+                    <p><strong>Step 2: Substitute Equation 1 into Equation 2.</strong></p>
+                    <p>0.25q + 0.10(q + 5) = 3.30</p>
+                    <p><strong>Step 3: Solve for q.</strong></p>
+                    <p>0.25q + 0.10q + 0.50 = 3.30</p>
+                    <p>0.35q + 0.50 = 3.30</p>
+                    <p>0.35q = 3.30 - 0.50</p>
+                    <p>0.35q = 2.80</p>
+                    <p>q = 2.80 / 0.35</p>
+                    <p>q = 8</p>
+                    <p><strong>Step 4: Solve for d using Equation 1.</strong></p>
+                    <p>d = q + 5 = 8 + 5 = 13</p>
+                    <p>Check: (8 * $0.25) + (13 * $0.10) = $2.00 + $1.30 = $3.30. Correct.</p>
+                    <p class="final-answer">Final Answer: Maria has 8 quarters and 13 dimes.</p>
+                `
+            },
+            {
+                problemText: "John has nickels and dimes. He has 3 times as many dimes as nickels. The total value of his coins is $2.10. How many of each coin does he have?",
+                solutionStepsHTML: `
+                    <p>Let n be the number of nickels and d be the number of dimes.</p>
+                    <p><strong>Step 1: Set up equations.</strong></p>
+                    <p>d = 3n (He has 3 times as many dimes as nickels)</p>
+                    <p>0.05n + 0.10d = 2.10 (Total value)</p>
+                    <p><strong>Step 2: Substitute the first equation into the second.</strong></p>
+                    <p>0.05n + 0.10(3n) = 2.10</p>
+                    <p><strong>Step 3: Solve for n.</strong></p>
+                    <p>0.05n + 0.30n = 2.10</p>
+                    <p>0.35n = 2.10</p>
+                    <p>n = 2.10 / 0.35</p>
+                    <p>n = 6</p>
+                    <p><strong>Step 4: Find d.</strong></p>
+                    <p>d = 3n = 3 * 6 = 18</p>
+                    <p>Check: (6 * $0.05) + (18 * $0.10) = $0.30 + $1.80 = $2.10. Correct.</p>
+                    <p class="final-answer">Final Answer: John has 6 nickels and 18 dimes.</p>
+                `
+            },
+            {
+                problemText: "A piggy bank contains only quarters and pennies. There are 40 coins in total. The total value is $4.24. How many quarters are there?",
+                solutionStepsHTML: `
+                    <p>Let q be the number of quarters and p be the number of pennies.</p>
+                    <p><strong>Step 1: Set up equations based on the given information.</strong></p>
+                    <p>Total number of coins: q + p = 40  (Equation 1)</p>
+                    <p>Total value of coins: 0.25q + 0.01p = $4.24 (Equation 2)</p>
+                    <p><strong>Step 2: Express one variable in terms of the other using Equation 1.</strong></p>
+                    <p>From Equation 1: p = 40 - q</p>
+                    <p><strong>Step 3: Substitute this expression into Equation 2.</strong></p>
+                    <p>0.25q + 0.01(40 - q) = 4.24</p>
+                    <p><strong>Step 4: Solve for q.</strong></p>
+                    <p>0.25q + 0.40 - 0.01q = 4.24</p>
+                    <p>0.24q + 0.40 = 4.24</p>
+                    <p>0.24q = 4.24 - 0.40</p>
+                    <p>0.24q = 3.84</p>
+                    <p>q = 3.84 / 0.24</p>
+                    <p>q = 16</p>
+                    <p class="final-answer">Final Answer: There are 16 quarters.</p>
+                `
+            },
+            {
+                problemText: "Sarah has $1.80 in dimes and nickels. She has 6 more nickels than dimes. How many dimes does she have?",
+                solutionStepsHTML: `
+                    <p>Let d be the number of dimes and n be the number of nickels.</p>
+                    <p><strong>Step 1: Set up equations.</strong></p>
+                    <p>n = d + 6 (6 more nickels than dimes)</p>
+                    <p>0.10d + 0.05n = 1.80 (Total value)</p>
+                    <p><strong>Step 2: Substitute the first equation into the second.</strong></p>
+                    <p>0.10d + 0.05(d + 6) = 1.80</p>
+                    <p><strong>Step 3: Solve for d.</strong></p>
+                    <p>0.10d + 0.05d + 0.30 = 1.80</p>
+                    <p>0.15d + 0.30 = 1.80</p>
+                    <p>0.15d = 1.80 - 0.30</p>
+                    <p>0.15d = 1.50</p>
+                    <p>d = 1.50 / 0.15</p>
+                    <p>d = 10</p>
+                    <p class="final-answer">Final Answer: Sarah has 10 dimes.</p>
+                `
+            },
+            {
+                problemText: "A collection of 30 coins, consisting of nickels and quarters, has a total value of $4.70. How many of each coin are there?",
+                solutionStepsHTML: `
+                    <p>Let n be the number of nickels and q be the number of quarters.</p>
+                    <p><strong>Step 1: Set up equations.</strong></p>
+                    <p>n + q = 30 (Total number of coins)  => n = 30 - q</p>
+                    <p>0.05n + 0.25q = 4.70 (Total value)</p>
+                    <p><strong>Step 2: Substitute the expression for n into the second equation.</strong></p>
+                    <p>0.05(30 - q) + 0.25q = 4.70</p>
+                    <p><strong>Step 3: Solve for q.</strong></p>
+                    <p>1.50 - 0.05q + 0.25q = 4.70</p>
+                    <p>1.50 + 0.20q = 4.70</p>
+                    <p>0.20q = 4.70 - 1.50</p>
+                    <p>0.20q = 3.20</p>
+                    <p>q = 3.20 / 0.20</p>
+                    <p>q = 16</p>
+                    <p><strong>Step 4: Find n.</strong></p>
+                    <p>n = 30 - q = 30 - 16 = 14</p>
+                    <p>Check: (14 * $0.05) + (16 * $0.25) = $0.70 + $4.00 = $4.70. Correct.</p>
+                    <p class="final-answer">Final Answer: There are 14 nickels and 16 quarters.</p>
+                `
+            },
+            // Category: Simple Systems of Relationships
+            {
+                problemText: "The sum of two numbers is 31. Their difference is 7. What are the two numbers?",
+                solutionStepsHTML: `
+                    <p>Let the two numbers be x and y.</p>
+                    <p><strong>Step 1: Set up the equations based on the given information.</strong></p>
+                    <p>Sum: x + y = 31 (Equation 1)</p>
+                    <p>Difference: x - y = 7 (Equation 2) (Assume x is the larger number)</p>
+                    <p><strong>Step 2: Solve the system of equations. One way is to add the two equations.</strong></p>
+                    <p>(x + y) + (x - y) = 31 + 7</p>
+                    <p>2x = 38</p>
+                    <p>x = 38 / 2</p>
+                    <p>x = 19</p>
+                    <p><strong>Step 3: Substitute the value of x into Equation 1 to find y.</strong></p>
+                    <p>19 + y = 31</p>
+                    <p>y = 31 - 19</p>
+                    <p>y = 12</p>
+                    <p>Check: Sum = 19 + 12 = 31. Difference = 19 - 12 = 7. Correct.</p>
+                    <p class="final-answer">Final Answer: The two numbers are 19 and 12.</p>
+                `
+            },
+            {
+                problemText: "The sum of two numbers is 50. One number is 4 times the other. Find the numbers.",
+                solutionStepsHTML: `
+                    <p>Let the two numbers be x and y.</p>
+                    <p><strong>Step 1: Set up equations.</strong></p>
+                    <p>x + y = 50 (Sum)</p>
+                    <p>x = 4y (One number is 4 times the other)</p>
+                    <p><strong>Step 2: Substitute the second equation into the first.</strong></p>
+                    <p>(4y) + y = 50</p>
+                    <p><strong>Step 3: Solve for y.</strong></p>
+                    <p>5y = 50</p>
+                    <p>y = 50 / 5</p>
+                    <p>y = 10</p>
+                    <p><strong>Step 4: Find x.</strong></p>
+                    <p>x = 4y = 4 * 10 = 40</p>
+                    <p>Check: Sum = 40 + 10 = 50. 40 is 4 times 10. Correct.</p>
+                    <p class="final-answer">Final Answer: The numbers are 40 and 10.</p>
+                `
+            },
+            {
+                problemText: "The difference between two numbers is 15. The larger number is 6 more than twice the smaller number. Find the numbers.",
+                solutionStepsHTML: `
+                    <p>Let L be the larger number and S be the smaller number.</p>
+                    <p><strong>Step 1: Set up equations.</strong></p>
+                    <p>L - S = 15 (Difference)</p>
+                    <p>L = 2S + 6 (Larger is 6 more than twice smaller)</p>
+                    <p><strong>Step 2: Substitute the second equation into the first.</strong></p>
+                    <p>(2S + 6) - S = 15</p>
+                    <p><strong>Step 3: Solve for S.</strong></p>
+                    <p>S + 6 = 15</p>
+                    <p>S = 15 - 6</p>
+                    <p>S = 9</p>
+                    <p><strong>Step 4: Find L.</strong></p>
+                    <p>L = 2S + 6 = 2(9) + 6 = 18 + 6 = 24</p>
+                    <p>Check: Difference = 24 - 9 = 15. 24 is 6 more than (2*9)=18. Correct.</p>
+                    <p class="final-answer">Final Answer: The numbers are 24 and 9.</p>
+                `
+            },
+            {
+                problemText: "One number is 5 less than another. Their sum is 41. Find the numbers.",
+                solutionStepsHTML: `
+                    <p>Let the two numbers be x and y. Let y be the larger number.</p>
+                    <p><strong>Step 1: Set up equations.</strong></p>
+                    <p>x = y - 5 (One number is 5 less than another)</p>
+                    <p>x + y = 41 (Their sum is 41)</p>
+                    <p><strong>Step 2: Substitute the first equation into the second.</strong></p>
+                    <p>(y - 5) + y = 41</p>
+                    <p><strong>Step 3: Solve for y.</strong></p>
+                    <p>2y - 5 = 41</p>
+                    <p>2y = 41 + 5</p>
+                    <p>2y = 46</p>
+                    <p>y = 46 / 2</p>
+                    <p>y = 23</p>
+                    <p><strong>Step 4: Find x.</strong></p>
+                    <p>x = y - 5 = 23 - 5 = 18</p>
+                    <p>Check: Sum = 18 + 23 = 41. 18 is 5 less than 23. Correct.</p>
+                    <p class="final-answer">Final Answer: The numbers are 18 and 23.</p>
+                `
+            },
+            {
+                problemText: "Two numbers have a sum of 25. The larger number is 1 more than twice the smaller number. Find the numbers.",
+                solutionStepsHTML: `
+                    <p>Let S be the smaller number and L be the larger number.</p>
+                    <p><strong>Step 1: Set up equations.</strong></p>
+                    <p>S + L = 25 (Sum)</p>
+                    <p>L = 2S + 1 (Larger is 1 more than twice smaller)</p>
+                    <p><strong>Step 2: Substitute the second equation into the first.</strong></p>
+                    <p>S + (2S + 1) = 25</p>
+                    <p><strong>Step 3: Solve for S.</strong></p>
+                    <p>3S + 1 = 25</p>
+                    <p>3S = 25 - 1</p>
+                    <p>3S = 24</p>
+                    <p>S = 24 / 3</p>
+                    <p>S = 8</p>
+                    <p><strong>Step 4: Find L.</strong></p>
+                    <p>L = 2S + 1 = 2(8) + 1 = 16 + 1 = 17</p>
+                    <p>Check: Sum = 8 + 17 = 25. 17 is 1 more than (2*8)=16. Correct.</p>
+                    <p class="final-answer">Final Answer: The numbers are 8 and 17.</p>
+                `
+            },
+            // Category: Working Backwards
+            {
+                problemText: "A number is doubled, then increased by 7. The result is then divided by 3, yielding 15. What was the original number?",
+                solutionStepsHTML: `
+                    <p>Let the original number be x.</p>
+                    <p><strong>Step 1: Translate the operations into an equation.</strong></p>
+                    <p>"A number is doubled": 2x</p>
+                    <p>"then increased by 7": 2x + 7</p>
+                    <p>"The result is then divided by 3": (2x + 7) / 3</p>
+                    <p>"yielding 15": (2x + 7) / 3 = 15</p>
+                    <p><strong>Step 2: Solve the equation by working backwards (using inverse operations).</strong></p>
+                    <p>Current equation: (2x + 7) / 3 = 15</p>
+                    <p>Multiply by 3: 2x + 7 = 15 * 3</p>
+                    <p>2x + 7 = 45</p>
+                    <p>Subtract 7: 2x = 45 - 7</p>
+                    <p>2x = 38</p>
+                    <p>Divide by 2: x = 38 / 2</p>
+                    <p>x = 19</p>
+                    <p class="final-answer">Final Answer: The original number was 19.</p>
+                `
+            },
+            {
+                problemText: "A number is tripled, then decreased by 5. The result is 22. What is the original number?",
+                solutionStepsHTML: `
+                    <p>Let the number be x.</p>
+                    <p><strong>Step 1: Formulate the equation.</strong></p>
+                    <p>3x - 5 = 22</p>
+                    <p><strong>Step 2: Work backwards to solve.</strong></p>
+                    <p>Add 5 to both sides: 3x = 22 + 5</p>
+                    <p>3x = 27</p>
+                    <p>Divide by 3: x = 27 / 3</p>
+                    <p>x = 9</p>
+                    <p class="final-answer">Final Answer: The original number is 9.</p>
+                `
+            },
+            {
+                problemText: "If you take a number, subtract 10 from it, then multiply by 4, the result is 24. What is the number?",
+                solutionStepsHTML: `
+                    <p>Let the number be n.</p>
+                    <p><strong>Step 1: Formulate the equation.</strong></p>
+                    <p>(n - 10) * 4 = 24</p>
+                    <p><strong>Step 2: Work backwards to solve.</strong></p>
+                    <p>Divide by 4: n - 10 = 24 / 4</p>
+                    <p>n - 10 = 6</p>
+                    <p>Add 10: n = 6 + 10</p>
+                    <p>n = 16</p>
+                    <p class="final-answer">Final Answer: The number is 16.</p>
+                `
+            },
+            {
+                problemText: "A number is divided by 2, then 8 is added. The result is 14. What is the original number?",
+                solutionStepsHTML: `
+                    <p>Let the number be x.</p>
+                    <p><strong>Step 1: Formulate the equation.</strong></p>
+                    <p>(x / 2) + 8 = 14</p>
+                    <p><strong>Step 2: Work backwards to solve.</strong></p>
+                    <p>Subtract 8: x / 2 = 14 - 8</p>
+                    <p>x / 2 = 6</p>
+                    <p>Multiply by 2: x = 6 * 2</p>
+                    <p>x = 12</p>
+                    <p class="final-answer">Final Answer: The original number is 12.</p>
+                `
+            },
+            {
+                problemText: "Start with a number. Add 5 to it. Multiply the sum by 3. Subtract 7 from the product. The result is 20. What was the number?",
+                solutionStepsHTML: `
+                    <p>Let the number be n.</p>
+                    <p><strong>Step 1: Formulate the equation step-by-step.</strong></p>
+                    <p>Add 5: n + 5</p>
+                    <p>Multiply by 3: (n + 5) * 3</p>
+                    <p>Subtract 7: (n + 5) * 3 - 7</p>
+                    <p>Result is 20: (n + 5) * 3 - 7 = 20</p>
+                    <p><strong>Step 2: Work backwards to solve.</strong></p>
+                    <p>Add 7: (n + 5) * 3 = 20 + 7</p>
+                    <p>(n + 5) * 3 = 27</p>
+                    <p>Divide by 3: n + 5 = 27 / 3</p>
+                    <p>n + 5 = 9</p>
+                    <p>Subtract 5: n = 9 - 5</p>
+                    <p>n = 4</p>
+                    <p class="final-answer">Final Answer: The number was 4.</p>
+                `
+            },
+             // Category: Age Problems (Simple Systems)
+            {
+                problemText: "Tom is 5 years older than Jerry. The sum of their ages is 31. How old is Jerry?",
+                solutionStepsHTML: `
+                    <p>Let T be Tom's age and J be Jerry's age.</p>
+                    <p><strong>Step 1: Set up equations.</strong></p>
+                    <p>T = J + 5 (Tom is 5 years older than Jerry)</p>
+                    <p>T + J = 31 (Sum of their ages)</p>
+                    <p><strong>Step 2: Substitute the first equation into the second.</strong></p>
+                    <p>(J + 5) + J = 31</p>
+                    <p><strong>Step 3: Solve for J.</strong></p>
+                    <p>2J + 5 = 31</p>
+                    <p>2J = 31 - 5</p>
+                    <p>2J = 26</p>
+                    <p>J = 26 / 2</p>
+                    <p>J = 13</p>
+                    <p class="final-answer">Final Answer: Jerry is 13 years old.</p>
+                `
+            },
+            {
+                problemText: "Alice is twice as old as Bob. In 5 years, the sum of their ages will be 40. How old is Bob now?",
+                solutionStepsHTML: `
+                    <p>Let A be Alice's current age and B be Bob's current age.</p>
+                    <p><strong>Step 1: Set up equations for current ages.</strong></p>
+                    <p>A = 2B (Alice is twice as old as Bob)</p>
+                    <p><strong>Step 2: Express their ages in 5 years.</strong></p>
+                    <p>Alice in 5 years: A + 5</p>
+                    <p>Bob in 5 years: B + 5</p>
+                    <p><strong>Step 3: Set up equation for the sum of their ages in 5 years.</strong></p>
+                    <p>(A + 5) + (B + 5) = 40</p>
+                    <p><strong>Step 4: Substitute A = 2B into this equation.</strong></p>
+                    <p>((2B) + 5) + (B + 5) = 40</p>
+                    <p>3B + 10 = 40</p>
+                    <p><strong>Step 5: Solve for B.</strong></p>
+                    <p>3B = 40 - 10</p>
+                    <p>3B = 30</p>
+                    <p>B = 30 / 3</p>
+                    <p>B = 10</p>
+                    <p class="final-answer">Final Answer: Bob is currently 10 years old.</p>
+                `
+            },
+            {
+                problemText: "My father is 30 years older than me. The sum of our ages is 58. How old am I?",
+                solutionStepsHTML: `
+                    <p>Let F be the father's age and M be my age.</p>
+                    <p><strong>Step 1: Set up equations.</strong></p>
+                    <p>F = M + 30 (Father is 30 years older than me)</p>
+                    <p>F + M = 58 (Sum of ages)</p>
+                    <p><strong>Step 2: Substitute the first equation into the second.</strong></p>
+                    <p>(M + 30) + M = 58</p>
+                    <p><strong>Step 3: Solve for M.</strong></p>
+                    <p>2M + 30 = 58</p>
+                    <p>2M = 58 - 30</p>
+                    <p>2M = 28</p>
+                    <p>M = 28 / 2</p>
+                    <p>M = 14</p>
+                    <p class="final-answer">Final Answer: I am 14 years old.</p>
+                `
+            },
+            {
+                problemText: "Sarah is 3 years younger than her brother Mark. The sum of their ages is 27. How old is Mark?",
+                solutionStepsHTML: `
+                    <p>Let S be Sarah's age and K be Mark's age (using K to avoid confusion with M from previous problem).</p>
+                    <p><strong>Step 1: Set up equations.</strong></p>
+                    <p>S = K - 3 (Sarah is 3 years younger than Mark)</p>
+                    <p>S + K = 27 (Sum of ages)</p>
+                    <p><strong>Step 2: Substitute the first equation into the second.</strong></p>
+                    <p>(K - 3) + K = 27</p>
+                    <p><strong>Step 3: Solve for K.</strong></p>
+                    <p>2K - 3 = 27</p>
+                    <p>2K = 27 + 3</p>
+                    <p>2K = 30</p>
+                    <p>K = 30 / 2</p>
+                    <p>K = 15</p>
+                    <p class="final-answer">Final Answer: Mark is 15 years old.</p>
+                `
+            },
+            {
+                problemText: "A mother is three times as old as her daughter. The difference in their ages is 24 years. How old is the daughter?",
+                solutionStepsHTML: `
+                    <p>Let M be the mother's age and D be the daughter's age.</p>
+                    <p><strong>Step 1: Set up equations.</strong></p>
+                    <p>M = 3D (Mother is three times as old as daughter)</p>
+                    <p>M - D = 24 (Difference in ages)</p>
+                    <p><strong>Step 2: Substitute the first equation into the second.</strong></p>
+                    <p>(3D) - D = 24</p>
+                    <p><strong>Step 3: Solve for D.</strong></p>
+                    <p>2D = 24</p>
+                    <p>D = 24 / 2</p>
+                    <p>D = 12</p>
+                    <p class="final-answer">Final Answer: The daughter is 12 years old.</p>
+                `
+            }
+        ];
+
+        function displayProblems() {
+            problemListContainer.innerHTML = ''; // Clear existing problems
+            showSolutionsBtn.textContent = 'Show Solutions';
+            showSolutionsBtn.disabled = false;
+
+            problemsData.forEach((data, index) => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <span class="problem-number">${index + 1}.</span>
+                    <div class="problem-text-container">${data.problemText}</div>
+                    <span class="answer-space">Answer: ____________</span>
+                    <div class="solution-steps" id="solution-${index + 1}">
+                        ${data.solutionStepsHTML}
+                    </div>
+                `;
+                problemListContainer.appendChild(listItem);
+            });
+
+            // Ensure solutions are initially hidden
+            const solutions = document.querySelectorAll('.solution-steps');
+            solutions.forEach(sol => sol.style.display = 'none');
+             const problemItems = document.querySelectorAll('.problem-list > li');
+            problemItems.forEach(item => item.classList.remove('solutions-shown'));
+        }
+
+        function showSolutions() {
+            const solutions = document.querySelectorAll('.solution-steps');
+            const problemItems = document.querySelectorAll('.problem-list > li');
+
+            if (solutions.length === 0) return;
+
+            let allSolutionsVisible = true;
+            solutions.forEach(sol => {
+                if (sol.style.display === 'none') {
+                    allSolutionsVisible = false;
+                }
+            });
+
+            if (allSolutionsVisible) {
+                // This state means solutions are already shown and button is disabled.
+                // No action needed if button is disabled.
+                // If button were to be re-enabled for hiding:
+                // solutions.forEach(sol => sol.style.display = 'none');
+                // problemItems.forEach(item => item.classList.remove('solutions-shown'));
+                // showSolutionsBtn.textContent = 'Show Solutions';
+                // showSolutionsBtn.disabled = false;
+            } else {
+                solutions.forEach(sol => sol.style.display = 'block');
+                problemItems.forEach(item => item.classList.add('solutions-shown'));
+                showSolutionsBtn.textContent = 'Solutions Shown';
+                showSolutionsBtn.disabled = true; // Disable after showing
+            }
+        }
+
+        showSolutionsBtn.addEventListener('click', showSolutions);
+        displayProblems(); // Load problems on page load
+
+    </script>
+</body>
+</html>
