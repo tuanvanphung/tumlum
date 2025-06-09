@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translating Words to Math & Basic Algebraic Thinking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #fdfdff;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .controls-container {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .controls-container button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 10px;
+        }
+        #generateTestButton { background-color: #007bff; } /* Blue for generate */
+        #generateTestButton:hover { background-color: #0056b3; }
+        #showSolutionsButton { background-color: #28a745; }
+        #showSolutionsButton:hover { background-color: #218838; }
+        #showSolutionsButton:disabled {
+            background-color: #6c757d; /* Gray when disabled */
+            cursor: not-allowed;
+        }
+
+        .problem-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .problem-list li {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .problem-number {
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+        .problem-text-container {
+            font-family: 'Georgia', serif;
+            font-size: 1.1em;
+            color: #444;
+            display: block;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+        .answer-space {
+            display: block;
+            margin-top: 10px;
+            font-style: italic;
+            color: #777;
+        }
+
+        .problem-list li.solutions-shown .problem-text-container,
+        .problem-list li.solutions-shown .answer-space,
+        .problem-list li.solutions-shown .problem-number {
+            /* color: #aaa; Optional: Keep full color if preferred */
+        }
+
+        .solution-steps {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e9f5ff; /* Light blue background */
+            border: 1px dashed #5bc0de; /* Info blue border */
+            border-radius: 4px;
+            font-family: 'Arial', sans-serif; /* Clear font for solutions */
+            font-size: 1.0em;
+            line-height: 1.5;
+        }
+        .solution-steps p {
+            margin: 8px 0;
+            word-wrap: break-word;
+        }
+        .solution-steps .final-answer {
+            font-weight: bold;
+            color: #007bff; /* Primary blue for final answer */
+            margin-top:10px;
+            padding-top:5px;
+            border-top: 1px solid #ccc;
+        }
+        .highlight-op {
+            color: #d9534f;
+            font-weight: bold;
+            background-color: #f9e6e5;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        @media print {
+            body { margin: 0.5in; }
+            .controls-container { display: none; }
+            h1 { font-size: 18pt; }
+            .problem-list li { page-break-inside: avoid; }
+             .problem-list li.solutions-shown .problem-text-container,
+            .problem-list li.solutions-shown .answer-space,
+            .problem-list li.solutions-shown .problem-number {
+                 color: #444 !important; /* Keep original color for print */
+            }
+            .solution-steps {
+                background-color: #fff !important;
+                border: 1px solid #ccc !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Translating Words to Math & Basic Algebraic Thinking</h1>
+
+    <div class="controls-container">
+        <button id="generateTestButton">Generate New Test</button>
+        <button id="showSolutionsButton">Show Solutions</button>
+    </div>
+
+    <ol class="problem-list" id="problemListContainer">
+        <!-- Problems will be dynamically inserted here -->
+    </ol>
+
+    <script>
+        const problemListContainer = document.getElementById('problemListContainer');
+        const showSolutionsBtn = document.getElementById('showSolutionsButton');
+        const generateTestBtn = document.getElementById('generateTestButton');
+
+        let currentProblemsData = [];
+
+        // Helper function for random integers
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Helper function for random names
+        function getRandomName(gender = null) {
+            const maleNames = ["Tom", "Bob", "Mike", "David", "John", "Chris", "Paul", "Mark", "James", "Alex", "Ben", "Sam"];
+            const femaleNames = ["Maria", "Alice", "Sarah", "Laura", "Linda", "Karen", "Susan", "Emma", "Olivia", "Sophia", "Mia", "Zoe"];
+            const anyNames = [...maleNames, ...femaleNames];
+            if (gender === "male") return maleNames[getRandomInt(0, maleNames.length - 1)];
+            if (gender === "female") return femaleNames[getRandomInt(0, femaleNames.length - 1)];
+            return anyNames[getRandomInt(0, anyNames.length - 1)];
+        }
+
+        function generateProblemsData() {
+            const problems = [];
+            let name1, name2, item1, item2; 
+
+            // --- 1. Consecutive Integers (Sum) ---
+            let type1 = getRandomInt(0, 1) === 0 ? "even" : "odd";
+            let start1_val = getRandomInt(10, 30);
+            let int1_1 = start1_val * 2 + (type1 === "odd" ? 1 : 0);
+            let int1_2 = int1_1 + 2;
+            let int1_3 = int1_1 + 4;
+            let sum1 = int1_1 + int1_2 + int1_3;
+            problems.push({
+                problemText: `The sum of three consecutive ${type1} integers is ${sum1}. What is the largest of these integers?`,
+                solutionStepsHTML: `
+                    <p>Let the three consecutive ${type1} integers be x, x + 2, and x + 4.</p>
+                    <p><strong>Step 1: Set up the equation.</strong></p>
+                    <p>x + (x + 2) + (x + 4) = ${sum1}</p>
+                    <p>3x + 6 = ${sum1}</p>
+                    <p>3x = ${sum1 - 6} = ${int1_1 * 3}</p>
+                    <p>x = ${int1_1}</p>
+                    <p><strong>Step 2: Find the integers.</strong></p>
+                    <p>Smallest: ${int1_1}, Middle: ${int1_2}, Largest: ${int1_3}</p>
+                    <p class="final-answer">Final Answer: The largest integer is ${int1_3}.</p>
+                `
+            });
+
+            // --- 2. Consecutive Integers (Sum of Extremes) ---
+            let start2 = getRandomInt(20, 40);
+            let small2 = start2;
+            let mid2 = start2 + 1;
+            let large2 = start2 + 2;
+            let sum_sl2 = small2 + large2;
+            problems.push({
+                problemText: `For three consecutive integers, the sum of the smallest and the largest is ${sum_sl2}. What is the middle integer?`,
+                solutionStepsHTML: `
+                    <p>Let integers be n, n+1, n+2.</p>
+                    <p>Smallest (n) + Largest (n+2) = ${sum_sl2}</p>
+                    <p>2n + 2 = ${sum_sl2}</p>
+                    <p>2n = ${sum_sl2 - 2} = ${2 * start2}</p>
+                    <p>n = ${start2}</p>
+                    <p>Middle integer is n+1 = ${start2} + 1 = ${mid2}.</p>
+                    <p class="final-answer">Final Answer: The middle integer is ${mid2}.</p>
+                `
+            });
+
+            // --- 3. Geometric (Rectangle Dimensions) ---
+            let W3 = getRandomInt(6, 15);
+            let B3_multiplier = getRandomInt(2, 3); 
+            let A3_less = getRandomInt(1, Math.min(5, W3-1) ); 
+            let L3 = B3_multiplier * W3 - A3_less;
+             while (L3 <=0 || L3 === W3) { 
+                W3 = getRandomInt(6, 15); A3_less = getRandomInt(1, Math.min(5, W3-1) ); L3 = B3_multiplier * W3 - A3_less;
+            }
+            let P3 = 2 * (L3 + W3);
+            problems.push({
+                problemText: `A rectangle's length is ${A3_less} cm less than ${B3_multiplier === 2 ? "twice" : B3_multiplier + " times"} its width. If its perimeter is ${P3} cm, find the dimensions.`,
+                solutionStepsHTML: `
+                    <p>Let W be width, L be length.</p>
+                    <p>L = ${B3_multiplier}W - ${A3_less}</p>
+                    <p>P = 2(L + W) = ${P3}</p>
+                    <p>2((${B3_multiplier}W - ${A3_less}) + W) = ${P3}</p>
+                    <p>2((${B3_multiplier+1})W - ${A3_less}) = ${P3}</p>
+                    <p>${2*(B3_multiplier+1)}W - ${2*A3_less} = ${P3}</p>
+                    <p>${2*(B3_multiplier+1)}W = ${P3 + 2*A3_less}</p>
+                    <p>W = ${(P3 + 2*A3_less) / (2*(B3_multiplier+1))} = ${W3} cm</p>
+                    <p>L = ${B3_multiplier}(${W3}) - ${A3_less} = ${L3} cm</p>
+                    <p class="final-answer">Final Answer: Width = ${W3} cm, Length = ${L3} cm.</p>
+                `
+            });
+
+            // --- 4. Geometric (Rectangle Area) ---
+            let W4 = getRandomInt(5, 10);
+            let A4_more = getRandomInt(2, 8);
+            let L4 = W4 + A4_more;
+            let P4 = 2 * (L4 + W4);
+            let Area4 = L4 * W4;
+            problems.push({
+                problemText: `The length of a rectangle is ${A4_more} m more than its width. If the perimeter is ${P4} m, find the area.`,
+                solutionStepsHTML: `
+                    <p>Let W be width, L be length.</p>
+                    <p>L = W + ${A4_more}</p>
+                    <p>P = 2(L + W) = ${P4}</p>
+                    <p>2((W + ${A4_more}) + W) = ${P4}</p>
+                    <p>2(2W + ${A4_more}) = ${P4}</p>
+                    <p>4W + ${2*A4_more} = ${P4}</p>
+                    <p>4W = ${P4 - 2*A4_more}</p>
+                    <p>W = ${(P4 - 2*A4_more)/4} = ${W4} m</p>
+                    <p>L = ${W4} + ${A4_more} = ${L4} m</p>
+                    <p>Area = L * W = ${L4} * ${W4} = ${Area4} m².</p>
+                    <p class="final-answer">Final Answer: Area = ${Area4} m².</p>
+                `
+            });
+
+            // --- 5. Geometric (Square Side) ---
+            let s5 = getRandomInt(5, 20);
+            let P5 = 4 * s5;
+            problems.push({
+                problemText: `A square has a perimeter of ${P5} inches. What is the length of one side?`,
+                solutionStepsHTML: `
+                    <p>Let s be the side length. P = 4s.</p>
+                    <p>4s = ${P5}</p>
+                    <p>s = ${P5} / 4 = ${s5} inches.</p>
+                    <p class="final-answer">Final Answer: Side length is ${s5} inches.</p>
+                `
+            });
+
+            // --- 6. Geometric (Triangle Expression) ---
+            let B6_more = getRandomInt(2, 7);
+            problems.push({
+                problemText: `The base of a triangle is ${B6_more} cm more than its height. If the height is 'h' cm, write an expression for the area of the triangle in terms of 'h'.`,
+                solutionStepsHTML: `
+                    <p>Height = h. Base (b) = h + ${B6_more}.</p>
+                    <p>Area (A) = (1/2) * base * height</p>
+                    <p>A = (1/2) * (h + ${B6_more}) * h</p>
+                    <p class="final-answer">Final Answer: A = (1/2)h(h + ${B6_more}) or (h² + ${B6_more}h)/2.</p>
+                `
+            });
+
+            // --- 7. Coin (Relationship & Value) ---
+            name1 = getRandomName("female");
+            let q7 = getRandomInt(4, 12);
+            let D_offset7 = getRandomInt(3, 7);
+            let d7 = q7 + D_offset7;
+            let V7 = (0.25 * q7 + 0.10 * d7).toFixed(2);
+            problems.push({
+                problemText: `${name1} has q quarters and d dimes. She has ${D_offset7} more dimes than quarters, and the total value of her coins is $${V7}. Find the number of quarters and dimes ${name1} has.`,
+                solutionStepsHTML: `
+                    <p>Let q be quarters, d be dimes.</p>
+                    <p>d = q + ${D_offset7} (Eq 1)</p>
+                    <p>0.25q + 0.10d = ${V7} (Eq 2)</p>
+                    <p>Substitute (1) into (2): 0.25q + 0.10(q + ${D_offset7}) = ${V7}</p>
+                    <p>0.25q + 0.10q + ${(0.10 * D_offset7).toFixed(2)} = ${V7}</p>
+                    <p>0.35q = ${(V7 - 0.10 * D_offset7).toFixed(2)} = ${(0.35 * q7).toFixed(2)}</p>
+                    <p>q = ${q7}</p>
+                    <p>d = ${q7} + ${D_offset7} = ${d7}</p>
+                    <p class="final-answer">Final Answer: ${q7} quarters, ${d7} dimes.</p>
+                `
+            });
+            
+            // --- 8. Coin (Total Count & Value) ---
+            let n8 = getRandomInt(5, 15); // nickels
+            let q8 = getRandomInt(5, 15); // quarters
+            let total_coins8 = n8 + q8;
+            let V8 = (0.05 * n8 + 0.25 * q8).toFixed(2);
+            problems.push({
+                problemText: `A collection of ${total_coins8} coins, consisting of nickels and quarters, has a total value of $${V8}. How many quarters are there?`,
+                solutionStepsHTML: `
+                    <p>Let n be nickels, q be quarters.</p>
+                    <p>n + q = ${total_coins8} => n = ${total_coins8} - q</p>
+                    <p>0.05n + 0.25q = ${V8}</p>
+                    <p>0.05(${total_coins8} - q) + 0.25q = ${V8}</p>
+                    <p>${(0.05 * total_coins8).toFixed(2)} - 0.05q + 0.25q = ${V8}</p>
+                    <p>${(0.05 * total_coins8).toFixed(2)} + 0.20q = ${V8}</p>
+                    <p>0.20q = ${(V8 - 0.05 * total_coins8).toFixed(2)} = ${(0.20 * q8).toFixed(2)}</p>
+                    <p>q = ${q8}</p>
+                     <p>(To find nickels: n = ${total_coins8} - ${q8} = ${n8})</p>
+                    <p class="final-answer">Final Answer: There are ${q8} quarters.</p>
+                `
+            });
+
+            // --- 9. Systems (Sum & Difference) ---
+            let x9 = getRandomInt(20, 50);
+            let y9 = getRandomInt(5, x9 - 3); 
+            let S9 = x9 + y9;
+            let D_val9 = x9 - y9;
+            problems.push({
+                problemText: `The sum of two numbers is ${S9}. Their difference is ${D_val9}. What are the two numbers?`,
+                solutionStepsHTML: `
+                    <p>Let numbers be x and y. x + y = ${S9}; x - y = ${D_val9}.</p>
+                    <p>Add equations: 2x = ${S9 + D_val9} = ${2*x9} => x = ${x9}.</p>
+                    <p>Substitute x: ${x9} + y = ${S9} => y = ${S9 - x9} = ${y9}.</p>
+                    <p class="final-answer">Final Answer: Numbers are ${x9} and ${y9}.</p>
+                `
+            });
+
+            // --- 10. Systems (Sum & Ratio) ---
+            let y10_small = getRandomInt(5, 15);
+            let N10_mult = getRandomInt(2, 5);
+            let x10_large = N10_mult * y10_small;
+            let S10 = x10_large + y10_small;
+            problems.push({
+                problemText: `The sum of two numbers is ${S10}. One number is ${N10_mult} times the other. Find the numbers.`,
+                solutionStepsHTML: `
+                    <p>Let numbers be x and y. Assume x = ${N10_mult}y.</p>
+                    <p>x + y = ${S10} => ${N10_mult}y + y = ${S10}</p>
+                    <p>(${N10_mult + 1})y = ${S10}</p>
+                    <p>y = ${S10 / (N10_mult + 1)} = ${y10_small}.</p>
+                    <p>x = ${N10_mult} * ${y10_small} = ${x10_large}.</p>
+                    <p class="final-answer">Final Answer: Numbers are ${x10_large} and ${y10_small}.</p>
+                `
+            });
+            
+            // --- 11. Systems (Difference & Complex Relationship) ---
+            let S11_small = getRandomInt(5, 12);
+            let N11_mult = getRandomInt(2, 3);
+            let A11_more = getRandomInt(1, 8);
+            let L11_large = N11_mult * S11_small + A11_more;
+            let D_val11 = L11_large - S11_small;
+            problems.push({
+                problemText: `The difference between two numbers is ${D_val11}. The larger number is ${A11_more} more than ${N11_mult === 2 ? "twice" : N11_mult+" times"} the smaller number. Find the numbers.`,
+                solutionStepsHTML: `
+                    <p>Let L be larger, S be smaller.</p>
+                    <p>L - S = ${D_val11}</p>
+                    <p>L = ${N11_mult}S + ${A11_more}</p>
+                    <p>Substitute: (${N11_mult}S + ${A11_more}) - S = ${D_val11}</p>
+                    <p>(${N11_mult - 1})S + ${A11_more} = ${D_val11}</p>
+                    <p>(${N11_mult - 1})S = ${D_val11 - A11_more}</p>
+                    <p>S = ${ (D_val11 - A11_more) / (N11_mult - 1) } = ${S11_small}.</p>
+                    <p>L = ${N11_mult}(${S11_small}) + ${A11_more} = ${L11_large}.</p>
+                    <p class="final-answer">Final Answer: Numbers are ${L11_large} and ${S11_small}.</p>
+                `
+            });
+
+            // --- 12. Working Backwards (Multi-step) ---
+            let original12 = getRandomInt(10, 25);
+            let A12_add = getRandomInt(3, 9);
+            let B12_div = getRandomInt(2, 5);
+            while ((2 * original12 + A12_add) % B12_div !== 0) { 
+                original12 = getRandomInt(10, 25); A12_add = getRandomInt(3,9); B12_div = getRandomInt(2,5);
+            }
+            let C12_res = (2 * original12 + A12_add) / B12_div;
+            problems.push({
+                problemText: `A number is doubled, then increased by ${A12_add}. The result is then divided by ${B12_div}, yielding ${C12_res}. What was the original number?`,
+                solutionStepsHTML: `
+                    <p>Let x be original. ((2x + ${A12_add}) / ${B12_div}) = ${C12_res}.</p>
+                    <p>Work backwards: 2x + ${A12_add} = ${C12_res} * ${B12_div} = ${C12_res * B12_div}.</p>
+                    <p>2x = ${C12_res * B12_div} - ${A12_add} = ${2 * original12}.</p>
+                    <p>x = ${original12}.</p>
+                    <p class="final-answer">Final Answer: Original was ${original12}.</p>
+                `
+            });
+
+            // --- 13. Working Backwards (Simpler) ---
+            let A13_sub = getRandomInt(3, 10);
+            let original13 = getRandomInt(A13_sub + 2, 25); 
+            let B13_mult = getRandomInt(2, 5);
+            let C13_res = (original13 - A13_sub) * B13_mult;
+            problems.push({
+                problemText: `If you take a number, subtract ${A13_sub} from it, then multiply by ${B13_mult}, the result is ${C13_res}. What is the number?`,
+                solutionStepsHTML: `
+                    <p>Let n be number. (n - ${A13_sub}) * ${B13_mult} = ${C13_res}.</p>
+                    <p>n - ${A13_sub} = ${C13_res} / ${B13_mult} = ${(original13 - A13_sub)}.</p>
+                    <p>n = ${(original13 - A13_sub)} + ${A13_sub} = ${original13}.</p>
+                    <p class="final-answer">Final Answer: Number is ${original13}.</p>
+                `
+            });
+
+            // --- 14. Age (Offset & Sum) ---
+            name1 = getRandomName(); name2 = getRandomName(); while(name1 === name2) name2=getRandomName();
+            let p2_age14 = getRandomInt(7, 18);
+            let A_offset14 = getRandomInt(2, 9);
+            let p1_age14 = p2_age14 + A_offset14;
+            let S_age14 = p1_age14 + p2_age14;
+            problems.push({
+                problemText: `${name1} is ${A_offset14} years older than ${name2}. The sum of their ages is ${S_age14}. How old is ${name2}?`,
+                solutionStepsHTML: `
+                    <p>Let ${name1[0]} be ${name1}'s age, ${name2[0]} be ${name2}'s age.</p>
+                    <p>${name1[0]} = ${name2[0]} + ${A_offset14}</p>
+                    <p>${name1[0]} + ${name2[0]} = ${S_age14}</p>
+                    <p>Substitute: (${name2[0]} + ${A_offset14}) + ${name2[0]} = ${S_age14}</p>
+                    <p>2${name2[0]} + ${A_offset14} = ${S_age14}</p>
+                    <p>2${name2[0]} = ${S_age14 - A_offset14} = ${2 * p2_age14}</p>
+                    <p>${name2[0]} = ${p2_age14}</p>
+                    <p class="final-answer">Final Answer: ${name2} is ${p2_age14} years old.</p>
+                `
+            });
+            
+            // --- 15. Age (Ratio & Difference) ---
+            let d_age15 = getRandomInt(6, 12); 
+            let N_mult_m15 = getRandomInt(3, 5); 
+            let m_age15 = N_mult_m15 * d_age15;
+            let diff_age15 = m_age15 - d_age15;
+            problems.push({
+                problemText: `A mother is ${N_mult_m15} times as old as her daughter. The difference in their ages is ${diff_age15} years. How old is the daughter?`,
+                solutionStepsHTML: `
+                    <p>Let M be mother's age, D be daughter's age.</p>
+                    <p>M = ${N_mult_m15}D</p>
+                    <p>M - D = ${diff_age15}</p>
+                    <p>Substitute: ${N_mult_m15}D - D = ${diff_age15}</p>
+                    <p>(${N_mult_m15 - 1})D = ${diff_age15}</p>
+                    <p>D = ${diff_age15 / (N_mult_m15 - 1)} = ${d_age15}</p>
+                    <p class="final-answer">Final Answer: The daughter is ${d_age15} years old.</p>
+                `
+            });
+
+            return problems;
+        }
+
+
+        function displayProblems() {
+            currentProblemsData = generateProblemsData(); // Generate new problems
+            problemListContainer.innerHTML = ''; // Clear existing problems
+            
+            // Reset solutions button
+            showSolutionsBtn.textContent = 'Show Solutions';
+            showSolutionsBtn.disabled = false;
+
+            currentProblemsData.forEach((data, index) => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <span class="problem-number">${index + 1}.</span>
+                    <div class="problem-text-container">${data.problemText}</div>
+                    <span class="answer-space">Answer: ____________</span>
+                    <div class="solution-steps" id="solution-${index + 1}">
+                        ${data.solutionStepsHTML}
+                    </div>
+                `;
+                problemListContainer.appendChild(listItem);
+            });
+
+            // Ensure solutions are initially hidden
+            const solutions = document.querySelectorAll('.solution-steps');
+            solutions.forEach(sol => sol.style.display = 'none');
+            const problemItems = document.querySelectorAll('.problem-list > li');
+            problemItems.forEach(item => item.classList.remove('solutions-shown'));
+        }
+
+        function showSolutions() {
+            const solutions = document.querySelectorAll('.solution-steps');
+            const problemItems = document.querySelectorAll('.problem-list > li');
+
+            if (solutions.length === 0) return;
+
+            let allSolutionsVisible = true;
+            solutions.forEach(sol => {
+                if (sol.style.display === 'none') {
+                    allSolutionsVisible = false;
+                }
+            });
+
+            if (allSolutionsVisible) {
+                // This state means solutions are already shown and button is disabled.
+            } else {
+                solutions.forEach(sol => sol.style.display = 'block');
+                problemItems.forEach(item => item.classList.add('solutions-shown'));
+                showSolutionsBtn.textContent = 'Solutions Shown';
+                showSolutionsBtn.disabled = true; // Disable after showing
+            }
+        }
+
+        showSolutionsBtn.addEventListener('click', showSolutions);
+        generateTestBtn.addEventListener('click', displayProblems);
+
+        // Load initial set of problems on page load
+        displayProblems(); 
+
+    </script>
+</body>
+</html>
