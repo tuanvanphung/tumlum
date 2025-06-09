@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Concept Word Problems Practice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #fdfdff;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .controls-container {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .controls-container button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 10px;
+        }
+        #generateTestButton { background-color: #007bff; }
+        #generateTestButton:hover { background-color: #0056b3; }
+        #showSolutionsButton { background-color: #28a745; }
+        #showSolutionsButton:hover { background-color: #218838; }
+        #showSolutionsButton:disabled {
+            background-color: #6c757d; /* Gray when disabled */
+            cursor: not-allowed;
+        }
+
+        .problem-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .problem-list li {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .problem-number {
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+        .problem-text-container {
+            font-family: 'Georgia', serif;
+            font-size: 1.1em;
+            color: #444;
+            display: block;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+        .answer-space {
+            display: block;
+            margin-top: 10px;
+            font-style: italic;
+            color: #777;
+        }
+        .problem-list li.solutions-shown .problem-text-container,
+        .problem-list li.solutions-shown .answer-space,
+        .problem-list li.solutions-shown .problem-number {
+            /* color: #aaa; Optional: Keep full color if preferred */
+        }
+
+        sup, sub {
+            line-height: 0;
+        }
+        .fraction {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            margin: 0 0.2em;
+            position: relative;
+        }
+        .fraction .numerator, .fraction .denominator {
+            display: block;
+            padding: 0 0.3em;
+            line-height: 1.2;
+        }
+        .fraction .numerator {
+            border-bottom: 1.5px solid black;
+        }
+
+        .solution-steps {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e9f5ff; /* Light blue background */
+            border: 1px dashed #5bc0de; /* Info blue border */
+            border-radius: 4px;
+            font-family: 'Arial', sans-serif; /* Clear font for solutions */
+            font-size: 1.0em;
+            line-height: 1.5;
+        }
+        .solution-steps p {
+            margin: 8px 0;
+            word-wrap: break-word;
+        }
+        .solution-steps .final-answer {
+            font-weight: bold;
+            color: #007bff; /* Primary blue for final answer */
+            margin-top:10px;
+            padding-top:5px;
+            border-top: 1px solid #ccc;
+        }
+        .highlight-op {
+            color: #d9534f;
+            font-weight: bold;
+            background-color: #f9e6e5;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        @media print {
+            body { margin: 0.5in; }
+            .controls-container { display: none; }
+            h1 { font-size: 18pt; }
+            .problem-list li { page-break-inside: avoid; }
+             .problem-list li.solutions-shown .problem-text-container,
+            .problem-list li.solutions-shown .answer-space,
+            .problem-list li.solutions-shown .problem-number {
+                 color: #444 !important; /* Keep original color for print */
+            }
+            .solution-steps {
+                background-color: #fff !important;
+                border: 1px solid #ccc !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Multi-Concept Word Problems Practice</h1>
+
+    <div class="controls-container">
+        <button id="generateTestButton">Generate New Test</button>
+        <button id="showSolutionsButton">Show Solutions</button>
+    </div>
+
+    <ol class="problem-list" id="problemListContainer">
+        <!-- Problems will be dynamically inserted here -->
+    </ol>
+
+    <script>
+        const problemListContainer = document.getElementById('problemListContainer');
+        const showSolutionsBtn = document.getElementById('showSolutionsButton');
+        const generateTestBtn = document.getElementById('generateTestButton');
+        let currentProblemsData = [];
+
+        // --- Helper Functions ---
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function getRandomFloat(min, max, decimals) {
+            const str = (Math.random() * (max - min) + min).toFixed(decimals);
+            return parseFloat(str);
+        }
+
+        function gcd(a, b) {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            if (b === 0) return a;
+            return gcd(b, a % b);
+        }
+
+        function simplifyFraction(numerator, denominator) {
+            if (denominator === 0) return { num: numerator, den: denominator }; // Avoid division by zero
+            const commonDivisor = gcd(numerator, denominator);
+            let num = numerator / commonDivisor;
+            let den = denominator / commonDivisor;
+            if (den < 0) { // Ensure denominator is positive
+                num = -num;
+                den = -den;
+            }
+            return { num, den };
+        }
+
+        function formatFractionHTML(num, den, simplify = true) {
+            if (den === 0) return "Error: Div by 0";
+            if (simplify) {
+                const simplified = simplifyFraction(num, den);
+                num = simplified.num;
+                den = simplified.den;
+            }
+            if (den === 1) return `${num}`;
+            return `<span class="fraction"><span class="numerator">${num}</span><span class="denominator">${den}</span></span>`;
+        }
+        
+        function formatDecimal(value, places = 2) {
+            if (Number.isInteger(value)) return value.toString();
+            // Check if it's very close to an integer due to floating point issues
+            if (Math.abs(value - Math.round(value)) < 1e-9) {
+                 return Math.round(value).toString();
+            }
+            return value.toFixed(places);
+        }
+
+
+        // --- Problem Generator Functions ---
+        const problemGenerators = [
+            // Problem 1: Tank filling with leak
+            function generateTankProblem() {
+                const initialFractionDen = getRandomInt(3, 5);
+                const initialFractionNum = getRandomInt(1, initialFractionDen - 1);
+                const pumpRate = getRandomInt(8, 20);
+                const leakRate = getRandomInt(1, Math.max(1, Math.floor(pumpRate * 0.4))); // Ensure leak < pump
+                const totalCapacity = getRandomInt(10, 30) * 10; // 100 to 300
+
+                const initialWater = (initialFractionNum / initialFractionDen) * totalCapacity;
+                const remainingVolume = totalCapacity - initialWater;
+                const netFillingRate = pumpRate - leakRate;
+                let timeToFill = 0;
+                if (netFillingRate <= 0) { // Failsafe if leak >= pump somehow
+                    timeToFill = Infinity; // Or handle as error
+                } else {
+                    timeToFill = remainingVolume / netFillingRate;
+                }
+                
+
+                const problemText = `A tank is ${formatFractionHTML(initialFractionNum, initialFractionDen)} full of water. A pump starts filling it at a rate of ${pumpRate} liters per minute. However, there is a leak in the tank that drains water at a rate of ${leakRate} liters per minute. If the total capacity of the tank is ${totalCapacity} liters, how long will it take to fill the remaining part of the tank?`;
+                const solutionStepsHTML = `
+                    <p><strong>Step 1: Calculate the volume of water already in the tank.</strong></p>
+                    <p>Water in tank = ${formatFractionHTML(initialFractionNum, initialFractionDen)} of ${totalCapacity} liters = ${formatDecimal(initialWater)} liters.</p>
+                    <p><strong>Step 2: Calculate the remaining volume to be filled.</strong></p>
+                    <p>Remaining volume = Total capacity - Water in tank = ${totalCapacity} liters - ${formatDecimal(initialWater)} liters = ${formatDecimal(remainingVolume)} liters.</p>
+                    <p><strong>Step 3: Calculate the net filling rate.</strong></p>
+                    <p>Net filling rate = Pump rate - Leak rate = ${pumpRate} liters/minute - ${leakRate} liters/minute = ${netFillingRate} liters/minute.</p>
+                    <p><strong>Step 4: Calculate the time to fill the remaining part.</strong></p>
+                    <p>Time = Remaining volume / Net filling rate</p>
+                    <p>Time = ${formatDecimal(remainingVolume)} liters / ${netFillingRate} liters/minute = ${netFillingRate > 0 ? formatDecimal(timeToFill) : 'Tank will not fill (net rate ≤ 0)'} minutes.</p>
+                    <p class="final-answer">Final Answer: ${netFillingRate > 0 ? formatDecimal(timeToFill) + " minutes" : 'Tank will not fill'}</p>
+                `;
+                return { problemText, solutionStepsHTML };
+            },
+
+            // Problem 2: Work rate (Tom and Jerry painting)
+            function generateWorkRateProblem() {
+                const tomTime = getRandomInt(4, 7); // e.g., 6
+                const jerryTime = tomTime + getRandomInt(1, 3); // e.g., 8 (Jerry is slower or faster)
+                const tomAloneHours = getRandomInt(1, tomTime - 2);
+
+                const tomRateNum = 1, tomRateDen = tomTime;
+                const jerryRateNum = 1, jerryRateDen = jerryTime;
+
+                const workDoneByTomNum = tomRateNum * tomAloneHours;
+                const workDoneByTomDen = tomRateDen;
+                const simplifiedWorkByTom = simplifyFraction(workDoneByTomNum, workDoneByTomDen);
+
+                const remainingWorkNum = simplifiedWorkByTom.den - simplifiedWorkByTom.num;
+                const remainingWorkDen = simplifiedWorkByTom.den;
+
+                const combinedRateNum = tomRateNum * jerryRateDen + jerryRateNum * tomRateDen;
+                const combinedRateDen = tomRateDen * jerryRateDen;
+                const simplifiedCombinedRate = simplifyFraction(combinedRateNum, combinedRateDen);
+
+                const timeTogetherNum = remainingWorkNum * simplifiedCombinedRate.den;
+                const timeTogetherDen = remainingWorkDen * simplifiedCombinedRate.num;
+                const simplifiedTimeTogether = simplifyFraction(timeTogetherNum, timeTogetherDen);
+                
+                const timeTogetherDecimal = simplifiedTimeTogether.num / simplifiedTimeTogether.den;
+
+                const problemText = `Tom can paint a fence in ${tomTime} hours. Jerry can paint the same fence in ${jerryTime} hours. Tom works alone for ${tomAloneHours} hours, after which Jerry joins him. How long will it take them, working together, to finish the remaining work?`;
+                const solutionStepsHTML = `
+                    <p><strong>Step 1: Determine individual work rates.</strong></p>
+                    <p>Tom's rate = ${formatFractionHTML(tomRateNum, tomRateDen)} of the fence per hour.</p>
+                    <p>Jerry's rate = ${formatFractionHTML(jerryRateNum, jerryRateDen)} of the fence per hour.</p>
+                    <p><strong>Step 2: Calculate the work done by Tom alone in ${tomAloneHours} hours.</strong></p>
+                    <p>Work done by Tom = Tom's rate × Time = ${formatFractionHTML(tomRateNum, tomRateDen)} × ${tomAloneHours} hours = ${formatFractionHTML(workDoneByTomNum, workDoneByTomDen)} = ${formatFractionHTML(simplifiedWorkByTom.num, simplifiedWorkByTom.den)} of the fence.</p>
+                    <p><strong>Step 3: Calculate the remaining work.</strong></p>
+                    <p>Remaining work = 1 - ${formatFractionHTML(simplifiedWorkByTom.num, simplifiedWorkByTom.den)} = ${formatFractionHTML(remainingWorkNum, remainingWorkDen)} of the fence.</p>
+                    <p><strong>Step 4: Calculate their combined work rate.</strong></p>
+                    <p>Combined rate = ${formatFractionHTML(tomRateNum, tomRateDen)} + ${formatFractionHTML(jerryRateNum, jerryRateDen)} = ${formatFractionHTML(tomRateNum * jerryRateDen + jerryRateNum * tomRateDen, tomRateDen * jerryRateDen)} = ${formatFractionHTML(simplifiedCombinedRate.num, simplifiedCombinedRate.den)} of the fence per hour.</p>
+                    <p><strong>Step 5: Calculate the time to finish the remaining work together.</strong></p>
+                    <p>Time = Remaining work / Combined rate = ${formatFractionHTML(remainingWorkNum, remainingWorkDen)} / ${formatFractionHTML(simplifiedCombinedRate.num, simplifiedCombinedRate.den)} = ${formatFractionHTML(timeTogetherNum, timeTogetherDen)} = ${formatFractionHTML(simplifiedTimeTogether.num, simplifiedTimeTogether.den)} hours.</p>
+                    <p class="final-answer">Final Answer: ${formatFractionHTML(simplifiedTimeTogether.num, simplifiedTimeTogether.den)} hours (or approx. ${formatDecimal(timeTogetherDecimal)} hours)</p>
+                `;
+                return { problemText, solutionStepsHTML };
+            },
+
+            // Problem 3: Investment growth and withdrawal
+            function generateInvestmentProblem() {
+                const initialInvestment = getRandomInt(5, 20) * 100; // 500 to 2000
+                const growth1Percent = getRandomInt(5, 15); // 5% to 15%
+                const growth2Percent = getRandomInt(10, 25); // 10% to 25%, different from first
+                const withdrawalFractionDen = getRandomInt(2, 5); // 1/2, 1/3, 1/4, 1/5
+                const withdrawalFractionNum = 1;
+
+                const amountAfterGrowth1 = initialInvestment * (1 + growth1Percent / 100);
+                const amountAfterGrowth2 = amountAfterGrowth1 * (1 + growth2Percent / 100);
+                const withdrawalAmount = (withdrawalFractionNum / withdrawalFractionDen) * amountAfterGrowth2;
+
+                const problemText = `Alex invested some money. In the first year, his investment grew by ${growth1Percent}%. In the second year, the new amount grew by ${growth2Percent}%. After these two years, he withdrew $${formatDecimal(withdrawalAmount)}, which he found was exactly ${formatFractionHTML(withdrawalFractionNum,withdrawalFractionDen)} of his total current amount. How much money did Alex initially invest?`;
+                const solutionStepsHTML = `
+                    <p>Let the initial investment be P.</p>
+                    <p><strong>Step 1: Calculate the amount after the first year.</strong></p>
+                    <p>Amount after 1st year = P × (1 + ${growth1Percent}/100) = P × ${1 + growth1Percent/100}.</p>
+                    <p><strong>Step 2: Calculate the amount after the second year.</strong></p>
+                    <p>Amount after 2nd year = (P × ${1 + growth1Percent/100}) × (1 + ${growth2Percent}/100) = P × ${( (1 + growth1Percent/100) * (1 + growth2Percent/100) ).toFixed(4)}.</p>
+                    <p>Let factor = ${((1 + growth1Percent/100) * (1 + growth2Percent/100)).toFixed(4)}. Current total = P × factor.</p>
+                    <p><strong>Step 3: Set up the equation based on the withdrawal.</strong></p>
+                    <p>He withdrew $${formatDecimal(withdrawalAmount)}, which was ${formatFractionHTML(withdrawalFractionNum,withdrawalFractionDen)} of the current total amount.</p>
+                    <p>So, ${formatFractionHTML(withdrawalFractionNum,withdrawalFractionDen)} × (P × factor) = $${formatDecimal(withdrawalAmount)}.</p>
+                    <p>(${(withdrawalFractionNum/withdrawalFractionDen).toFixed(4)} × factor)P = $${formatDecimal(withdrawalAmount)}.</p>
+                    <p>${((withdrawalFractionNum/withdrawalFractionDen) * ( (1 + growth1Percent/100) * (1 + growth2Percent/100) )).toFixed(4)}P = $${formatDecimal(withdrawalAmount)}.</p>
+                    <p><strong>Step 4: Solve for P.</strong></p>
+                    <p>P = $${formatDecimal(withdrawalAmount)} / ${((withdrawalFractionNum/withdrawalFractionDen) * ( (1 + growth1Percent/100) * (1 + growth2Percent/100) )).toFixed(4)}</p>
+                    <p>P = $${formatDecimal(initialInvestment)}.</p>
+                    <p class="final-answer">Final Answer: $${formatDecimal(initialInvestment)}</p>
+                `;
+                return { problemText, solutionStepsHTML };
+            },
+
+            // Problem 4: Cyclist average speed
+            function generateCyclistProblem() {
+                const speedUp = getRandomInt(8, 12); // km/h
+                const speedDown = speedUp * getRandomInt(2, 4); // e.g., 2x or 3x faster
+                const distance = speedUp * speedDown * getRandomInt(1,3) / gcd(speedUp, speedDown) ; // ensure nice time sum
+                // D/speedUp + D/speedDown = TotalTime
+                // TotalTime = D * (1/speedUp + 1/speedDown) = D * (speedUp+speedDown)/(speedUp*speedDown)
+                // Choose D such that TotalTime is nice. Let D = k * lcm(speedUp, speedDown)
+                // A simpler way for total time: choose integer times for each leg
+                const timeUp = getRandomInt(2,4); // hours
+                const oneWayDistance = speedUp * timeUp;
+                const timeDown = oneWayDistance / speedDown;
+                const totalTime = timeUp + timeDown;
+
+
+                const problemText = `A cyclist travels uphill to a destination at an average speed of ${speedUp} km/h and returns downhill along the same route at an average speed of ${speedDown} km/h. If the total journey (uphill and downhill) took ${formatDecimal(totalTime,1)} hours, what is the distance to the destination (one way)?`;
+                const solutionStepsHTML = `
+                    <p>Let D be the one-way distance to the destination in km.</p>
+                    <p><strong>Step 1: Express time taken for each part of the journey.</strong></p>
+                    <p>Time uphill (T<sub>up</sub>) = Distance / Speed<sub>up</sub> = D / ${speedUp} hours.</p>
+                    <p>Time downhill (T<sub>down</sub>) = Distance / Speed<sub>down</sub> = D / ${speedDown} hours.</p>
+                    <p><strong>Step 2: Use the total time to form an equation.</strong></p>
+                    <p>Total time = T<sub>up</sub> + T<sub>down</sub> = ${formatDecimal(totalTime,1)} hours.</p>
+                    <p>So, ${formatFractionHTML('D',speedUp)} + ${formatFractionHTML('D',speedDown)} = ${formatDecimal(totalTime,1)}.</p>
+                    <p><strong>Step 3: Solve the equation for D.</strong></p>
+                    <p>Common denominator for ${speedUp} and ${speedDown} is ${speedUp * speedDown / gcd(speedUp, speedDown)}.</p>
+                    <p>D(${formatFractionHTML(1,speedUp)} + ${formatFractionHTML(1,speedDown)}) = ${formatDecimal(totalTime,1)}</p>
+                    <p>D(${formatFractionHTML(speedDown + speedUp, speedUp * speedDown)}) = ${formatDecimal(totalTime,1)}</p>
+                    <p>D = ${formatDecimal(totalTime,1)} × ${formatFractionHTML(speedUp * speedDown, speedUp + speedDown)}</p>
+                    <p>D = ${formatDecimal(totalTime,1)} × ${formatDecimal((speedUp*speedDown)/(speedUp+speedDown))}</p>
+                    <p>D = ${formatDecimal(oneWayDistance)} km.</p>
+                    <p class="final-answer">Final Answer: ${formatDecimal(oneWayDistance)} km</p>
+                `;
+                return { problemText, solutionStepsHTML };
+            },
+            
+            // Problem 5: Average of consecutive odd integers
+            function generateConsecutiveOddProblem() {
+                const middleOdd = getRandomInt(5, 20) * 2 + 1; // e.g., 11 to 41
+                const int1 = middleOdd - 2;
+                const int2 = middleOdd;
+                const int3 = middleOdd + 2;
+                const average = middleOdd; // Average is the middle number for 3 consecutive
+                const x = int1;
+                const y = int3;
+                const productXY = x * y;
+
+                const problemText = `The average of three consecutive distinct positive odd integers is ${average}. If the smallest of these integers is denoted by 'x', and the largest is denoted by 'y', what is the product of x and y?`;
+                const solutionStepsHTML = `
+                    <p>Let the three consecutive distinct positive odd integers be n, n+2, and n+4.</p>
+                    <p><strong>Step 1: Use the average to find the integers.</strong></p>
+                    <p>Since they are consecutive and there are three, the average is the middle integer.</p>
+                    <p>Middle integer (n+2) = ${average}.</p>
+                    <p>So, n = ${average} - 2 = ${int1}.</p>
+                    <p>The three integers are ${int1}, ${int1}+2=${int2}, and ${int1}+4=${int3}.</p>
+                    <p><strong>Step 2: Identify 'x' and 'y'.</strong></p>
+                    <p>The smallest integer (x) = ${x}.</p>
+                    <p>The largest integer (y) = ${y}.</p>
+                    <p><strong>Step 3: Calculate the product of x and y.</strong></p>
+                    <p>Product = x × y = ${x} × ${y} = ${productXY}.</p>
+                    <p class="final-answer">Final Answer: ${productXY}</p>
+                `;
+                return { problemText, solutionStepsHTML };
+            },
+
+            // Problem 6: Percentage change in area of rectangle
+            function generateRectangleAreaChangeProblem() {
+                const widthMultiplier = getRandomInt(2, 4); // Length = widthMultiplier * Width
+                const lengthIncreasePercent = getRandomInt(10, 30); // multiples of 10
+                const widthDecreasePercent = getRandomInt(5, 20); // multiples of 5
+
+                const originalLengthFactor = widthMultiplier; // L = factor * W
+                const originalAreaFactor = widthMultiplier; // Area = factor * W^2
+
+                const newLengthFactor = originalLengthFactor * (1 + lengthIncreasePercent / 100);
+                const newWidthFactor = 1 * (1 - widthDecreasePercent / 100); // W_new = newWidthFactor * W_old
+
+                const newAreaFactor = newLengthFactor * newWidthFactor;
+                const areaChangeFactor = newAreaFactor - originalAreaFactor;
+                const percentageChange = (areaChangeFactor / originalAreaFactor) * 100;
+                const changeType = percentageChange >= 0 ? "increase" : "decrease";
+
+                const problemText = `The length of a rectangle is ${widthMultiplier === 2 ? "twice" : widthMultiplier + " times"} its width. If the length is increased by ${lengthIncreasePercent}% and the width is decreased by ${widthDecreasePercent}%, what is the percentage change in the area of the rectangle?`;
+                const solutionStepsHTML = `
+                    <p>Let the original width be W. Then the original length L = ${originalLengthFactor}W.</p>
+                    <p><strong>Step 1: Calculate the original area.</strong></p>
+                    <p>Original Area (A<sub>1</sub>) = L × W = (${originalLengthFactor}W) × W = ${originalAreaFactor}W<sup>2</sup>.</p>
+                    <p><strong>Step 2: Calculate the new dimensions.</strong></p>
+                    <p>New Length (L') = L × (1 + ${lengthIncreasePercent}/100) = ${originalLengthFactor}W × ${1 + lengthIncreasePercent/100} = ${newLengthFactor.toFixed(2)}W.</p>
+                    <p>New Width (W') = W × (1 - ${widthDecreasePercent}/100) = W × ${1 - widthDecreasePercent/100} = ${newWidthFactor.toFixed(2)}W.</p>
+                    <p><strong>Step 3: Calculate the new area.</strong></p>
+                    <p>New Area (A<sub>2</sub>) = L' × W' = (${newLengthFactor.toFixed(2)}W) × (${newWidthFactor.toFixed(2)}W) = ${newAreaFactor.toFixed(4)}W<sup>2</sup>.</p>
+                    <p><strong>Step 4: Calculate the change in area.</strong></p>
+                    <p>Change in Area = A<sub>2</sub> - A<sub>1</sub> = ${newAreaFactor.toFixed(4)}W<sup>2</sup> - ${originalAreaFactor}W<sup>2</sup> = ${areaChangeFactor.toFixed(4)}W<sup>2</sup>.</p>
+                    <p><strong>Step 5: Calculate the percentage change in area.</strong></p>
+                    <p>Percentage Change = (Change in Area / Original Area) × 100%</p>
+                    <p>Percentage Change = (${areaChangeFactor.toFixed(4)}W<sup>2</sup> / ${originalAreaFactor}W<sup>2</sup>) × 100%</p>
+                    <p>Percentage Change = (${(areaChangeFactor / originalAreaFactor).toFixed(4)}) × 100% = ${formatDecimal(Math.abs(percentageChange))}%.</p>
+                    <p>Since the change is ${percentageChange >= 0 ? "positive" : "negative"}, it's a ${formatDecimal(Math.abs(percentageChange))}% ${changeType}.</p>
+                    <p class="final-answer">Final Answer: ${formatDecimal(Math.abs(percentageChange))}% ${changeType}</p>
+                `;
+                return { problemText, solutionStepsHTML };
+            },
+
+            // Problem 7: Mixture of acid solutions
+            function generateMixtureProblem() {
+                const vol1 = getRandomInt(4, 10); // Liters of first solution
+                const conc1 = getRandomInt(2, 4) * 10; // 20%, 30%, 40%
+                const conc2 = getRandomInt(1, conc1/10 - 1) * 10; // 10% (if conc1=20), or 10%,20% (if conc1=30)
+                const finalConc = getRandomInt(conc2/10 + 1, conc1/10 -1) * 10; // Between conc1 and conc2
+
+                // x*conc2 + vol1*conc1 = (x+vol1)*finalConc
+                // x*conc2 + vol1*conc1 = x*finalConc + vol1*finalConc
+                // vol1*conc1 - vol1*finalConc = x*finalConc - x*conc2
+                // vol1*(conc1 - finalConc) = x*(finalConc - conc2)
+                // x = vol1 * (conc1 - finalConc) / (finalConc - conc2)
+                // Ensure (finalConc - conc2) is not zero and result is positive
+                if (finalConc <= conc2 || finalConc >= conc1) { // Regenerate if logic is flawed for chosen concs
+                    return generateMixtureProblem(); // Simple recursive call, might need a counter for safety
+                }
+
+                const x_num = vol1 * (conc1 - finalConc);
+                const x_den = finalConc - conc2;
+                const x = x_num / x_den;
+                const simplified_x = simplifyFraction(x_num, x_den);
+
+
+                const problemText = `How many liters of a ${conc2}% acid solution must be added to ${vol1} liters of a ${conc1}% acid solution to obtain a mixture that is a ${finalConc}% acid solution?`;
+                const solutionStepsHTML = `
+                    <p>Let x be the volume (in liters) of the ${conc2}% acid solution to be added.</p>
+                    <p><strong>Step 1: Calculate the amount of acid in each solution.</strong></p>
+                    <p>Acid in the ${conc2}% solution = ${conc2/100} × x = ${(conc2/100).toFixed(2)}x liters.</p>
+                    <p>Acid in the ${vol1} liters of ${conc1}% solution = ${conc1/100} × ${vol1} = ${((conc1/100)*vol1).toFixed(2)} liters.</p>
+                    <p><strong>Step 2: Set up expressions for the total volume and total acid in the mixture.</strong></p>
+                    <p>Total volume of the mixture = x + ${vol1} liters.</p>
+                    <p>Total amount of acid in the mixture = ${(conc2/100).toFixed(2)}x + ${((conc1/100)*vol1).toFixed(2)} liters.</p>
+                    <p><strong>Step 3: Form an equation based on the desired concentration of the mixture.</strong></p>
+                    <p>The mixture is to be ${finalConc}% acid. So, (Total acid / Total volume) = ${finalConc/100}.</p>
+                    <p>(${(conc2/100).toFixed(2)}x + ${((conc1/100)*vol1).toFixed(2)}) / (x + ${vol1}) = ${finalConc/100}.</p>
+                    <p><strong>Step 4: Solve the equation for x.</strong></p>
+                    <p>${(conc2/100).toFixed(2)}x + ${((conc1/100)*vol1).toFixed(2)} = ${(finalConc/100).toFixed(2)}(x + ${vol1})</p>
+                    <p>${(conc2/100).toFixed(2)}x + ${((conc1/100)*vol1).toFixed(2)} = ${(finalConc/100).toFixed(2)}x + ${((finalConc/100)*vol1).toFixed(2)}</p>
+                    <p>${((conc1/100)*vol1 - (finalConc/100)*vol1).toFixed(2)} = (${(finalConc/100).toFixed(2)} - ${(conc2/100).toFixed(2)})x</p>
+                    <p>${((conc1 - finalConc)*vol1/100).toFixed(2)} = ${((finalConc - conc2)/100).toFixed(2)}x</p>
+                    <p>x = ${((conc1 - finalConc)*vol1).toFixed(2)} / ${(finalConc - conc2).toFixed(2)} = ${formatDecimal(x)} liters.</p>
+                    <p class="final-answer">Final Answer: ${formatFractionHTML(simplified_x.num, simplified_x.den)} liters (or approximately ${formatDecimal(x)} liters)</p>
+                `;
+                return { problemText, solutionStepsHTML };
+            },
+            
+            // Problem 8: Shopkeeper markup and discount
+            function generateShopkeeperProblem() {
+                const costPrice = getRandomInt(10, 50) * 10; // e.g., 100, 200, ... 500
+                const markupPercent = getRandomInt(3, 8) * 10; // 30% to 80%
+                const discountPercent = getRandomInt(1, Math.floor(markupPercent/10)-1) * 10; // 10% or 20%, less than markup
+
+                const markedPrice = costPrice * (1 + markupPercent / 100);
+                const sellingPrice = markedPrice * (1 - discountPercent / 100);
+
+                const problemText = `A shopkeeper marks an item ${markupPercent}% above its cost price. He then offers a ${discountPercent}% discount on the marked price. If the item sells for $${formatDecimal(sellingPrice)}, what was the original cost price of the item?`;
+                const solutionStepsHTML = `
+                    <p>Let the Cost Price (CP) be C.</p>
+                    <p><strong>Step 1: Calculate the Marked Price (MP).</strong></p>
+                    <p>The item is marked ${markupPercent}% above CP.</p>
+                    <p>MP = CP × (1 + ${markupPercent}/100) = CP × ${1 + markupPercent/100}.</p>
+                    <p><strong>Step 2: Calculate the Selling Price (SP) after discount.</strong></p>
+                    <p>A ${discountPercent}% discount is offered on the MP.</p>
+                    <p>SP = MP × (1 - ${discountPercent}/100) = (CP × ${1 + markupPercent/100}) × (1 - ${discountPercent}/100).</p>
+                    <p>SP = CP × ${((1 + markupPercent/100) * (1 - discountPercent/100)).toFixed(3)}.</p>
+                    <p><strong>Step 3: Use the given selling price to find the cost price.</strong></p>
+                    <p>We are given that SP = $${formatDecimal(sellingPrice)}.</p>
+                    <p>CP × ${((1 + markupPercent/100) * (1 - discountPercent/100)).toFixed(3)} = $${formatDecimal(sellingPrice)}.</p>
+                    <p>C = $${formatDecimal(sellingPrice)} / ${((1 + markupPercent/100) * (1 - discountPercent/100)).toFixed(3)} = $${formatDecimal(costPrice)}.</p>
+                    <p class="final-answer">Final Answer: $${formatDecimal(costPrice)}</p>
+                `;
+                return { problemText, solutionStepsHTML };
+            },
+
+            // Problem 9: Ages ratio problem
+            function generateAgesRatioProblem() {
+                const ratioA = getRandomInt(2, 4);
+                const ratioB = ratioA + getRandomInt(1, 2);
+                const x = getRandomInt(3, 7); // Common multiplier for ratio
+                const yearsAgo = 5; // Fixed for simplicity, can be varied
+                const yearsHence = 5; // Fixed
+
+                // Sum in 'yearsHence' years will be (ratioA*x + yearsAgo + yearsHence) + (ratioB*x + yearsAgo + yearsHence)
+                const sumAgesHence = (ratioA * x + yearsAgo + yearsHence) + (ratioB * x + yearsAgo + yearsHence);
+                
+                const benCurrentAgeNum = ratioB * x + yearsAgo;
+                // To make final answer a nice fraction or int if x wasn't an int:
+                // Let 7x + 20 = sumAgesHence, so 7x = sumAgesHence - 20. sumAgesHence-20 must be div by 7.
+                // Here, x is integer, so benCurrentAgeNum is integer.
+
+                const problemText = `${yearsAgo} years ago, the ratio of Anna's age to Ben's age was ${ratioA}:${ratioB}. In ${yearsHence} years from now, the sum of their ages will be ${sumAgesHence}. What is Ben's current age?`;
+                const solutionStepsHTML = `
+                    <p>Let Anna's age ${yearsAgo} years ago be ${ratioA}x and Ben's age ${yearsAgo} years ago be ${ratioB}x.</p>
+                    <p><strong>Step 1: Express their current ages.</strong></p>
+                    <p>Anna's current age = ${ratioA}x + ${yearsAgo}.</p>
+                    <p>Ben's current age = ${ratioB}x + ${yearsAgo}.</p>
+                    <p><strong>Step 2: Express their ages in ${yearsHence} years from now.</strong></p>
+                    <p>Anna's age in ${yearsHence} years = (${ratioA}x + ${yearsAgo}) + ${yearsHence} = ${ratioA}x + ${yearsAgo + yearsHence}.</p>
+                    <p>Ben's age in ${yearsHence} years = (${ratioB}x + ${yearsAgo}) + ${yearsHence} = ${ratioB}x + ${yearsAgo + yearsHence}.</p>
+                    <p><strong>Step 3: Use the sum of their ages in ${yearsHence} years to form an equation.</strong></p>
+                    <p>Sum of their ages in ${yearsHence} years = (${ratioA}x + ${yearsAgo + yearsHence}) + (${ratioB}x + ${yearsAgo + yearsHence}) = ${sumAgesHence}.</p>
+                    <p>(${ratioA + ratioB})x + ${2 * (yearsAgo + yearsHence)} = ${sumAgesHence}.</p>
+                    <p><strong>Step 4: Solve for x.</strong></p>
+                    <p>(${ratioA + ratioB})x = ${sumAgesHence} - ${2 * (yearsAgo + yearsHence)} = ${sumAgesHence - 2 * (yearsAgo + yearsHence)}}.</p>
+                    <p>x = ${formatFractionHTML(sumAgesHence - 2 * (yearsAgo + yearsHence), ratioA + ratioB)} = ${x}.</p>
+                    <p><strong>Step 5: Calculate Ben's current age.</strong></p>
+                    <p>Ben's current age = ${ratioB}x + ${yearsAgo} = ${ratioB} × ${x} + ${yearsAgo} = ${ratioB * x + yearsAgo}.</p>
+                    <p class="final-answer">Final Answer: ${benCurrentAgeNum} years</p>
+                `;
+                return { problemText, solutionStepsHTML };
+            },
+
+            // Problem 10: Pipes filling/emptying cistern
+            function generatePipesCisternProblem() {
+                // Rates: A fills in Ta, B fills in Tb, C empties in Tc
+                // 1/Ta + 1/Tb - 1/Tc = Combined Rate
+                // Choose Ta, Tb, Tc such that combined rate is positive and calculations are manageable.
+                // e.g., Ta=12, Tb=15, Tc=10 => 1/12+1/15-1/10 = (5+4-6)/60 = 3/60 = 1/20
+                // Tc should be smaller than Ta, Tb for emptying to be significant, but not too small.
+                let ta, tb, tc, commonLCM, rateA, rateB, rateC, combinedNum, combinedDen, simplifiedCombined;
+                do {
+                    ta = getRandomInt(10, 20); // Time for A to fill
+                    tb = getRandomInt(ta + 1, ta + 10); // Time for B to fill (B is slower)
+                    tc = getRandomInt(Math.min(ta,tb)-5 > 0 ? Math.min(ta,tb)-5 : 5 , Math.max(ta,tb)+5 ); // Time for C to empty
+
+                    commonLCM = ta * tb * tc / gcd(gcd(ta * tb, tc * ta), tc * tb); // A bit complex, let's use a fixed LCM target for simplicity or just calculate
+                    
+                    rateA = {num: 1, den: ta};
+                    rateB = {num: 1, den: tb};
+                    rateC = {num: 1, den: tc};
+
+                    // Combined rate: (1/ta + 1/tb - 1/tc)
+                    combinedNum = (rateA.num * rateB.den * rateC.den) + (rateB.num * rateA.den * rateC.den) - (rateC.num * rateA.den * rateB.den);
+                    combinedDen = rateA.den * rateB.den * rateC.den;
+                    simplifiedCombined = simplifyFraction(combinedNum, combinedDen);
+                } while (simplifiedCombined.num <= 0); // Ensure net filling rate is positive
+
+                const initialFillNum = 1;
+                const initialFillDen = getRandomInt(2, 4); // 1/2, 1/3, 1/4 full
+
+                const remainingFillNum = initialFillDen - initialFillNum;
+                const remainingFillDen = initialFillDen;
+
+                const timeToFillNum = remainingFillNum * simplifiedCombined.den;
+                const timeToFillDen = remainingFillDen * simplifiedCombined.num;
+                const simplifiedTimeToFill = simplifyFraction(timeToFillNum, timeToFillDen);
+                const timeToFillDecimal = simplifiedTimeToFill.num / simplifiedTimeToFill.den;
+
+                const problemText = `Pipe A can fill a cistern in ${ta} minutes. Pipe B can fill the same cistern in ${tb} minutes. Pipe C can empty the full cistern in ${tc} minutes. If all three pipes are opened simultaneously when the cistern is ${formatFractionHTML(initialFillNum,initialFillDen)} full, how long will it take to fill the cistern?`;
+                const solutionStepsHTML = `
+                    <p><strong>Step 1: Determine the rate of work for each pipe (fraction of cistern per minute).</strong></p>
+                    <p>Rate of Pipe A (filling) = +${formatFractionHTML(1, ta)} cistern/minute.</p>
+                    <p>Rate of Pipe B (filling) = +${formatFractionHTML(1, tb)} cistern/minute.</p>
+                    <p>Rate of Pipe C (emptying) = -${formatFractionHTML(1, tc)} cistern/minute.</p>
+                    <p><strong>Step 2: Calculate the combined rate when all pipes are open.</strong></p>
+                    <p>Combined rate = ${formatFractionHTML(1, ta)} + ${formatFractionHTML(1, tb)} - ${formatFractionHTML(1, tc)}.</p>
+                    <p>A common denominator for ${ta}, ${tb}, ${tc} can be ${combinedDen/gcd(combinedDen,combinedNum)} or ${ta*tb*tc/gcd(ta*tb,tc)}. For calculation: ${combinedDen}.</p>
+                    <p>Combined rate = ${formatFractionHTML(rateB.den * rateC.den, combinedDen)} + ${formatFractionHTML(rateA.den * rateC.den, combinedDen)} - ${formatFractionHTML(rateA.den * rateB.den, combinedDen)} = ${formatFractionHTML(combinedNum, combinedDen)} = ${formatFractionHTML(simplifiedCombined.num, simplifiedCombined.den)} cistern/minute.</p>
+                    <p>Since the rate is positive (${simplifiedCombined.num}/${simplifiedCombined.den}), the cistern is filling.</p>
+                    <p><strong>Step 3: Determine the fraction of the cistern remaining to be filled.</strong></p>
+                    <p>The cistern is already ${formatFractionHTML(initialFillNum, initialFillDen)} full.</p>
+                    <p>Fraction remaining to fill = 1 - ${formatFractionHTML(initialFillNum, initialFillDen)} = ${formatFractionHTML(remainingFillNum, remainingFillDen)}.</p>
+                    <p><strong>Step 4: Calculate the time to fill the remaining part.</strong></p>
+                    <p>Time = Work to be done / Combined rate</p>
+                    <p>Time = ${formatFractionHTML(remainingFillNum, remainingFillDen)} / ${formatFractionHTML(simplifiedCombined.num, simplifiedCombined.den)} = ${formatFractionHTML(timeToFillNum, timeToFillDen)} = ${formatFractionHTML(simplifiedTimeToFill.num, simplifiedTimeToFill.den)} minutes.</p>
+                    <p>(${formatDecimal(timeToFillDecimal)} minutes)</p>
+                    <p class="final-answer">Final Answer: ${formatFractionHTML(simplifiedTimeToFill.num, simplifiedTimeToFill.den)} minutes (or approx. ${formatDecimal(timeToFillDecimal)} minutes)</p>
+                `;
+                return { problemText, solutionStepsHTML };
+            },
+
+            // Problem 11: Average score change
+            function generateAverageScoreProblem() {
+                const numStudents = getRandomInt(20, 40);
+                const originalAverage = getRandomInt(60, 85);
+                const scoreLeft = getRandomInt(Math.max(30, originalAverage-20), originalAverage + 5); // Score of student who left
+                const newAverageIncrease = getRandomInt(1, 3); // New average is 1, 2, or 3 points higher
+                const newAverage = originalAverage + newAverageIncrease;
+
+                const originalTotalScore = numStudents * originalAverage;
+                const totalScoreAfterLeft = originalTotalScore - scoreLeft;
+                const newTotalScore = numStudents * newAverage; // Class size remains same
+                const scoreNewStudent = newTotalScore - totalScoreAfterLeft;
+
+                const problemText = `The average score of a class of ${numStudents} students on a test was ${originalAverage}. After one student who scored ${scoreLeft} left the class, and a new student joined, the new average score of the class (which still has ${numStudents} students) became ${newAverage}. What was the score of the new student?`;
+                const solutionStepsHTML = `
+                    <p><strong>Step 1: Calculate the original total score of the class.</strong></p>
+                    <p>Original total score = ${numStudents} × ${originalAverage} = ${originalTotalScore}.</p>
+                    <p><strong>Step 2: Calculate the total score after the student who scored ${scoreLeft} left.</strong></p>
+                    <p>Number of students temporarily becomes ${numStudents -1}.</p>
+                    <p>Total score of ${numStudents -1} students = ${originalTotalScore} - ${scoreLeft} = ${totalScoreAfterLeft}.</p>
+                    <p><strong>Step 3: Calculate the new total score of the class with the new student.</strong></p>
+                    <p>The class size is back to ${numStudents} students, and the new average is ${newAverage}.</p>
+                    <p>New total score = ${numStudents} × ${newAverage} = ${newTotalScore}.</p>
+                    <p><strong>Step 4: Calculate the score of the new student.</strong></p>
+                    <p>The new total score (${newTotalScore}) is the sum of the scores of the ${numStudents-1} students (${totalScoreAfterLeft}) plus the score of the new student (S).</p>
+                    <p>${totalScoreAfterLeft} + S = ${newTotalScore}.</p>
+                    <p>S = ${newTotalScore} - ${totalScoreAfterLeft} = ${scoreNewStudent}.</p>
+                    <p class="final-answer">Final Answer: ${scoreNewStudent}</p>
+                `;
+                return { problemText, solutionStepsHTML };
+            },
+
+            // Problem 12: Combined ratios a:d
+            function generateCombinedRatiosProblem() {
+                const a_b_num = getRandomInt(1, 4);
+                const a_b_den = getRandomInt(a_b_num + 1, 5);
+                const b_c_num = getRandomInt(1, 4);
+                const b_c_den = getRandomInt(b_c_num + 1, 5);
+                const c_d_num = getRandomInt(1, 4);
+                const c_d_den = getRandomInt(c_d_num + 1, 5);
+
+                const ad_num = a_b_num * b_c_num * c_d_num;
+                const ad_den = a_b_den * b_c_den * c_d_den;
+                const simplified_ad = simplifyFraction(ad_num, ad_den);
+
+                const problemText = `Given the ratios a:b = ${a_b_num}:${a_b_den}, b:c = ${b_c_num}:${b_c_den}, and c:d = ${c_d_num}:${c_d_den}, what is the ratio a:d?`;
+                const solutionStepsHTML = `
+                    <p>We are given the following ratios:</p>
+                    <p>${formatFractionHTML('a','b')} = ${formatFractionHTML(a_b_num,a_b_den)}</p>
+                    <p>${formatFractionHTML('b','c')} = ${formatFractionHTML(b_c_num,b_c_den)}</p>
+                    <p>${formatFractionHTML('c','d')} = ${formatFractionHTML(c_d_num,c_d_den)}</p>
+                    <p><strong>Step 1: To find the ratio a:d, we multiply these fractions.</strong></p>
+                    <p>${formatFractionHTML('a','d')} = ${formatFractionHTML('a','b')} × ${formatFractionHTML('b','c')} × ${formatFractionHTML('c','d')}</p>
+                    <p>${formatFractionHTML('a','d')} = ${formatFractionHTML(a_b_num,a_b_den)} × ${formatFractionHTML(b_c_num,b_c_den)} × ${formatFractionHTML(c_d_num,c_d_den)}</p>
+                    <p><strong>Step 2: Perform the multiplication.</strong></p>
+                    <p>${formatFractionHTML('a','d')} = ${formatFractionHTML(`(${a_b_num} × ${b_c_num} × ${c_d_num})`, `(${a_b_den} × ${b_c_den} × ${c_d_den})`)} = ${formatFractionHTML(ad_num, ad_den, false)}</p>
+                    <p><strong>Step 3: Simplify the resulting fraction.</strong></p>
+                    <p>${formatFractionHTML('a','d')} = ${formatFractionHTML(simplified_ad.num, simplified_ad.den)}.</p>
+                    <p>The ratio a:d is ${simplified_ad.num}:${simplified_ad.den}.</p>
+                    <p class="final-answer">Final Answer: ${simplified_ad.num}:${simplified_ad.den}</p>
+                `;
+                return { problemText, solutionStepsHTML };
+            },
+
+            // Problem 13: Train speed quadratic equation
+            function generateTrainSpeedProblem() {
+                const originalSpeed = getRandomInt(20, 50); // km/h e.g. 30
+                const speedIncrease = getRandomInt(5, 15); // km/h e.g. 10
+                const timeSaved = getRandomInt(1, 4); // hours e.g. 3
+
+                // D/S - D/(S+Si) = Ts  => D( (S+Si-S) / (S(S+Si)) ) = Ts => D * Si / (S(S+Si)) = Ts
+                // D = Ts * S * (S+Si) / Si
+                // Ensure D is a nice number (e.g. multiple of 10)
+                let distance;
+                do {
+                    distance = timeSaved * originalSpeed * (originalSpeed + speedIncrease) / speedIncrease;
+                } while (!Number.isInteger(distance) || distance % 10 !== 0 || distance < 100); // Retry if not nice
+                
+                // Equation: (timeSaved)S^2 + (speedIncrease*timeSaved)S - (speedIncrease*Distance) = 0
+                const coeff_a = timeSaved;
+                const coeff_b = speedIncrease * timeSaved;
+                const coeff_c = -1 * speedIncrease * distance;
+                const simplified_a = coeff_a / gcd(gcd(coeff_a,coeff_b),coeff_c);
+                const simplified_b = coeff_b / gcd(gcd(coeff_a,coeff_b),coeff_c);
+                const simplified_c = coeff_c / gcd(gcd(coeff_a,coeff_b),coeff_c);
+
+
+                const problemText = `A train is scheduled to cover a distance of ${distance} km at a uniform speed. If its speed were ${speedIncrease} km/h more than planned, it would have taken ${timeSaved} hours less for the journey. What is the original planned speed of the train?`;
+                const solutionStepsHTML = `
+                    <p>Let the original planned speed be S km/h and the original planned time be T hours.</p>
+                    <p>Distance = Speed × Time, so ${distance} = S × T.  (Equation 1)</p>
+                    <p>From Equation 1, T = ${formatFractionHTML(distance,'S')}.</p>
+                    <p><strong>Step 1: Set up equations based on the given information.</strong></p>
+                    <p>If speed were S + ${speedIncrease} km/h, time taken would be T - ${timeSaved} hours.</p>
+                    <p>The distance is still ${distance} km: ${distance} = (S + ${speedIncrease})(T - ${timeSaved}). (Equation 2)</p>
+                    <p><strong>Step 2: Substitute T from Equation 1 into Equation 2.</strong></p>
+                    <p>${distance} = (S + ${speedIncrease})(${formatFractionHTML(distance,'S')} - ${timeSaved})</p>
+                    <p><strong>Step 3: Solve the equation for S.</strong></p>
+                    <p>${distance} = (S + ${speedIncrease})(${formatFractionHTML(`(${distance} - ${timeSaved}S)`,'S')})</p>
+                    <p>Multiply both sides by S (S ≠ 0):</p>
+                    <p>${distance}S = (S + ${speedIncrease})(${distance} - ${timeSaved}S)</p>
+                    <p>${distance}S = ${distance}S - ${timeSaved}S<sup>2</sup> + ${speedIncrease*distance} - ${speedIncrease*timeSaved}S</p>
+                    <p>0 = -${timeSaved}S<sup>2</sup> - ${speedIncrease*timeSaved}S + ${speedIncrease*distance}</p>
+                    <p>Multiply by -1 and divide by gcd (if any) to simplify (original form: ${coeff_a}S<sup>2</sup> + ${coeff_b}S + ${coeff_c} = 0):</p>
+                    <p>${simplified_a}S<sup>2</sup> + ${simplified_b}S + ${simplified_c} = 0</p>
+                    <p><strong>Step 4: Factorize or use quadratic formula.</strong> We expect S = ${originalSpeed}.</p>
+                    <p>(S - ${originalSpeed})( ${simplified_a}S + (${simplified_b} + ${simplified_a*originalSpeed}) ) = 0 (One factor S-${originalSpeed})</p>
+                    <p>The positive solution for speed is S = ${originalSpeed} km/h.</p>
+                    <p class="final-answer">Final Answer: ${originalSpeed} km/h</p>
+                `;
+                return { problemText, solutionStepsHTML };
+            },
+
+            // Problem 14: Price increase then decrease by x%
+            function generatePriceChangeXPercentProblem() {
+                const x = getRandomInt(1, 4) * 5; // 5, 10, 15, 20%
+                const originalPrice = 100; // Let original be 100 for easy percentage calculation
+
+                const priceAfterIncrease = originalPrice * (1 + x/100);
+                const finalPrice = priceAfterIncrease * (1 - x/100);
+                const finalPricePercentage = (finalPrice / originalPrice) * 100;
+
+                const problemText = `The price of an item was first increased by x%. Later, the new price was decreased by x%. If the final price was ${formatDecimal(finalPricePercentage)}% of the original price, what is the value of x?`;
+                const solutionStepsHTML = `
+                    <p>Let the original price be P.</p>
+                    <p><strong>Step 1: Express the price after the x% increase.</strong></p>
+                    <p>Price after increase = P × (1 + ${formatFractionHTML('x',100)}).</p>
+                    <p><strong>Step 2: Express the price after the subsequent x% decrease on the new price.</strong></p>
+                    <p>Price after decrease = [P × (1 + ${formatFractionHTML('x',100)})] × (1 - ${formatFractionHTML('x',100)}).</p>
+                    <p><strong>Step 3: Set this final price equal to ${formatDecimal(finalPricePercentage)}% of the original price.</strong></p>
+                    <p>Final Price = ${(finalPricePercentage/100).toFixed(4)}P.</p>
+                    <p>So, P × (1 + ${formatFractionHTML('x',100)}) × (1 - ${formatFractionHTML('x',100)}) = ${(finalPricePercentage/100).toFixed(4)}P.</p>
+                    <p><strong>Step 4: Solve for x.</strong></p>
+                    <p>Divide by P (P ≠ 0): (1 + ${formatFractionHTML('x',100)})(1 - ${formatFractionHTML('x',100)}) = ${(finalPricePercentage/100).toFixed(4)}.</p>
+                    <p>1<sup>2</sup> - (${formatFractionHTML('x',100)})<sup>2</sup> = ${(finalPricePercentage/100).toFixed(4)}</p>
+                    <p>1 - ${formatFractionHTML('x<sup>2</sup>',10000)} = ${(finalPricePercentage/100).toFixed(4)}</p>
+                    <p>${formatFractionHTML('x<sup>2</sup>',10000)} = 1 - ${(finalPricePercentage/100).toFixed(4)} = ${(1 - finalPricePercentage/100).toFixed(4)}</p>
+                    <p>x<sup>2</sup> = ${(1 - finalPricePercentage/100).toFixed(4)} × 10000 = ${((1 - finalPricePercentage/100) * 10000).toFixed(0)}</p>
+                    <p>x = √${((1 - finalPricePercentage/100) * 10000).toFixed(0)} = ${x}.</p>
+                    <p class="final-answer">Final Answer: ${x}</p>
+                `;
+                return { problemText, solutionStepsHTML };
+            },
+
+            // Problem 15: Boat upstream/downstream
+            function generateBoatStreamProblem() {
+                const boatSpeed = getRandomInt(5, 15); // km/h
+                const streamSpeed = getRandomInt(1, boatSpeed - 2); // km/h, ensure boatSpeed > streamSpeed
+
+                const speedUpstream = boatSpeed - streamSpeed;
+                const speedDownstream = boatSpeed + streamSpeed;
+
+                // Distance = speedUpstream * timeUpstream = speedDownstream * timeDownstream
+                // Choose timeUpstream to be an integer.
+                const timeUpstream = getRandomInt(2, 6);
+                const distance = speedUpstream * timeUpstream;
+                const timeDownstream = distance / speedDownstream;
+                
+                if (!Number.isInteger(timeDownstream) || timeDownstream <=0) { // Retry if timeDownstream is not nice
+                    return generateBoatStreamProblem();
+                }
+
+
+                const problemText = `A boat travels ${distance} km upstream in ${timeUpstream} hours. It travels the same distance (${distance} km) downstream in ${formatDecimal(timeDownstream)} hours. What is the speed of the boat in still water and the speed of the stream?`;
+                const solutionStepsHTML = `
+                    <p>Let B be the speed of the boat in still water (km/h).</p>
+                    <p>Let S be the speed of the stream (km/h).</p>
+                    <p><strong>Step 1: Formulate speeds for upstream and downstream travel.</strong></p>
+                    <p>Speed upstream = B - S.</p>
+                    <p>Speed downstream = B + S.</p>
+                    <p><strong>Step 2: Use Distance = Speed × Time to form equations.</strong></p>
+                    <p>Upstream journey: ${distance} km = (B - S) × ${timeUpstream} hours.</p>
+                    <p>So, B - S = ${distance} / ${timeUpstream} = ${speedUpstream}.  (Equation 1)</p>
+                    <p>Downstream journey: ${distance} km = (B + S) × ${formatDecimal(timeDownstream)} hours.</p>
+                    <p>So, B + S = ${distance} / ${formatDecimal(timeDownstream)} = ${speedDownstream}.  (Equation 2)</p>
+                    <p><strong>Step 3: Solve the system of two linear equations.</strong></p>
+                    <p>1) B - S = ${speedUpstream}</p>
+                    <p>2) B + S = ${speedDownstream}</p>
+                    <p>Add Equation 1 and Equation 2: (B - S) + (B + S) = ${speedUpstream} + ${speedDownstream}</p>
+                    <p>2B = ${speedUpstream + speedDownstream} => B = ${boatSpeed} km/h.</p>
+                    <p><strong>Step 4: Substitute B into Equation 2 to find S.</strong></p>
+                    <p>${boatSpeed} + S = ${speedDownstream} => S = ${speedDownstream} - ${boatSpeed} = ${streamSpeed} km/h.</p>
+                    <p class="final-answer">Final Answer: Speed of boat in still water = ${boatSpeed} km/h, Speed of stream = ${streamSpeed} km/h</p>
+                `;
+                return { problemText, solutionStepsHTML };
+            }
+        ];
+
+        function generateNewTestData() {
+            currentProblemsData = problemGenerators.map(generator => generator());
+        }
+
+        function displayProblems() {
+            problemListContainer.innerHTML = ''; // Clear existing problems
+            showSolutionsBtn.textContent = 'Show Solutions';
+            showSolutionsBtn.disabled = false;
+
+            currentProblemsData.forEach((data, index) => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <span class="problem-number">${index + 1}.</span>
+                    <div class="problem-text-container">${data.problemText}</div>
+                    <span class="answer-space">Answer: ____________</span>
+                    <div class="solution-steps" id="solution-${index + 1}">
+                        ${data.solutionStepsHTML}
+                    </div>
+                `;
+                problemListContainer.appendChild(listItem);
+            });
+
+            // Ensure solutions are initially hidden
+            const solutions = document.querySelectorAll('.solution-steps');
+            solutions.forEach(sol => sol.style.display = 'none');
+            const problemItems = document.querySelectorAll('.problem-list > li');
+            problemItems.forEach(item => item.classList.remove('solutions-shown'));
+        }
+
+        function handleGenerateTest() {
+            generateNewTestData();
+            displayProblems();
+        }
+
+        function showSolutions() {
+            const solutions = document.querySelectorAll('.solution-steps');
+            const problemItems = document.querySelectorAll('.problem-list > li');
+
+            if (solutions.length === 0) return;
+
+            let shouldShowAll = false;
+            solutions.forEach(sol => {
+                if (sol.style.display === 'none') {
+                    shouldShowAll = true;
+                }
+            });
+
+            if (shouldShowAll) {
+                solutions.forEach(sol => sol.style.display = 'block');
+                problemItems.forEach(item => item.classList.add('solutions-shown'));
+                showSolutionsBtn.textContent = 'Solutions Shown';
+                showSolutionsBtn.disabled = true;
+            }
+        }
+
+        generateTestBtn.addEventListener('click', handleGenerateTest);
+        showSolutionsBtn.addEventListener('click', showSolutions);
+        
+        // Load initial set of problems on page load
+        handleGenerateTest();
+
+    </script>
+</body>
+</html>
