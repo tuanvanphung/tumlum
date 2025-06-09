@@ -1,0 +1,99 @@
+name: Generate Index HTML
+
+on:
+  push:
+    branches:
+      - main  # Or your default branch
+    paths:    # Only run if HTML files are changed, or this workflow file
+      - '**.html'
+      - '.github/workflows/generate-index.yml'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  build_index:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Important: Allows the action to write to the repository
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Generate index.html
+        run: |
+          import os
+          import html
+
+          files = sorted([f for f in os.listdir('.') if os.path.isfile(f) and f.endswith('.html') and f.lower() != 'index.html'])
+
+          if not files:
+              print("No HTML files found to index (excluding index.html).")
+              # Create a basic index if no other files are found, or exit
+              index_content = """<!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Index</title></head>
+              <body><h1>No other HTML files found.</h1></body></html>"""
+          else:
+              list_items = ""
+              for filename in files:
+                  # Make a slightly friendlier name from the filename
+                  friendly_name = os.path.splitext(filename)[0] # Remove .html
+                  # Add spaces before capital letters (for camelCase or PascalCase)
+                  friendly_name = ''.join([' ' + char if char.isupper() else char for char in friendly_name]).strip()
+                  friendly_name = friendly_name.replace('_', ' ').replace('-', ' ')
+                  # Capitalize first letter of each word (optional)
+                  friendly_name = ' '.join(word.capitalize() for word in friendly_name.split())
+                  if not friendly_name: friendly_name = filename # Fallback
+
+                  list_items += f'  <li><a href="{html.escape(filename)}">{html.escape(friendly_name)} ({html.escape(filename)})</a></li>\n'
+
+              index_content = f"""<!DOCTYPE html>
+              <html lang="en">
+              <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>Index of HTML Files</title>
+                  <style>
+                      body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }}
+                      .container {{ max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }}
+                      h1 {{ color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }}
+                      ul {{ list-style-type: none; padding: 0; }}
+                      li {{ background-color: #f9f9f9; margin-bottom: 10px; padding: 12px 15px; border-radius: 5px; border-left: 5px solid #007bff; }}
+                      li:hover {{ background-color: #e9ecef; }}
+                      a {{ text-decoration: none; color: #007bff; font-weight: bold; }}
+                      a:hover {{ text-decoration: underline; color: #0056b3; }}
+                  </style>
+              </head>
+              <body>
+                  <div class="container">
+                      <h1>Available HTML Documents</h1>
+                      <ul>
+              {list_items}
+                      </ul>
+                  </div>
+              </body>
+              </html>
+              """
+
+          with open('index.html', 'w') as f:
+              f.write(index_content)
+          print("index.html generated successfully.")
+        shell: python # Specify to run the multi-line script with Python
+
+      - name: Commit and push if changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add index.html
+          # Only commit and push if there are actual changes to index.html
+          if ! git diff --staged --quiet; then
+            git commit -m "Automated: Update index.html with latest file list"
+            git push
+          else
+            echo "No changes to index.html. Nothing to commit."
+          fi
