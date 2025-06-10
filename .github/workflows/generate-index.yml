@@ -31,10 +31,9 @@ jobs:
 
           # --- Configuration ---
           INDEX_TITLE = "Available Tests and Solutions"
-          EXCLUDE_FILES = ['index.html'] # Files to exclude from the list (case-insensitive)
+          EXCLUDE_FILES = ['index.html'] # Files to exclude (case-insensitive)
           # --- End Configuration ---
 
-          # Convert exclude_files to lowercase for case-insensitive comparison
           exclude_files_lower = [f.lower() for f in EXCLUDE_FILES]
 
           files = []
@@ -43,7 +42,7 @@ jobs:
                  f_name.endswith('.html') and \
                  f_name.lower() not in exclude_files_lower:
                   files.append(f_name)
-          files.sort() # Sort alphabetically
+          files.sort()
 
           if not files:
               print(f"No HTML files found to index (excluding {', '.join(EXCLUDE_FILES)}).")
@@ -58,7 +57,7 @@ jobs:
                   friendly_name_parts = []
                   current_part = ""
                   for char_idx, char in enumerate(friendly_name_base):
-                      if char.isupper() and current_part and not current_part[-1].isspace() and not (char_idx > 0 and friendly_name_base[char_idx-1].isupper()): # Add space if uppercase and not start of word/acronym
+                      if char.isupper() and current_part and not current_part[-1].isspace() and not (char_idx > 0 and friendly_name_base[char_idx-1].isupper()):
                           friendly_name_parts.append(current_part)
                           current_part = char
                       elif char in ['_', '-']:
@@ -69,11 +68,18 @@ jobs:
                   if current_part: friendly_name_parts.append(current_part)
 
                   friendly_name = ' '.join(word.capitalize() for word in friendly_name_parts if word.strip()).strip()
-
                   if not friendly_name: friendly_name = filename
 
-                  # MODIFIED LINE: Removed the part that shows the original filename
-                  list_items += f'  <li><a href="{html.escape(filename)}">{html.escape(friendly_name)}</a></li>\n'
+                  # Determine list item class based on filename prefix
+                  li_class_str = ""
+                  fn_lower = filename.lower()
+                  if fn_lower.startswith("math"):
+                      li_class_str = ' class="item-math"'
+                  elif fn_lower.startswith("reading"):
+                      li_class_str = ' class="item-reading"'
+                  # Add more elif conditions here for other prefixes and classes
+
+                  list_items += f'  <li{li_class_str}><a href="{html.escape(filename)}">{html.escape(friendly_name)}</a></li>\n'
 
               index_content = f"""<!DOCTYPE html>
               <html lang="en">
@@ -84,35 +90,51 @@ jobs:
                   <style>
                       body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding-top: 20px; background-color: #f4f4f4; color: #333; }}
                       .container {{ max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 15px rgba(0,0,0,0.1); }}
-                      h1 {{ color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-top:0; text-align: center; font-size: 2em; }}
+                      h1 {{ color: #2c3e50; border-bottom: 2px solid #bdc3c7; padding-bottom: 10px; margin-top:0; text-align: center; font-size: 2em; }}
                       ul {{ list-style-type: none; padding: 0; }}
                       li {{
                           background-color: #ffffff;
                           margin-bottom: 12px;
                           padding: 15px 20px;
                           border-radius: 6px;
-                          border-left: 5px solid #3498db;
+                          border-left: 5px solid #bdc3c7; /* Default neutral grey border */
                           box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-                          transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-                          /* Removed display:flex and justify-content as it's simpler now */
+                          transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-left-color 0.2s ease-in-out;
                       }}
-                      li:hover {{
+                      li.item-math {{
+                          border-left-color: #3498db; /* Blue for MATH */
+                      }}
+                      li.item-reading {{
+                          border-left-color: #2ecc71; /* Green for READING */
+                      }}
+                      /* Add more .item-xxx classes here for other prefixes */
+
+                      li:hover {{ /* General hover transform, will apply to all */
                           transform: translateY(-2px);
                           box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                          border-left-color: #2980b9;
                       }}
+                      li.item-math:hover {{
+                          border-left-color: #2980b9; /* Darker Blue on hover */
+                      }}
+                      li.item-reading:hover {{
+                          border-left-color: #27ae60; /* Darker Green on hover */
+                      }}
+                      /* Hover for default items (if any) */
+                      li:not(.item-math):not(.item-reading):hover {{
+                          border-left-color: #95a5a6; /* Darker grey for default items on hover */
+                      }}
+
                       a {{
                           text-decoration: none;
                           color: #2c3e50;
                           font-weight: 500;
                           font-size: 1.1em;
-                          display: block; /* Make link take full width of li for easier clicking */
+                          display: block;
                           width: 100%;
                       }}
                       a:hover {{
-                          color: #3498db;
+                          color: #3498db; /* Default link hover color, can be more specific if needed */
                       }}
-                      /* Removed span.filename-display style as it's no longer used */
                   </style>
               </head>
               <body>
@@ -128,7 +150,7 @@ jobs:
 
           with open('index.html', 'w', encoding='utf-8') as f:
               f.write(index_content)
-          print("index.html generated successfully (without filenames in parentheses).")
+          print("index.html generated successfully with conditional styling.")
         shell: python
 
       - name: Commit and push if changes
@@ -137,7 +159,7 @@ jobs:
           git config --local user.name "GitHub Action"
           git add index.html
           if ! git diff --staged --quiet; then
-            git commit -m "Automated: Update index.html (removed parenthesized filenames)"
+            git commit -m "Automated: Update index.html (conditional prefix styling)"
             git push
           else
             echo "No changes to index.html. Nothing to commit."
