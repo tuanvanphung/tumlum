@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Multi-Concept Word Problems Practice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #fdfdff;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .controls-container {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .controls-container button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 10px;
+        }
+        #generateTestButton { background-color: #007bff; }
+        #generateTestButton:hover { background-color: #0056b3; }
+        #checkAndShowSolutionsButton { background-color: #28a745; }
+        #checkAndShowSolutionsButton:hover { background-color: #218838; }
+        #checkAndShowSolutionsButton:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .problem-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .problem-list li {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .problem-number {
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+        .problem-text-container {
+            font-family: 'Georgia', serif;
+            font-size: 1.1em;
+            color: #444;
+            display: block;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+        .answer-input-container {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .answer-input {
+            padding: 8px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 250px; 
+        }
+        .answer-input.correct {
+            background-color: #d4edda; 
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .answer-input.incorrect {
+            background-color: #f8d7da; 
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .solution-steps {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e9f5ff;
+            border: 1px dashed #5bc0de;
+            border-radius: 4px;
+            font-family: 'Arial', sans-serif;
+            font-size: 1.0em;
+            line-height: 1.5;
+        }
+        .solution-steps p {
+            margin: 8px 0;
+            word-wrap: break-word;
+        }
+        .solution-steps .final-answer {
+            font-weight: bold;
+            color: #007bff;
+            margin-top:10px;
+            padding-top:5px;
+            border-top: 1px solid #ccc;
+        }
+        .fraction {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            margin: 0 0.2em;
+            position: relative;
+        }
+        .fraction .numerator, .fraction .denominator {
+            display: block;
+            padding: 0 0.3em;
+            line-height: 1.2;
+        }
+        .fraction .numerator {
+            border-bottom: 1.5px solid black;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Comprehensive Multi-Concept Word Problems Practice</h1>
+
+    <div class="controls-container">
+        <button id="generateTestButton">Generate New Test</button>
+        <button id="checkAndShowSolutionsButton">Check Answers & Show Solutions</button>
+    </div>
+
+    <ol class="problem-list" id="problemListContainer">
+        <!-- Problems will be dynamically inserted here -->
+    </ol>
+
+    <script>
+        const problemListContainer = document.getElementById('problemListContainer');
+        const checkAndShowSolutionsBtn = document.getElementById('checkAndShowSolutionsButton');
+        const generateTestBtn = document.getElementById('generateTestButton');
+        let currentProblemsData = [];
+        let solutionsCheckedAndLocked = false;
+
+        // --- Helper Functions ---
+        function getRandomInt(min, max) { if (min > max) {[min,max]=[max,min];} return Math.floor(Math.random()*(max-min+1))+min; }
+        function gcd(a,b) { a=Math.abs(a);b=Math.abs(b);if(b===0)return a;return gcd(b,a%b); }
+        function lcm(a,b) { if(a===0||b===0)return 0;return Math.abs(a*b)/gcd(a,b); }
+        function simplifyFraction(num,den) { if(den===0)return{num,den};const c=gcd(num,den);let n=num/c,d=den/c;if(d<0){n=-n;d=-d;}return{num:n,den:d}; }
+        function formatDecimal(val,pl=2) { if(!isFinite(val)||typeof val!=='number')return String(val);if(Number.isInteger(val))return val.toString();if(Math.abs(val-Math.round(val))<1e-9)return Math.round(val).toString();return val.toFixed(pl); }
+        function formatFractionHTML(num,den,simp=true) { if(typeof num!=='number'||typeof den!=='number'||!isFinite(num)||!isFinite(den))return"Invalid";if(den===0)return"DivBy0";if(simp){const s=simplifyFraction(num,den);num=s.num;den=s.den;}if(den===1)return`${num}`;if(num===0)return`0`;return`<span class="fraction"><span class="numerator">${num}</span><span class="denominator">${den}</span></span>`;}
+        function parseFloatExt(value) {
+            if (typeof value !== 'string') value = String(value);
+            const cleanedValue = value.replace(/[^0-9.,-]+/g, "").replace(/,/g, '.');
+            const num = parseFloat(cleanedValue);
+            return isNaN(num) ? NaN : num;
+        }
+        
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+
+        // --- Problem Generator Functions (Original Set - with correctAnswer and rephrased problemText) ---
+        const problemGenerators_Set1 = [
+            function generateTankProblem() { 
+                const iFD = getRandomInt(3, 5), iFN = getRandomInt(1, iFD - 1);
+                const pR = getRandomInt(8, 20), lR = getRandomInt(1, Math.max(1, Math.floor(pR * 0.6))), tC = getRandomInt(10, 30) * 10;
+                const iW = (iFN / iFD) * tC, rV = tC - iW;
+                const nFR = pR - lR;
+                let tTF = nFR > 0 ? rV / nFR : Infinity;
+                const problemText = `A water tank is currently ${formatFractionHTML(iFN, iFD)} full of water. A pump is adding water to the tank at a rate of ${pR} liters per minute. At the same time, a leak is draining water from the tank at a rate of ${lR} liters per minute. The total capacity of the tank is ${tC} liters. How many minutes will it take to fill the remaining part of the tank?`;
+                const solutionStepsHTML = `<p>Initial water: ${formatDecimal(iW)}L. Remaining: ${formatDecimal(rV)}L.</p><p>Net fill rate: ${pR} - ${lR} = ${nFR} liters per minute.</p><p>Time = ${formatDecimal(rV)} liters / ${nFR} liters per minute = ${formatDecimal(tTF)} minutes.</p><p class="final-answer">Final Answer: ${formatDecimal(tTF)} minutes</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: parseFloat(formatDecimal(tTF)) };
+            },
+            function generateWorkRateProblem() { 
+                const tT = getRandomInt(4, 7), jT = tT + getRandomInt(1, 3), tAH = getRandomInt(1, Math.max(1, tT - 2));
+                const sWBT = simplifyFraction(tAH, tT);
+                const rWN = sWBT.den - sWBT.num, rWD = sWBT.den;
+                const cRN = jT + tT, cRD = tT * jT;
+                const sCR = simplifyFraction(cRN, cRD);
+                const tTN = rWN * sCR.den, tTD = rWD * sCR.num;
+                const sTT = simplifyFraction(tTN, tTD);
+                const tTDc = sTT.den === 0 ? Infinity : sTT.num / sTT.den;
+                const problemText = `Tom can paint a fence in ${tT} hours by himself. Jerry can paint the same fence in ${jT} hours by himself. Tom works alone for ${tAH} hours, and then Jerry joins him. How long will it take for Tom and Jerry, working together, to finish painting the rest of the fence?`;
+                const solutionStepsHTML = `<p>Tom's rate ${formatFractionHTML(1,tT)} of fence per hour. Jerry's rate ${formatFractionHTML(1,jT)} of fence per hour.</p><p>Work Tom did alone: ${formatFractionHTML(sWBT.num,sWBT.den)}. Remaining work: ${formatFractionHTML(rWN,rWD)}.</p><p>Combined rate: ${formatFractionHTML(sCR.num,sCR.den)} of fence per hour.</p><p>Time together = Remaining work / Combined rate = ${formatFractionHTML(rWN,rWD)} / ${formatFractionHTML(sCR.num,sCR.den)} = ${formatFractionHTML(sTT.num,sTT.den)} hours.</p><p class="final-answer">Final Answer: ${formatFractionHTML(sTT.num,sTT.den)} hours (approximately ${formatDecimal(tTDc)} hours)</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: parseFloat(formatDecimal(tTDc)) };
+            },
+            function generateInvestmentProblem() { 
+                const iI = getRandomInt(5, 20) * 100, g1P = getRandomInt(5, 15), g2P = getRandomInt(10, 25);
+                const wFD = getRandomInt(2, 5), wFN = 1;
+                const aAG1 = iI * (1 + g1P / 100), aAG2 = aAG1 * (1 + g2P / 100);
+                const wA = (wFN / wFD) * aAG2;
+                const problemText = `Alex invested an amount of money. In the first year, his investment increased by ${g1P} percent. In the second year, the new total amount increased by another ${g2P} percent. After these two years, he withdrew $${formatDecimal(wA)}. He found that this withdrawal amount was exactly ${formatFractionHTML(wFN,wFD)} of his total current amount in the investment. What was the initial amount of money Alex invested?`;
+                const solutionStepsHTML = `<p>Let P be the initial investment. After Year 1: P × ${formatDecimal(1+g1P/100,2)}. After Year 2: P × ${formatDecimal((1+g1P/100)*(1+g2P/100),4)}.</p><p>The withdrawal equation is: ${formatFractionHTML(wFN,wFD)} × (Current Total Amount) = $${formatDecimal(wA)}.</p><p>So, ${formatFractionHTML(wFN,wFD)} × P × ${formatDecimal((1+g1P/100)*(1+g2P/100),4)} = ${formatDecimal(wA)}.</p><p>Solving for P: P = ${formatDecimal(iI)}.</p><p class="final-answer">Final Answer: $${formatDecimal(iI)}</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: parseFloat(formatDecimal(iI)) };
+            },
+            function generateCyclistProblem() { 
+                const sU = getRandomInt(8, 12), sDM = getRandomInt(2,4), sD = sU*sDM;
+                const tU = getRandomInt(2,4), oWD = sU*tU, tD = oWD/sD, tT = tU+tD;
+                const problemText = `A cyclist travels uphill to a destination at an average speed of ${sU} kilometers per hour. The cyclist then returns downhill along the same route at an average speed of ${sD} kilometers per hour. If the entire journey (uphill and downhill) took a total of ${formatDecimal(tT,1)} hours, what is the distance in kilometers from the starting point to the destination (one way)?`;
+                const solutionStepsHTML = `<p>Let D be the one-way distance. Time uphill = D/${sU}. Time downhill = D/${sD}.</p><p>Total time: D/${sU} + D/${sD} = ${formatDecimal(tT,1)}.</p><p>Solving for D: D × (${formatFractionHTML(1,sU)} + ${formatFractionHTML(1,sD)}) = ${formatDecimal(tT,1)}.</p><p>D × ${formatFractionHTML(sD + sU, sU * sD, false)} = ${formatDecimal(tT,1)}.</p><p>D = ${formatDecimal(tT,1)} × ${formatFractionHTML(sU * sD, sU + sD, false)} = ${formatDecimal(oWD)} kilometers.</p><p class="final-answer">Final Answer: ${formatDecimal(oWD)} kilometers</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: parseFloat(formatDecimal(oWD)) };
+            },
+            function generateConsecutiveOddProblem() { 
+                const mO=getRandomInt(5,20)*2+1, i1=mO-2, i3=mO+2, avg=mO, pXY=i1*i3;
+                const problemText = `The average (mean) of three distinct positive odd integers that are consecutive (follow each other in order) is ${avg}. If the smallest of these integers is called 'x', and the largest is called 'y', what is the product of 'x' and 'y'?`;
+                const solutionStepsHTML = `<p>Let the integers be n, n+2, n+4. Their average is (n + n+2 + n+4)/3 = (3n+6)/3 = n+2.</p><p>Given average is ${avg}, so n+2 = ${avg}, which means n = ${i1}.</p><p>The integers are: ${i1}, ${avg}, ${i3}. Thus, x = ${i1} and y = ${i3}.</p><p>The product x × y = ${i1} × ${i3} = ${pXY}.</p><p class="final-answer">Final Answer: ${pXY}</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: pXY };
+            },
+            function generateRectangleAreaChangeProblem() { 
+                const wM=getRandomInt(2,4), lIP=getRandomInt(1,3)*10, wDP=getRandomInt(1,2)*10;
+                const oAF=wM, nLF=wM*(1+lIP/100), nWF=1*(1-wDP/100);
+                const nAF=nLF*nWF, pC=((nAF-oAF)/oAF)*100, cT=pC>=0?"increase":"decrease";
+                const problemText = `The length of a rectangle is ${wM} times its width. If the length is increased by ${lIP} percent and the width is decreased by ${wDP} percent, what is the percentage change in the area of the rectangle? (Enter your answer as a number. For example, if it's an 8% increase, enter 8. If it's a 5% decrease, enter -5).`;
+                const solutionStepsHTML = `<p>Let original width be W, original length L = ${wM}W. Original Area A1 = L × W = ${oAF}W<sup>2</sup>.</p><p>New Length L' = ${wM}W × (1 + ${lIP/100}) = ${formatDecimal(nLF,2)}W.</p><p>New Width W' = W × (1 - ${wDP/100}) = ${formatDecimal(nWF,2)}W.</p><p>New Area A2 = L' × W' = ${formatDecimal(nLF,2)}W × ${formatDecimal(nWF,2)}W = ${formatDecimal(nAF,4)}W<sup>2</sup>.</p><p>Percentage Change = ((A2 - A1) / A1) × 100% = ((${formatDecimal(nAF,4)} - ${oAF}) / ${oAF}) × 100% = ${formatDecimal(pC)}%.</p><p class="final-answer">Final Answer: ${formatDecimal(pC)}% (${cT})</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: parseFloat(formatDecimal(pC)) };
+            },
+            function generateMixtureProblem() { 
+                let v1,c1,c2,fC,x,att=0; do{v1=getRandomInt(4,10);c1=getRandomInt(3,5)*10;c2=getRandomInt(1,Math.max(1,c1/10-2))*10;fC=getRandomInt(c2/10+1,c1/10-1)*10;if(fC-c2===0){x=Infinity;}else{x=v1*(c1-fC)/(fC-c2);}att++;if(att>50){v1=5;c1=30;c2=10;fC=25;x=2.5;break;}}while(!isFinite(x)||x<=0||fC<=c2||fC>=c1);
+                const sX=simplifyFraction(v1*(c1-fC),fC-c2);
+                const problemText = `How many liters of a ${c2} percent acid solution must be added to ${v1} liters of a ${c1} percent acid solution to obtain a mixture that is a ${fC} percent acid solution?`;
+                const solutionStepsHTML = `<p>Let x be the liters of the ${c2}% solution.</p><p>Amount of acid in first solution: ${v1} × ${c1/100} = ${formatDecimal(v1*c1/100,2)} liters.</p><p>Amount of acid in second solution: x × ${c2/100} = ${formatDecimal(c2/100,2)}x liters.</p><p>Total acid in mixture: (${v1} + x) × ${fC/100} liters.</p><p>Equation: ${formatDecimal(v1*c1/100,2)} + ${formatDecimal(c2/100,2)}x = (${v1} + x) × ${formatDecimal(fC/100,2)}.</p><p>Solving gives x = ${formatDecimal(x,2)} liters.</p><p class="final-answer">Final Answer: ${formatFractionHTML(sX.num,sX.den)} liters (approximately ${formatDecimal(x,2)} liters)</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: parseFloat(formatDecimal(x,2)) };
+            },
+            function generateShopkeeperProblem() { 
+                const cP=getRandomInt(10,50)*10,mP=getRandomInt(3,8)*10,dP=getRandomInt(1,Math.max(1,Math.floor(mP/10)-1))*10;
+                const sP=cP*(1+mP/100)*(1-dP/100);
+                const problemText = `A shopkeeper marks an item ${mP} percent above its original cost price. He then offers a ${dP} percent discount on this marked price. If the item sells for $${formatDecimal(sP)}, what was the original cost price of the item?`;
+                const solutionStepsHTML = `<p>Let Cost Price = C. Marked Price = C × (1 + ${mP/100}).</p><p>Selling Price = Marked Price × (1 - ${dP/100}) = C × (1 + ${mP/100}) × (1 - ${dP/100}).</p><p>Given Selling Price = $${formatDecimal(sP)}.</p><p>C × ${formatDecimal((1+mP/100)*(1-dP/100),3)} = ${formatDecimal(sP)}.</p><p>C = $${formatDecimal(sP)} / ${formatDecimal((1+mP/100)*(1-dP/100),3)} = $${formatDecimal(cP)}.</p><p class="final-answer">Final Answer: $${formatDecimal(cP)}</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: parseFloat(formatDecimal(cP)) };
+            },
+            function generateAgesRatioProblem() { 
+                const rA=getRandomInt(2,4),rB=rA+getRandomInt(1,2),x=getRandomInt(3,7),yA=5,yH=5;
+                const sAH=(rA*x+yA+yH)+(rB*x+yA+yH),bCA=rB*x+yA;
+                const problemText = `${yA} years ago, the ratio of Anna's age to Ben's age was ${rA} to ${rB}. In ${yH} years from now, the sum of their ages will be ${sAH} years. What is Ben's current age in years?`;
+                const solutionStepsHTML = `<p>Let ages ${yA} years ago be ${rA}k (Anna) and ${rB}k (Ben).</p><p>Current ages: Anna = ${rA}k + ${yA}, Ben = ${rB}k + ${yA}.</p><p>Ages in ${yH} years: Anna = ${rA}k + ${yA+yH}, Ben = ${rB}k + ${yA+yH}.</p><p>Sum in ${yH} years: (${rA}k + ${yA+yH}) + (${rB}k + ${yA+yH}) = ${sAH}.</p><p>(${rA+rB})k + 2(${yA+yH}) = ${sAH} => (${rA+rB})k = ${sAH - 2*(yA+yH)} => k = ${x}.</p><p>Ben's current age = ${rB}k + ${yA} = ${rB}(${x}) + ${yA} = ${bCA} years.</p><p class="final-answer">Final Answer: ${bCA} years</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: bCA };
+            },
+            function generatePipesCisternProblem() { 
+                let ta,tb,tc,sC,tDc,att=0; do{ta=getRandomInt(10,20);tb=getRandomInt(ta+1,ta+10);tc=getRandomInt(Math.max(5,Math.min(ta,tb)-5),Math.max(ta,tb)+5);const cN=(tb*tc)+(ta*tc)-(ta*tb),cD=ta*tb*tc;if(cD===0){att++;continue;}sC=simplifyFraction(cN,cD);att++;if(att>100){ta=12;tb=15;tc=10;sC=simplifyFraction(90,1800);break;}}while(sC.num<=0||sC.den===0);
+                const iFN=1,iFD=getRandomInt(2,4),rFN=iFD-iFN,rFD=iFD; if(sC.num===0){tDc=Infinity;}else{const tN=rFN*sC.den,tD=rFD*sC.num;const sT=simplifyFraction(tN,tD);tDc=sT.den===0?Infinity:sT.num/sT.den;}
+                const problemText = `Pipe A can fill a cistern in ${ta} minutes. Pipe B can fill the same cistern in ${tb} minutes. Pipe C can empty the full cistern in ${tc} minutes. If all three pipes are opened simultaneously when the cistern is already ${formatFractionHTML(iFN,iFD)} full, how many minutes will it take to fill the remaining part of the cistern?`;
+                const solutionStepsHTML = `<p>Rate of A = +${formatFractionHTML(1,ta)}/min. Rate of B = +${formatFractionHTML(1,tb)}/min. Rate of C = -${formatFractionHTML(1,tc)}/min.</p><p>Combined rate = ${formatFractionHTML(1,ta)} + ${formatFractionHTML(1,tb)} - ${formatFractionHTML(1,tc)} = ${formatFractionHTML(sC.num,sC.den)} cistern/minute.</p><p>Fraction to fill = 1 - ${formatFractionHTML(iFN,iFD)} = ${formatFractionHTML(rFN,rFD)}.</p><p>Time = Work / Rate = ${formatFractionHTML(rFN,rFD)} / ${formatFractionHTML(sC.num,sC.den)} = ${formatDecimal(tDc)} minutes.</p><p class="final-answer">Final Answer: ${formatDecimal(tDc)} minutes</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: parseFloat(formatDecimal(tDc)) };
+            },
+            function generateAverageScoreProblem() { 
+                const nS=getRandomInt(20,40),oA=getRandomInt(60,85),sL=getRandomInt(Math.max(30,oA-20),oA+5),nA=oA+getRandomInt(1,3);
+                const oTS=nS*oA,tSAL=oTS-sL,nTS=nS*nA,sNS=nTS-tSAL;
+                const problemText = `The average score of a class of ${nS} students on a test was ${oA}. After one student who scored ${sL} left the class, and a new student joined, the new average score of the class (which still has ${nS} students) became ${nA}. What was the score of the new student?`;
+                const solutionStepsHTML = `<p>Original total score = ${nS} × ${oA} = ${oTS}.</p><p>Total score after student left = ${oTS} - ${sL} = ${tSAL} (for ${nS-1} students).</p><p>New total score for ${nS} students = ${nS} × ${nA} = ${nTS}.</p><p>Score of new student = New total score - Total score of remaining ${nS-1} students = ${nTS} - ${tSAL} = ${sNS}.</p><p class="final-answer">Final Answer: ${sNS}</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: sNS };
+            },
+            function generateCombinedRatiosProblem() { 
+                const abn=getRandomInt(1,4),abd=getRandomInt(abn+1,5),bcn=getRandomInt(1,4),bcd=getRandomInt(bcn+1,5),cdn=getRandomInt(1,4),cdd=getRandomInt(cdn+1,5);
+                const adn=abn*bcn*cdn,add=abd*bcd*cdd,sad=simplifyFraction(adn,add);
+                const problemText = `We are given three ratios: the ratio of 'a' to 'b' is ${abn} to ${abd}, the ratio of 'b' to 'c' is ${bcn} to ${bcd}, and the ratio of 'c' to 'd' is ${cdn} to ${cdd}. What is the ratio of 'a' to 'd'? Please write your answer in the format X:Y.`;
+                const solutionStepsHTML = `<p>To find a:d, we multiply the ratios: (a/b) × (b/c) × (c/d).</p><p>= (${abn}/${abd}) × (${bcn}/${bcd}) × (${cdn}/${cdd}) = ${adn}/${add}.</p><p>Simplified ratio a:d = ${sad.num}:${sad.den}.</p><p class="final-answer">Final Answer: ${sad.num}:${sad.den}</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: `${sad.num}:${sad.den}` };
+            },
+            function generateTrainSpeedProblem() { 
+                let oS,sI,oT,dist,tS,att=0; do{oS=getRandomInt(20,70);sI=getRandomInt(5,25);oT=getRandomInt(4,20);dist=oS*oT;const nS=oS+sI;if(dist<=0||nS<=0||dist%nS!==0){att++;if(att>100){oS=30;sI=10;oT=12;dist=360;}continue;}const nT=dist/nS;tS=oT-nT;att++;if(att>100){oS=30;sI=10;oT=12;dist=360;tS=3;break;}}while(tS<=0||!Number.isInteger(tS)||tS>Math.floor(oT*0.85)||tS<1);
+                const problemText = `A train is scheduled to cover a distance of ${dist} kilometers at a uniform speed. If its speed were ${sI} kilometers per hour more than planned, it would have taken ${tS} hours less for the journey. What is the original planned speed of the train in kilometers per hour?`;
+                const solutionStepsHTML = `<p>Let S be original speed, T be original time. Distance D = ${dist} km.</p><p>D = S × T  => T = D/S = ${dist}/S.</p><p>New speed = S + ${sI}, New time = T - ${tS}.</p><p>So, ${dist} = (S + ${sI})(T - ${tS}) = (S + ${sI})(${dist}/S - ${tS}).</p><p>Expanding: ${dist}S = (S + ${sI})(${dist} - ${tS}S) = ${dist}S - ${tS}S<sup>2</sup> + ${dist*sI} - ${sI*tS}S.</p><p>This simplifies to the quadratic equation: ${tS}S<sup>2</sup> + ${sI*tS}S - ${dist*sI} = 0.</p><p>Solving this quadratic equation for S (and taking the positive root for speed) yields S = ${oS} km/h.</p><p class="final-answer">Final Answer: ${oS} km/h</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: oS };
+            },
+            function generatePriceChangeXPercentProblem() { 
+                const x=getRandomInt(1,4)*5,fPP=100*(1-(x/100)*(x/100));
+                const problemText = `The price of an item was first increased by some percentage, let's call it x percent. Later, the new price was decreased by the same x percent. If the final price was ${formatDecimal(fPP)} percent of the original price, what is the value of x?`;
+                const solutionStepsHTML = `<p>Let original price be P. After increase: P(1 + x/100).</p><p>After decrease: P(1 + x/100)(1 - x/100) = P(1 - (x/100)<sup>2</sup>).</p><p>This final price is ${fPP}% of P, so P(1 - x<sup>2</sup>/10000) = P × (${fPP}/100).</p><p>1 - x<sup>2</sup>/10000 = ${fPP/100} => x<sup>2</sup>/10000 = 1 - ${fPP/100} = ${formatDecimal(1-fPP/100,4)}.</p><p>x<sup>2</sup> = ${formatDecimal((1-fPP/100)*10000,0)} => x = ${x}.</p><p class="final-answer">Final Answer: ${x}</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: x };
+            },
+            function generateBoatStreamProblem() { 
+                let bS,sS,sU,sD,tU,dist,tD,att=0; do{bS=getRandomInt(5,20);sS=getRandomInt(1,Math.max(1,bS-2));sU=bS-sS;sD=bS+sS;tU=getRandomInt(2,6);dist=sU*tU;if(sD<=0||dist<=0||dist%sD!==0){att++;if(att>100){bS=6;sS=2;tU=6;dist=24;sD=8;}continue;}tD=dist/sD;att++;if(att>100){bS=6;sS=2;tU=6;dist=24;sD=8;tD=3;break;}}while(tD<=0||!Number.isInteger(tD));
+                const problemText = `A boat travels ${dist} kilometers upstream (against the current) in ${tU} hours. It travels the same distance of ${dist} kilometers downstream (with the current) in ${tD} hours. What is the speed of the boat in still water, and what is the speed of the stream? (Enter as: boat speed, stream speed)`;
+                const solutionStepsHTML = `<p>Let B = boat speed in still water, S = stream speed.</p><p>Upstream: Speed = B - S. So, ${dist} = (B - S) × ${tU} => B - S = ${sU}. (Equation 1)</p><p>Downstream: Speed = B + S. So, ${dist} = (B + S) × ${tD} => B + S = ${sD}. (Equation 2)</p><p>Add (1) and (2): (B - S) + (B + S) = ${sU} + ${sD} => 2B = ${sU+sD} => B = ${bS} km/h.</p><p>Substitute B into (2): ${bS} + S = ${sD} => S = ${sD} - ${bS} = ${sS} km/h.</p><p class="final-answer">Final Answer: Boat speed = ${bS} km/h, Stream speed = ${sS} km/h</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: [bS, sS] };
+            }
+        ];
+        
+        // --- Problem Generator Functions (New Set - with correctAnswer and rephrased problemText) ---
+        const problemGenerators_Set2 = [
+            function generatePythagoreanAreaProblem() { 
+                const tr=[[3,4,5],[5,12,13],[8,15,17],[7,24,25]],cT=tr[getRandomInt(0,tr.length-1)],m=getRandomInt(1,3);
+                const sA=cT[0]*m,sB=cT[1]*m,diag=cT[2]*m,p=2*(sA+sB),cM=getRandomInt(3,10),tC=p*cM;
+                const problemText = `A rectangular field has a length of ${sA} meters and its diagonal measures ${diag} meters. What is the width of the field in meters? If fencing costs $${cM} per meter, what is the total cost to fence the entire perimeter of the field? (Enter as: width, total cost)`;
+                const solutionStepsHTML = `<p>Let L=${sA}, D=${diag}. Using Pythagorean theorem L<sup>2</sup>+W<sup>2</sup>=D<sup>2</sup>.</p><p>W<sup>2</sup> = D<sup>2</sup> - L<sup>2</sup> = ${diag*diag} - ${sA*sA} = ${sB*sB}. So, W = ${sB} meters.</p><p>Perimeter = 2(L+W) = 2(${sA}+${sB}) = ${p} meters.</p><p>Total Cost = Perimeter × Cost/meter = ${p} × ${cM} = $${tC}.</p><p class="final-answer">Final Answer: Width=${sB} meters, Total Cost=$${tC}</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: [sB, tC] };
+            },
+            function generateCylinderVolumeProblem() { 
+                const r=getRandomInt(1,3),h=getRandomInt(4,8),iFN=getRandomInt(1,3),iFD=iFN+getRandomInt(1,2);
+                const tV=Math.PI*r*r*h,vTF=tV*(1-iFN/iFD),fR=getRandomInt(1,5)*0.1,tTF=vTF/fR;
+                const problemText = `A cylindrical water tank has a radius of ${r} meters and a height of ${h} meters. The tank is currently ${formatFractionHTML(iFN,iFD)} full of water. How many cubic meters of water are needed to fill the tank completely (round to 2 decimal places, use π ≈ 3.14159)? If water flows into the tank at a rate of ${formatDecimal(fR,1)} cubic meters per minute, how long will it take to fill this remaining volume (round to 1 decimal place)? (Enter as: volume needed, time)`;
+                const solutionStepsHTML = `<p>Use π ≈ 3.14159. Total Volume = πr<sup>2</sup>h ≈ 3.14159 × ${r}<sup>2</sup> × ${h} = ${formatDecimal(tV,2)} m<sup>3</sup>.</p><p>Fraction to fill = 1 - ${formatFractionHTML(iFN,iFD)} = ${formatFractionHTML(iFD-iFN,iFD)}.</p><p>Volume needed = Total Volume × ${formatFractionHTML(iFD-iFN,iFD)} ≈ ${formatDecimal(vTF,2)} m<sup>3</sup>.</p><p>Time = Volume needed / Flow rate ≈ ${formatDecimal(vTF,2)} / ${formatDecimal(fR,1)} = ${formatDecimal(tTF,1)} minutes.</p><p class="final-answer">Final Answer: Water needed ≈ ${formatDecimal(vTF,2)} m<sup>3</sup>, Time ≈ ${formatDecimal(tTF,1)} minutes</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: [parseFloat(formatDecimal(vTF,2)), parseFloat(formatDecimal(tTF,1))] };
+            },
+            function generateShadowProblem() { 
+                const pH=getRandomInt(15,20)/10,pS=pH*(getRandomInt(10,15)/10),tSM=getRandomInt(3,6),tS=pS*tSM;
+                const tH=(pH*tS)/pS,dFD=getRandomInt(15,25),tD=tH/dFD;
+                const problemText = `A person who is ${formatDecimal(pH,1)} meters tall casts a shadow that is ${formatDecimal(pS,1)} meters long. At the same time of day, a nearby tree casts a shadow that is ${formatDecimal(tS,1)} meters long. How tall is the tree in meters? If the tree's diameter is exactly ${formatFractionHTML(1,dFD)} of its height, what is its approximate diameter in meters (round to 2 decimal places)? (Enter as: tree height, tree diameter)`;
+                const solutionStepsHTML = `<p>Using similar triangles: (Person Height / Person Shadow) = (Tree Height / Tree Shadow).</p><p>(${formatDecimal(pH,1)} / ${formatDecimal(pS,1)}) = (Tree Height / ${formatDecimal(tS,1)}).</p><p>Tree Height = (${formatDecimal(pH,1)} × ${formatDecimal(tS,1)}) / ${formatDecimal(pS,1)} = ${formatDecimal(tH,1)} meters.</p><p>Diameter = Tree Height / ${dFD} = ${formatDecimal(tH,1)} / ${dFD} ≈ ${formatDecimal(tD,2)} meters.</p><p class="final-answer">Final Answer: Tree Height=${formatDecimal(tH,1)} meters, Diameter≈${formatDecimal(tD,2)} meters</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: [parseFloat(formatDecimal(tH,1)), parseFloat(formatDecimal(tD,2))] };
+            },
+            function generateLcmGearsProblem() { 
+                let tA,tB,att=0;do{tA=getRandomInt(3,5)*6;tB=getRandomInt(2,4)*6;att++;if(att>20){tA=24;tB=18;break;}}while(tA===tB);
+                const lcmT=lcm(tA,tB),lGT=Math.max(tA,tB),rL=lcmT/lGT;
+                const problemText = `Two gears are meshed together. Gear A has ${tA} teeth, and Gear B has ${tB} teeth. A marked tooth on Gear A and a marked tooth on Gear B are initially aligned at the point where the gears mesh. How many complete revolutions must the gear with ${lGT} teeth make before these two marked teeth align again at the mesh point?`;
+                const solutionStepsHTML = `<p>The teeth will align again after a number of tooth movements equal to the LCM of their teeth counts.</p><p>LCM(${tA}, ${tB}) = ${lcmT}.</p><p>The gear with ${lGT} teeth needs to complete ${lcmT} / ${lGT} = ${rL} revolutions for this to happen.</p><p class="final-answer">Final Answer: ${rL} revolutions</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: rL };
+            },
+            function generateDigitProblem() { 
+                let t,o,sD,dRv,oN,rN,att=0;do{t=getRandomInt(1,9);o=getRandomInt(0,9);while(t===o&&att<50){o=getRandomInt(0,9);att++;}if(t===o){t=7;o=2;}oN=t*10+o;rN=o*10+t;sD=t+o;dRv=Math.abs(oN-rN);att++;if(att>100){t=7;o=2;oN=72;rN=27;sD=9;dRv=45;break;}}while(dRv===0||dRv%9!==0||oN<=rN);
+                const problemText = `The sum of the digits of a two-digit number is ${sD}. If the digits of the number are reversed, the new number formed is ${dRv} less than the original number. What is the original two-digit number?`;
+                const solutionStepsHTML = `<p>Let the original number be 10t + u (t=tens, u=units).</p><p>Equation 1 (sum of digits): t + u = ${sD}.</p><p>Equation 2 (difference when reversed): (10t + u) - (10u + t) = ${dRv} => 9t - 9u = ${dRv} => t - u = ${dRv/9}.</p><p>Adding Eq1 and Eq2: (t+u) + (t-u) = ${sD} + ${dRv/9} => 2t = ${sD + dRv/9} => t = ${t}.</p><p>Substitute t into Eq1: ${t} + u = ${sD} => u = ${o}.</p><p>The original number is 10(${t}) + ${o} = ${oN}.</p><p class="final-answer">Final Answer: ${oN}</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: oN };
+            },
+            function generateProbabilityProblem() { 
+                const rM=getRandomInt(3,6),bM=getRandomInt(2,5),tM=rM+bM;
+                const p2Rn=rM*(rM-1),p2Rd=tM*(tM-1),sp2R=simplifyFraction(p2Rn,p2Rd);
+                const pOEn=2*rM*bM,pOEd=tM*(tM-1),spOE=simplifyFraction(pOEn,pOEd);
+                const problemText = `A bag contains ${rM} red marbles and ${bM} blue marbles. Two marbles are drawn from the bag one after the other, without replacing the first marble. What is the probability that both marbles drawn are red? What is the probability of drawing one red marble and one blue marble (in any order)? (Enter as: P(Both Red) as X/Y, P(One of each) as A/B)`;
+                const solutionStepsHTML = `<p>Total marbles = ${tM}.</p><p>Probability of 1st Red = ${rM}/${tM}. After 1 red, ${rM-1} red left, ${tM-1} total.</p><p>P(Both Red) = (${rM}/${tM}) × (${rM-1}/${tM-1}) = ${formatFractionHTML(sp2R.num,sp2R.den)}.</p><p>P(One of each) = P(Red then Blue) + P(Blue then Red)</p><p>= (${rM}/${tM} × ${bM}/${tM-1}) + (${bM}/${tM} × ${rM}/${tM-1}) = 2 × (${rM*bM}/${tM*(tM-1)}) = ${formatFractionHTML(spOE.num,spOE.den)}.</p><p class="final-answer">Final Answer: P(Both Red) = ${sp2R.num}/${sp2R.den}, P(One of each) = ${spOE.num}/${spOE.den}</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: [`${sp2R.num}/${sp2R.den}`, `${spOE.num}/${spOE.den}`] };
+            },
+            function generateVennDiagramProblem() { 
+                let tot,aO,bO,bth,a,b,nei,att=0;do{tot=getRandomInt(80,150);aO=getRandomInt(10,Math.floor(tot*0.3));bO=getRandomInt(10,Math.floor(tot*0.3));bth=getRandomInt(5,Math.floor(tot*0.2));a=aO+bth;b=bO+bth;nei=tot-(aO+bO+bth);att++;if(att>50){tot=100;a=60;b=50;bth=30;aO=30;bO=20;nei=20;break;}}while(nei<0);
+                const pAB=a>0?(bth/a)*100:0;
+                const problemText = `In a survey of ${tot} students, ${a} students like Math, ${b} students like Science, and ${bth} students like both Math and Science. How many students like neither Math nor Science? What percentage of the students who like Math also like Science (round to one decimal place)? (Enter as: number who like neither, percentage)`;
+                const solutionStepsHTML = `<p>Likes Math only = ${a} - ${bth} = ${aO}.</p><p>Likes Science only = ${b} - ${bth} = ${bO}.</p><p>Likes at least one = Math only + Science only + Both = ${aO} + ${bO} + ${bth} = ${aO+bO+bth}.</p><p>Likes Neither = Total - Likes at least one = ${tot} - ${aO+bO+bth} = ${nei}.</p><p>Percentage of Math likers who also like Science = (Likes Both / Likes Math) × 100% = (${bth} / ${a}) × 100% ≈ ${formatDecimal(pAB,1)}%.</p><p class="final-answer">Final Answer: Likes Neither = ${nei}, Percentage ≈ ${formatDecimal(pAB,1)}%</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: [nei, parseFloat(formatDecimal(pAB,1))] };
+            },
+            function generateCompoundInterestProblem() { 
+                const P=getRandomInt(5,20)*100,R=getRandomInt(3,8),T=getRandomInt(2,4),WDR=getRandomInt(1,3)*10;
+                const r=R/100,A=P*Math.pow((1+r),T),WDA=A*(WDR/100),RemA=A-WDA;
+                const problemText = `John invests $${P} in an account that pays ${R} percent annual interest, compounded annually. What will be the total amount in the account after ${T} years (round to the nearest cent)? If John then withdraws ${WDR} percent of this total amount, how much money will remain in the account (round to the nearest cent)? (Enter as: amount after T years, amount remaining)`;
+                const solutionStepsHTML = `<p>Amount A = P(1 + r)<sup>t</sup> = ${P}(1 + ${r})<sup>${T}</sup> ≈ $${formatDecimal(A,2)}.</p><p>Withdrawal Amount = ${WDR/100} × $${formatDecimal(A,2)} ≈ $${formatDecimal(WDA,2)}.</p><p>Remaining Amount = $${formatDecimal(A,2)} - $${formatDecimal(WDA,2)} ≈ $${formatDecimal(RemA,2)}.</p><p class="final-answer">Final Answer: Amount after ${T} years ≈ $${formatDecimal(A,2)}, Amount Remaining ≈ $${formatDecimal(RemA,2)}</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: [parseFloat(formatDecimal(A,2)), parseFloat(formatDecimal(RemA,2))] };
+            },
+            function generateClockAngleProblem() { 
+                const h=getRandomInt(1,12),mI=[0,5,10,15,20,25,30,35,40,45,50,55],m=mI[getRandomInt(0,mI.length-1)];
+                const hA=(h%12+m/60)*30,mA=m*6; let aD=Math.abs(hA-mA); if(aD>180)aD=360-aD;
+                const problemText = `What is the measure of the smaller angle, in degrees, formed by the hour hand and the minute hand of a standard analog clock when the time is exactly ${h}:${m<10?'0':''}${m}?`;
+                const solutionStepsHTML = `<p>Minute hand position (from 12): ${m} minutes × 6 degrees/minute = ${mA}°.</p><p>Hour hand position (from 12): (${h%12} hours + ${m}/60 hours) × 30 degrees/hour ≈ ${formatDecimal(hA,1)}°.</p><p>Absolute difference in angles = |${formatDecimal(hA,1)}° - ${mA}°| ≈ ${formatDecimal(Math.abs(hA-mA),1)}°.</p><p>The smaller angle is ${formatDecimal(aD,1)}° (if difference > 180°, use 360° - difference).</p><p class="final-answer">Final Answer: ${formatDecimal(aD,1)}°</p>`;
+                return { problemText, solutionStepsHTML, correctAnswer: parseFloat(formatDecimal(aD,1)) };
+            }
+        ];
+
+        const allProblemGenerators = [...problemGenerators_Set1, ...problemGenerators_Set2];
+
+
+        function generateNewTestData() {
+            solutionsCheckedAndLocked = false; 
+            checkAndShowSolutionsBtn.textContent = 'Check Answers & Show Solutions';
+            checkAndShowSolutionsBtn.disabled = false;
+            generateTestBtn.disabled = false;
+
+
+            let generatedData = allProblemGenerators.map(generator => {
+                try {
+                    return generator();
+                } catch (e) {
+                    console.error("Error in problem generator:", e, generator.name); 
+                    return { 
+                        problemText: "Error generating problem. Please try again.",
+                        solutionStepsHTML: `<p>Error: ${e.message}</p>`,
+                        correctAnswer: "ERROR_GENERATING" 
+                    };
+                }
+            });
+            shuffleArray(generatedData); 
+            currentProblemsData = generatedData;
+        }
+
+        function displayProblems() {
+            problemListContainer.innerHTML = ''; 
+            
+            currentProblemsData.forEach((data, index) => {
+                const listItem = document.createElement('li');
+                listItem.setAttribute('data-problem-id', index); 
+                
+                listItem.innerHTML = `
+                    <span class="problem-number">${index + 1}.</span>
+                    <div class="problem-text-container">${data.problemText}</div>
+                    <div class="answer-input-container">
+                        Answer: <input type="text" class="answer-input" id="answer-input-${index}">
+                    </div>
+                    <div class="solution-steps" id="solution-${index}">
+                        ${data.solutionStepsHTML}
+                    </div>
+                `;
+                problemListContainer.appendChild(listItem);
+            });
+
+            const solutions = document.querySelectorAll('.solution-steps');
+            solutions.forEach(sol => sol.style.display = 'none');
+        }
+
+        function compareAnswers(userAnswerStr, correctAnswer) {
+            const epsilon = 0.015; 
+
+            if (correctAnswer === "ERROR_GENERATING") return false;
+
+            if (Array.isArray(correctAnswer)) {
+                const userParts = userAnswerStr.split(',').map(s => s.trim());
+                if (userParts.length !== correctAnswer.length) return false;
+
+                for (let i = 0; i < correctAnswer.length; i++) {
+                    const correctPart = correctAnswer[i];
+                    const userPartStr = userParts[i];
+
+                    if (typeof correctPart === 'number') {
+                        const userNum = parseFloatExt(userPartStr);
+                        if (isNaN(userNum) || Math.abs(userNum - correctPart) > epsilon) return false;
+                    } else if (typeof correctPart === 'string') { 
+                        if (userPartStr.toLowerCase().replace(/\s+/g, '') !== correctPart.toLowerCase().replace(/\s+/g, '')) return false;
+                    } else { 
+                        return false; 
+                    }
+                }
+                return true; 
+            }
+
+            if (typeof correctAnswer === 'number') {
+                const userNum = parseFloatExt(userAnswerStr);
+                return !isNaN(userNum) && Math.abs(userNum - correctAnswer) < epsilon;
+            }
+            if (typeof correctAnswer === 'string') {
+                if (correctAnswer.includes(':') || correctAnswer.includes('/')) {
+                    return userAnswerStr.trim().replace(/\s+/g, '') === correctAnswer.replace(/\s+/g, '');
+                }
+                return userAnswerStr.trim().toLowerCase() === correctAnswer.toLowerCase();
+            }
+            return false;
+        }
+
+
+        function handleCheckAndShowSolutions() {
+            if (solutionsCheckedAndLocked) return;
+
+            const solutions = document.querySelectorAll('.solution-steps');
+            const answerInputs = document.querySelectorAll('.answer-input');
+
+            currentProblemsData.forEach((data, index) => {
+                const inputElement = document.getElementById(`answer-input-${index}`); 
+                const solutionElement = document.getElementById(`solution-${index}`);
+                
+                if (inputElement && data) { 
+                    const userAnswer = inputElement.value;
+                    
+                    if (compareAnswers(userAnswer, data.correctAnswer)) {
+                        inputElement.classList.add('correct');
+                        inputElement.classList.remove('incorrect');
+                    } else {
+                        inputElement.classList.add('incorrect');
+                        inputElement.classList.remove('correct');
+                    }
+                    inputElement.disabled = true;
+                    if (solutionElement) solutionElement.style.display = 'block';
+                }
+            });
+
+            checkAndShowSolutionsBtn.textContent = 'Checked & Solutions Shown (Locked)';
+            checkAndShowSolutionsBtn.disabled = true;
+            solutionsCheckedAndLocked = true;
+        }
+        
+        generateTestBtn.addEventListener('click', () => {
+            generateNewTestData(); 
+            displayProblems();
+        });
+        checkAndShowSolutionsBtn.addEventListener('click', handleCheckAndShowSolutions);
+        
+        generateNewTestData();
+        displayProblems();
+
+    </script>
+</body>
+</html>

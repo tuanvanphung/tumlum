@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translating Words to Math & Basic Algebraic Thinking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #fdfdff;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .controls-container {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .controls-container button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 10px;
+        }
+        #generateTestButton { background-color: #007bff; }
+        #generateTestButton:hover { background-color: #0056b3; }
+        #checkAndShowButton { background-color: #28a745; } /* Updated ID */
+        #checkAndShowButton:hover { background-color: #218838; }
+        #checkAndShowButton:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .problem-list { list-style-type: none; padding-left: 0; }
+        .problem-list li {
+            margin-bottom: 30px; padding: 15px;
+            border: 1px solid #ddd; border-radius: 5px;
+            background-color: #fff;
+        }
+        .problem-number { font-weight: bold; margin-right: 10px; font-size: 1.1em; }
+        .problem-text-container {
+            font-family: 'Georgia', serif; font-size: 1.1em;
+            color: #444; display: block;
+            margin-bottom: 10px; word-wrap: break-word;
+        }
+        /* New styles for input boxes */
+        .answer-input-container { margin-top: 10px; margin-bottom: 10px; }
+        .answer-input-container input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 80%;
+            max-width: 400px;
+            font-size: 1em;
+            margin-bottom: 5px; /* For multi-part inputs */
+        }
+        .answer-input-container input.correct {
+            border-color: green !important;
+            background-color: #e6ffe6 !important;
+            color: darkgreen !important;
+        }
+        .answer-input-container input.incorrect {
+            border-color: red !important;
+            background-color: #ffe6e6 !important;
+            color: darkred !important;
+        }
+         .answer-input-container input.partial { /* For self-assessment cases */
+            border-color: orange !important;
+            background-color: #fff3e0 !important;
+        }
+
+
+        .solution-steps {
+            display: none; margin-top: 15px; padding: 15px;
+            background-color: #e9f5ff; border: 1px dashed #5bc0de;
+            border-radius: 4px; font-family: 'Arial', sans-serif;
+            font-size: 1.0em; line-height: 1.5;
+        }
+        .solution-steps p { margin: 8px 0; word-wrap: break-word; }
+        .solution-steps .final-answer { /* Revision 4 used .final-answer */
+            font-weight: bold; color: #007bff;
+            margin-top:10px; padding-top:5px;
+            border-top: 1px solid #ccc;
+        }
+        @media print {
+            body { margin: 0.5in; }
+            .controls-container { display: none; }
+            h1 { font-size: 18pt; }
+            .problem-list li { page-break-inside: avoid; }
+            .solution-steps { background-color: #fff !important; border: 1px solid #ccc !important;}
+             .answer-input-container input[type="text"] { border: 1px solid #ccc !important; background-color: #f9f9f9 !important; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Translating Words to Math & Basic Algebraic Thinking</h1>
+    <div class="controls-container">
+        <button id="generateTestButton">Generate New Test</button>
+        <button id="checkAndShowButton">Check Answers & Show Solutions</button> <!-- Updated ID -->
+    </div>
+    <ol class="problem-list" id="problemListContainer"></ol>
+
+    <script>
+        const problemListContainer = document.getElementById('problemListContainer');
+        const checkAndShowBtn = document.getElementById('checkAndShowButton'); // Updated ID
+        const generateTestBtn = document.getElementById('generateTestButton');
+
+        let currentProblemsData = []; // Will store the shuffled problem data for the current test
+
+        function getRandomInt(min, max) {
+            min = Math.ceil(min); max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        function getRandomName() {
+            const names = ["Tom", "Bob", "Maria", "Alice", "John", "Sarah", "Mike", "Linda"];
+            return names[getRandomInt(0, names.length - 1)];
+        }
+
+        // Fisher-Yates (Knuth) Shuffle algorithm
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function generateProblemsData() {
+            const problems = [];
+            let name1, name2, item1, item2;
+            let problemIdCounter = 0; // For unique IDs before shuffling
+
+            // --- Type 1: Consecutive Integers (Sum) ---
+            let type1 = getRandomInt(0, 1) === 0 ? "even" : "odd";
+            let start1_val = getRandomInt(10, 20);
+            let int1_1 = start1_val * 2 + (type1 === "odd" ? 1 : 0);
+            let int1_3 = int1_1 + 4;
+            let sum1 = int1_1 + (int1_1 + 2) + int1_3;
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `The sum of three consecutive ${type1} integers is ${sum1}. What is the largest of these integers?`,
+                answerType: "number",
+                correctAnswer: int1_3.toString(),
+                solutionStepsHTML: `<p>Let integers be x, x+2, x+4. Then x + (x+2) + (x+4) = ${sum1} => 3x+6=${sum1} => 3x=${sum1-6} => x=${int1_1}.</p><p>Largest is x+4 = ${int1_1}+4 = ${int1_3}.</p><p class="final-answer">Final Answer: ${int1_3}.</p>`
+            });
+
+            // --- Type 2: Consecutive Integers (Sum of Extremes) ---
+            let start2 = getRandomInt(15, 25);
+            let mid2 = start2 + 1;
+            let sum_sl2 = start2 + (start2 + 2);
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `For three consecutive integers, the sum of the smallest and the largest is ${sum_sl2}. What is the middle integer?`,
+                answerType: "number",
+                correctAnswer: mid2.toString(),
+                solutionStepsHTML: `<p>Let integers be n, n+1, n+2. Then n + (n+2) = ${sum_sl2} => 2n+2=${sum_sl2} => 2n=${sum_sl2-2} => n=${start2}.</p><p>Middle is n+1 = ${start2}+1 = ${mid2}.</p><p class="final-answer">Final Answer: ${mid2}.</p>`
+            });
+
+            // --- Type 3: Geometric (Rectangle Dimensions from Perimeter & Relationship) ---
+            let W3 = getRandomInt(5, 10);
+            let B3_mult = 2; let A3_less = getRandomInt(1, W3-1);
+            let L3 = B3_mult * W3 - A3_less; if (L3 <= 0) L3 = W3+1;
+            let P3 = 2 * (L3 + W3);
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `A rectangle's length is ${A3_less} cm less than twice its width. If its perimeter is ${P3} cm, find the dimensions (e.g., "Width=Xcm, Length=Ycm").`,
+                answerType: "text_dimensions",
+                correctAnswer: `Width=${W3}cm, Length=${L3}cm`,
+                solutionStepsHTML: `<p>L=2W-${A3_less}, P=2(L+W)=${P3}. So 2((2W-${A3_less})+W)=${P3} => 6W-${2*A3_less}=${P3} => W=${W3}.</p><p>L=2(${W3})-${A3_less}=${L3}.</p><p class="final-answer">Final Answer: Width=${W3}cm, Length=${L3}cm.</p>`
+            });
+
+            // --- Type 4: Geometric (Rectangle Area from Perimeter & Relationship) ---
+            let W4 = getRandomInt(4, 8); let A4_more = getRandomInt(2, 5);
+            let L4 = W4 + A4_more; let P4 = 2 * (L4 + W4); let Area4 = L4 * W4;
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `The length of a rectangle is ${A4_more} m more than its width. If the perimeter is ${P4} m, find the area (number only).`,
+                answerType: "number",
+                correctAnswer: Area4.toString(),
+                solutionStepsHTML: `<p>L=W+${A4_more}, P=2(L+W)=${P4} => W=${W4}.</p><p>L=${L4}. Area=L*W=${Area4}m².</p><p class="final-answer">Final Answer: ${Area4}m².</p>`
+            });
+
+            // --- Type 5: Geometric (Square Side from Perimeter) ---
+            let s5 = getRandomInt(6, 15); let P5 = 4 * s5;
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `A square has a perimeter of ${P5} inches. What is the length of one side (number only)?`,
+                answerType: "number",
+                correctAnswer: s5.toString(),
+                solutionStepsHTML: `<p>P=4s. ${P5}=4s => s=${s5}.</p><p class="final-answer">Final Answer: Side=${s5} inches.</p>`
+            });
+
+            // --- Type 6: Coin (Relationship & Value) ---
+            name1 = getRandomName();
+            let q6 = getRandomInt(5, 10); let D_offset6 = getRandomInt(2, 4); let d6 = q6 + D_offset6;
+            let V6 = (0.25 * q6 + 0.10 * d6).toFixed(2);
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `${name1} has q quarters and d dimes. She has ${D_offset6} more dimes than quarters, and the total value is $${V6}. Find q and d (e.g., "Q=X, D=Y").`,
+                answerType: "text_coins",
+                correctAnswer: `Q=${q6}, D=${d6}`,
+                solutionStepsHTML: `<p>d=q+${D_offset6}. 0.25q+0.10d=${V6} => q=${q6}, d=${d6}.</p><p class="final-answer">Final Answer: ${q6} quarters, ${d6} dimes.</p>`
+            });
+
+            // --- Type 7: Coin (Total Count & Value) ---
+            let n7_val = getRandomInt(6, 12); let q7_val = getRandomInt(4, 10);
+            let total_coins7 = n7_val + q7_val; let V7 = (0.05 * n7_val + 0.25 * q7_val).toFixed(2);
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `A collection of ${total_coins7} coins (nickels & quarters) has value $${V7}. How many quarters (number only)?`,
+                answerType: "number",
+                correctAnswer: q7_val.toString(),
+                solutionStepsHTML: `<p>n+q=${total_coins7}, 0.05n+0.25q=${V7} => q=${q7_val}.</p><p class="final-answer">Final Answer: ${q7_val} quarters.</p>`
+            });
+
+            // --- Type 8: Systems (Sum & Difference) ---
+            let x8 = getRandomInt(15, 30); let y8 = getRandomInt(5, x8 - 2);
+            let S8 = x8 + y8; let D_val8 = x8 - y8;
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `The sum of two numbers is ${S8}. Their difference is ${D_val8}. Find the numbers (e.g., "X and Y").`,
+                answerType: "text_numbers_and",
+                correctAnswer: `${x8} and ${y8}`,
+                alternativeCorrectAnswer: `${y8} and ${x8}`,
+                solutionStepsHTML: `<p>x+y=${S8}, x-y=${D_val8} => x=${x8}, y=${y8}.</p><p class="final-answer">Final Answer: ${x8} and ${y8}.</p>`
+            });
+
+            // --- Type 9: Systems (Sum & Ratio) ---
+            let y9_small = getRandomInt(4, 10); let N9_mult = getRandomInt(2, 4);
+            let x9_large = N9_mult * y9_small; let S9 = x9_large + y9_small;
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `Sum of two numbers is ${S9}. One is ${N9_mult} times other. Find them (e.g., "X and Y").`,
+                answerType: "text_numbers_and",
+                correctAnswer: `${x9_large} and ${y9_small}`,
+                alternativeCorrectAnswer: `${y9_small} and ${x9_large}`,
+                solutionStepsHTML: `<p>x=${N9_mult}y, x+y=${S9} => y=${y9_small}, x=${x9_large}.</p><p class="final-answer">Final Answer: ${x9_large} and ${y9_small}.</p>`
+            });
+
+            // --- Type 10: Systems (Difference & Complex Relationship) ---
+            let S10_small = getRandomInt(6,10); let N10_mult=2; let A10_more=getRandomInt(1,5);
+            let L10_large = N10_mult*S10_small+A10_more; let D_val10 = L10_large-S10_small;
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `Difference is ${D_val10}. Larger is ${A10_more} more than twice smaller. Find them (e.g., "X and Y").`,
+                answerType: "text_numbers_and",
+                correctAnswer: `${L10_large} and ${S10_small}`,
+                solutionStepsHTML: `<p>L-S=${D_val10}, L=2S+${A10_more} => S=${S10_small}, L=${L10_large}.</p><p class="final-answer">Final Answer: ${L10_large} and ${S10_small}.</p>`
+            });
+
+            // --- Type 11: Working Backwards (Multi-step with division) ---
+            let original11 = getRandomInt(8, 15); let A11_add = getRandomInt(2, 5); let B11_div = getRandomInt(2, 3);
+            while ((2 * original11 + A11_add) % B11_div !== 0) { original11++; }
+            let C11_res = (2 * original11 + A11_add) / B11_div;
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `A number doubled, +${A11_add}, then /${B11_div}, yields ${C11_res}. Original (number only)?`,
+                answerType: "number",
+                correctAnswer: original11.toString(),
+                solutionStepsHTML: `<p>((2x+${A11_add})/${B11_div})=${C11_res} => x=${original11}.</p><p class="final-answer">Final Answer: ${original11}.</p>`
+            });
+
+            // --- Type 12: Working Backwards (Multi-step with multiplication) ---
+            let A12_sub = getRandomInt(2, 6); let original12 = getRandomInt(A12_sub + 1, 12);
+            let B12_mult = getRandomInt(2, 4); let C12_res = (original12 - A12_sub) * B12_mult;
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `Number -${A12_sub}, then *${B12_mult}, yields ${C12_res}. Original (number only)?`,
+                answerType: "number",
+                correctAnswer: original12.toString(),
+                solutionStepsHTML: `<p>(x-${A12_sub})*${B12_mult}=${C12_res} => x=${original12}.</p><p class="final-answer">Final Answer: ${original12}.</p>`
+            });
+
+            // --- Type 13: Age (Offset & Sum) ---
+            name1 = getRandomName(); name2 = getRandomName(); while(name1===name2)name2=getRandomName();
+            let p2_age13 = getRandomInt(6, 12); let A_offset13 = getRandomInt(3, 7);
+            let S_age13 = (p2_age13 + A_offset13) + p2_age13;
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `${name1} is ${A_offset13} yrs older than ${name2}. Sum of ages ${S_age13}. ${name2}'s age (number only)?`,
+                answerType: "number",
+                correctAnswer: p2_age13.toString(),
+                solutionStepsHTML: `<p>A=B+${A_offset13}, A+B=${S_age13} => B=${p2_age13}.</p><p class="final-answer">Final Answer: ${name2} is ${p2_age13}.</p>`
+            });
+
+            // --- Type 14: Age (Ratio & Difference) ---
+            let d_age14 = getRandomInt(5, 10); let N_mult_m14 = getRandomInt(3, 4);
+            let diff_age14 = (N_mult_m14 * d_age14) - d_age14;
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `Mother is ${N_mult_m14} times daughter. Age difference ${diff_age14} yrs. Daughter's age (number only)?`,
+                answerType: "number",
+                correctAnswer: d_age14.toString(),
+                solutionStepsHTML: `<p>M=${N_mult_m14}D, M-D=${diff_age14} => D=${d_age14}.</p><p class="final-answer">Final Answer: Daughter is ${d_age14}.</p>`
+            });
+
+            // --- Type 15: Geometric (Triangle Area Expression - specific) ---
+            let B15_more = getRandomInt(2, 5);
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `The base of a triangle is ${B15_more} cm more than its height 'h'. Write an expression for its area (e.g., "0.5h(h+${B15_more})").`,
+                answerType: "expression_eval",
+                correctAnswer: `0.5h(h+${B15_more})`, // Example, variations possible
+                solutionStepsHTML: `<p>Height=h. Base=h+${B15_more}.</p><p>Area A = (1/2) * base * height = (1/2) * (h+${B15_more}) * h.</p><p class="final-answer">Final Answer: A = 0.5h(h+${B15_more}) or (h^2+${B15_more}h)/2.</p>`
+            });
+
+            // --- Type 16: Symbolic Representation of Changes / Processes (NEW CONCEPTUAL) ---
+            let perc_inc16 = getRandomInt(10, 30);
+            let perc_dec16 = getRandomInt(5, 15);
+            let final_multiplier = ( (1 + perc_inc16/100) * (1 - perc_dec16/100) ).toFixed(3);
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `A quantity Q is first increased by ${perc_inc16}%. Then, the new amount is decreased by ${perc_dec16}%. Write a single algebraic expression in terms of Q that represents the final quantity (e.g., "${final_multiplier}Q").`,
+                answerType: "expression_eval",
+                correctAnswer: `${final_multiplier}Q`,
+                solutionStepsHTML: `<p>1. Increase by ${perc_inc16}%: Q_new1 = Q * (1 + ${perc_inc16}/100) = Q * ${(1 + perc_inc16/100).toFixed(2)}.</p><p>2. Decrease new amount by ${perc_dec16}%: Q_final = Q_new1 * (1 - ${perc_dec16}/100) = Q_new1 * ${(1 - perc_dec16/100).toFixed(2)}.</p><p>Combining: Q_final = (Q * ${(1 + perc_inc16/100).toFixed(2)}) * ${(1 - perc_dec16/100).toFixed(2)}.</p><p class="final-answer">Final Answer: ${final_multiplier}Q (or Q * ${(1 + perc_inc16/100).toFixed(2)} * ${(1 - perc_dec16/100).toFixed(2)}).</p>`
+            });
+
+            // --- Type 17: Abstract Ratio/Proportion Setup (NEW CONCEPTUAL) ---
+            let item_add17 = getRandomInt(2,5); let item_rem17 = getRandomInt(1,4);
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `A mixture contains 'A' liters of acid and 'W' liters of water. If ${item_add17} liters of acid are added and ${item_rem17} liters of water are removed, write an expression for the new ratio of acid to the total mixture volume. (e.g., "(A+X)/(A+W+Y)")`,
+                answerType: "expression_eval",
+                correctAnswer: `(A+${item_add17})/(A+W+${item_add17-item_rem17})`,
+                solutionStepsHTML: `<p>Original acid = A, Original water = W.</p><p>New acid = A + ${item_add17}.</p><p>New water = W - ${item_rem17}.</p><p>New total volume = (New acid) + (New water) = (A + ${item_add17}) + (W - ${item_rem17}) = A + W + ${item_add17 - item_rem17}.</p><p>New ratio of acid to total volume = (New acid) / (New total volume).</p><p class="final-answer">Final Answer: (A + ${item_add17}) / (A + W + ${item_add17 - item_rem17}).</p>`
+            });
+
+            // --- Type 18: Interpreting Algebraic Expressions in Context (NEW CONCEPTUAL) ---
+            let base_cost18 = getRandomInt(15, 30); let per_item_cost18 = (getRandomInt(5, 20)/100).toFixed(2);
+            let item_name18 = "text messages"; let var_name18 = "t";
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `The monthly cost 'C' (in dollars) for a mobile plan is C = ${base_cost18} + ${per_item_cost18}${var_name18}, where '${var_name18}' is the number of ${item_name18} sent.
+                <br>a) What does the '${base_cost18}' represent? (briefly)
+                <br>b) What does the '${per_item_cost18}${var_name18}' represent? (briefly)
+                <br>c) Cost if no ${item_name18} are sent? (number only)`,
+                answerType: "multi_text_abc",
+                correctAnswer: {
+                    a: "base fee",
+                    b: "cost for " + item_name18, // Adjusted for dynamic item name
+                    c: base_cost18.toString()
+                },
+                solutionStepsHTML: `<p>a) The '${base_cost18}' represents the fixed base monthly fee for the plan, even if no ${item_name18} are sent.</p><p>b) The '${per_item_cost18}${var_name18}' represents the total additional cost for sending '${var_name18}' ${item_name18}, where each message costs $${per_item_cost18}.</p><p>c) If no ${item_name18} are sent, ${var_name18}=0. So, C = ${base_cost18} + ${per_item_cost18}(0) = ${base_cost18}. The cost is $${base_cost18}.</p><p class="final-answer">Final Answer: a) Base fee, b) Cost of ${item_name18}, c) $${base_cost18}.</p>`
+            });
+
+            // --- Type 19: Geometric Relationships with Variables (NEW CONCEPTUAL) ---
+            let L_inc19 = getRandomInt(2,5); let W_dec19 = getRandomInt(1,3);
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `A rectangle has length 'L' and width 'W'.
+                <br>a) If its length is increased by ${L_inc19} units and its width is decreased by ${W_dec19} unit(s), write an expression for its new perimeter.
+                <br>b) Write an expression for its new area. (Use L, W in answers)`,
+                answerType: "expression_eval_ab",
+                correctAnswer: {
+                    a: `2(L+W+${L_inc19-W_dec19})`,
+                    b: `(L+${L_inc19})(W-${W_dec19})`
+                },
+                solutionStepsHTML: `<p>Original: Length=L, Width=W.</p><p>New dimensions: New Length = L + ${L_inc19}, New Width = W - ${W_dec19}.</p><p>a) New Perimeter = 2 * (New Length + New Width) = 2 * ((L + ${L_inc19}) + (W - ${W_dec19})) = 2 * (L + W + ${L_inc19 - W_dec19}).</p><p>   Simplified: 2L + 2W + ${2 * (L_inc19 - W_dec19)}.</p><p>b) New Area = (New Length) * (New Width) = (L + ${L_inc19}) * (W - ${W_dec19}).</p><p>   Expanded: LW - ${W_dec19}L + ${L_inc19}W - ${L_inc19 * W_dec19}.</p><p class="final-answer">Final Answer: a) 2(L + W + ${L_inc19 - W_dec19}), b) (L + ${L_inc19})(W - ${W_dec19}).</p>`
+            });
+
+            // --- Type 20: Number Properties and General Representations (NEW CONCEPTUAL) ---
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `The sum of two integers is an even number.
+                <br>a) What can you say about the individual integers (their parity - odd/even)?
+                <br>b) If one integer is represented as '2k' (where 'k' is an integer), how could you represent the other integer generally?`,
+                answerType: "text_ab",
+                correctAnswer: {
+                    a: "both even or both odd",
+                    b: "2m"
+                },
+                solutionStepsHTML: `<p>a) For the sum of two integers to be even, both integers must have the same parity. This means either:<br>   - Both integers are even (e.g., 2+4=6).<br>   - Both integers are odd (e.g., 3+5=8).</p><p>b) If one integer is '2k' (even), the other integer must also be even to make their sum even. So, the other integer can be represented as '2m', where 'm' is any integer.</p><p>(If the first integer was odd, e.g., 2k+1, the other would also have to be odd, e.g., 2m+1).</p><p class="final-answer">Final Answer: a) Both even OR both odd. b) 2m (where m is an integer).</p>`
+            });
+
+            // --- Type 21: "What if" Scenarios Based on Existing Structures (NEW CONCEPTUAL) ---
+            problems.push({
+                problemId: `p${problemIdCounter++}`,
+                problemText: `Simple interest 'I' is calculated as I = P * R * T, where P is principal, R is rate (as a decimal), and T is time. If the Principal (P) and Time (T) are kept constant, but the interest Rate (R) is tripled, what happens to the amount of Simple Interest (I) earned? (e.g., "doubled", "halved", "tripled")`,
+                answerType: "simple_text",
+                correctAnswer: "tripled",
+                solutionStepsHTML: `<p>Original Interest: I_orig = P * R_orig * T.</p><p>New Rate: R_new = 3 * R_orig.</p><p>New Interest: I_new = P * R_new * T = P * (3 * R_orig) * T.</p><p>Rearranging: I_new = 3 * (P * R_orig * T).</p><p>Since I_orig = P * R_orig * T, we can substitute: I_new = 3 * I_orig.</p><p>Explanation: Because the interest 'I' is directly proportional to the rate 'R' (when P and T are constant), tripling the rate 'R' will directly result in tripling the amount of simple interest 'I' earned.</p><p class="final-answer">Final Answer: The Simple Interest (I) earned will also be tripled.</p>`
+            });
+
+            shuffleArray(problems); // Randomize the order of questions
+            return problems;
+        }
+
+        function normalizeAnswer(answer) {
+            if (typeof answer !== 'string') return "";
+            return answer.trim().toLowerCase().replace(/\s+/g, ' ');
+        }
+        function normalizeDimensionAnswer(answer) {
+            if (typeof answer !== 'string') return "";
+            // Be more flexible with "width=X,length=Y" vs "length=Y,width=X"
+            let parts = answer.trim().toLowerCase().replace(/\s*cm\s*/g, 'cm').replace(/\s*=\s*/g, '=').split(',').map(p => p.trim()).sort();
+            return parts.join(',');
+        }
+        function normalizeCoinAnswer(answer) {
+             if (typeof answer !== 'string') return "";
+             let parts = answer.trim().toUpperCase().replace(/\s*=\s*/g, '=').split(',').map(p => p.trim()).sort();
+            return parts.join(',');
+        }
+
+
+        function displayProblems() {
+            currentProblemsData = generateProblemsData(); // This now shuffles
+            problemListContainer.innerHTML = '';
+            checkAndShowBtn.textContent = 'Check Answers & Show Solutions';
+            checkAndShowBtn.disabled = false;
+
+            currentProblemsData.forEach((data, displayIndex) => {
+                const listItem = document.createElement('li');
+                const uniqueProblemId = data.problemId; // Use the stable ID
+
+                let inputHtml = `<div class="answer-input-container"><label for="answer-${uniqueProblemId}">Your Answer: </label><input type="text" id="answer-${uniqueProblemId}" name="answer-${uniqueProblemId}"></div>`;
+                if (data.answerType === "multi_text_abc") {
+                     inputHtml = `
+                        <div class="answer-input-container">
+                            <label for="answer-${uniqueProblemId}-a">a) </label><input type="text" id="answer-${uniqueProblemId}-a"><br>
+                            <label for="answer-${uniqueProblemId}-b">b) </label><input type="text" id="answer-${uniqueProblemId}-b"><br>
+                            <label for="answer-${uniqueProblemId}-c">c) </label><input type="text" id="answer-${uniqueProblemId}-c">
+                        </div>`;
+                } else if (data.answerType === "expression_eval_ab" || data.answerType === "text_ab") {
+                     inputHtml = `
+                        <div class="answer-input-container">
+                            <label for="answer-${uniqueProblemId}-a">a) </label><input type="text" id="answer-${uniqueProblemId}-a"><br>
+                            <label for="answer-${uniqueProblemId}-b">b) </label><input type="text" id="answer-${uniqueProblemId}-b">
+                        </div>`;
+                }
+
+                listItem.innerHTML = `
+                    <span class="problem-number">${displayIndex + 1}.</span>
+                    <div class="problem-text-container">${data.problemText}</div>
+                    ${inputHtml}
+                    <div class="solution-steps" id="solution-${uniqueProblemId}">${data.solutionStepsHTML}</div>`; // Solution HTML is pre-generated
+                problemListContainer.appendChild(listItem);
+            });
+            document.querySelectorAll('.solution-steps').forEach(sol => sol.style.display = 'none');
+        }
+
+        function checkAndShowSolutions() {
+            currentProblemsData.forEach((problem) => {
+                const uniqueProblemId = problem.problemId;
+                const solutionDiv = document.getElementById(`solution-${uniqueProblemId}`);
+                solutionDiv.style.display = 'block';
+
+                let inputsToLockAndCheck = [];
+                // Determine which input(s) to check and lock based on answerType
+                if (problem.answerType === "multi_text_abc" || problem.answerType === "expression_eval_ab" || problem.answerType === "text_ab") {
+                    inputsToLockAndCheck.push({el: document.getElementById(`answer-${uniqueProblemId}-a`), part: 'a'});
+                    inputsToLockAndCheck.push({el: document.getElementById(`answer-${uniqueProblemId}-b`), part: 'b'});
+                    if (problem.answerType === "multi_text_abc") {
+                        inputsToLockAndCheck.push({el: document.getElementById(`answer-${uniqueProblemId}-c`), part: 'c'});
+                    }
+                } else {
+                    inputsToLockAndCheck.push({el: document.getElementById(`answer-${uniqueProblemId}`), part: null });
+                }
+
+                inputsToLockAndCheck.forEach(item => {
+                     const inputEl = item.el;
+                     if (inputEl) {
+                        inputEl.readOnly = true;
+                        inputEl.classList.remove("correct", "incorrect", "partial"); // Clear previous
+
+                        let userAnswer, correctAnswerPart, altCorrectAnswerPart;
+                        if (item.part) { // Multi-part question
+                            userAnswer = normalizeAnswer(inputEl.value);
+                            correctAnswerPart = normalizeAnswer(problem.correctAnswer[item.part]);
+                        } else { // Single input question
+                            userAnswer = normalizeAnswer(inputEl.value);
+                            correctAnswerPart = normalizeAnswer(problem.correctAnswer);
+                            if (problem.alternativeCorrectAnswer) {
+                                altCorrectAnswerPart = normalizeAnswer(problem.alternativeCorrectAnswer);
+                            }
+                        }
+
+                        // Apply specific normalization for certain types
+                        if (problem.answerType === "text_dimensions") {
+                            userAnswer = normalizeDimensionAnswer(inputEl.value);
+                            correctAnswerPart = normalizeDimensionAnswer(problem.correctAnswer);
+                        } else if (problem.answerType === "text_coins") {
+                            userAnswer = normalizeCoinAnswer(inputEl.value);
+                            correctAnswerPart = normalizeCoinAnswer(problem.correctAnswer);
+                        }
+
+
+                        if (problem.answerType.includes("expression_eval")) {
+                            inputEl.classList.add("partial"); // Expressions are for self-assessment
+                        } else if (userAnswer === correctAnswerPart || (altCorrectAnswerPart && userAnswer === altCorrectAnswerPart)) {
+                            inputEl.classList.add("correct");
+                        } else if (problem.answerType === "multi_text_abc" || problem.answerType === "text_ab") {
+                            // More lenient keyword check for conceptual multi-part text answers
+                            let isConceptuallyCorrect = false;
+                            const keywordsCorrect = problem.correctAnswer[item.part].toLowerCase().split(" or ").map(s => s.trim().split(" ")).flat();
+                            const keywordsUser = userAnswer.split(" ");
+                            if (keywordsCorrect.some(kw => keywordsUser.includes(kw) && kw.length > 2)) {
+                                isConceptuallyCorrect = true;
+                            }
+                            if(isConceptuallyCorrect || userAnswer.includes(correctAnswerPart)){
+                                inputEl.classList.add("correct"); // Could be partial if only keyword match
+                            } else {
+                                inputEl.classList.add("incorrect");
+                            }
+                        }
+                        else {
+                            inputEl.classList.add("incorrect");
+                        }
+                     }
+                });
+            });
+
+            checkAndShowBtn.textContent = 'Solutions Displayed & Locked';
+            checkAndShowBtn.disabled = true;
+        }
+
+        checkAndShowBtn.addEventListener('click', checkAndShowSolutions);
+        generateTestBtn.addEventListener('click', displayProblems);
+        displayProblems(); // Initial load
+    </script>
+</body>
+</html>

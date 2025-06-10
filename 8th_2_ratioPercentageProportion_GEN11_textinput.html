@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ratio Percentage & Proportion Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #fdfdff;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .controls-container {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .controls-container button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 10px;
+        }
+        #generateTestButton { background-color: #007bff; }
+        #generateTestButton:hover { background-color: #0056b3; }
+        #checkAndShowButton { background-color: #28a745; }
+        #checkAndShowButton:hover { background-color: #218838; }
+        #checkAndShowButton:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .problem-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .problem-list li {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .problem-number {
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+        .problem-text-container {
+            font-family: 'Georgia', serif;
+            font-size: 1.1em;
+            color: #444;
+            display: block;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+        .answer-input-container {
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+        .answer-input-container label {
+            font-style: italic;
+            color: #555;
+            margin-right: 8px;
+        }
+        .answer-input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            min-width: 150px;
+        }
+        .answer-input.correct-answer { /* Green for correct */
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .answer-input.incorrect-answer { /* Red for incorrect */
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .answer-input:disabled {
+            background-color: #e9ecef;
+            color: #495057;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .solution-steps {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e9f5ff;
+            border: 1px dashed #5bc0de;
+            border-radius: 4px;
+            font-family: 'Arial', sans-serif;
+            font-size: 1.0em;
+            line-height: 1.5;
+        }
+        .solution-steps p {
+            margin: 8px 0;
+            word-wrap: break-word;
+        }
+        .solution-steps .final-answer {
+            font-weight: bold;
+            color: #007bff;
+            margin-top:10px;
+            padding-top:5px;
+            border-top: 1px solid #ccc;
+        }
+
+        @media print {
+            body { margin: 0.5in; }
+            .controls-container { display: none; }
+            h1 { font-size: 18pt; }
+            .problem-list li { page-break-inside: avoid; }
+             .answer-input.correct-answer, .answer-input.incorrect-answer {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            .solution-steps {
+                background-color: #fff !important;
+                border: 1px solid #ccc !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Ratio Percentage & Proportion Test</h1> {/* Title Updated */}
+
+    <div class="controls-container">
+        <button id="generateTestButton">Generate New Test (11 Problems)</button>
+        <button id="checkAndShowButton" style="display:none;">Check Answers & Show Solutions</button>
+    </div>
+
+    <ol class="problem-list" id="problemListContainer">
+        <!-- Problems will be dynamically inserted here -->
+    </ol>
+
+    <script>
+        const problemListContainer = document.getElementById('problemListContainer');
+        const generateTestBtn = document.getElementById('generateTestButton');
+        const checkAndShowBtn = document.getElementById('checkAndShowButton');
+
+        let currentProblemsData = [];
+
+        // --- Helper Functions ---
+        function getRandomInt(min, max) {
+            if (min > max) [min, max] = [max, min];
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        function getRandomDecimal(min, max, places) {
+            if (min > max) [min, max] = [max, min];
+            const value = Math.random() * (max - min) + min;
+            return parseFloat(value.toFixed(places));
+        }
+        function roundTo(num, places) {
+            if (typeof num !== 'number' || isNaN(num)) return num;
+            const factor = Math.pow(10, places);
+            return Math.round((num + Number.EPSILON) * factor) / factor;
+        }
+        function roundToTwo(num) {
+            return roundTo(num, 2);
+        }
+        function getRandomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+        function parseUserAnswerToNumber(answerString) {
+            if (typeof answerString !== 'string') return null;
+            const cleanedString = answerString.replace(/\$|€|£|%|,/g, '').trim();
+            const cleanedFurther = cleanedString.replace(/(kilometers per hour|kilometer|kilograms|meters|hours|years|days|widgets|machines|servings|items|centimeters|apples|oranges)$/i, '').trim();
+            const number = parseFloat(cleanedFurther);
+            if (!isNaN(number)) return number;
+            const numberFromOriginalClean = parseFloat(cleanedString);
+            return isNaN(numberFromOriginalClean) ? null : numberFromOriginalClean;
+        }
+
+
+        // --- Problem Generator Functions (Questions rephrased, from previous version) ---
+        function generateDiscountTaxProblem() {
+            let problemText = ""; let solutionStepsHTML = "<p><strong>Step-by-step solution:</strong></p>"; let finalAnswerNum;
+            const type = getRandomInt(1, 4); const originalPrice = getRandomInt(50, 500); const discount1Percent = getRandomInt(10, 30);
+            if (type === 1) {
+                const taxPercent = getRandomInt(5, 10); const discountAmount = originalPrice * (discount1Percent / 100); const discountedPrice = originalPrice - discountAmount; const taxAmount = discountedPrice * (taxPercent / 100); finalAnswerNum = discountedPrice + taxAmount;
+                problemText = `An item was originally priced at ${originalPrice} dollars. It is then discounted by ${discount1Percent} percent. After the discount, a sales tax of ${taxPercent} percent is applied to the discounted price. What is the final cost of the item in dollars?`;
+                solutionStepsHTML += `<p>1. Discount amount: ${discount1Percent}% of $${originalPrice} = $${roundToTwo(discountAmount)}.</p><p>2. Price after discount: $${originalPrice} - $${roundToTwo(discountAmount)} = $${roundToTwo(discountedPrice)}.</p><p>3. Sales tax amount: ${taxPercent}% of $${roundToTwo(discountedPrice)} = $${roundToTwo(taxAmount)}.</p><p>4. Final cost: $${roundToTwo(discountedPrice)} + $${roundToTwo(taxAmount)} = $${roundToTwo(finalAnswerNum)}.</p>`;
+            } else if (type === 2) {
+                const discount2Percent = getRandomInt(5, 15); const taxPercent = getRandomInt(5, 10); const d1Amt = originalPrice * (discount1Percent / 100); const pAD1 = originalPrice - d1Amt; const d2Amt = pAD1 * (discount2Percent / 100); const pAD2 = pAD1 - d2Amt; const taxAmt = pAD2 * (taxPercent / 100); finalAnswerNum = pAD2 + taxAmt;
+                problemText = `A product is listed at ${originalPrice} dollars. It first receives a discount of ${discount1Percent} percent. Then, an additional discount of ${discount2Percent} percent is applied to the already discounted price. Finally, a sales tax of ${taxPercent} percent is calculated on this last discounted price. What is the final amount to be paid for the product in dollars?`;
+                solutionStepsHTML += `<p>1. Price after first discount: $${roundToTwo(pAD1)}.</p><p>2. Price after second discount: $${roundToTwo(pAD2)}.</p><p>3. Sales tax: $${roundToTwo(taxAmt)}.</p><p>4. Final price: $${roundToTwo(finalAnswerNum)}.</p>`;
+            } else if (type === 3) {
+                const markupPercent = getRandomInt(40, 80); const saleDiscountPercent = getRandomInt(15, 30); const markupAmt = originalPrice * (markupPercent / 100); const sellingPrice = originalPrice + markupAmt; const saleDiscAmt = sellingPrice * (saleDiscountPercent / 100); finalAnswerNum = sellingPrice - saleDiscAmt;
+                problemText = `A store purchased an item for ${originalPrice} dollars. The store then marked up the price by ${markupPercent} percent to set the selling price. During a sale, the store offered a ${saleDiscountPercent} percent discount on this marked-up selling price. What is the final sale price of the item in dollars?`;
+                solutionStepsHTML += `<p>1. Selling price after markup: $${roundToTwo(sellingPrice)}.</p><p>2. Sale discount amount: $${roundToTwo(saleDiscAmt)}.</p><p>3. Final sale price: $${roundToTwo(finalAnswerNum)}.</p>`;
+            } else {
+                const tipPercent = getRandomInt(15, 20); const taxPercent = getRandomInt(7, 10); const tipAmt = originalPrice * (tipPercent / 100); const taxAmt = originalPrice * (taxPercent / 100); finalAnswerNum = originalPrice + tipAmt + taxAmt;
+                problemText = `The cost of a meal at a restaurant is ${originalPrice} dollars before adding a tip or sales tax. A tip of ${tipPercent} percent is calculated on this pre-tax amount. Additionally, a sales tax of ${taxPercent} percent is also calculated on the pre-tax amount. What is the total cost of the meal, including both the tip and the sales tax, in dollars?`;
+                solutionStepsHTML += `<p>1. Tip amount: $${roundToTwo(tipAmt)}.</p><p>2. Tax amount: $${roundToTwo(taxAmt)}.</p><p>3. Total cost: $${roundToTwo(finalAnswerNum)}.</p>`;
+            }
+            const finalAnswerDisplay = `$${roundToTwo(finalAnswerNum)}`;
+            solutionStepsHTML += `<p class="final-answer">Final Answer: ${finalAnswerDisplay}</p>`;
+            return { problemText, solutionStepsHTML, correctAnswer: { value: roundToTwo(finalAnswerNum), display: finalAnswerDisplay, isNumeric: true } };
+        }
+
+        function generateChangingRatioProblem() {
+            let problemText = ""; let solutionStepsHTML = "<p><strong>Step-by-step solution:</strong></p>"; let finalAnswerNum;
+            const commonMultiplier = getRandomInt(2, 10); const r1p1 = getRandomInt(2, 7); let r1p2 = getRandomInt(2, 7); while (r1p2 === r1p1 && r1p1 > 1) { r1p2 = getRandomInt(2,7); }
+            const initial1 = r1p1 * commonMultiplier; const initial2 = r1p2 * commonMultiplier;
+            let c1, c2, n1, n2;
+            if (Math.random() > 0.5 || initial1 <= 1) { c1 = getRandomInt(1, 10); } else { c1 = -getRandomInt(1, initial1 - 1); } n1 = initial1 + c1;
+            if (Math.random() > 0.5 || initial2 <= 1) { c2 = getRandomInt(1, 10); } else { c2 = -getRandomInt(1, initial2 - 1); } n2 = initial2 + c2;
+            if (n1 <= 0 || n2 <= 0) { return null; }
+            function gcd(a, b) { return b === 0 ? a : gcd(b, Math.abs(a % b)); } const commonDivisor = gcd(n1, n2); const r2p1 = n1 / commonDivisor; const r2p2 = n2 / commonDivisor;
+            if (r2p1 === 0 || r2p2 === 0) return null;
+            const item1Name = "red marbles"; const item2Name = "blue marbles";
+            const c1Txt = c1 > 0 ? `${c1} more ${item1Name} were added` : `${Math.abs(c1)} ${item1Name} were removed`;
+            const c2Txt = c2 > 0 ? `${c2} more ${item2Name} were added` : `${Math.abs(c2)} ${item2Name} were removed`;
+            const qType = getRandomInt(1,2);
+            if(qType === 1) {
+                problemText = `The ratio of ${item1Name} to ${item2Name} in a bag was ${r1p1} to ${r1p2}. After ${c1Txt} and ${c2Txt}, the new ratio of ${item1Name} to ${item2Name} became ${r2p1} to ${r2p2}. How many ${item1Name} were there in the bag originally?`;
+                finalAnswerNum = initial1;
+            } else {
+                problemText = `Initially, the ratio of ${item1Name} to ${item2Name} in a bag was ${r1p1} to ${r1p2}. Then, ${c1Txt} and ${c2Txt}. After these changes, the new ratio of ${item1Name} to ${item2Name} became ${r2p1} to ${r2p2}. What was the total number of marbles in the bag originally?`;
+                finalAnswerNum = initial1 + initial2;
+            }
+            solutionStepsHTML += `<p>Let original ${item1Name} = ${r1p1}x, original ${item2Name} = ${r1p2}x.</p><p>Equation: (${r1p1}x ${c1>=0?'+':'-'} ${Math.abs(c1)}) / (${r1p2}x ${c2>=0?'+':'-'} ${Math.abs(c2)}) = ${r2p1} / ${r2p2}.</p>`;
+            solutionStepsHTML += `<p>Solving this equation gives x = ${commonMultiplier}.</p><p>Therefore, the original number of ${qType===1?item1Name:'total marbles'} was ${finalAnswerNum}.</p>`;
+            const finalAnswerDisplay = `${finalAnswerNum}`;
+            solutionStepsHTML += `<p class="final-answer">Final Answer: ${finalAnswerDisplay}</p>`;
+            return { problemText, solutionStepsHTML, correctAnswer: { value: finalAnswerNum, display: finalAnswerDisplay, isNumeric: true } };
+        }
+
+        function generateWorkRateProblem() {
+            let problemText = ""; let solutionStepsHTML = "<p><strong>Step-by-step solution:</strong></p>"; let finalAnswerNum; let finalAnswerUnit = "units";
+            const rate = getRandomInt(5, 20); const m1 = getRandomInt(2, 6); const h1 = getRandomInt(3, 8); const w1 = m1 * h1 * rate; const type = getRandomInt(1, 3);
+            if (type === 1) {
+                const m2 = getRandomInt(2, 6); let hSolve = getRandomInt(3,10); const w2 = m2 * hSolve * rate; finalAnswerNum = w2 / (m2 * rate); finalAnswerUnit = "hours";
+                problemText = `If ${m1} similar machines can produce ${w1} widgets in ${h1} hours, how many hours will it take ${m2} of these machines to produce ${w2} widgets?`;
+                solutionStepsHTML += `<p>Rate per machine = ${rate} widgets per hour.</p><p>Time = Total Widgets / (Number of Machines × Rate per Machine) = ${w2} / (${m2} × ${rate}) = ${roundToTwo(finalAnswerNum)} hours.</p>`;
+            } else if (type === 2) {
+                const h2 = getRandomInt(3, 8); let mSolve = getRandomInt(2,6); const w2 = mSolve * h2 * rate; finalAnswerNum = w2 / (h2 * rate); finalAnswerUnit = "machines";
+                problemText = `Suppose ${m1} similar machines can produce ${w1} widgets in ${h1} hours. How many of these machines would be needed to produce ${w2} widgets in ${h2} hours?`;
+                solutionStepsHTML += `<p>Rate per machine = ${rate} widgets per hour.</p><p>Number of Machines = Total Widgets / (Time in Hours × Rate per Machine) = ${w2} / (${h2} × ${rate}) = ${roundToTwo(finalAnswerNum)} machines.</p>`;
+            } else {
+                const m2 = getRandomInt(2, 6); const h2 = getRandomInt(3, 8); finalAnswerNum = m2 * h2 * rate; finalAnswerUnit = "widgets";
+                problemText = `Given that ${m1} similar machines can produce ${w1} widgets in ${h1} hours, how many widgets can ${m2} of these machines produce if they work for ${h2} hours?`;
+                solutionStepsHTML += `<p>Rate per machine = ${rate} widgets per hour.</p><p>Total Widgets = Number of Machines × Time in Hours × Rate per Machine = ${m2} × ${h2} × ${rate} = ${finalAnswerNum} widgets.</p>`;
+            }
+            const finalAnswerDisplay = `${roundToTwo(finalAnswerNum)} ${finalAnswerUnit}`;
+            solutionStepsHTML += `<p class="final-answer">Final Answer: ${finalAnswerDisplay}</p>`;
+            return { problemText, solutionStepsHTML, correctAnswer: { value: roundToTwo(finalAnswerNum), display: finalAnswerDisplay, isNumeric: true } };
+        }
+
+        function generateRecipeScalingProblem() {
+            let problemText = ""; let solutionStepsHTML = "<p><strong>Step-by-step solution:</strong></p>"; let finalAnswerNum;
+            const rServes1 = getRandomInt(2,6)*2; const ingAmt1 = getRandomDecimal(1,3,1); const ingUnit="cups"; const item="flour";
+            const rServes2 = rServes1 + getRandomInt(1,4)*2; const ingPerServe = ingAmt1/rServes1; const ingReq2 = ingPerServe*rServes2;
+            let ingHave; if(Math.random()<0.8){ingHave=getRandomDecimal(ingReq2*0.5, ingReq2*1.5,1); if(roundToTwo(ingHave)===roundToTwo(ingReq2))ingHave=ingReq2*(Math.random()>0.5?1.1:0.9);}else{ingHave=ingReq2;} ingHave=roundToTwo(ingHave);
+            if(ingReq2 === 0) return null; finalAnswerNum = (ingHave/ingReq2)*100;
+            problemText = `A recipe designed to make ${rServes1} servings of a dish requires ${ingAmt1} ${ingUnit} of ${item}. You plan to make ${rServes2} servings of this dish. However, you find that you only have ${ingHave} ${ingUnit} of ${item}. What percentage of the ${item} required for ${rServes2} servings do you currently possess?`;
+            solutionStepsHTML += `<p>1. Amount of ${item} needed for ${rServes2} servings: ${roundToTwo(ingReq2)} ${ingUnit}.</p><p>2. Amount of ${item} you have: ${ingHave} ${ingUnit}.</p><p>3. Percentage you have = (Amount you have / Amount required) × 100 percent = (${ingHave} / ${roundToTwo(ingReq2)}) × 100 = ${roundToTwo(finalAnswerNum)} percent.</p>`;
+            const finalAnswerDisplay = `${roundToTwo(finalAnswerNum)}%`;
+            solutionStepsHTML += `<p class="final-answer">Final Answer: ${finalAnswerDisplay}</p>`;
+            return { problemText, solutionStepsHTML, correctAnswer: { value: roundToTwo(finalAnswerNum), display: finalAnswerDisplay, isNumeric: true } };
+        }
+
+        function generateRatioPartDifferenceProblem() {
+            let problemText = ""; let solutionStepsHTML = "<p><strong>Step-by-step solution:</strong></p>"; let finalAnswerNum;
+            const commonX = getRandomInt(5,50); const rA=getRandomInt(1,5); const rB=getRandomInt(rA+1,rA+4); const rC=getRandomInt(rB+1,rB+4);
+            const names=["Anne","Ben","Chris"]; const unitWord = Math.random()<0.5?"dollars":"candies"; const unitSymbol = unitWord === "dollars" ? "$" : "";
+            const diffAmt=(rC-rA)*commonX;
+            if(rC-rA === 0) return null;
+            problemText = `A certain number of ${unitWord} was shared among ${names[0]}, ${names[1]}, and ${names[2]} in the ratio ${rA} to ${rB} to ${rC} respectively. If ${names[2]} received ${diffAmt} ${unitWord} more than ${names[0]}, what was the total number of ${unitWord} that was shared among the three of them?`;
+            solutionStepsHTML += `<p>Let the shares be ${rA}x for ${names[0]}, ${rB}x for ${names[1]}, and ${rC}x for ${names[2]}.</p><p>Given: ${names[2]}'s share - ${names[0]}'s share = ${diffAmt} ${unitWord}.</p><p>So, ${rC}x - ${rA}x = ${diffAmt}  =>  (${rC-rA})x = ${diffAmt}  =>  x = ${commonX}.</p>`;
+            finalAnswerNum=(rA+rB+rC)*commonX; solutionStepsHTML += `<p>Total ${unitWord} shared = (${rA}+${rB}+${rC})x = ${rA+rB+rC} × ${commonX} = ${finalAnswerNum} ${unitWord}.</p>`;
+            const finalAnswerDisplay = `${unitSymbol}${finalAnswerNum}`;
+            solutionStepsHTML += `<p class="final-answer">Final Answer: ${finalAnswerDisplay}</p>`;
+            return { problemText, solutionStepsHTML, correctAnswer: { value: finalAnswerNum, display: finalAnswerDisplay, isNumeric: true } };
+        }
+
+        function generateBasicPercentageProblem() {
+            let problemText = ""; let solutionStepsHTML = "<p><strong>Step-by-step solution:</strong></p>"; let finalAnswerNum; let finalAnswerUnitWord=""; let finalAnswerSymbol = "";
+            const type=getRandomInt(1,3);
+            if(type===1){const perc=getRandomInt(5,75); const num=getRandomInt(50,1000); finalAnswerNum=(perc/100)*num;
+                problemText=`What is the value of ${perc} percent of the number ${num}?`;
+                solutionStepsHTML+=`<p>${perc} percent of ${num} = (${perc}/100) × ${num} = ${roundToTwo(finalAnswerNum)}.</p>`;
+            } else if(type===2){const orig=getRandomInt(100,500); const pInc=getRandomInt(10,50); finalAnswerNum=orig+(pInc/100)*orig;
+                problemText=`A quantity, which is initially ${orig}, is increased by ${pInc} percent. What is the new value of the quantity?`;
+                solutionStepsHTML+=`<p>Increase amount = (${pInc}/100) × ${orig} = ${roundToTwo((pInc/100)*orig)}.</p><p>New quantity = ${orig} + ${roundToTwo((pInc/100)*orig)} = ${roundToTwo(finalAnswerNum)}.</p>`;
+            } else{const orig=getRandomInt(200,800); const pDec=getRandomInt(10,40); finalAnswerUnitWord="dollars"; finalAnswerSymbol = "$"; finalAnswerNum=orig-(pDec/100)*orig;
+                problemText=`The price of an item is initially ${orig} dollars. This price is then decreased by ${pDec} percent. What is the new price of the item in dollars?`;
+                solutionStepsHTML+=`<p>Decrease amount = (${pDec}/100) × $${orig} = $${roundToTwo((pDec/100)*orig)}.</p><p>New price = $${orig} - $${roundToTwo((pDec/100)*orig)} = $${roundToTwo(finalAnswerNum)}.</p>`;
+            }
+            const finalAnswerDisplay = `${finalAnswerSymbol}${roundToTwo(finalAnswerNum)}`;
+            solutionStepsHTML += `<p class="final-answer">Final Answer: ${finalAnswerDisplay}</p>`;
+            return { problemText, solutionStepsHTML, correctAnswer: { value: roundToTwo(finalAnswerNum), display: finalAnswerDisplay, isNumeric: true } };
+        }
+
+        function generateSpeedDistanceTimeProblem() {
+            let pT = ""; let sSH = "<p><strong>Step-by-step solution:</strong></p>"; let fAN; let fAUWord; const type=getRandomInt(1,3);
+            const spd=getRandomInt(40,120); const t=getRandomInt(2,6); const dist=spd*t;
+            const speedUnit = "kilometers per hour"; const distUnit = "kilometers"; const timeUnit = "hours";
+
+            if(type===1){const nT=getRandomInt(2,8); if(nT===t && spd*nT===dist) return generateSpeedDistanceTimeProblem(); fAN=spd*nT; fAUWord=distUnit;
+                pT=`A car is traveling at a constant speed of ${spd} ${speedUnit}. How far will the car travel if it continues at this speed for ${nT} ${timeUnit}?`;
+                sSH+=`<p>Distance = Speed × Time = ${spd} ${speedUnit} × ${nT} ${timeUnit} = ${fAN} ${distUnit}.</p>`;
+            } else if(type===2){const nD=spd*getRandomInt(2,7); const nT=getRandomInt(2,6); if(nD===dist && nT===t) return generateSpeedDistanceTimeProblem(); fAN=nD/nT; fAUWord=speedUnit;
+                pT=`A train covers a total distance of ${nD} ${distUnit} in ${nT} ${timeUnit}. What was the average speed of the train in ${speedUnit}?`;
+                sSH+=`<p>Speed = Distance / Time = ${nD} ${distUnit} / ${nT} ${timeUnit} = ${roundToTwo(fAN)} ${speedUnit}.</p>`;
+            } else{const nD=spd*getRandomInt(2,7); if(nD===dist) return generateSpeedDistanceTimeProblem(); fAN=nD/spd; fAUWord=timeUnit;
+                pT=`A bus is traveling at an average speed of ${spd} ${speedUnit}. How long will it take the bus to cover a distance of ${nD} ${distUnit}? Give your answer in ${timeUnit}.`;
+                sSH+=`<p>Time = Distance / Speed = ${nD} ${distUnit} / ${spd} ${speedUnit} = ${roundToTwo(fAN)} ${timeUnit}.</p>`;
+            }
+            const fAD = `${roundToTwo(fAN)} ${fAUWord}`; sSH+=`<p class="final-answer">Final Answer: ${fAD}</p>`;
+            return { problemText:pT, solutionStepsHTML:sSH, correctAnswer: { value: roundToTwo(fAN), display: fAD, isNumeric: true } };
+        }
+
+        function generateMixtureProblem_CostBased() {
+            let pT=""; let sSH="<p><strong>Step-by-step solution:</strong></p>"; let fAN;
+            const q1=getRandomInt(5,15); const c1=getRandomInt(5,12); const q2=getRandomInt(5,15); const c2=getRandomInt(c1+1,c1+8);
+            const tQ=q1+q2; const tC=(q1*c1)+(q2*c2); fAN=tC/tQ;
+            const itemUnit = "kilograms"; const costUnit = "dollars per kilogram"; const currencySymbol = "$";
+            pT=`A merchant mixes ${q1} ${itemUnit} of coffee that costs ${c1} ${costUnit} with ${q2} ${itemUnit} of coffee that costs ${c2} ${costUnit}. What is the average cost of the resulting mixture, in ${costUnit}?`;
+            sSH+=`<p>Total cost of the mixture = (${q1} ${itemUnit} × ${currencySymbol}${c1}/${itemUnit}) + (${q2} ${itemUnit} × ${currencySymbol}${c2}/${itemUnit}) = ${currencySymbol}${q1*c1} + ${currencySymbol}${q2*c2} = ${currencySymbol}${tC}.</p>`;
+            sSH+=`<p>Total quantity of the mixture = ${q1} ${itemUnit} + ${q2} ${itemUnit} = ${tQ} ${itemUnit}.</p>`;
+            sSH+=`<p>Average cost = Total Cost / Total Quantity = ${currencySymbol}${tC} / ${tQ} ${itemUnit} = ${currencySymbol}${roundToTwo(fAN)} per ${itemUnit}.</p>`;
+            const fAD = `${currencySymbol}${roundToTwo(fAN)}/${itemUnit}`; sSH+=`<p class="final-answer">Final Answer: ${fAD}</p>`;
+            return { problemText:pT, solutionStepsHTML:sSH, correctAnswer: { value: roundToTwo(fAN), display: fAD, isNumeric: true } };
+        }
+
+        function generateSimpleInterestProblem() {
+            let pT=""; let sSH="<p><strong>Step-by-step solution:</strong></p>"; let fAN;
+            const princ=getRandomInt(100,1000)*10; const rateP=getRandomInt(2,10); const timeY=getRandomInt(1,5);
+            fAN=princ*(rateP/100)*timeY;
+            const timeUnit = timeY === 1 ? "year" : "years";
+            pT=`Calculate the simple interest earned on a principal amount of ${princ} dollars, at an annual interest rate of ${rateP} percent, for a period of ${timeY} ${timeUnit}.`;
+            sSH+=`<p>Simple Interest (I) = Principal (P) × Rate (R) × Time (T).</p><p>I = $${princ} × (${rateP}/100) × ${timeY} ${timeUnit} = $${roundToTwo(fAN)}.</p>`;
+            const fAD = `$${roundToTwo(fAN)}`; sSH+=`<p class="final-answer">Final Answer: ${fAD}</p>`;
+            return { problemText:pT, solutionStepsHTML:sSH, correctAnswer: { value: roundToTwo(fAN), display: fAD, isNumeric: true } };
+        }
+
+        function generateScaleDrawingProblem() {
+            let pT=""; let sSH="<p><strong>Step-by-step solution:</strong></p>"; let fAN; let fAUWord; const type=getRandomInt(1,2);
+            const sMU=1; const sMUNWord="centimeter"; const sMUNSymbol="cm";
+            const scaleFactorMultiplier = getRandomItem([1, 10, 100, 1000]);
+            const sRUVRaw = getRandomInt(2,10) * scaleFactorMultiplier;
+            let sRUNWord, sRUVSymbol, sRUVDisplay;
+            if (sRUVRaw >= 100000) { sRUNWord = "kilometers"; sRUVSymbol = "km"; sRUVDisplay = sRUVRaw / 100000; }
+            else if (sRUVRaw >= 100) { sRUNWord = "meters"; sRUVSymbol = "m"; sRUVDisplay = sRUVRaw / 100; }
+            else { sRUNWord = "centimeters"; sRUVSymbol = "cm"; sRUVDisplay = sRUVRaw; }
+            if (sRUVDisplay === 0) return generateScaleDrawingProblem();
+
+            if(type===1){
+                const mD=getRandomDecimal(2,10,1); fAN=mD*sRUVDisplay; fAUWord=sRUNWord;
+                pT=`The scale on a map indicates that ${sMU} ${sMUNWord} on the map represents an actual distance of ${sRUVDisplay} ${sRUNWord}. If two towns are ${mD} ${sMUNWord} apart on the map, what is the actual distance between these towns in ${sRUNWord}?`;
+                sSH+=`<p>Actual Distance = Map Distance × Scale Factor = ${mD} ${sMUNSymbol} × ${sRUVDisplay} ${sRUVSymbol}/${sMUNSymbol} = ${roundToTwo(fAN)} ${sRUNWord}.</p>`;
+            } else {
+                const rDRaw = sRUVDisplay * getRandomInt(2,8); fAN=rDRaw/sRUVDisplay; fAUWord=sMUNWord;
+                pT=`A map uses a scale where ${sMU} ${sMUNWord} on the map corresponds to an actual distance of ${sRUVDisplay} ${sRUNWord}. If the actual distance between two cities is ${rDRaw} ${sRUNWord}, how far apart will these cities appear on the map, in ${sMUNWord}?`;
+                sSH+=`<p>Map Distance = Actual Distance / Scale Factor = ${rDRaw} ${sRUNWord} / (${sRUVDisplay} ${sRUNWord}/${sMUNSymbol}) = ${roundToTwo(fAN)} ${sMUNWord}.</p>`;
+            }
+            const fAD = `${roundToTwo(fAN)} ${fAUWord}`; sSH+=`<p class="final-answer">Final Answer: ${fAD}</p>`;
+            return { problemText:pT, solutionStepsHTML:sSH, correctAnswer: { value: roundToTwo(fAN), display: fAD, isNumeric: true } };
+        }
+
+        function generateDirectInverseProportionProblem() {
+            let pT=""; let sSH="<p><strong>Step-by-step solution:</strong></p>"; let fAN; const isD=Math.random()<0.5;
+            const x1=getRandomInt(2,10); const y1=getRandomInt(10,50); const k=isD?y1/x1:y1*x1; const x2=getRandomInt(x1+1, x1+10);
+            if(x2===0 && !isD) return generateDirectInverseProportionProblem();
+            const relationship = isD ? "directly proportional" : "inversely proportional";
+            const formula = isD ? "Y = kX" : "Y = k/X (or XY = k)";
+
+            if(isD){
+                fAN=k*x2;
+                pT=`The quantity Y is ${relationship} to the quantity X. It is known that Y is equal to ${y1} when X is equal to ${x1}. What will be the value of Y when X is equal to ${x2}?`;
+                sSH+=`<p>Since Y is directly proportional to X, their relationship is ${formula}.</p><p>First, find the constant of proportionality (k): k = Y/X = ${y1}/${x1} = ${roundToTwo(k)}.</p><p>Now, use k to find the new Y: New Y = k × (new X) = ${roundToTwo(k)} × ${x2} = ${roundToTwo(fAN)}.</p>`;
+            } else{
+                fAN=k/x2;
+                pT=`The quantity Y is ${relationship} to the quantity X. We are given that Y is equal to ${y1} when X is equal to ${x1}. Determine the value of Y when X becomes ${x2}.`;
+                sSH+=`<p>Since Y is inversely proportional to X, their relationship is ${formula}.</p><p>First, find the constant of proportionality (k): k = X × Y = ${x1} × ${y1} = ${k}.</p><p>Now, use k to find the new Y: New Y = k / (new X) = ${k} / ${x2} = ${roundToTwo(fAN)}.</p>`;
+            }
+            const fAD = `${roundToTwo(fAN)}`; sSH+=`<p class="final-answer">Final Answer: ${fAD}</p>`;
+            return { problemText:pT, solutionStepsHTML:sSH, correctAnswer: { value: roundToTwo(fAN), display: fAD, isNumeric: true } };
+        }
+
+
+        const problemGenerators = [
+            generateDiscountTaxProblem, generateChangingRatioProblem, generateWorkRateProblem,
+            generateRecipeScalingProblem, generateRatioPartDifferenceProblem, generateBasicPercentageProblem,
+            generateSpeedDistanceTimeProblem, generateMixtureProblem_CostBased, generateSimpleInterestProblem,
+            generateScaleDrawingProblem, generateDirectInverseProportionProblem
+        ];
+
+        function displayProblems() {
+            problemListContainer.innerHTML = '';
+            checkAndShowBtn.style.display = 'inline-block';
+            checkAndShowBtn.textContent = 'Check Answers & Show Solutions';
+            checkAndShowBtn.disabled = false;
+            currentProblemsData = [];
+
+            const totalProblemsToGenerate = problemGenerators.length;
+            const maxAttemptsPerSlot = 25;
+
+            let shuffledGenerators = [...problemGenerators];
+            for (let i = shuffledGenerators.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledGenerators[i], shuffledGenerators[j]] = [shuffledGenerators[j], shuffledGenerators[i]];
+            }
+
+            for (let i = 0; i < totalProblemsToGenerate; i++) {
+                const generatorFn = shuffledGenerators[i];
+                const generatorName = generatorFn.name || `Generator ${i + 1}`;
+                let generatedProblemData = null;
+                let attempt = 0;
+                while (!generatedProblemData && attempt < maxAttemptsPerSlot) {
+                    generatedProblemData = generatorFn();
+                    attempt++;
+                }
+
+                if (generatedProblemData) {
+                    currentProblemsData.push(generatedProblemData);
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                        <span class="problem-number">${i + 1}.</span>
+                        <div class="problem-text-container">${generatedProblemData.problemText}</div>
+                        <div class="answer-input-container">
+                            <label for="answer-${i}">Your Answer:</label>
+                            <input type="text" id="answer-${i}" class="answer-input" name="answer-${i}">
+                        </div>
+                        <div class="solution-steps" id="solution-${i}">
+                            ${generatedProblemData.solutionStepsHTML}
+                        </div>
+                    `;
+                    problemListContainer.appendChild(listItem);
+                } else {
+                    currentProblemsData.push({
+                        problemText: `Error: Could not generate problem of type '${generatorName}'.`,
+                        solutionStepsHTML: "<p>No solution available.</p>",
+                        correctAnswer: { value: "N/A", display: "N/A", isNumeric: false }
+                    });
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `<span class="problem-number">${i + 1}.</span><div class="problem-text-container">Error generating problem of type '${generatorName}'. Please try new test.</div>`;
+                    problemListContainer.appendChild(listItem);
+                }
+            }
+            const solutions = document.querySelectorAll('.solution-steps');
+            solutions.forEach(sol => sol.style.display = 'none');
+        }
+
+        function checkAnswersAndShowSolutions() {
+            if (currentProblemsData.length === 0) return;
+
+            currentProblemsData.forEach((problemData, index) => {
+                const inputField = document.getElementById(`answer-${index}`);
+                const solutionDiv = document.getElementById(`solution-${index}`);
+
+                if (!inputField) {
+                    if (solutionDiv) solutionDiv.style.display = 'block';
+                    return;
+                }
+
+                const userAnswerStr = inputField.value.trim();
+                const correctAnswerObj = problemData.correctAnswer;
+                let isCorrect = false;
+
+                if (correctAnswerObj.isNumeric) {
+                    const userAnswerNum = parseUserAnswerToNumber(userAnswerStr);
+                    if (userAnswerNum !== null && Math.abs(userAnswerNum - correctAnswerObj.value) < 0.015) {
+                        isCorrect = true;
+                    }
+                } else {
+                    if (userAnswerStr.toLowerCase() === correctAnswerObj.value.toString().toLowerCase().trim()) {
+                        isCorrect = true;
+                    }
+                }
+
+                inputField.classList.remove('correct-answer', 'incorrect-answer');
+                if (isCorrect) {
+                    inputField.classList.add('correct-answer');
+                } else {
+                    inputField.classList.add('incorrect-answer');
+                }
+                inputField.disabled = true;
+
+                if (solutionDiv) {
+                    solutionDiv.style.display = 'block';
+                }
+            });
+
+            checkAndShowBtn.textContent = 'Answers Checked & Solutions Shown';
+            checkAndShowBtn.disabled = true;
+        }
+
+        generateTestBtn.addEventListener('click', displayProblems);
+        checkAndShowBtn.addEventListener('click', checkAnswersAndShowSolutions);
+        displayProblems();
+    </script>
+</body>
+</html>
