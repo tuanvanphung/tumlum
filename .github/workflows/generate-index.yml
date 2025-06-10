@@ -29,49 +29,95 @@ jobs:
           import os
           import html
 
-          files = sorted([f for f in os.listdir('.') if os.path.isfile(f) and f.endswith('.html') and f.lower() != 'index.html'])
+          # --- Configuration ---
+          INDEX_TITLE = "Available Tests and Solutions"
+          EXCLUDE_FILES = ['index.html'] # Files to exclude from the list (case-insensitive)
+          # --- End Configuration ---
+
+          # Convert exclude_files to lowercase for case-insensitive comparison
+          exclude_files_lower = [f.lower() for f in EXCLUDE_FILES]
+
+          files = []
+          for f_name in os.listdir('.'):
+              if os.path.isfile(f_name) and \
+                 f_name.endswith('.html') and \
+                 f_name.lower() not in exclude_files_lower:
+                  files.append(f_name)
+          files.sort() # Sort alphabetically
 
           if not files:
-              print("No HTML files found to index (excluding index.html).")
-              # Create a basic index if no other files are found, or exit
-              index_content = """<!DOCTYPE html>
+              print(f"No HTML files found to index (excluding {', '.join(EXCLUDE_FILES)}).")
+              index_content = f"""<!DOCTYPE html>
               <html lang="en">
-              <head><meta charset="UTF-8"><title>Index</title></head>
+              <head><meta charset="UTF-8"><title>{html.escape(INDEX_TITLE)}</title></head>
               <body><h1>No other HTML files found.</h1></body></html>"""
           else:
               list_items = ""
               for filename in files:
-                  # Make a slightly friendlier name from the filename
-                  friendly_name = os.path.splitext(filename)[0] # Remove .html
-                  # Add spaces before capital letters (for camelCase or PascalCase)
-                  friendly_name = ''.join([' ' + char if char.isupper() else char for char in friendly_name]).strip()
-                  friendly_name = friendly_name.replace('_', ' ').replace('-', ' ')
-                  # Capitalize first letter of each word (optional)
-                  friendly_name = ' '.join(word.capitalize() for word in friendly_name.split())
-                  if not friendly_name: friendly_name = filename # Fallback
+                  friendly_name_base = os.path.splitext(filename)[0]
+                  friendly_name_parts = []
+                  current_part = ""
+                  for char_idx, char in enumerate(friendly_name_base):
+                      if char.isupper() and current_part and not current_part[-1].isspace() and not (char_idx > 0 and friendly_name_base[char_idx-1].isupper()): # Add space if uppercase and not start of word/acronym
+                          friendly_name_parts.append(current_part)
+                          current_part = char
+                      elif char in ['_', '-']:
+                          if current_part: friendly_name_parts.append(current_part)
+                          current_part = ""
+                      else:
+                          current_part += char
+                  if current_part: friendly_name_parts.append(current_part)
 
-                  list_items += f'  <li><a href="{html.escape(filename)}">{html.escape(friendly_name)} ({html.escape(filename)})</a></li>\n'
+                  friendly_name = ' '.join(word.capitalize() for word in friendly_name_parts if word.strip()).strip()
+
+                  if not friendly_name: friendly_name = filename
+
+                  # MODIFIED LINE: Removed the part that shows the original filename
+                  list_items += f'  <li><a href="{html.escape(filename)}">{html.escape(friendly_name)}</a></li>\n'
 
               index_content = f"""<!DOCTYPE html>
               <html lang="en">
               <head>
                   <meta charset="UTF-8">
                   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <title>Index of HTML Files</title>
+                  <title>{html.escape(INDEX_TITLE)}</title>
                   <style>
-                      body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }}
-                      .container {{ max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }}
-                      h1 {{ color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }}
+                      body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding-top: 20px; background-color: #f4f4f4; color: #333; }}
+                      .container {{ max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 15px rgba(0,0,0,0.1); }}
+                      h1 {{ color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-top:0; text-align: center; font-size: 2em; }}
                       ul {{ list-style-type: none; padding: 0; }}
-                      li {{ background-color: #f9f9f9; margin-bottom: 10px; padding: 12px 15px; border-radius: 5px; border-left: 5px solid #007bff; }}
-                      li:hover {{ background-color: #e9ecef; }}
-                      a {{ text-decoration: none; color: #007bff; font-weight: bold; }}
-                      a:hover {{ text-decoration: underline; color: #0056b3; }}
+                      li {{
+                          background-color: #ffffff;
+                          margin-bottom: 12px;
+                          padding: 15px 20px;
+                          border-radius: 6px;
+                          border-left: 5px solid #3498db;
+                          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                          transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+                          /* Removed display:flex and justify-content as it's simpler now */
+                      }}
+                      li:hover {{
+                          transform: translateY(-2px);
+                          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                          border-left-color: #2980b9;
+                      }}
+                      a {{
+                          text-decoration: none;
+                          color: #2c3e50;
+                          font-weight: 500;
+                          font-size: 1.1em;
+                          display: block; /* Make link take full width of li for easier clicking */
+                          width: 100%;
+                      }}
+                      a:hover {{
+                          color: #3498db;
+                      }}
+                      /* Removed span.filename-display style as it's no longer used */
                   </style>
               </head>
               <body>
                   <div class="container">
-                      <h1>Available HTML Documents</h1>
+                      <h1>{html.escape(INDEX_TITLE)}</h1>
                       <ul>
               {list_items}
                       </ul>
@@ -80,19 +126,18 @@ jobs:
               </html>
               """
 
-          with open('index.html', 'w') as f:
+          with open('index.html', 'w', encoding='utf-8') as f:
               f.write(index_content)
-          print("index.html generated successfully.")
-        shell: python # Specify to run the multi-line script with Python
+          print("index.html generated successfully (without filenames in parentheses).")
+        shell: python
 
       - name: Commit and push if changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add index.html
-          # Only commit and push if there are actual changes to index.html
           if ! git diff --staged --quiet; then
-            git commit -m "Automated: Update index.html with latest file list"
+            git commit -m "Automated: Update index.html (removed parenthesized filenames)"
             git push
           else
             echo "No changes to index.html. Nothing to commit."
