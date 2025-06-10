@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade 6 Interactive Math Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #fdfdff;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .controls-container {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .controls-container button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 10px;
+        }
+        #generateTestButton { background-color: #007bff; }
+        #generateTestButton:hover { background-color: #0056b3; }
+        #checkAnswersButton { background-color: #28a745; }
+        #checkAnswersButton:hover { background-color: #218838; }
+        #checkAnswersButton:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .problem-list { list-style-type: none; padding-left: 0; }
+        .problem-list li {
+            margin-bottom: 30px; padding: 15px;
+            border: 1px solid #ddd; border-radius: 5px;
+            background-color: #fff;
+        }
+        .problem-number { font-weight: bold; margin-right: 10px; font-size: 1.1em; }
+        .problem-text-container {
+            font-family: 'Georgia', serif; font-size: 1.1em;
+            color: #444; display: block;
+            margin-bottom: 15px; word-wrap: break-word;
+        }
+        .answer-input {
+            padding: 8px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 250px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .answer-input.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+            font-weight: bold;
+        }
+        .answer-input.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+            font-weight: bold;
+        }
+        .answer-input:read-only {
+            cursor: not-allowed;
+        }
+        .answer-input:read-only:not(.correct):not(.incorrect) {
+             background-color: #e9ecef;
+        }
+        .solution-steps {
+            display: none; margin-top: 15px; padding: 15px;
+            background-color: #e9f5ff; border: 1px dashed #5bc0de;
+            border-radius: 4px; font-family: 'Arial', sans-serif;
+            font-size: 1.0em; line-height: 1.5;
+        }
+        .solution-steps p { margin: 8px 0; word-wrap: break-word; }
+        .solution-steps .final-answer {
+            font-weight: bold; color: #007bff;
+            margin-top:10px; padding-top:5px;
+            border-top: 1px solid #ccc;
+        }
+        .conceptual-q { background-color: #fffbe6; }
+        @media print {
+            body { margin: 0.5in; }
+            .controls-container { display: none; }
+            h1 { font-size: 18pt; }
+            .problem-list li { page-break-inside: avoid; }
+            .solution-steps { background-color: #fff !important; border: 1px solid #ccc !important;}
+        }
+    </style>
+</head>
+<body>
+    <h1>Grade 6 Interactive Math Quiz</h1>
+    <div class="controls-container">
+        <button id="generateTestButton">Generate New Test</button>
+        <button id="checkAnswersButton">Check Answers</button>
+    </div>
+    <ol class="problem-list" id="problemListContainer"></ol>
+
+    <script>
+        const problemListContainer = document.getElementById('problemListContainer');
+        const checkAnswersBtn = document.getElementById('checkAnswersButton');
+        const generateTestBtn = document.getElementById('generateTestButton');
+        
+        let currentProblems = [];
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function generateProblemData() {
+            let allProblems = [];
+
+            // --- Generate Dynamic Data ---
+            const geo1_angle = getRandomInt(95, 175);
+            const geo2_side1 = getRandomInt(5, 10); const geo2_side2 = getRandomInt(11, 15);
+            const geo3_angle1 = getRandomInt(30, 80); const geo3_angle2 = getRandomInt(30, 140 - geo3_angle1); const geo3_angle3 = 180 - geo3_angle1 - geo3_angle2;
+            const meas1_len = getRandomInt(10, 20); const meas1_wid = getRandomInt(3, 9); const meas1_perim = 2 * (meas1_len + meas1_wid);
+            const meas2_base = getRandomInt(4, 12) * 2; const meas2_height = getRandomInt(3, 10); const meas2_area = 0.5 * meas2_base * meas2_height;
+            const meas3_l = getRandomInt(8, 15); const meas3_w = getRandomInt(4, 7); const meas3_h = getRandomInt(3, 6); const meas3_vol = meas3_l * meas3_w * meas3_h;
+            const meas4_l = getRandomInt(10, 20); const meas4_w = getRandomInt(4, 9); const meas4_area = meas4_l * meas4_w;
+            const data4_outlier = getRandomInt(10, 25); const data4_scores = [getRandomInt(85, 92), getRandomInt(86, 93), getRandomInt(87, 94), getRandomInt(88, 95), data4_outlier];
+            const prob1_green = getRandomInt(2, 6); const prob1_blue = getRandomInt(2, 6); const prob1_red = getRandomInt(1, 3); const prob1_total = prob1_green + prob1_blue + prob1_red;
+            const prob2_sections = getRandomInt(3, 5); const prob2_spins = prob2_sections * getRandomInt(8, 15); const prob2_exp = prob2_spins / prob2_sections;
+            
+            // --- Add Problem Objects to Array ---
+            allProblems.push({
+                problemText: `What type of angle is ${geo1_angle}°?`, correctAnswer: 'obtuse',
+                solutionStepsHTML: `<p>An angle greater than 90° and less than 180° is <b>obtuse</b>.</p><p class="final-answer">Final Answer: Obtuse</p>`
+            });
+            allProblems.push({
+                problemText: `A triangle has side lengths of ${geo2_side1} cm, ${geo2_side1} cm, and ${geo2_side2} cm. What is its classification by its sides?`, correctAnswer: 'isosceles',
+                solutionStepsHTML: `<p>A triangle with two equal sides is <b>isosceles</b>.</p><p class="final-answer">Final Answer: Isosceles</p>`
+            });
+            allProblems.push({
+                problemText: `A triangle has two angles measuring ${geo3_angle1}° and ${geo3_angle2}°. What is the third angle?`, correctAnswer: geo3_angle3.toString(),
+                solutionStepsHTML: `<p>The angles in a triangle sum to 180°. 180 - (${geo3_angle1} + ${geo3_angle2}) = ${geo3_angle3}°.</p><p class="final-answer">Final Answer: ${geo3_angle3}°</p>`
+            });
+            allProblems.push({
+                problemText: `How many edges does a cube have?`, correctAnswer: '12',
+                solutionStepsHTML: `<p>A cube has 12 edges (4 on top, 4 on bottom, 4 connecting them).</p><p class="final-answer">Final Answer: 12</p>`
+            });
+            allProblems.push({
+                problemText: `<b>[Conceptual]</b> Explain why a triangle cannot have two right angles.`, isConceptual: true, correctAnswer: ['180', '0'],
+                solutionStepsHTML: `<p>Two right angles (90°+90°) sum to 180°. This leaves 0° for the third angle, which is impossible.</p><p class="final-answer">Final Answer: The first two angles already sum to 180°, leaving no degrees for a third angle.</p>`
+            });
+            allProblems.push({
+                problemText: `What is the perimeter of a rectangle with length ${meas1_len} cm and width ${meas1_wid} cm?`, correctAnswer: meas1_perim.toString(),
+                solutionStepsHTML: `<p>Perimeter = 2(l+w) = 2(${meas1_len}+${meas1_wid}) = ${meas1_perim} cm.</p><p class="final-answer">Final Answer: ${meas1_perim} cm</p>`
+            });
+            allProblems.push({
+                problemText: `What is the area of a triangle with base ${meas2_base} m and height ${meas2_height} m?`, correctAnswer: meas2_area.toString(),
+                solutionStepsHTML: `<p>Area = ½ × base × height = 0.5 × ${meas2_base} × ${meas2_height} = ${meas2_area} m².</p><p class="final-answer">Final Answer: ${meas2_area} m²</p>`
+            });
+            allProblems.push({
+                problemText: `What is the volume of a box that is ${meas3_l} in long, ${meas3_w} in wide, and ${meas3_h} in high?`, correctAnswer: meas3_vol.toString(),
+                solutionStepsHTML: `<p>Volume = l×w×h = ${meas3_l}×${meas3_w}×${meas3_h} = ${meas3_vol} in³.</p><p class="final-answer">Final Answer: ${meas3_vol} in³</p>`
+            });
+            allProblems.push({
+                problemText: `The area of a rectangle is ${meas4_area} sq. inches. If its length is ${meas4_l} inches, what is its width?`, correctAnswer: meas4_w.toString(),
+                solutionStepsHTML: `<p>Width = Area / Length = ${meas4_area} / ${meas4_l} = ${meas4_w} inches.</p><p class="final-answer">Final Answer: ${meas4_w} inches</p>`
+            });
+            allProblems.push({
+                problemText: `<b>[Conceptual]</b> Can two rectangles have the same area but different perimeters? (Yes/No)`, isConceptual: true, correctAnswer: 'yes',
+                solutionStepsHTML: `<p>Yes. For example, an 8x3 rectangle (Area=24, Perim=22) and a 6x4 rectangle (Area=24, Perim=20) have the same area but different perimeters.</p><p class="final-answer">Final Answer: Yes</p>`
+            });
+            allProblems.push({
+                problemText: `<b>[Conceptual]</b> A student's scores are ${data4_scores.join(', ')}. Which is a better measure of typical performance? (Mean/Median)`, isConceptual: true, correctAnswer: 'median',
+                solutionStepsHTML: `<p>The <b>median</b> is better because the score of ${data4_outlier} is an outlier that skews the mean.</p><p class="final-answer">Final Answer: Median</p>`
+            });
+            allProblems.push({
+                problemText: `A bag has ${prob1_green} green and ${prob1_blue} blue marbles. What is the probability of picking green? (as a fraction)`, correctAnswer: `${prob1_green}/${prob1_green + prob1_blue}`,
+                solutionStepsHTML: `<p>Prob = Favorable/Total = ${prob1_green} / (${prob1_green}+${prob1_blue}) = ${prob1_green}/${prob1_green + prob1_blue}.</p><p class="final-answer">Final Answer: ${prob1_green}/${prob1_green + prob1_blue}</p>`
+            });
+            allProblems.push({
+                problemText: `A spinner has ${prob2_sections} equal sections. If you spin it ${prob2_spins} times, how many times do you expect it to land on one specific section?`, correctAnswer: prob2_exp.toString(),
+                solutionStepsHTML: `<p>Expected = P(event) × Trials = (1/${prob2_sections}) × ${prob2_spins} = ${prob2_exp}.</p><p class="final-answer">Final Answer: ${prob2_exp} times</p>`
+            });
+            allProblems.push({
+                problemText: `<b>[Conceptual]</b> If P(heads) is 1/2, are you guaranteed exactly 5 heads in 10 flips? (Yes/No)`, isConceptual: true, correctAnswer: 'no',
+                solutionStepsHTML: `<p>No. Probability describes likelihood, not certainty. Any outcome is possible due to random chance.</p><p class="final-answer">Final Answer: No</p>`
+            });
+            
+            return allProblems;
+        }
+        
+        function displayTest() {
+            currentProblems = generateProblemData();
+            shuffleArray(currentProblems);
+            
+            problemListContainer.innerHTML = ''; 
+            checkAnswersBtn.textContent = 'Check Answers';
+            checkAnswersBtn.disabled = false;
+
+            currentProblems.forEach((data, index) => {
+                const listItem = document.createElement('li');
+                if(data.isConceptual) listItem.classList.add('conceptual-q');
+                
+                listItem.innerHTML = `
+                    <span class="problem-number">${index + 1}.</span>
+                    <div class="problem-text-container">${data.problemText}</div>
+                    <input type="text" id="input-${index}" class="answer-input" placeholder="Your answer...">
+                    <div class="solution-steps" id="solution-${index}">${data.solutionStepsHTML}</div>`;
+                problemListContainer.appendChild(listItem);
+            });
+        }
+
+        function isAnswerCorrect(userInput, correctAnswer) {
+            let normalizedInput = userInput.trim().toLowerCase().replace(/°|cm|in|m|sq|cubic|meters|inches|times/g, '').replace(/\s+/g, '');
+            let normalizedCorrectAnswer = correctAnswer.toString().toLowerCase();
+
+            if (Array.isArray(correctAnswer)) {
+                return correctAnswer.every(keyword => normalizedInput.includes(keyword.toLowerCase()));
+            }
+
+            if (normalizedInput === normalizedCorrectAnswer) return true;
+
+            const fractionRegex = /^(-?\d+)\/(\d+)$/;
+            const userInputMatch = normalizedInput.match(fractionRegex);
+            const correctAnswerMatch = normalizedCorrectAnswer.match(fractionRegex);
+
+            if (userInputMatch && correctAnswerMatch) {
+                const userValue = parseInt(userInputMatch[1]) / parseInt(userInputMatch[2]);
+                const correctValue = parseInt(correctAnswerMatch[1]) / parseInt(correctAnswerMatch[2]);
+                return Math.abs(userValue - correctValue) < 0.001;
+            }
+
+            return false;
+        }
+
+        function checkAnswersAndLock() {
+            if (!currentProblems.length) return;
+
+            currentProblems.forEach((problem, index) => {
+                const inputEl = document.getElementById(`input-${index}`);
+                const solutionEl = document.getElementById(`solution-${index}`);
+                const userAnswer = inputEl.value;
+
+                if (isAnswerCorrect(userAnswer, problem.correctAnswer)) {
+                    inputEl.classList.add('correct');
+                } else {
+                    inputEl.classList.add('incorrect');
+                }
+
+                inputEl.readOnly = true;
+                solutionEl.style.display = 'block';
+            });
+
+            checkAnswersBtn.textContent = 'Test Graded';
+            checkAnswersBtn.disabled = true;
+        }
+
+        generateTestBtn.addEventListener('click', displayTest);
+        checkAnswersBtn.addEventListener('click', checkAnswersAndLock);
+        
+        displayTest();
+    </script>
+</body>
+</html>
