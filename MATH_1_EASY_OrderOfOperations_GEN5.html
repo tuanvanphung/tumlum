@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order of Operations Practice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .controls-container { 
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #f0f0f0; 
+            border-radius: 5px;
+        }
+        .controls-container button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 10px; 
+        }
+        #generateProblemsButton { background-color: #007bff; }
+        #generateProblemsButton:hover { background-color: #0056b3; }
+        #showSolutionsButton { background-color: #28a745; }
+        #showSolutionsButton:hover { background-color: #218838; }
+        #showSolutionsButton:disabled {
+            background-color: #6c757d; 
+            cursor: not-allowed;
+        }
+
+        .problem-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .problem-list li {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .problem-number {
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+        .problem-expression {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.2em;
+            color: #555;
+            display: block;
+            margin-bottom: 10px;
+            word-wrap: break-word; 
+        }
+        
+        .answer-input-container {
+            display: block;
+            margin-top: 10px;
+            color: #777;
+        }
+        .user-answer {
+            padding: 5px;
+            font-size: 1em;
+            margin-left: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            width: 150px; 
+        }
+        .user-answer.correct-input {
+            background-color: #d4edda; 
+            border-color: #c3e6cb;
+            color: #155724;
+            font-weight: bold;
+        }
+        .user-answer.incorrect-input {
+            background-color: #f8d7da; 
+            border-color: #f5c6cb;
+            color: #721c24;
+            font-weight: bold;
+        }
+        
+        .problem-list li.solutions-shown .problem-expression,
+        .problem-list li.solutions-shown .problem-number,
+        .problem-list li.solutions-shown .answer-input-container { 
+            color: #bbb !important; 
+        }
+         .problem-list li.solutions-shown .user-answer.correct-input { color: #155724 !important; }
+         .problem-list li.solutions-shown .user-answer.incorrect-input { color: #721c24 !important; }
+
+
+        sup, sub {
+            line-height: 0;
+        }
+        .fraction {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            margin: 0 0.2em;
+            position: relative;
+        }
+        .fraction .numerator, .fraction .denominator {
+            display: block;
+            padding: 0 0.3em;
+            line-height: 1.2;
+        }
+        .fraction .numerator {
+            border-bottom: 1.5px solid black;
+        }
+        .fraction .fraction { 
+            font-size: 0.9em; 
+            margin: 0 0.1em;
+        }
+        .fraction .numerator .fraction, .fraction .denominator .fraction {
+             padding: 0 0.1em;
+        }
+        .solution-steps {
+            display: none; 
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e9f5e9; 
+            border: 1px dashed #5cb85c;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.0em; 
+            line-height: 1.5;
+        }
+        .solution-steps p {
+            margin: 8px 0; 
+            word-wrap: break-word;
+        }
+        .solution-steps .final-answer {
+            font-weight: bold;
+            color: #337ab7;
+            margin-top:10px;
+            padding-top:5px;
+            border-top: 1px solid #ccc;
+        }
+        .highlight-op { 
+            color: #d9534f;
+            font-weight: bold;
+            background-color: #f9e6e5; 
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        @media print {
+            body { margin: 0.5in; }
+            .controls-container { display: none !important; }
+            h1 { font-size: 18pt; }
+            .problem-list li { page-break-inside: avoid; }
+            .problem-list li.solutions-shown .problem-expression,
+            .problem-list li.solutions-shown .answer-input-container, 
+            .problem-list li.solutions-shown .problem-number {
+                 color: #555 !important; 
+            }
+             .user-answer.correct-input, .user-answer.incorrect-input { 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact;
+                border: 1px solid #999 !important; 
+            }
+            .user-answer.correct-input { background-color: #e9f5e9 !important; color: #155724 !important;}
+            .user-answer.incorrect-input { background-color: #fce8e6 !important; color: #721c24 !important;}
+
+            .solution-steps {
+                background-color: #fff !important; 
+                border: 1px solid #ccc !important;
+                display: block !important; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Order of Operations Practice</h1>
+
+    <div class="controls-container">
+        <button id="generateProblemsButton">Generate New Problems</button>
+        <button id="showSolutionsButton" style="display:none;">Check Answers & Show Solutions</button> 
+    </div>
+
+    <ol class="problem-list" id="problemListContainer">
+        <!-- Problems will be dynamically inserted here -->
+    </ol>
+
+    <script>
+        const problemListContainer = document.getElementById('problemListContainer');
+        const generateBtn = document.getElementById('generateProblemsButton');
+        const showSolutionsBtn = document.getElementById('showSolutionsButton'); 
+
+        const EPSILON = 0.00001; 
+        const MAX_INTERMEDIATE_VALUE = 9999; 
+
+        function isValueTooLarge(frac) {
+            if (!frac || typeof frac.num === 'undefined' || typeof frac.den === 'undefined') {
+                return true; 
+            }
+            return Math.abs(frac.num) > MAX_INTERMEDIATE_VALUE || Math.abs(frac.den) > MAX_INTERMEDIATE_VALUE;
+        }
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function getRandomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+        
+        function formatFractionHTML(num, den) {
+            if (typeof num === 'object' && num.isFraction) { 
+                den = num.den;
+                num = num.num;
+            }
+            if (den === 1) return `${num}`; 
+            return `<span class="fraction"><span class="numerator">${num}</span><span class="denominator">${den}</span></span>`;
+        }
+
+        function formatNumber(n, isResultInStep = false, preferDecimalForOriginal = false) {
+            if (!n) return 'Error(null/undef_fmtNum)'; 
+            if (n.isFraction) {
+                if (preferDecimalForOriginal && n.originalDecimalValue !== undefined) {
+                    // Show original easy decimal if it was one, e.g. "2.5" not "5/2"
+                    const easyDecimalString = n.originalDecimalValue.toString();
+                    if (/^-?\d+\.\d$/.test(easyDecimalString) || /^-?\d+$/.test(easyDecimalString)) { // Ends in .x or is integer
+                         // Check if it's a simple decimal like x.0, x.1, x.2, x.5
+                        if (easyDecimalString.endsWith(".0")) {
+                           // return easyDecimalString.slice(0,-2); // "2" from "2.0" - but toFraction already handles this if den=1
+                        } else if (/\.\d$/.test(easyDecimalString)) { // ends in .<digit>
+                           return easyDecimalString;
+                        }
+                    }
+                }
+                if (n.den === 1) return n.num.toString();
+                if (Number.isNaN(n.value)) return "NaN";
+                if (n.value === Infinity) return "Infinity";
+                if (n.value === -Infinity) return "-Infinity";
+                return formatFractionHTML(n.num, n.den);
+            }
+            if (typeof n.value === 'number') {
+                if (Number.isNaN(n.value)) return "NaN";
+                if (n.value === Infinity) return "Infinity";
+                if (n.value === -Infinity) return "-Infinity";
+            }
+            return n && typeof n.value !== 'undefined' ? n.value.toString() : 'Error(no_val_fmtNum)';
+        }
+
+        function formatBaseForExponent(baseFraction, preferDecimal = false) {
+            if (!baseFraction) return '(ErrorBase)';
+            const formattedBase = formatNumber(baseFraction, false, preferDecimal);
+            // Parenthesize if negative, a fraction, or a decimal string that includes "."
+            if (baseFraction.num < 0 || 
+                (baseFraction.den !== 1 && baseFraction.den !== 0) || 
+                (typeof baseFraction.originalDecimalValue === 'number' && formatNumber(baseFraction,false,true).includes('.'))
+               ) {
+                return `(${formattedBase})`;
+            }
+            return formattedBase;
+        }
+        
+        function simplifyFraction(num, den) {
+            function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+            if (den === 0) {
+                if (num === 0) return { num: 0, den: 0, isFraction: true, value: NaN, error: "0/0 Undefined" };
+                return { num: num > 0 ? 1 : (num < 0 ? -1 : 0), den: 0, isFraction: true, value: Infinity * Math.sign(num), error: "Div by zero" };
+            }
+            if (den < 0) { num = -num; den = -den; }
+            const common = gcd(Math.abs(num), Math.abs(den));
+            let simplifiedNum = num / common;
+            let simplifiedDen = den / common;
+            return { num: simplifiedNum, den: simplifiedDen, isFraction: true, value: simplifiedNum / simplifiedDen };
+        }
+
+        function toFraction(numInput) {
+            if (typeof numInput === 'object' && numInput.isFraction) return numInput; 
+            
+            let originalNumInputStr = String(numInput); // Store original string form for decimals
+            let num = Number(numInput);
+            let originalDecimalValue = undefined;
+
+            if (originalNumInputStr.includes('.') && !originalNumInputStr.includes('e')) { 
+                originalDecimalValue = parseFloat(originalNumInputStr); 
+            } else if (typeof numInput === 'number' && numInput % 1 !== 0) { 
+                 originalDecimalValue = numInput; // If input was already a float number
+            }
+
+
+            if (Number.isNaN(num)) {
+                return { num: 0, den: 0, isFraction: true, value: NaN, error: "NaN input", originalDecimalValue };
+            }
+            if (num === Infinity) {
+                 return { num: 1, den: 0, isFraction: true, value: Infinity, originalDecimalValue };
+            }
+            if (num === -Infinity) {
+                 return { num: -1, den: 0, isFraction: true, value: -Infinity, originalDecimalValue };
+            }
+
+            if (num % 1 !== 0) { // If it's a float
+                let s = num.toString(); // Use the Number's string representation for calculation
+                if (s.includes('e')) { 
+                    const parts = s.split('e');
+                    const significand = parseFloat(parts[0]);
+                    const exponent = parseInt(parts[1]);
+                    const significandDecimalPlaces = (parts[0].includes('.')) ? parts[0].split('.')[1].length : 0;
+                    
+                    let numerator = significand * Math.pow(10, significandDecimalPlaces);
+                    let denominator = Math.pow(10, significandDecimalPlaces);
+
+                    if (exponent > 0) {
+                        numerator *= Math.pow(10, exponent);
+                    } else { 
+                        denominator *= Math.pow(10, Math.abs(exponent));
+                    }
+                    // For e-notation, originalDecimalValue might not be the simple "x.y" form
+                    return { ...simplifyFraction(Math.round(numerator), Math.round(denominator)), originalDecimalValue: num };
+                }
+                // For regular decimals, check original string for decimal places
+                if (originalNumInputStr.includes('.')) {
+                    const decimalPlaces = originalNumInputStr.split('.')[1].length;
+                    const denominator = Math.pow(10, decimalPlaces);
+                    const numerator = Math.round(num * denominator); 
+                    return { ...simplifyFraction(numerator, denominator), originalDecimalValue };
+                }
+            }
+            // If it's an integer or became an integer
+            return { num: Math.round(num), den: 1, isFraction: true, value: Math.round(num), originalDecimalValue };
+        }
+
+        function addFrac(f1, f2) { return simplifyFraction(f1.num * f2.den + f2.num * f1.den, f1.den * f2.den); }
+        function subFrac(f1, f2) { return simplifyFraction(f1.num * f2.den - f2.num * f1.den, f1.den * f2.den); }
+        function mulFrac(f1, f2) { return simplifyFraction(f1.num * f2.num, f1.den * f2.den); }
+        function divFrac(f1, f2) {
+            if (f2.num === 0) {
+                if (f1.num === 0 && f1.den !== 0) return { num: 0, den: 0, isFraction: true, value: NaN, error: "0/0 Undefined" }; 
+                if (f1.num === 0 && f1.den === 0) return { num: 0, den: 0, isFraction: true, value: NaN, error: "NaN / 0 Undefined" }; 
+                return { num: Math.sign(f1.num) * (f2.den === 0 ? 1 : Math.sign(f2.den)), den: 0, isFraction: true, value: Infinity * Math.sign(f1.num) * (f2.den === 0 ? 1 : Math.sign(f2.den)), error: "Div by zero" };
+            }
+            return simplifyFraction(f1.num * f2.den, f1.den * f2.num);
+        }
+        function powFrac(base, exp) {
+            if (Number.isNaN(base.value)) return {num:0, den:0, value: NaN, isFraction:true, error: "Base is NaN for power"};
+
+            if (base.num === 0 && exp < 0) {
+                if (exp === 0) return toFraction(1);
+                return { num: (exp % 2 === 0 ? 1 : base.den === 0 ? 0 : Math.sign(base.den)), den: 0, isFraction: true, value: Infinity, error: "0 to negative power" };
+            }
+            if (exp === 0) return toFraction(1);
+            
+            if (exp % 1 !== 0) { 
+                if (base.value < 0 ) { 
+                    return { num:0, den:0, value: NaN, isFraction:true, error: "Negative base to non-integer power"}
+                }
+                const val = Math.pow(base.value, exp);
+                return toFraction(val);
+            }
+
+            let result = toFraction(1);
+            let absExp = Math.abs(exp);
+            for (let i = 0; i < absExp; i++) { 
+                result = mulFrac(result, base); 
+                if (isValueTooLarge(result) && i < absExp -1 && absExp > 1) { 
+                    return { ...result, error: `Power intermediate too large: ${formatBaseForExponent(base)}^${i+1}`};
+                }
+            }
+            if (exp < 0) {
+                if (result.num === 0) {
+                    return { num: 1, den: 0, isFraction: true, value: Infinity, error: "Division by zero from inverting 0 result in power"};
+                }
+                result = divFrac(toFraction(1), result);
+            }
+            return result;
+        }
+        function absFrac(f) { 
+             if (Number.isNaN(f.value)) return { ...f, value: NaN, error: "Absolute value of NaN" };
+            return { ...f, num: Math.abs(f.num), value: Math.abs(f.value || 0), originalDecimalValue: f.originalDecimalValue !== undefined ? Math.abs(f.originalDecimalValue) : undefined }; 
+        }
+
+        function generateOperand(options = {}) {
+            const { min = -9, max = 9, forceFraction = false, nonZero = false, perfectSquare = false, allowDecimal = true } = options;
+
+            if (perfectSquare) {
+                const bases = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // Keep perfect squares simple
+                const base = getRandomItem(bases);
+                let val = base * base;
+                 // nonZero check for perfectSquare is generally not needed as bases are non-zero.
+                return toFraction(val);
+            }
+
+            let value; // This will hold the fraction object
+            const typeRoll = Math.random();
+
+            if (forceFraction) {
+                let den = getRandomItem([2, 3, 4, 5, 10]); // Denominators for simple/easy decimal-like fractions
+                let numLimit = den * 2; 
+                let num = getRandomInt(1, numLimit); // Start with positive numerator
+                if (Math.random() < 0.4 && (min < 0 || max < 0 || (min < 0 && max > 0)) ) num *= -1; // Allow negative if range supports negatives
+                value = simplifyFraction(num, den);
+            } else if (typeRoll < 0.65) { // 65% Integers
+                value = toFraction(getRandomInt(min, max));
+            } else if (allowDecimal && typeRoll < 0.90) { // 25% Easy Decimals
+                let intPartMin = Math.max(min, -7); // Keep integer part of decimal generally small
+                let intPartMax = Math.min(max, 7);
+                if (intPartMin > intPartMax && min <= max) { // If overall min/max is narrow and outside -7 to 7
+                    intPartMin = min; intPartMax = max;
+                } else if (intPartMin > intPartMax) { // Fallback if min/max were crossed due to -7/7
+                     intPartMin = -1; intPartMax = 1;
+                }
+                
+                let intPart = getRandomInt(intPartMin, intPartMax);
+                let decDigit;
+                const decRoll = Math.random();
+                if (decRoll < 0.5) decDigit = 5;       // .5 (50%)
+                else if (decRoll < 0.8) decDigit = getRandomItem([1, 2]); // .1, .2 (30%)
+                else decDigit = getRandomItem([3, 4, 6, 7, 8, 9]); // others (20%)
+                
+                // Construct as string to preserve ".0" if intPart was, e.g., 2 and decDigit was 0 (not currently possible with decDigit items)
+                let decimalString = `${intPart}.${decDigit}`;
+                value = toFraction(decimalString); // Pass string to toFraction
+            } else { // 10% Simple Fractions (or if !allowDecimal and decimal was rolled)
+                let den = getRandomItem([2, 3, 4, 5]);
+                let numLimit = den; // Numerators generally <= denominator for "simple"
+                if (Math.random() < 0.3) numLimit = Math.floor(den * 1.5); 
+                let num = getRandomInt(1, numLimit);
+                if (Math.random() < 0.4 && (min < 0 || max < 0 || (min < 0 && max > 0))) num *= -1;
+                value = simplifyFraction(num, den);
+            }
+
+            // Final nonZero check
+            if (nonZero && value.num === 0 && value.den !== 0) { // Finite zero
+                const wasLikelyDecimal = (typeRoll >= 0.65 && typeRoll < 0.90 && allowDecimal && !forceFraction);
+                const wasLikelyFraction = forceFraction || (typeRoll >= 0.90 && !forceFraction);
+
+                if (wasLikelyDecimal) {
+                    value = toFraction(getRandomItem([-0.5, -0.2, -0.1, 0.1, 0.2, 0.5]));
+                } else if (wasLikelyFraction) {
+                     value = simplifyFraction(getRandomItem([-1,1]), getRandomItem([2,3,4,5]));
+                } else { // Was integer
+                    value = toFraction(getRandomItem([-2,-1,1,2])); // একটু বড় integer 
+                }
+                // Ensure the new non-zero value is within reason or clamped if min/max are very restrictive
+                if (value.value > max && max !== 0 && Math.abs(max) < 20) value = toFraction(max); // Avoid large jumps if max is small
+                else if (value.value < min && min !== 0 && Math.abs(min) < 20) value = toFraction(min);
+            }
+            return value;
+        }
+
+
+        function generatePowerOperands() {
+            let base, exp;
+            const expType = Math.random();
+            if (expType < 0.35) { 
+                exp = getRandomInt(-2, -1); // Simpler negative exponents
+                // Base for negative exponent: prefer integers or simple decimals, must be non-zero
+                base = generateOperand({min: -5, max: 5, nonZero: true, allowDecimal: true}); 
+            } else if (expType < 0.55) { 
+                exp = 0;
+                base = generateOperand({min: -7, max: 7, allowDecimal: true}); 
+            } else { 
+                exp = getRandomInt(2, 3); // Simpler positive exponents (1 is often trivial)
+                base = generateOperand({min: -7, max: 7, allowDecimal: true});
+            }
+            return { base, exp };
+        }
+        
+        const problemTemplates = [
+            // template1 removed
+            function template2() { 
+                const A_frac = generateOperand({forceFraction: true, allowDecimal: false}); // Keep this as a clear fraction
+                const B_int = generateOperand({min: 1, max: 5, nonZero: true, allowDecimal: false}); 
+                const C = generateOperand({min: -4, max: 4, allowDecimal: true});
+                const D_neg = generateOperand({min: -7, max: -1, allowDecimal: true});
+                let {base: E_base, exp: E_exp} = generatePowerOperands(); 
+                if (E_base.num === 0 && E_exp < 0) E_exp = getRandomInt(0,2); // Avoid 0^-ve
+
+                this.steps.push(`1. Division inside absolute value: <span class="highlight-op">${formatNumber(A_frac, false, true)} &divide; ${formatNumber(B_int, false, true)}</span>`);
+                let val_div_AB = divFrac(A_frac, B_int);
+                val_div_AB = this.checkIntermediate(val_div_AB, "Step 1 A_frac/B_int");
+                this.steps.push(`   = ${formatNumber(val_div_AB, true)}`);
+
+                this.steps.push(`2. Subtraction inside absolute value: <span class="highlight-op">${formatNumber(val_div_AB)} - ${formatNumber(C, false, true)}</span>`);
+                let val_inside_abs = subFrac(val_div_AB, C);
+                val_inside_abs = this.checkIntermediate(val_inside_abs, "Step 2 (val_div_AB)-C");
+                this.steps.push(`   = ${formatNumber(val_inside_abs, true)}`);
+
+                this.steps.push(`3. Absolute value: <span class="highlight-op">|${formatNumber(val_inside_abs)}|</span>`);
+                const val_abs = absFrac(val_inside_abs); 
+                this.checkIntermediate(val_abs, "Step 3 AbsVal");
+                this.steps.push(`   = ${formatNumber(val_abs, true)}`);
+
+                this.steps.push(`4. Exponent in parentheses: <span class="highlight-op">${formatBaseForExponent(E_base, true)}<sup>${E_exp}</sup></span>`);
+                let val_E_pow = powFrac(E_base, E_exp);
+                val_E_pow = this.checkIntermediate(val_E_pow, "Step 4 E_base^E_exp");
+                this.steps.push(`   = ${formatNumber(val_E_pow, true)}`);
+
+                this.steps.push(`5. Addition in parentheses: <span class="highlight-op">${formatNumber(D_neg, false, true)} + ${formatNumber(val_E_pow)}</span>`);
+                let val_paren_DE = addFrac(D_neg, val_E_pow);
+                val_paren_DE = this.checkIntermediate(val_paren_DE, "Step 5 D_neg+val_E_pow");
+                this.steps.push(`   = ${formatNumber(val_paren_DE, true)}`);
+
+                this.steps.push(`6. Final multiplication: <span class="highlight-op">${formatNumber(val_abs)} * ${formatNumber(val_paren_DE)}</span>`);
+                this.finalAnswer = mulFrac(val_abs, val_paren_DE);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "Final Answer Template 2");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+
+                this.problemString = `| ${formatNumber(A_frac, false, true)} &divide; ${formatNumber(B_int, false, true)} - ${formatNumber(C, false, true)} | * (${formatNumber(D_neg, false, true)} + ${formatBaseForExponent(E_base, true)}<sup>${E_exp}</sup>)`;
+            },
+            function template3() { 
+                let {base: A, exp: exp_A} = generatePowerOperands();
+                if (A.num === 0 && exp_A < 0) exp_A = getRandomInt(0,2);
+
+                const B_frac = generateOperand({forceFraction: true, allowDecimal: true}); // Allow simple decimal-like fractions here too
+                const C_frac = generateOperand({forceFraction: true, nonZero: true, allowDecimal: true}); 
+                
+                let {base: D, exp: exp_D} = generatePowerOperands();
+                if (D.num === 0 && exp_D < 0) exp_D = getRandomInt(0,2);
+                
+                const E_neg = generateOperand({min:-4, max:-1, allowDecimal: true});
+
+                this.steps.push(`1. Numerator exponent: <span class="highlight-op">${formatBaseForExponent(A, true)}<sup>${exp_A}</sup></span>`);
+                let val_A_exp = powFrac(A, exp_A);
+                val_A_exp = this.checkIntermediate(val_A_exp, "T3S1 A^exp_A");
+                this.steps.push(`   = ${formatNumber(val_A_exp, true)}`);
+
+                this.steps.push(`2. Numerator addition: <span class="highlight-op">${formatNumber(val_A_exp)} + ${formatNumber(B_frac, false, true)}</span>`);
+                let val_Numerator = addFrac(val_A_exp, B_frac);
+                val_Numerator = this.checkIntermediate(val_Numerator, "T3S2 NumAdd");
+                this.steps.push(`   = ${formatNumber(val_Numerator, true)}`);
+
+                this.steps.push(`3. Denominator exponent: <span class="highlight-op">${formatBaseForExponent(D, true)}<sup>${exp_D}</sup></span>`);
+                let val_D_exp = powFrac(D, exp_D);
+                val_D_exp = this.checkIntermediate(val_D_exp, "T3S3 D^exp_D");
+                this.steps.push(`   = ${formatNumber(val_D_exp, true)}`);
+
+                this.steps.push(`4. Denominator subtraction: <span class="highlight-op">${formatNumber(C_frac, false, true)} - ${formatNumber(val_D_exp)}</span>`);
+                let val_Denominator = subFrac(C_frac, val_D_exp);
+                val_Denominator = this.checkIntermediate(val_Denominator, "T3S4 DenSub (Divisor for Main Fraction)");
+
+
+                this.steps.push(`5. Division of main fraction: <span class="highlight-op">${formatNumber(val_Numerator)} &divide; ${formatNumber(val_Denominator)}</span>`);
+                let val_MainFrac = divFrac(val_Numerator, val_Denominator);
+                val_MainFrac = this.checkIntermediate(val_MainFrac, "T3S5 MainDiv");
+                this.steps.push(`   = ${formatNumber(val_MainFrac, true)}`);
+                
+                this.steps.push(`6. Final multiplication: <span class="highlight-op">${formatNumber(val_MainFrac)} * ${formatNumber(E_neg, false, true)}</span>`);
+                this.finalAnswer = mulFrac(val_MainFrac, E_neg);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T3S6 FinalMul");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                
+                this.problemString = `(<span class="fraction"><span class="numerator">${formatBaseForExponent(A, true)}<sup>${exp_A}</sup> + ${formatNumber(B_frac, false, true)}</span><span class="denominator">${formatNumber(C_frac, false, true)} - ${formatBaseForExponent(D, true)}<sup>${exp_D}</sup></span></span>) * ${formatNumber(E_neg, false, true)}`;
+            },
+            function template4() { 
+                const a = generateOperand({min: -10, max: 10, allowDecimal: true});
+                const b = generateOperand({min: -5, max: 5, nonZero: true, allowDecimal: true});
+                const c = generateOperand({min: 1, max: 10, allowDecimal: true});
+                let {base: d_base, exp: d_exp} = generatePowerOperands();
+                if (d_base.num === 0 && d_exp < 0) d_exp = getRandomInt(0,2);
+
+                const op1 = getRandomItem(['+', '-']);
+                const op2 = getRandomItem(['*', '/']); 
+                const op3 = getRandomItem(['+', '-']);
+
+                this.steps.push(`1. Innermost exponent: <span class="highlight-op">${formatBaseForExponent(d_base, true)}<sup>${d_exp}</sup></span>`);
+                let val_d_pow = powFrac(d_base, d_exp);
+                val_d_pow = this.checkIntermediate(val_d_pow, "T4S1 d_base^d_exp");
+                this.steps.push(`   = ${formatNumber(val_d_pow, true)}`);
+
+                let val_c_op2_dpow;
+                let step2OpString = `${formatNumber(c, false, true)} ${op2 === '/' ? '&divide;' : op2} ${formatNumber(val_d_pow)}`;
+                this.steps.push(`2. Innermost parentheses operation: <span class="highlight-op">${step2OpString}</span>`);
+
+                if (op2 === '*') {
+                    val_c_op2_dpow = mulFrac(c, val_d_pow);
+                } else { 
+                    val_c_op2_dpow = divFrac(c, val_d_pow); 
+                }
+                val_c_op2_dpow = this.checkIntermediate(val_c_op2_dpow, "T4S2 c_op2_dpow");
+                this.steps.push(`   = ${formatNumber(val_c_op2_dpow, true)}`);
+
+                let step3OpString = `${formatNumber(b, false, true)} ${op1} ${formatNumber(val_c_op2_dpow)}`;
+                this.steps.push(`3. Brackets: <span class="highlight-op">${step3OpString}</span>`);
+                let val_bracket;
+                if (op1 === '+') val_bracket = addFrac(b, val_c_op2_dpow);
+                else val_bracket = subFrac(b, val_c_op2_dpow);
+                val_bracket = this.checkIntermediate(val_bracket, "T4S3 bracket_val");
+                this.steps.push(`   = ${formatNumber(val_bracket, true)}`);
+
+                let step4OpString = `${formatNumber(a, false, true)} ${op3} ${formatNumber(val_bracket)}`;
+                this.steps.push(`4. Braces/Final operation: <span class="highlight-op">${step4OpString}</span>`);
+                if (op3 === '+') this.finalAnswer = addFrac(a, val_bracket);
+                else this.finalAnswer = subFrac(a, val_bracket);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T4S4 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                
+                this.problemString = `{${formatNumber(a, false, true)} ${op3} [${formatNumber(b, false, true)} ${op1} (${formatNumber(c, false, true)} ${op2 === '/' ? '&divide;' : op2} ${formatBaseForExponent(d_base, true)}<sup>${d_exp}</sup>)]}`;
+            },
+            function template5() {
+                const A = generateOperand({min: -5, max: 5, nonZero: true, allowDecimal: true});
+                let {base: B, exp: exp1} = generatePowerOperands();
+                if (B.num === 0 && exp1 < 0) exp1 = getRandomInt(0,2);
+
+                const C_sqrt_base_val = getRandomItem([1,2,3,4,5,6,7]); // Simpler perfect squares for sqrt
+                const C_sqrt_val_frac = toFraction(C_sqrt_base_val * C_sqrt_base_val);
+
+                const D_frac = generateOperand({forceFraction: true, allowDecimal: true}); // Allow simple decimal-like fractions
+                const E = generateOperand({min: -5, max: 5, allowDecimal: true});
+                const F = generateOperand({min: -5, max: 5, allowDecimal: true});
+                
+                let { exp: exp2 } = generatePowerOperands(); 
+
+                this.steps.push(`1. Exponent in absolute value (numerator): <span class="highlight-op">${formatBaseForExponent(B, true)}<sup>${exp1}</sup></span>`);
+                let val_B_exp = powFrac(B, exp1);
+                val_B_exp = this.checkIntermediate(val_B_exp, "T5S1 B^exp1");
+                this.steps.push(`   = ${formatNumber(val_B_exp, true)}`);
+
+                this.steps.push(`2. Multiplication in absolute value (numerator): <span class="highlight-op">${formatNumber(A, false, true)} * ${formatNumber(val_B_exp)}</span>`);
+                let val_AB_exp = mulFrac(A, val_B_exp);
+                val_AB_exp = this.checkIntermediate(val_AB_exp, "T5S2 A*B_exp");
+                this.steps.push(`   = ${formatNumber(val_AB_exp, true)}`);
+
+                this.steps.push(`3. Square root (numerator): <span class="highlight-op">&radic;${C_sqrt_val_frac.num}</span>`);
+                const val_C_sqrt = powFrac(C_sqrt_val_frac, 0.5);
+                this.checkIntermediate(val_C_sqrt, "T5S3 Sqrt(C)");
+                this.steps.push(`   = ${formatNumber(val_C_sqrt, true)}`);
+                
+                this.steps.push(`4. Subtraction for absolute value (numerator): <span class="highlight-op">${formatNumber(val_AB_exp)} - ${formatNumber(val_C_sqrt)}</span>`);
+                let val_inside_abs_num = subFrac(val_AB_exp, val_C_sqrt);
+                val_inside_abs_num = this.checkIntermediate(val_inside_abs_num, "T5S4 inside_abs_num");
+                this.steps.push(`   = ${formatNumber(val_inside_abs_num, true)}`);
+
+                this.steps.push(`5. Absolute value (numerator): <span class="highlight-op">|${formatNumber(val_inside_abs_num)}|</span>`);
+                const val_Numerator = absFrac(val_inside_abs_num);
+                this.checkIntermediate(val_Numerator, "T5S5 AbsVal Numerator");
+                this.steps.push(`   = ${formatNumber(val_Numerator, true)}`);
+
+                this.steps.push(`6. Parentheses in denominator: <span class="highlight-op">${formatNumber(E, false, true)} - ${formatNumber(F, false, true)}</span>`);
+                let val_EF = subFrac(E, F);
+                val_EF = this.checkIntermediate(val_EF, "T5S6 E-F");
+                this.steps.push(`   = ${formatNumber(val_EF, true)}`);
+
+                if (val_EF.num === 0 && exp2 < 0) { 
+                    exp2 = getRandomInt(0,2); 
+                }
+
+                this.steps.push(`7. Exponent in denominator: <span class="highlight-op">${formatBaseForExponent(val_EF, true)}<sup>${exp2}</sup></span>`);
+                let val_EF_exp = powFrac(val_EF, exp2);
+                val_EF_exp = this.checkIntermediate(val_EF_exp, "T5S7 (E-F)^exp2");
+                this.steps.push(`   = ${formatNumber(val_EF_exp, true)}`);
+
+                this.steps.push(`8. Addition in denominator: <span class="highlight-op">${formatNumber(D_frac, false, true)} + ${formatNumber(val_EF_exp)}</span>`);
+                let val_Denominator = addFrac(D_frac, val_EF_exp);
+                val_Denominator = this.checkIntermediate(val_Denominator, "T5S8 Denominator (Divisor for Final Fraction)");
+
+
+                this.steps.push(`9. Final division: <span class="highlight-op">${formatNumber(val_Numerator)} &divide; ${formatNumber(val_Denominator)}</span>`);
+                this.finalAnswer = divFrac(val_Numerator, val_Denominator);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T5S9 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+
+                this.problemString = `<span class="fraction"><span class="numerator">|${formatNumber(A, false, true)} * ${formatBaseForExponent(B, true)}<sup>${exp1}</sup> - &radic;${C_sqrt_val_frac.num}|</span><span class="denominator">{${formatNumber(D_frac, false, true)} + (${formatNumber(E, false, true)} - ${formatNumber(F, false, true)})<sup>${exp2}</sup>}</span></span>`;
+            },
+            function template6() {
+                const G_neg = generateOperand({min: -10, max: -1, allowDecimal: true});
+                const H = generateOperand({min: -5, max: 5, allowDecimal: true});
+                const I_frac = generateOperand({forceFraction: true, allowDecimal: true}); // Allow simple decimal-like fractions
+                const J_op = generateOperand({min: -7, max: 7, allowDecimal: true}); 
+                const K_val_for_abs = generateOperand({min: -9, max: 9, allowDecimal: true}); 
+                const exp_neg = getRandomInt(-2, -1); // Keep as negative exponent
+
+                this.steps.push(`1. Innermost absolute value: <span class="highlight-op">|${formatNumber(K_val_for_abs, false, true)}|</span>`);
+                const val_K_abs = absFrac(K_val_for_abs);
+                this.checkIntermediate(val_K_abs, "T6S1 AbsVal K");
+                this.steps.push(`   = ${formatNumber(val_K_abs, true)}`);
+
+                this.steps.push(`2. Subtraction in parentheses (divisor): <span class="highlight-op">${formatNumber(J_op, false, true)} - ${formatNumber(val_K_abs)}</span>`);
+                let val_divisor = subFrac(J_op, val_K_abs);
+                val_divisor = this.checkIntermediate(val_divisor, "T6S2 Divisor for I_frac/(J-K)");
+
+                this.steps.push(`3. Division inside brackets: <span class="highlight-op">${formatNumber(I_frac, false, true)} &divide; ${formatNumber(val_divisor)}</span>`);
+                let val_division_in_bracket = divFrac(I_frac, val_divisor);
+                val_division_in_bracket = this.checkIntermediate(val_division_in_bracket, "T6S3 DivisionInBracket");
+                this.steps.push(`   = ${formatNumber(val_division_in_bracket, true)}`);
+                
+                let base_for_exp = val_division_in_bracket;
+                
+                this.steps.push(`4. Negative exponent on bracket result: <span class="highlight-op">${formatBaseForExponent(base_for_exp, true)}<sup>${exp_neg}</sup></span>`);
+                let val_bracket_exp = powFrac(base_for_exp, exp_neg);
+                val_bracket_exp = this.checkIntermediate(val_bracket_exp, "T6S4 Bracket^exp");
+                this.steps.push(`   = ${formatNumber(val_bracket_exp, true)}`);
+
+                this.steps.push(`5. Addition inside braces: <span class="highlight-op">${formatNumber(H, false, true)} + ${formatNumber(val_bracket_exp)}</span>`);
+                let val_braces = addFrac(H, val_bracket_exp);
+                val_braces = this.checkIntermediate(val_braces, "T6S5 BracesAdd");
+                this.steps.push(`   = ${formatNumber(val_braces, true)}`);
+
+                this.steps.push(`6. Final subtraction: <span class="highlight-op">${formatNumber(G_neg, false, true)} - ${formatNumber(val_braces)}</span>`);
+                this.finalAnswer = subFrac(G_neg, val_braces);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T6S6 FinalSub");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+
+                this.problemString = `${formatNumber(G_neg, false, true)} - {${formatNumber(H, false, true)} + [${formatNumber(I_frac, false, true)} &divide; (${formatNumber(J_op, false, true)} - |${formatNumber(K_val_for_abs, false, true)}|)]<sup>${exp_neg}</sup>}`;
+            }
+        ];
+
+        function generateProblemAndSolution(templateFn) { 
+            function checkIntermediate(value, stepDescription = "Intermediate") {
+                if (!value || typeof value.num === 'undefined' || typeof value.den === 'undefined') {
+                    throw new Error(`${stepDescription} resulted in undefined or malformed fraction value.`);
+                }
+                const fatalErrorStrings = [
+                    "NaN input", 
+                    "Base is NaN for power",
+                    "Negative base to non-integer power",
+                    "Absolute value of NaN", 
+                ];
+                if (value.error) {
+                    if (fatalErrorStrings.includes(value.error)) {
+                        throw new Error(`${stepDescription} fatal operation error: ${value.error}`);
+                    }
+                    if (value.error.startsWith("Power intermediate too large")) { 
+                        throw new Error(`${stepDescription} fatal operation error: ${value.error}`);
+                    }
+                }
+                if (Number.isFinite(value.value) && isValueTooLarge(value)) {
+                    throw new Error(`${stepDescription} finite value too large: num=${value.num}, den=${value.den} (value: ${value.value})`);
+                }
+                return value;
+            }
+            
+            let success = false;
+            let attemptLimit = 25; 
+            let contextForTemplate = { 
+                steps: [],
+                problemString: '',
+                finalAnswer: undefined,
+                checkIntermediate: checkIntermediate 
+            };
+
+            while(!success && attemptLimit > 0) {
+                contextForTemplate.steps = []; 
+                contextForTemplate.problemString = '';
+                contextForTemplate.finalAnswer = undefined;
+                try {
+                    templateFn.call(contextForTemplate); 
+
+                    let stepsHTMLContent = '<p><strong>Step-by-step solution:</strong></p>';
+                    contextForTemplate.steps.forEach(step => stepsHTMLContent += `<p>${step}</p>`); 
+                    if (contextForTemplate.finalAnswer && contextForTemplate.finalAnswer.value !== undefined) { 
+                        stepsHTMLContent += `<p class="final-answer">Final Answer: ${formatNumber(contextForTemplate.finalAnswer, true)}</p>`;
+                    } else {
+                         throw new Error("Final answer value became undefined during generation for template: " + (templateFn.name || 'anonymous'));
+                    }
+                    success = true; 
+                    return { problemHTML: contextForTemplate.problemString, stepsHTML: stepsHTMLContent, answer: contextForTemplate.finalAnswer };
+
+                } catch (e) { 
+                    attemptLimit--;
+                    if (attemptLimit === 0) {
+                        console.error(`Exhausted ${25} attempts for template '${templateFn.name || 'anonymous'}'. Last error:`, e.message);
+                        throw e; 
+                    }
+                }
+            }
+             if (!success) throw new Error(`Exhausted attempts to generate a valid problem instance for template '${templateFn.name || 'anonymous'}'`);
+        }
+
+        function parseUserFractionInput(inputStr) {
+            inputStr = String(inputStr).trim().toLowerCase(); 
+            if (inputStr === "infinity" || inputStr === "inf") return Infinity;
+            if (inputStr === "-infinity" || inputStr === "-inf") return -Infinity;
+            if (inputStr === "nan") return NaN; 
+
+            if (inputStr.includes('/')) {
+                const parts = inputStr.split('/');
+                if (parts.length === 2) {
+                    const num = parseFloat(parts[0]);
+                    const den = parseFloat(parts[1]);
+                    if (!isNaN(num) && !isNaN(den)) {
+                        if (den === 0) {
+                            if (num === 0) return NaN; 
+                            return num > 0 ? Infinity : -Infinity; 
+                        }
+                        return num / den;
+                    }
+                }
+            }
+            const numVal = parseFloat(inputStr);
+            return numVal;
+        }
+
+        function displayProblems() {
+            problemListContainer.innerHTML = ''; 
+            
+            showSolutionsBtn.textContent = 'Check Answers & Show Solutions';
+            showSolutionsBtn.style.display = 'inline-block'; 
+            showSolutionsBtn.disabled = false; 
+
+            let problemsSuccessfullyGenerated = 0;
+            const targetProblemCount = problemTemplates.length; // Now 5
+
+            for (let i = 0; i < targetProblemCount; i++) {
+                const currentTemplateFn = problemTemplates[i];
+                const problemNumber = i + 1; // Problem numbers 1-5
+                let generated = null;
+
+                try {
+                     generated = generateProblemAndSolution(currentTemplateFn);
+                } catch (e) { 
+                    generated = null; 
+                }
+
+                const listItem = document.createElement('li'); 
+                listItem.innerHTML = `<span class="problem-number">${problemNumber}.</span>`;
+
+                if (!generated || generated.answer === undefined || generated.answer.value === undefined) {
+                    listItem.innerHTML += `<span class="problem-expression" style="color:orange;">Could not generate a valid problem for this type (Template: ${currentTemplateFn.name || 'Type '+(i+2)}). Please try "Generate New Problems" again.</span>`;
+                } else {
+                    const { problemHTML, stepsHTML, answer } = generated;
+                    listItem.innerHTML += `
+                        <span class="problem-expression">${problemHTML}</span>
+                        <div class="answer-input-container">
+                            Answer: <input type="text" class="user-answer" data-correct-answer-value="${answer.value}">
+                        </div>
+                        <div class="solution-steps" id="solution-${problemNumber}" style="display:none;">
+                            ${stepsHTML}
+                        </div>
+                    `;
+                    problemsSuccessfullyGenerated++;
+                }
+                problemListContainer.appendChild(listItem);
+            }
+
+            if (problemsSuccessfullyGenerated < targetProblemCount) {
+                console.warn(`Successfully generated ${problemsSuccessfullyGenerated} out of ${targetProblemCount} expected problems. Check console for errors on specific templates that failed.`);
+            }
+        }
+        
+        function checkAndShowSolutions() { 
+            const problemItems = problemListContainer.querySelectorAll('li');
+            
+            problemItems.forEach(item => {
+                const inputField = item.querySelector('.user-answer');
+                const solutionDiv = item.querySelector('.solution-steps');
+
+                if (inputField) { 
+                    inputField.classList.remove('correct-input', 'incorrect-input'); 
+                    
+                    const userAnswerStr = inputField.value;
+                    const correctAnswerValueStr = inputField.dataset.correctAnswerValue;
+                    
+                    if (correctAnswerValueStr !== undefined) { 
+                        const correctAnswerValue = parseFloat(correctAnswerValueStr); 
+                        const userAnswerNum = parseUserFractionInput(userAnswerStr); 
+
+                        let isCorrect = false;
+                        if (Number.isNaN(correctAnswerValue) && Number.isNaN(userAnswerNum)) {
+                            isCorrect = true;
+                        } else if (correctAnswerValue === Infinity && userAnswerNum === Infinity) {
+                            isCorrect = true;
+                        } else if (correctAnswerValue === -Infinity && userAnswerNum === -Infinity) {
+                            isCorrect = true;
+                        } else if (!Number.isNaN(correctAnswerValue) && !Number.isNaN(userAnswerNum) &&
+                                   isFinite(correctAnswerValue) && isFinite(userAnswerNum)) {
+                            isCorrect = Math.abs(userAnswerNum - correctAnswerValue) < EPSILON;
+                        }
+                        
+                        if (isCorrect) {
+                            inputField.classList.add('correct-input');
+                        } else {
+                            inputField.classList.add('incorrect-input');
+                        }
+                    }
+                }
+
+                if (solutionDiv) {
+                    solutionDiv.style.display = 'block';
+                }
+                item.classList.add('solutions-shown'); 
+            });
+            
+            showSolutionsBtn.textContent = 'Solutions Shown / Answers Checked';
+            showSolutionsBtn.disabled = true; 
+        }
+
+        generateBtn.addEventListener('click', displayProblems);
+        showSolutionsBtn.addEventListener('click', checkAndShowSolutions); 
+        displayProblems();
+
+    </script>
+</body>
+</html>
