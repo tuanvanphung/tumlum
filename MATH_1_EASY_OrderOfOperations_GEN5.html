@@ -91,6 +91,31 @@
             font-weight: bold;
         }
         
+        /* Styles for static answer spans in the downloaded HTML */
+        .static-user-answer {
+            display: inline-block; 
+            padding: 5px;
+            font-size: 1em;
+            margin-left: 5px;
+            border: 1px solid transparent; 
+            border-radius: 3px;
+            min-width: 150px; 
+            box-sizing: border-box;
+            line-height: 1.4; 
+        }
+        .static-user-answer.correct-input {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+            font-weight: bold;
+        }
+        .static-user-answer.incorrect-input {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+            font-weight: bold;
+        }
+
         .problem-list li.solutions-shown .problem-expression,
         .problem-list li.solutions-shown .problem-number,
         .problem-list li.solutions-shown .answer-input-container { 
@@ -165,19 +190,22 @@
             .problem-list li.solutions-shown .problem-number {
                  color: #555 !important; 
             }
-             .user-answer.correct-input, .user-answer.incorrect-input { 
+             .user-answer.correct-input, .user-answer.incorrect-input,
+             .static-user-answer.correct-input, .static-user-answer.incorrect-input { 
                 -webkit-print-color-adjust: exact; 
                 print-color-adjust: exact;
                 border: 1px solid #999 !important; 
             }
-            .user-answer.correct-input { background-color: #e9f5e9 !important; color: #155724 !important;}
-            .user-answer.incorrect-input { background-color: #fce8e6 !important; color: #721c24 !important;}
+            .user-answer.correct-input, .static-user-answer.correct-input { background-color: #e9f5e9 !important; color: #155724 !important;}
+            .user-answer.incorrect-input, .static-user-answer.incorrect-input { background-color: #fce8e6 !important; color: #721c24 !important;}
 
             .solution-steps {
                 background-color: #fff !important; 
                 border: 1px solid #ccc !important;
                 display: block !important; 
             }
+             .user-answer { display: none !important; }
+             .static-user-answer { display: inline-block !important; }
         }
     </style>
 </head>
@@ -230,13 +258,10 @@
             if (!n) return 'Error(null/undef_fmtNum)'; 
             if (n.isFraction) {
                 if (preferDecimalForOriginal && n.originalDecimalValue !== undefined) {
-                    // Show original easy decimal if it was one, e.g. "2.5" not "5/2"
                     const easyDecimalString = n.originalDecimalValue.toString();
-                    if (/^-?\d+\.\d$/.test(easyDecimalString) || /^-?\d+$/.test(easyDecimalString)) { // Ends in .x or is integer
-                         // Check if it's a simple decimal like x.0, x.1, x.2, x.5
+                    if (/^-?\d+\.\d$/.test(easyDecimalString) || /^-?\d+$/.test(easyDecimalString)) { 
                         if (easyDecimalString.endsWith(".0")) {
-                           // return easyDecimalString.slice(0,-2); // "2" from "2.0" - but toFraction already handles this if den=1
-                        } else if (/\.\d$/.test(easyDecimalString)) { // ends in .<digit>
+                        } else if (/\.\d$/.test(easyDecimalString)) { 
                            return easyDecimalString;
                         }
                     }
@@ -258,7 +283,6 @@
         function formatBaseForExponent(baseFraction, preferDecimal = false) {
             if (!baseFraction) return '(ErrorBase)';
             const formattedBase = formatNumber(baseFraction, false, preferDecimal);
-            // Parenthesize if negative, a fraction, or a decimal string that includes "."
             if (baseFraction.num < 0 || 
                 (baseFraction.den !== 1 && baseFraction.den !== 0) || 
                 (typeof baseFraction.originalDecimalValue === 'number' && formatNumber(baseFraction,false,true).includes('.'))
@@ -284,16 +308,15 @@
         function toFraction(numInput) {
             if (typeof numInput === 'object' && numInput.isFraction) return numInput; 
             
-            let originalNumInputStr = String(numInput); // Store original string form for decimals
+            let originalNumInputStr = String(numInput); 
             let num = Number(numInput);
             let originalDecimalValue = undefined;
 
             if (originalNumInputStr.includes('.') && !originalNumInputStr.includes('e')) { 
                 originalDecimalValue = parseFloat(originalNumInputStr); 
             } else if (typeof numInput === 'number' && numInput % 1 !== 0) { 
-                 originalDecimalValue = numInput; // If input was already a float number
+                 originalDecimalValue = numInput; 
             }
-
 
             if (Number.isNaN(num)) {
                 return { num: 0, den: 0, isFraction: true, value: NaN, error: "NaN input", originalDecimalValue };
@@ -305,8 +328,8 @@
                  return { num: -1, den: 0, isFraction: true, value: -Infinity, originalDecimalValue };
             }
 
-            if (num % 1 !== 0) { // If it's a float
-                let s = num.toString(); // Use the Number's string representation for calculation
+            if (num % 1 !== 0) { 
+                let s = num.toString(); 
                 if (s.includes('e')) { 
                     const parts = s.split('e');
                     const significand = parseFloat(parts[0]);
@@ -321,10 +344,8 @@
                     } else { 
                         denominator *= Math.pow(10, Math.abs(exponent));
                     }
-                    // For e-notation, originalDecimalValue might not be the simple "x.y" form
                     return { ...simplifyFraction(Math.round(numerator), Math.round(denominator)), originalDecimalValue: num };
                 }
-                // For regular decimals, check original string for decimal places
                 if (originalNumInputStr.includes('.')) {
                     const decimalPlaces = originalNumInputStr.split('.')[1].length;
                     const denominator = Math.pow(10, decimalPlaces);
@@ -332,7 +353,6 @@
                     return { ...simplifyFraction(numerator, denominator), originalDecimalValue };
                 }
             }
-            // If it's an integer or became an integer
             return { num: Math.round(num), den: 1, isFraction: true, value: Math.round(num), originalDecimalValue };
         }
 
@@ -389,54 +409,51 @@
             const { min = -9, max = 9, forceFraction = false, nonZero = false, perfectSquare = false, allowDecimal = true } = options;
 
             if (perfectSquare) {
-                const bases = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // Keep perfect squares simple
+                const bases = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
                 const base = getRandomItem(bases);
                 let val = base * base;
-                 // nonZero check for perfectSquare is generally not needed as bases are non-zero.
                 return toFraction(val);
             }
 
-            let value; // This will hold the fraction object
+            let value; 
             const typeRoll = Math.random();
 
             if (forceFraction) {
-                let den = getRandomItem([2, 3, 4, 5, 10]); // Denominators for simple/easy decimal-like fractions
+                let den = getRandomItem([2, 3, 4, 5, 10]); 
                 let numLimit = den * 2; 
-                let num = getRandomInt(1, numLimit); // Start with positive numerator
-                if (Math.random() < 0.4 && (min < 0 || max < 0 || (min < 0 && max > 0)) ) num *= -1; // Allow negative if range supports negatives
+                let num = getRandomInt(1, numLimit); 
+                if (Math.random() < 0.4 && (min < 0 || max < 0 || (min < 0 && max > 0)) ) num *= -1; 
                 value = simplifyFraction(num, den);
-            } else if (typeRoll < 0.65) { // 65% Integers
+            } else if (typeRoll < 0.65) { 
                 value = toFraction(getRandomInt(min, max));
-            } else if (allowDecimal && typeRoll < 0.90) { // 25% Easy Decimals
-                let intPartMin = Math.max(min, -7); // Keep integer part of decimal generally small
+            } else if (allowDecimal && typeRoll < 0.90) { 
+                let intPartMin = Math.max(min, -7); 
                 let intPartMax = Math.min(max, 7);
-                if (intPartMin > intPartMax && min <= max) { // If overall min/max is narrow and outside -7 to 7
+                if (intPartMin > intPartMax && min <= max) { 
                     intPartMin = min; intPartMax = max;
-                } else if (intPartMin > intPartMax) { // Fallback if min/max were crossed due to -7/7
+                } else if (intPartMin > intPartMax) { 
                      intPartMin = -1; intPartMax = 1;
                 }
                 
                 let intPart = getRandomInt(intPartMin, intPartMax);
                 let decDigit;
                 const decRoll = Math.random();
-                if (decRoll < 0.5) decDigit = 5;       // .5 (50%)
-                else if (decRoll < 0.8) decDigit = getRandomItem([1, 2]); // .1, .2 (30%)
-                else decDigit = getRandomItem([3, 4, 6, 7, 8, 9]); // others (20%)
+                if (decRoll < 0.5) decDigit = 5;       
+                else if (decRoll < 0.8) decDigit = getRandomItem([1, 2]); 
+                else decDigit = getRandomItem([3, 4, 6, 7, 8, 9]); 
                 
-                // Construct as string to preserve ".0" if intPart was, e.g., 2 and decDigit was 0 (not currently possible with decDigit items)
                 let decimalString = `${intPart}.${decDigit}`;
-                value = toFraction(decimalString); // Pass string to toFraction
-            } else { // 10% Simple Fractions (or if !allowDecimal and decimal was rolled)
+                value = toFraction(decimalString); 
+            } else { 
                 let den = getRandomItem([2, 3, 4, 5]);
-                let numLimit = den; // Numerators generally <= denominator for "simple"
+                let numLimit = den; 
                 if (Math.random() < 0.3) numLimit = Math.floor(den * 1.5); 
                 let num = getRandomInt(1, numLimit);
                 if (Math.random() < 0.4 && (min < 0 || max < 0 || (min < 0 && max > 0))) num *= -1;
                 value = simplifyFraction(num, den);
             }
 
-            // Final nonZero check
-            if (nonZero && value.num === 0 && value.den !== 0) { // Finite zero
+            if (nonZero && value.num === 0 && value.den !== 0) { 
                 const wasLikelyDecimal = (typeRoll >= 0.65 && typeRoll < 0.90 && allowDecimal && !forceFraction);
                 const wasLikelyFraction = forceFraction || (typeRoll >= 0.90 && !forceFraction);
 
@@ -444,11 +461,10 @@
                     value = toFraction(getRandomItem([-0.5, -0.2, -0.1, 0.1, 0.2, 0.5]));
                 } else if (wasLikelyFraction) {
                      value = simplifyFraction(getRandomItem([-1,1]), getRandomItem([2,3,4,5]));
-                } else { // Was integer
-                    value = toFraction(getRandomItem([-2,-1,1,2])); // একটু বড় integer 
+                } else { 
+                    value = toFraction(getRandomItem([-2,-1,1,2])); 
                 }
-                // Ensure the new non-zero value is within reason or clamped if min/max are very restrictive
-                if (value.value > max && max !== 0 && Math.abs(max) < 20) value = toFraction(max); // Avoid large jumps if max is small
+                if (value.value > max && max !== 0 && Math.abs(max) < 20) value = toFraction(max); 
                 else if (value.value < min && min !== 0 && Math.abs(min) < 20) value = toFraction(min);
             }
             return value;
@@ -459,28 +475,26 @@
             let base, exp;
             const expType = Math.random();
             if (expType < 0.35) { 
-                exp = getRandomInt(-2, -1); // Simpler negative exponents
-                // Base for negative exponent: prefer integers or simple decimals, must be non-zero
+                exp = getRandomInt(-2, -1); 
                 base = generateOperand({min: -5, max: 5, nonZero: true, allowDecimal: true}); 
             } else if (expType < 0.55) { 
                 exp = 0;
                 base = generateOperand({min: -7, max: 7, allowDecimal: true}); 
             } else { 
-                exp = getRandomInt(2, 3); // Simpler positive exponents (1 is often trivial)
+                exp = getRandomInt(2, 3); 
                 base = generateOperand({min: -7, max: 7, allowDecimal: true});
             }
             return { base, exp };
         }
         
         const problemTemplates = [
-            // template1 removed
             function template2() { 
-                const A_frac = generateOperand({forceFraction: true, allowDecimal: false}); // Keep this as a clear fraction
+                const A_frac = generateOperand({forceFraction: true, allowDecimal: false}); 
                 const B_int = generateOperand({min: 1, max: 5, nonZero: true, allowDecimal: false}); 
                 const C = generateOperand({min: -4, max: 4, allowDecimal: true});
                 const D_neg = generateOperand({min: -7, max: -1, allowDecimal: true});
                 let {base: E_base, exp: E_exp} = generatePowerOperands(); 
-                if (E_base.num === 0 && E_exp < 0) E_exp = getRandomInt(0,2); // Avoid 0^-ve
+                if (E_base.num === 0 && E_exp < 0) E_exp = getRandomInt(0,2); 
 
                 this.steps.push(`1. Division inside absolute value: <span class="highlight-op">${formatNumber(A_frac, false, true)} &divide; ${formatNumber(B_int, false, true)}</span>`);
                 let val_div_AB = divFrac(A_frac, B_int);
@@ -518,7 +532,7 @@
                 let {base: A, exp: exp_A} = generatePowerOperands();
                 if (A.num === 0 && exp_A < 0) exp_A = getRandomInt(0,2);
 
-                const B_frac = generateOperand({forceFraction: true, allowDecimal: true}); // Allow simple decimal-like fractions here too
+                const B_frac = generateOperand({forceFraction: true, allowDecimal: true}); 
                 const C_frac = generateOperand({forceFraction: true, nonZero: true, allowDecimal: true}); 
                 
                 let {base: D, exp: exp_D} = generatePowerOperands();
@@ -608,10 +622,10 @@
                 let {base: B, exp: exp1} = generatePowerOperands();
                 if (B.num === 0 && exp1 < 0) exp1 = getRandomInt(0,2);
 
-                const C_sqrt_base_val = getRandomItem([1,2,3,4,5,6,7]); // Simpler perfect squares for sqrt
+                const C_sqrt_base_val = getRandomItem([1,2,3,4,5,6,7]); 
                 const C_sqrt_val_frac = toFraction(C_sqrt_base_val * C_sqrt_base_val);
 
-                const D_frac = generateOperand({forceFraction: true, allowDecimal: true}); // Allow simple decimal-like fractions
+                const D_frac = generateOperand({forceFraction: true, allowDecimal: true}); 
                 const E = generateOperand({min: -5, max: 5, allowDecimal: true});
                 const F = generateOperand({min: -5, max: 5, allowDecimal: true});
                 
@@ -671,10 +685,10 @@
             function template6() {
                 const G_neg = generateOperand({min: -10, max: -1, allowDecimal: true});
                 const H = generateOperand({min: -5, max: 5, allowDecimal: true});
-                const I_frac = generateOperand({forceFraction: true, allowDecimal: true}); // Allow simple decimal-like fractions
+                const I_frac = generateOperand({forceFraction: true, allowDecimal: true}); 
                 const J_op = generateOperand({min: -7, max: 7, allowDecimal: true}); 
                 const K_val_for_abs = generateOperand({min: -9, max: 9, allowDecimal: true}); 
-                const exp_neg = getRandomInt(-2, -1); // Keep as negative exponent
+                const exp_neg = getRandomInt(-2, -1); 
 
                 this.steps.push(`1. Innermost absolute value: <span class="highlight-op">|${formatNumber(K_val_for_abs, false, true)}|</span>`);
                 const val_K_abs = absFrac(K_val_for_abs);
@@ -805,11 +819,11 @@
             showSolutionsBtn.disabled = false; 
 
             let problemsSuccessfullyGenerated = 0;
-            const targetProblemCount = problemTemplates.length; // Now 5
+            const targetProblemCount = problemTemplates.length; 
 
             for (let i = 0; i < targetProblemCount; i++) {
                 const currentTemplateFn = problemTemplates[i];
-                const problemNumber = i + 1; // Problem numbers 1-5
+                const problemNumber = i + 1; 
                 let generated = null;
 
                 try {
@@ -822,7 +836,7 @@
                 listItem.innerHTML = `<span class="problem-number">${problemNumber}.</span>`;
 
                 if (!generated || generated.answer === undefined || generated.answer.value === undefined) {
-                    listItem.innerHTML += `<span class="problem-expression" style="color:orange;">Could not generate a valid problem for this type (Template: ${currentTemplateFn.name || 'Type '+(i+2)}). Please try "Generate New Problems" again.</span>`;
+                    listItem.innerHTML += `<span class="problem-expression" style="color:orange;">Could not generate a valid problem for this type (Template: ${currentTemplateFn.name || 'Type '+(i+1)}). Please try "Generate New Problems" again.</span>`;
                 } else {
                     const { problemHTML, stepsHTML, answer } = generated;
                     listItem.innerHTML += `
@@ -844,6 +858,72 @@
             }
         }
         
+        function getTimestampYYMMDD() {
+            const date = new Date();
+            const year = date.getFullYear().toString().slice(-2);
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}${month}${day}`;
+        }
+
+        function generateAndDownloadStaticPage() {
+            const clonedDocElement = document.documentElement.cloneNode(true);
+
+            const scripts = clonedDocElement.querySelectorAll('script');
+            scripts.forEach(script => script.remove());
+
+            const controls = clonedDocElement.querySelector('.controls-container');
+            if (controls) {
+                controls.remove();
+            }
+
+            const problemItemsCloned = clonedDocElement.querySelectorAll('.problem-list > li');
+            problemItemsCloned.forEach(item => {
+                const inputField = item.querySelector('.user-answer');
+                if (inputField) {
+                    const staticAnswerSpan = document.createElement('span');
+                    // Get value from the *original* input field on the live page before cloning
+                    const originalInputField = document.getElementById(inputField.id); // Assuming inputs might get IDs if needed, or traverse by structure
+                                                                                    // For this specific setup, class and order is enough if we link items
+                    const originalProblemLi = inputField.closest('li');
+                    const livePageInput = Array.from(document.querySelectorAll('.problem-list > li')).find(
+                        li => li.querySelector('.problem-number')?.textContent === originalProblemLi.querySelector('.problem-number')?.textContent
+                    )?.querySelector('.user-answer');
+                    
+                    staticAnswerSpan.textContent = livePageInput ? livePageInput.value : inputField.value ; 
+                    
+                    staticAnswerSpan.classList.add('static-user-answer'); 
+                    if (inputField.classList.contains('correct-input')) { // Classes on the cloned input
+                        staticAnswerSpan.classList.add('correct-input');
+                    } else if (inputField.classList.contains('incorrect-input')) {
+                        staticAnswerSpan.classList.add('incorrect-input');
+                    }
+                    inputField.parentNode.replaceChild(staticAnswerSpan, inputField);
+                }
+
+                const solutionDiv = item.querySelector('.solution-steps');
+                if (solutionDiv) {
+                    solutionDiv.style.display = 'block'; 
+                }
+                item.classList.add('solutions-shown'); 
+            });
+            
+            let staticHtml = '<!DOCTYPE html>\n' + clonedDocElement.outerHTML;
+
+            const timestamp = getTimestampYYMMDD();
+            const filename = `OrderOfOperationsPractice_${timestamp}.html`;
+
+            const blob = new Blob([staticHtml], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a); 
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
         function checkAndShowSolutions() { 
             const problemItems = problemListContainer.querySelectorAll('li');
             
@@ -887,7 +967,9 @@
                 item.classList.add('solutions-shown'); 
             });
             
-            showSolutionsBtn.textContent = 'Solutions Shown / Answers Checked';
+            generateAndDownloadStaticPage(); // Call to save the static page
+
+            showSolutionsBtn.textContent = 'Solutions Shown / Answers Checked & Saved'; // Updated button text
             showSolutionsBtn.disabled = true; 
         }
 
