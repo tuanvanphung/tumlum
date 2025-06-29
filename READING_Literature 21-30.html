@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading: Literature (Set 2)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        h2 {
+            color: #3498db;
+        }
+
+        .tab-nav {
+            overflow: hidden;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 20px;
+            padding-bottom: 5px;
+        }
+
+        .tab-nav button {
+            float: left;
+            background-color: inherit;
+            border: 1px solid #ccc;
+            margin: 2px;
+            outline: none;
+            cursor: pointer;
+            padding: 10px 14px;
+            transition: 0.3s;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        .tab-nav button:hover {
+            background-color: #ddd;
+        }
+
+        .tab-nav button.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+       
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .excerpt {
+            background-color: #f9f9f9;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            font-style: italic;
+            color: #555;
+            white-space: pre-wrap;
+        }
+
+        .question {
+            margin-bottom: 25px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .options label {
+            display: block;
+            margin: 5px 0 5px 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .options label:hover {
+            background-color: #ecf0f1;
+        }
+
+        .options input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        #calculate-btn {
+            display: block;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 12px 25px;
+            margin: 20px auto;
+            cursor: pointer;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        #calculate-btn:hover {
+            background-color: #27ae60;
+        }
+
+        #results-display p {
+            font-size: 1.1em;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            background-color: #fdfdfd;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Reading: Literature (Set 2)</h1>
+
+        <div class="tab-nav">
+            <button class="tab-button" onclick="openTab(event, 'test1')" id="defaultOpen">1. Fiction: A Wrinkle in Time</button>
+            <button class="tab-button" onclick="openTab(event, 'test2')">2. Fiction: The Hunger Games</button>
+            <button class="tab-button" onclick="openTab(event, 'test3')">3. Fiction: Roll of Thunder...</button>
+            <button class="tab-button" onclick="openTab(event, 'test4')">4. Fiction: The Call of the Wild</button>
+            <button class="tab-button" onclick="openTab(event, 'test5')">5. Drama: The Miracle Worker</button>
+            <button class="tab-button" onclick="openTab(event, 'test6')">6. Drama: The Crucible</button>
+            <button class="tab-button" onclick="openTab(event, 'test7')">7. Drama: Twelve Angry Men</button>
+            <button class="tab-button" onclick="openTab(event, 'test8')">8. Poetry: O Captain! My Captain!</button>
+            <button class="tab-button" onclick="openTab(event, 'test9')">9. Poetry: Hope is the thing...</button>
+            <button class="tab-button" onclick="openTab(event, 'test10')">10. Poetry: Casey at the Bat</button>
+            <button class="tab-button" onclick="openTab(event, 'results')">Results</button>
+        </div>
+
+        <!-- FICTION -->
+        <div id="test1" class="tab-pane">
+            <h2>1. Fiction: from A Wrinkle in Time by Madeleine L'Engle</h2>
+            <div class="excerpt">They walked down a long, white corridor. The walls were smooth and seamless. The children's footsteps made no sound. It was like walking on a cloud. At the end of the corridor was a large, circular room. In the center of the room was a platform, and on the platform was a chair. And in the chair sat a man.
+
+He was a small man, with a thin, gray mustache. He wore a gray suit and a gray tie. His face was gray, and his eyes were gray, and they were the coldest, most frightening eyes Meg had ever seen. "Good afternoon, children," he said, his voice as colorless as his suit. "I am the Prime Coordinator. Welcome to Camazotz."
+
+Meg felt a cold dread creep over her. There was something terribly wrong with this man, with this place. She looked at Charles Wallace and saw that he was pale, his blue eyes wide with a fear she had never seen in him before.
+
+The man smiled, a thin, tight smile that did not reach his eyes. "We are a peaceful planet," he said. "We have conquered all illness, all deformity, all suffering. Here, everyone is the same. Everyone is happy."
+
+"But they're not happy," Charles Wallace whispered, his voice shaking. "They're not really alive."
+
+"Alive?" the Prime Coordinator said, his smile widening. "Of course they are alive. They are the most alive people in the universe. They have given up their individuality, their little quirks and differences, for the sake of the whole. They are one mind, one body. They are IT."
+
+He pointed a long, gray finger at them. "And soon, you will be one with us. You will be happy. You will be free from the burden of choice."
+
+Meg grabbed Charles Wallace's hand. "No," she said, her voice a fierce whisper. "We won't." She could feel a strange, rhythmic pulsing in the air, a pulsing that seemed to want to draw her in, to make her forget who she was. It was the pulsing of IT, and she knew, with a certainty that chilled her to the bone, that she had to fight it.</div>
+            <div class="question" id="q-1-1"><p class="question-text">1. The primary purpose of this passage is to:</p><div class="options"><label><input type="radio" name="q-1-1-options" value="A"> A. describe the futuristic architecture of the planet Camazotz.</label><label><input type="radio" name="q-1-1-options" value="B"> B. introduce the antagonist and the central conflict of conformity versus individuality.</label><label><input type="radio" name="q-1-1-options" value="C"> C. showcase the advanced technology of the Prime Coordinator.</label><label><input type="radio" name="q-1-1-options" value="D"> D. explain the history of how Camazotz conquered suffering.</label></div></div>
+            <div class="question" id="q-1-2"><p class="question-text">2. The word <b>seamless</b> used to describe the walls means:</p><div class="options"><label><input type="radio" name="q-1-2-options" value="A"> A. brightly colored.</label><label><input type="radio" name="q-1-2-options" value="B"> B. covered in pictures.</label><label><input type="radio" name="q-1-2-options" value="C"> C. having no visible joints or lines.</label><label><input type="radio" name="q-1-2-options" value="D"> D. rough and uneven.</label></div></div>
+            <div class="question" id="q-1-3"><p class="question-text">3. The Prime Coordinator's definition of "happiness" is best described as:</p><div class="options"><label><input type="radio" name="q-1-3-options" value="A"> A. the freedom to make one's own choices.</label><label><input type="radio" name="q-1-3-options" value="B"> B. the experience of a wide range of emotions.</label><label><input type="radio" name="q-1-3-options" value="C"> C. the elimination of individuality and free will for the sake of order.</label><label><input type="radio" name="q-1-3-options" value="D"> D. the pursuit of knowledge and truth.</label></div></div>
+            <div class="question" id="q-1-4"><p class="question-text">4. The "rhythmic pulsing" that Meg feels is a physical manifestation of:</p><div class="options"><label><input type="radio" name="q-1-4-options" value="A"> A. her own heartbeat.</label><label><input type="radio" name="q-1-4-options" value="B"> B. the planet's power source.</label><label><input type="radio" name="q-1-4-options" value="C"> C. the controlling, mind-numbing power of IT.</label><label><input type="radio" name="q-1-4-options" value="D"> D. a piece of music playing in the room.</label></div></div>
+            <div class="question" id="q-1-5"><p class="question-text">5. What does Charles Wallace mean when he says the people are "not really alive"?</p><div class="options"><label><input type="radio" name="q-1-5-options" value="A"> A. He believes they are all robots or illusions.</label><label><input type="radio" name="q-1-5-options" value="B"> B. He means that a life without free will, emotion, and individuality is not a true life.</label><label><input type="radio" name="q-1-5-options" value="C"> C. He thinks they are all asleep or in a trance.</label><label><input type="radio" name="q-1-5-options" value="D"> D. He is confused and doesn't know what he is saying.</label></div></div>
+            <div class="question" id="q-1-6"><p class="question-text">6. The repetition of the color "gray" in the description of the Prime Coordinator is used to create a tone of:</p><div class="options"><label><input type="radio" name="q-1-6-options" value="A"> A. warmth and comfort.</label><label><input type="radio" name="q-1-6-options" value="B"> B. excitement and energy.</label><label><input type="radio" name="q-1-6-options" value="C"> C. lifelessness, conformity, and emotional coldness.</label><label><input type="radio" name="q-1-6-options" value="D"> D. dignity and authority.</label></div></div>
+            <div class="question" id="q-1-7"><p class="question-text">7. The central theme explored in this passage is:</p><div class="options"><label><input type="radio" name="q-1-7-options" value="A"> A. the importance of obedience to authority.</label><label><input type="radio" name="q-1-7-options" value="B"> B. the beauty of a perfectly orderly society.</label><label><input type="radio" name="q-1-7-options" value="C"> C. the conflict between forced happiness and the freedom of choice.</label><label><input type="radio" name="q-1-7-options" value="D"> D. the dangers of space travel.</label></div></div>
+            <div class="question" id="q-1-8"><p class="question-text">8. What can be inferred about the society on Camazotz?</p><div class="options"><label><input type="radio" name="q-1-8-options" value="A"> A. It values creativity and artistic expression.</label><label><input type="radio" name="q-1-8-options" value="B"> B. It prizes individuality and personal freedom above all else.</label><label><input type="radio" name="q-1-8-options" value="C"> C. It has achieved order at the cost of personal liberty and emotion.</label><label><input type="radio" name="q-1-8-options" value="D"> D. It is a chaotic and disorganized place.</label></div></div>
+            <div class="question" id="q-1-9"><p class="question-text">9. The word <b>burden</b> in the phrase "the burden of choice" means:</p><div class="options"><label><input type="radio" name="q-1-9-options" value="A"> A. a joyous gift.</label><label><input type="radio" name="q-1-9-options" value="B"> B. a heavy load or responsibility.</label><label><input type="radio" name="q-1-9-options" value="C"> C. an easy decision.</label><label><input type="radio" name="q-1-9-options" value="D"> D. a moment of clarity.</label></div></div>
+            <div class="question" id="q-1-10"><p class="question-text">10. The passage ends on a note of:</p><div class="options"><label><input type="radio" name="q-1-10-options" value="A"> A. despair and surrender.</label><label><input type="radio" name="q-1-10-options" value="B"> B. confusion and uncertainty.</label><label><input type="radio" name="q-1-10-options" value="C"> C. fierce defiance and resolve.</label><label><input type="radio" name="q-1-10-options" value="D"> D. calm acceptance.</label></div></div>
+        </div>
+
+        <div id="test2" class="tab-pane">
+            <h2>2. Fiction: from The Hunger Games by Suzanne Collins</h2>
+            <div class="excerpt">When I was younger, I scared my mother to death, the things I would blurt out about District 12, about the people who rule our country, Panem, from the far-off city called the Capitol. Eventually I understood this would only lead us to more trouble. So I learned to hold my tongue and to turn my features into an indifferent mask so that no one could ever read my thoughts. I do my work, I trade my kills for money, and I keep my mouth shut.
+
+But today is the day of the reaping.
+
+Effie Trinket, our escort from the Capitol, stands on the stage, her face a plastic smile, her hair a frightening shade of pink. She pulls a slip of paper from the glass ball. "Primrose Everdeen!" she chirps.
+
+My little sister.
+
+Prim, who is the only person in the world I’m certain I love. Prim, who is as fragile as the flower she was named for. A wave of nausea washes over me. The crowd murmurs, a sea of gray faces turning to find the small girl who has been chosen. I see her, her small frame, her white shirttail untucked. She is walking to the stage.
+
+I reach her in a few steps. "Prim!" I cry out, and then I say the words that will change everything. "I volunteer! I volunteer as tribute!"
+
+There is a stir in the crowd. In District 12, where the word tribute is pretty much synonymous with corpse, volunteers are all but unheard of. The reaping is our punishment for a long-ago rebellion.
+
+Effie Trinket is momentarily taken aback. "A volunteer?" she says, her voice losing some of its artificial cheer.
+
+"That's right," I say, my voice steady, though my heart is hammering against my ribs. I walk past Prim, and I can feel her small hands clutching at my shirt. I force myself to the stage, to the place where my sister was supposed to stand. I can feel the eyes of the entire district on me, and for the first time in a long time, my mask has slipped. They can see everything.</div>
+            <div class="question" id="q-2-1"><p class="question-text">1. The primary purpose of this passage is to:</p><div class="options"><label><input type="radio" name="q-2-1-options" value="A"> A. describe the economy of District 12.</label><label><input type="radio" name="q-2-1-options" value="B"> B. explain the history of the country of Panem.</label><label><input type="radio" name="q-2-1-options" value="C"> C. establish the narrator's protective nature and the central conflict of the story.</label><label><input type="radio" name="q-2-1-options" value="D"> D. introduce the character of Effie Trinket.</label></div></div>
+            <div class="question" id="q-2-2"><p class="question-text">2. The narrator’s decision to volunteer reveals her character as being primarily:</p><div class="options"><label><input type="radio" name="q-2-2-options" value="A"> A. impulsive and reckless.</label><label><input type="radio" name="q-2-2-options" value="B"> B. attention-seeking and dramatic.</label><label><input type="radio" name="q-2-2-options" value="C"> C. resentful and angry toward her sister.</label><label><input type="radio" name="q-2-2-options" value="D"> D. fiercely protective, brave, and self-sacrificing.</label></div></div>
+            <div class="question" id="q-2-3"><p class="question-text">3. The word <b>indifferent</b> in the phrase "indifferent mask" means:</p><div class="options"><label><input type="radio" name="q-2-3-options" value="A"> A. happy and cheerful.</label><label><input type="radio" name="q-2-3-options" value="B"> B. having no particular interest or sympathy; unconcerned.</label><label><input type="radio" name="q-2-3-options" value="C"> C. angry and hostile.</label><label><input type="radio" name="q-2-3-options" value="D"> D. sad and mournful.</label></div></div>
+            <div class="question" id="q-2-4"><p class="question-text">4. The phrase "synonymous with corpse" implies that:</p><div class="options"><label><input type="radio" name="q-2-4-options" value="A"> A. being chosen as tribute is a great honor.</label><label><input type="radio" name="q-2-4-options" value="B"> B. the tributes are well-fed and cared for.</label><label><input type="radio" name="q-2-4-options" value="C"> C. being chosen as tribute is considered a death sentence.</label><label><input type="radio" name="q-2-4-options" value="D"> D. the tributes are already dead before they leave.</label></div></div>
+            <div class="question" id="q-2-5"><p class="question-text">5. What does the narrator's control over her "indifferent mask" reveal about her and her society?</p><div class="options"><label><input type="radio" name="q-2-5-options" value="A"> A. That she is a naturally unemotional person.</label><label><input type="radio" name="q-2-5-options" value="B"> B. That showing one's true thoughts and feelings is dangerous in her society.</label><label><input type="radio" name="q-2-5-options" value="C"> C. That she enjoys deceiving people.</label><label><input type="radio" name="q-2-5-options" value="D"> D. That people in her district value emotional control as a sign of strength.</label></div></div>
+            <div class="question" id="q-2-6"><p class="question-text">6. The contrast between Effie Trinket's "plastic smile" and the crowd's "sea of gray faces" highlights:</p><div class="options"><label><input type="radio" name="q-2-6-options" value="A"> A. the fashion differences between the districts.</label><label><input type="radio" name="q-2-6-options" value="B"> B. the general happiness of the people in District 12.</label><label><input type="radio" name="q-2-6-options" value="C"> C. the gap between the Capitol's artificial cheerfulness and the district's grim reality.</label><label><input type="radio" name="q-2-6-options" value="D"> D. the bad weather on the day of the reaping.</label></div></div>
+            <div class="question" id="q-2-7"><p class="question-text">7. From the passage, what can be inferred about the Capitol?</p><div class="options"><label><input type="radio" name="q-2-7-options" value="A"> A. It is a benevolent government that cares for its citizens.</label><label><input type="radio" name="q-2-7-options" value="B"> B. It is an oppressive and controlling regime that uses the reaping as a tool of fear.</label><label><input type="radio" name="q-2-7-options" value="C"> C. It is a poor and struggling city, just like the districts.</label><label><input type="radio" name="q-2-7-options" value="D"> D. It has little to no control over what happens in the districts.</label></div></div>
+            <div class="question" id="q-2-8"><p class="question-text">8. The narrator's heart "hammering against my ribs" despite her "steady" voice is an example of:</p><div class="options"><label><input type="radio" name="q-2-8-options" value="A"> A. her physical weakness.</label><label><input type="radio" name="q-2-8-options" value="B"> B. the contrast between her inner terror and her outward display of strength.</label><label><input type="radio" name="q-2-8-options" value="C"> C. her excitement about becoming a tribute.</label><label><input type="radio" name="q-2-8-options" value="D"> D. a medical condition.</label></div></div>
+            <div class="question" id="q-2-9"><p class="question-text">9. The word <b>reaping</b> is used to describe the selection of tributes. This word choice is ironic because reaping usually refers to harvesting crops, but here it refers to:</p><div class="options"><label><input type="radio" name="q-2-9-options" value="A"> A. a celebration of a good harvest.</label><label><input type="radio" name="q-2-9-options" value="B"> B. the planting of new seeds for the future.</label><label><input type="radio" name="q-2-9-options" value="C"> C. the harvesting of children for a deadly event.</label><label><input type="radio" name="q-2-9-options" value="D"> D. a reward for good behavior.</label></div></div>
+            <div class="question" id="q-2-10"><p class="question-text">10. The passage ends with the narrator's mask having "slipped." This suggests that:</p><div class="options"><label><input type="radio" name="q-2-10-options" value="A"> A. she is about to be punished for showing emotion.</label><label><input type="radio" name="q-2-10-options" value="B"> B. her act of love and defiance has made her emotionally vulnerable and visible to her community.</label><label><input type="radio" name="q-2-10-options" value="C"> C. she has forgotten her training and is now weak.</label><label><input type="radio" name="q-2-10-options" value="D"> D. she is physically smiling.</label></div></div>
+        </div>
+
+        <div id="test3" class="tab-pane">
+            <h2>3. Fiction: from Roll of Thunder, Hear My Cry by Mildred D. Taylor</h2>
+            <div class="excerpt">By the time we reached the crossroads, the dust was settling, and we could see the Jefferson Davis school bus, a glorious vehicle of red and gold, churning up a fresh cloud of dust as it headed toward Strawberry. The bus driver, a fat, grumpy man, liked to entertain himself by spraying us with dust. Every morning, we would step off the road and wait for the bus to pass. And every morning, he would slow down, then speed up, sending a wave of red dust and mud flying in our direction.
+
+My little brother, Little Man, who was only six and a half, was meticulous about his appearance. His clothes had to be perfectly clean, his shoes polished. The daily dose of dirt was a constant source of agony for him.
+
+Today was different. A heavy rain the night before had left the road a mess of slick, red mud. We were walking single file, trying to stay on the high, grassy bank, when we heard the bus. We scrambled up as high as we could, but it wasn't high enough. The bus driver slowed, just as he always did, and then, with a malevolent grin, he veered close to the bank and accelerated. A wall of muddy water shot up, drenching us from head to toe.
+
+Little Man stood frozen, his face a mask of disbelief. His brand-new suit, his first day of school suit, was splattered with mud. He looked down at himself, then back at the disappearing bus. A low, guttural cry of outrage escaped him.
+
+"It ain't fair," he wailed. "It just ain't fair."
+
+I put my arm around him. "I know, Little Man. I know." But I was thinking about more than just the mud. I was thinking about the Jefferson Davis school bus, and the white children who rode it, laughing at us. And I was thinking that maybe, just maybe, there was something we could do about it. The wheels of my mind began to turn.</div>
+            <div class="question" id="q-3-1"><p class="question-text">1. The central conflict presented in this passage is between:</p><div class="options"><label><input type="radio" name="q-3-1-options" value="A"> A. the narrator and her brother, Little Man.</label><label><input type="radio" name="q-3-1-options" value="B"> B. the children's desire to be clean and the muddy conditions of the road.</label><label><input type="radio" name="q-3-1-options" value="C"> C. the Logan children and the systemic injustice and racism symbolized by the school bus.</label><label><input type="radio" name="q-3-1-options" value="D"> D. the bus driver and his employer, the school district.</label></div></div>
+            <div class="question" id="q-3-2"><p class="question-text">2. The word <b>meticulous</b> used to describe Little Man means he is:</p><div class="options"><label><input type="radio" name="q-3-2-options" value="A"> A. loud and boisterous.</label><label><input type="radio" name="q-3-2-options" value="B"> B. very careful and precise about details.</label><label><input type="radio" name="q-3-2-options" value="C"> C. careless and messy.</label><label><input type="radio" name="q-3-2-options" value="D"> D. shy and quiet.</label></div></div>
+            <div class="question" id="q-3-3"><p class="question-text">3. The bus being named for Jefferson Davis is significant because he was:</p><div class="options"><label><input type="radio" name="q-3-3-options" value="A"> A. the President of the Confederacy, which reinforces the racial hierarchy of the setting.</label><label><input type="radio" name="q-3-3-options" value="B"> B. a famous inventor of school buses.</label><label><input type="radio" name="q-3-3-options" value="C"> C. the founder of the town of Strawberry.</label><label><input type="radio" name="q-3-3-options" value="D"> D. a proponent of equal rights and education.</label></div></div>
+            <div class="question" id="q-3-4"><p class="question-text">4. The narrator's final thought, "the wheels of my mind began to turn," suggests that she is:</p><div class="options"><label><input type="radio" name="q-3-4-options" value="A"> A. planning to tell her parents what happened.</label><label><input type="radio" name="q-3-4-options" value="B"> B. beginning to formulate a plan for revenge or justice.</label><label><input type="radio" name="q-3-4-options" value="C"> C. feeling dizzy from the shock of the event.</label><label><input type="radio" name="q-3-4-options" value="D"> D. deciding to drop out of school.</label></div></div>
+            <div class="question" id="q-3-5"><p class="question-text">5. The bus driver's actions can be best described as:</p><div class="options"><label><input type="radio" name="q-3-5-options" value="A"> A. accidental and careless.</label><label><input type="radio" name="q-3-5-options" value="B"> B. deliberately cruel and malicious.</label><label><input type="radio" name="q-3-5-options" value="C"> C. friendly and playful.</label><label><input type="radio" name="q-3-5-options" value="D"> D. professional and efficient.</label></div></div>
+            <div class="question" id="q-3-6"><p class="question-text">6. The word <b>malevolent</b> in the third paragraph means:</p><div class="options"><label><input type="radio" name="q-3-6-options" value="A"> A. cheerful.</label><label><input type="radio" name="q-3-6-options" value="B"> B. careless.</label><label><input type="radio" name="q-3-6-options" value="C"> C. having or showing a wish to do evil to others.</label><label><input type="radio" name="q-3-6-options" value="D"> D. tired.</label></div></div>
+            <div class="question" id="q-3-7"><p class="question-text">7. What does this passage reveal about the societal structure of the setting?</p><div class="options"><label><input type="radio" name="q-3-7-options" value="A"> A. All children are treated equally and have access to the same resources.</label><label><input type="radio" name="q-3-7-options" value="B"> B. There is a clear and enforced racial segregation, with white children having privileges (like a bus) denied to Black children.</label><label><input type="radio" name="q-3-7-options" value="C"> C. The community places a high value on education for all its children.</label><label><input type="radio" name="q-3-7-options" value="D"> D. The bus system is inefficient and serves no one well.</label></div></div>
+            <div class="question" id="q-3-8"><p class="question-text">8. Little Man’s focus on his clean clothes symbolizes a desire for:</p><div class="options"><label><input type="radio" name="q-3-8-options" value="A"> A. wealth and expensive things.</label><label><input type="radio" name="q-3-8-options" value="B"> B. attention from his older siblings.</label><label><input type="radio" name="q-3-8-options" value="C"> C. dignity, respect, and order in a world that denies him these things.</label><label><input type="radio" name="q-3-8-options" value="D"> D. a career in the fashion industry.</label></div></div>
+            <div class="question" id="q-3-9"><p class="question-text">9. The author's tone in this passage is:</p><div class="options"><label><input type="radio" name="q-3-9-options" value="A"> A. lighthearted and humorous.</label><label><input type="radio" name="q-3-9-options" value="B"> B. detached and unemotional.</label><label><input type="radio" name="q-3-9-options" value="C"> C. a mix of simmering indignation and budding defiance.</label><label><input type="radio" name="q-3-9-options" value="D"> D. nostalgic and sentimental.</label></div></div>
+            <div class="question" id="q-3-10"><p class="question-text">10. The "glorious vehicle of red and gold" is an example of irony because:</p><div class="options"><label><input type="radio" name="q-3-10-options" value="A"> A. the bus is actually old and falling apart.</label><label><input type="radio" name="q-3-10-options" value="B"> B. the narrator secretly wants to ride the bus.</label><label><input type="radio" name="q-3-10-options" value="C"> C. for the Logan children, this "glorious" object is a source of daily humiliation and injustice.</label><label><input type="radio" name="q-3-10-options" value="D"> D. the colors red and gold are the school's colors.</label></div></div>
+        </div>
+
+        <div id="test4" class="tab-pane">
+            <h2>4. Fiction: from The Call of the Wild by Jack London</h2>
+            <div class="excerpt">There is an ecstasy that marks the summit of life, and beyond which life cannot rise. And such is the paradox of living, this ecstasy comes when one is most alive, and it comes as a complete forgetfulness that one is alive. This ecstasy, this forgetfulness of living, comes to the artist, caught up and out of himself in a sheet of flame; it comes to the soldier, war-mad on a stricken field and refusing quarter; and it came to Buck, leading the pack, sounding the old wolf-cry, straining his muscles against the grim frost, and his heart bursting with a mighty joy.
+
+He was a killer, a thing that preyed, living on the things that lived, unaided, alone, by virtue of his own strength and prowess, surviving triumphantly in a hostile environment where only the strong survived. Because of all this he became possessed of a great pride in himself, which communicated itself like a contagion to his physical being. It advertised itself in all his movements, was apparent in the play of every muscle, spoke plainly as speech in the way he carried himself.
+
+He was mastered by the sheer surging of life, the tidal wave of being, the perfect joy of each separate muscle, joint, and sinew in that it was everything that was not death, that it was aglow and rampant, expressing itself in movement, flying exultantly under the stars.
+
+"I'm going to kill you," he growled, "but I'm going to play with you first."
+
+It was a strange scene. The man, a creature of a another world, was being hunted by this creature of the wild. Buck was a live hurricane of fury, bounding in and out, teasing, growling, his brilliant eyes flashing. He was playing with the man as a cat plays with a mouse. But this was a cat that could kill a man. And Buck was not playing. He was learning. He was remembering.</div>
+            <div class="question" id="q-4-1"><p class="question-text">1. The central theme of this passage is:</p><div class="options"><label><input type="radio" name="q-4-1-options" value="A"> A. the cruelty of man towards animals.</label><label><input type="radio" name="q-4-1-options" value="B"> B. Buck's transformation from a domesticated dog into a primal, instinct-driven creature.</label><label><input type="radio" name="q-4-1-options" value="C"> C. the beauty and tranquility of the natural world.</label><label><input type="radio" name="q-4-1-options" value="D"> D. the importance of teamwork and cooperation for survival.</label></div></div>
+            <div class="question" id="q-4-2"><p class="question-text">2. The word <b>ecstasy</b> as used in the first paragraph means:</p><div class="options"><label><input type="radio" name="q-4-2-options" value="A"> A. extreme fear.</label><label><input type="radio" name="q-4-2-options" value="B"> B. profound sadness.</label><label><input type="radio" name="q-4-2-options" value="C"> C. overwhelming joy or delight.</label><label><input type="radio" name="q-4-2-options" value="D"> D. calm indifference.</label></div></div>
+            <div class="question" id="q-4-3"><p class="question-text">3. The author compares Buck's ecstasy to that of an artist and a soldier in order to:</p><div class="options"><label><input type="radio" name="q-4-3-options" value="A"> A. show that Buck is more civilized than he appears.</label><label><input type="radio" name="q-4-3-options" value="B"> B. suggest that Buck is engaged in a creative or warlike act.</label><label><input type="radio" name="q-4-3-options" value="C"> C. prove that animals have the same emotions as humans.</label><label><input type="radio" name="q-4-3-options" value="D"> D. elevate Buck's primal experience to a universal, peak moment of existence.</label></div></div>
+            <div class="question" id="q-4-4"><p class="question-text">4. The phrase "sounding the old wolf-cry" indicates that Buck is:</p><div class="options"><label><input type="radio" name="q-4-4-options" value="A"> A. imitating a wolf to scare away other animals.</label><label><input type="radio" name="q-4-4-options" value="B"> B. connecting with his ancient, wild ancestry.</label><label><input type="radio" name="q-4-4-options" value="C"> C. crying out in pain and loneliness.</label><label><input type="radio" name="q-4-4-options" value="D"> D. trying to communicate with humans.</label></div></div>
+            <div class="question" id="q-4-5"><p class="question-text">5. What does the author mean by "the paradox of living, this ecstasy comes when one is most alive, and it comes as a complete forgetfulness that one is alive"?</p><div class="options"><label><input type="radio" name="q-4-5-options" value="A"> A. That life and death are the same thing.</label><label><input type="radio" name="q-4-5-options" value="B"> B. That to be fully immersed in a peak experience, one loses self-consciousness and acts on pure instinct.</label><label><input type="radio" name="q-4-5-options" value="C"> C. That being truly alive is a forgettable experience.</label><label><input type="radio" name="q-4-5-options" value="D"> D. That only soldiers and artists can truly feel alive.</label></div></div>
+            <div class="question" id="q-4-6"><p class="question-text">6. The word <b>prowess</b> in the second paragraph means:</p><div class="options"><label><input type="radio" name="q-4-6-options" value="A"> A. physical weakness.</label><label><input type="radio" name="q-4-6-options" value="B"> B. skill or expertise in a particular activity.</label><label><input type="radio" name="q-4-6-options" value="C"> C. moral character.</label><label><input type="radio" name="q-4-6-options" value="D"> D. family ancestry.</label></div></div>
+            <div class="question" id="q-4-7"><p class="question-text">7. The author's tone in describing Buck's transformation is:</p><div class="options"><label><input type="radio" name="q-4-7-options" value="A"> A. sorrowful and pitying.</label><label><input type="radio" name="q-4-7-options" value="B"> B. awestruck and glorifying.</label><label><input type="radio" name="q-4-7-options" value="C"> C. fearful and condemning.</label><label><input type="radio" name="q-4-7-options" value="D"> D. neutral and scientific.</label></div></div>
+            <div class="question" id="q-4-8"><p class="question-text">8. "He was a live hurricane of fury" is a metaphor used to describe Buck's:</p><div class="options"><label><input type="radio" name="q-4-8-options" value="A"> A. large size.</label><label><input type="radio" name="q-4-8-options" value="B"> B. ability to predict the weather.</label><label><input type="radio" name="q-4-8-options" value="C"> C. intense, chaotic, and powerful energy.</label><label><input type="radio" name="q-4-8-options" value="D"> D. loud bark.</label></div></div>
+            <div class="question" id="q-4-9"><p class="question-text">9. The final lines "And Buck was not playing. He was learning. He was remembering," suggest that:</p><div class="options"><label><input type="radio" name="q-4-9-options" value="A"> A. Buck is a slow learner.</label><label><input type="radio" name="q-4-9-options" value="B"> B. Buck is awakening dormant, primal instincts that are part of his heritage.</label><label><input type="radio" name="q-4-9-options" value="C"> C. Buck is remembering specific training from a previous owner.</label><label><input type="radio" name="q-4-9-options" value="D"> D. Buck has decided to stop playing and attack immediately.</label></div></div>
+            <div class="question" id="q-4-10"><p class="question-text">10. From this passage, what can be inferred about the "hostile environment" of the wild?</p><div class="options"><label><input type="radio" name="q-4-10-options" value="A"> A. It is a place of peace and cooperation.</label><label><input type="radio" name="q-4-10-options" value="B"> B. It is governed by human laws and morality.</label><label><input type="radio" name="q-4-10-options" value="C"> C. It operates on the principle of "survival of the fittest," where strength is paramount.</label><label><input type="radio" name="q-4-10-options" value="D"> D. It is an easy place for any animal to live.</label></div></div>
+        </div>
+        
+        <!-- DRAMA -->
+        <div id="test5" class="tab-pane">
+            <h2>5. Drama: from The Miracle Worker by William Gibson</h2>
+            <div class="excerpt">
+(The water pump is in the yard. ANNIE has dragged the struggling HELEN to it. She forces HELEN’s hand under the spout. With her other hand, she pumps.)
+
+<b>ANNIE:</b> (Shouting) Water! Water!
+
+(The water gushes out over HELEN’s hand. HELEN stands shivering, her other hand clenched in a fist. ANNIE continues to pump. Then, a change comes over HELEN. Her body goes still. Her fist unclenches. She holds her other hand out.)
+
+<b>HELEN:</b> (A sound emerges from her throat) Wah. Wah.
+
+<b>ANNIE:</b> (Whispering, ecstatic) Yes. Yes, Helen. Yes!
+
+(She takes HELEN’s hand and spells into it, her fingers moving with frantic speed.)
+
+<b>ANNIE:</b> W-A-T-E-R. Water. It has a name.
+
+(HELEN’s head jerks up. Her eyes, unseeing, are wide. A look of dawning comprehension, of miraculous understanding, illuminates her face. She clutches at ANNIE’s hand, then lets it go and plunges her own hand under the pump again, a look of desperate urgency on her face.)
+
+<b>HELEN:</b> Wah. Wah.
+
+<b>ANNIE:</b> (Crying, laughing) Yes! Oh, my dear, yes!
+
+(HELEN drops to the ground, her hand groping for something, anything. She touches the pump and looks questioningly at ANNIE. ANNIE spells into her hand.)
+
+<b>ANNIE:</b> P-U-M-P.
+
+(HELEN touches the trellis.)
+
+<b>ANNIE:</b> T-R-E-L-L-I-S.
+
+(HELEN’s whole body is trembling with the excitement of her discovery. She turns and runs back toward the house, touching objects, holding her hand out to ANNIE, who follows, spelling the name of everything HELEN touches. The world has opened up to her.)
+
+<b>CAPTAIN KELLER:</b> (From the porch, his voice choked with emotion) Annie. Annie, I…
+
+<b>ANNIE:</b> (Without turning) The world has a name, Captain. Everything has a name.</div>
+            <div class="question" id="q-5-1"><p class="question-text">1. The central event of this scene is:</p><div class="options"><label><input type="radio" name="q-5-1-options" value="A"> A. Helen learning to speak her first word.</label><label><input type="radio" name="q-5-1-options" value="B"> B. Helen finally understanding the connection between a word (a sign) and the object it represents.</label><label><input type="radio" name="q-5-1-options" value="C"> C. Annie teaching Helen how to use the water pump.</label><label><input type="radio" name="q-5-1-options" value="D"> D. Captain Keller finally accepting Annie as a teacher.</label></div></div>
+            <div class="question" id="q-5-2"><p class="question-text">2. The word <b>comprehension</b> in the stage directions means:</p><div class="options"><label><input type="radio" name="q-5-2-options" value="A"> A. fear.</label><label><input type="radio" name="q-5-2-options" value="B"> B. confusion.</label><label><input type="radio" name="q-5-2-options" value="C"> C. the ability to understand something.</label><label><input type="radio" name="q-5-2-options" value="D"> D. physical pain.</label></div></div>
+            <div class="question" id="q-5-3"><p class="question-text">3. Annie's exclamation "It has a name" is significant because it marks the moment:</p><div class="options"><label><input type="radio" name="q-5-3-options" value="A"> A. she decides to name the water pump.</label><label><input type="radio" name="q-5-3-options" value="B"> B. language is unlocked for Helen, connecting her to the world.</label><label><input type="radio" name="q-5-3-options" value="C"> C. she remembers the name for water.</label><label><input type="radio" name="q-5-3-options" value="D"> D. she teaches Helen how to write her own name.</label></div></div>
+            <div class="question" id="q-5-4"><p class="question-text">4. The stage direction "(Crying, laughing)" for Annie indicates her feeling of:</p><div class="options"><label><input type="radio" name="q-5-4-options" value="A"> A. overwhelming relief, joy, and triumph.</label><label><input type="radio" name="q-5-4-options" value="B"> B. hysteria and loss of control.</label><label><input type="radio" name="q-5-4-options" value="C"> C. confusion about Helen's reaction.</label><label><input type="radio" name="q-5-4-options" value="D"> D. sadness that her job is now over.</label></div></div>
+            <div class="question" id="q-5-5"><p class="question-text">5. Helen's action of immediately touching the pump and trellis and holding her hand out shows that she:</p><div class="options"><label><input type="radio" name="q-5-5-options" value="A"> A. is trying to break the objects.</label><label><input type="radio" name="q-5-5-options" value="B"> B. is simply copying Annie's movements.</label><label><input type="radio" name="q-5-5-options" value="C"> C. is suddenly desperate to learn the names for everything in her world.</label><label><input type="radio" name="q-5-5-options" value="D"> D. wants to show Annie that she is thirsty.</label></div></div>
+            <div class="question" id="q-5-6"><p class="question-text">6. The overall tone of the second half of the scene, after Helen understands, is one of:</p><div class="options"><label><input type="radio" name="q-5-6-options" value="A"> A. quiet sadness.</label><label><input type="radio" name="q-5-6-options" value="B"> B. miraculous and ecstatic breakthrough.</label><label><input type="radio" name="q-5-6-options" value="C"> C. tense conflict.</label><label><input type="radio" name="q-5-6-options" value="D"> D. calm resolution.</label></div></div>
+            <div class="question" id="q-5-7"><p class="question-text">7. The word <b>illuminates</b> in the stage direction "illuminates her face" means:</p><div class="options"><label><input type="radio" name="q-5-7-options" value="A"> A. casts a shadow over.</label><label><input type="radio" name="q-5-7-options" value="B"> B. makes it dirty.</label><label><input type="radio" name="q-5-7-options" value="C"> C. lights up, both literally and figuratively.</label><label><input type="radio" name="q-5-7-options" value="D"> D. makes it look sad.</label></div></div>
+            <div class="question" id="q-5-8"><p class="question-text">8. What does Captain Keller's choked voice suggest?</p><div class="options"><label><input type="radio" name="q-5-8-options" value="A"> A. He is overwhelmed with emotion and gratitude at witnessing the miracle.</label><label><input type="radio" name="q-5-8-options" value="B"> B. He is angry at Annie for her rough methods.</label><label><input type="radio" name="q-5-8-options" value="C"> C. He has a sore throat and cannot speak properly.</label><label><input type="radio" name="q-5-8-options" value="D"> D. He is about to scold Annie for making a mess.</label></div></div>
+            <div class="question" id="q-5-9"><p class="question-text">9. The setting at the water pump is significant because:</p><div class="options"><label><input type="radio" name="q-5-9-options" value="A"> A. it is the only place with enough light to see.</label><label><input type="radio" name="q-5-9-options" value="B"> B. water is a basic, elemental substance, making the connection clear and powerful.</label><label><input type="radio" name="q-5-9-options" value="C"> C. it is a place where Helen has been punished before.</label><label><input type="radio" name="q-5-9-options" value="D"> D. it is far away from the house so no one can interfere.</label></div></div>
+            <div class="question" id="q-5-10"><p class="question-text">10. Annie's final line, "Everything has a name," encapsulates the central theme of the play, which is the power of:</p><div class="options"><label><input type="radio" name="q-5-10-options" value="A"> A. parental authority.</label><label><input type="radio" name="q-5-10-options" value="B"> B. physical strength.</label><label><input type="radio" name="q-5-10-options" value="C"> C. language to unlock the human mind and spirit.</label><label><input type="radio" name="q-5-10-options" value="D"> D. water to cleanse and heal.</label></div></div>
+        </div>
+
+        <div id="test6" class="tab-pane">
+            <h2>6. Drama: from The Crucible by Arthur Miller</h2>
+            <div class="excerpt">
+<b>DANFORTH:</b> Mr. Proctor, you have seen the Devil, have you not?
+
+<b>PROCTOR:</b> (His voice about to break) I have.
+
+<b>DANFORTH:</b> And you wish to confess yourself to God?
+
+<b>PROCTOR:</b> I do.
+
+<b>DANFORTH:</b> And you will sign your name to your confession?
+
+<b>PROCTOR:</b> (He cannot bear to look at his friends) I will.
+
+<b>DANFORTH:</b> Then do so. (Proctor signs the paper. Danforth reaches for it.)
+
+<b>PROCTOR:</b> (He snatches the paper back) No.
+
+<b>DANFORTH:</b> Mr. Proctor!
+
+<b>PROCTOR:</b> You have all witnessed it. It is enough.
+
+<b>DANFORTH:</b> No, sir, it is not. We must have it posted on the church door!
+
+<b>PROCTOR:</b> (With a cry of his whole soul) Because it is my name! Because I cannot have another in my life! Because I lie and sign myself to lies! Because I am not worth the dust on the feet of them that hang! How may I live without my name? I have given you my soul; leave me my name!
+
+<b>DANFORTH:</b> (Impatiently) Mr. Proctor, you mistake me. The law knows nothing of souls. We are a court of law.
+
+<b>PROCTOR:</b> I know it. But I have three children. How may I teach them to walk like men in the world, and I sold my friends?
+
+<b>DANFORTH:</b> You have confessed yourself. That is the same.
+
+<b>PROCTOR:</b> (He tears the paper and crumples it) I have confessed to God, and God has seen my name on this! It is enough! You will not use me!
+
+<b>DANFORTH:</b> (Stunned) Marshal!
+
+<b>PROCTOR:</b> I say you will not use me! I am not some preaching tool to be nailed to the church door! I am John Proctor! You are the judges of my life, not the keepers of my name!
+
+<b>HALE:</b> (In terror) Proctor, Proctor!
+
+<b>DANFORTH:</b> Take him! He has chosen his fate!
+
+(Proctor is led away to be hanged.)</div>
+            <div class="question" id="q-6-1"><p class="question-text">1. The central conflict for John Proctor in this scene is between:</p><div class="options"><label><input type="radio" name="q-6-1-options" value="A"> A. his love for his wife and his desire for freedom.</label><label><input type="radio" name="q-6-1-options" value="B"> B. his fear of death and his need to protect his friends.</label><label><input type="radio" name="q-6-1-options" value="C"> C. saving his life by signing a false confession and preserving his personal honor and good name.</label><label><input type="radio" name="q-6-1-options" value="D"> D. his belief in God and his hatred for the court.</label></div></div>
+            <div class="question" id="q-6-2"><p class="question-text">2. When Proctor says, "How may I live without my name?" the word "name" symbolizes:</p><div class="options"><label><input type="radio" name="q-6-2-options" value="A"> A. his personal reputation, integrity, and honor.</label><label><input type="radio" name="q-6-2-options" value="B"> B. the legal document he has just signed.</label><label><input type="radio" name="q-6-2-options" value="C"> C. the names of his three children.</label><label><input type="radio" name="q-6-2-options" value="D"> D. a secret alias he wishes to use.</label></div></div>
+            <div class="question" id="q-6-3"><p class="question-text">3. Danforth's main motivation for wanting the signed confession posted on the church door is to:</p><div class="options"><label><input type="radio" name="q-6-3-options" value="A"> A. save Proctor's soul in the eyes of the community.</label><label><input type="radio" name="q-6-3-options" value="B"> B. use Proctor's respected name to legitimize the court's proceedings and encourage others to confess.</label><label><input type="radio" name="q-6-3-options" value="C"> C. create a souvenir of the witch trials.</label><label><input type="radio" name="q-6-3-options" value="D"> D. prove that he is more powerful than Proctor.</label></div></div>
+            <div class="question" id="q-6-4"><p class="question-text">4. Proctor's act of tearing the confession paper is a final, defiant act of:</p><div class="options"><label><input type="radio" name="q-6-4-options" value="A"> A. insanity.</label><label><input type="radio" name="q-6-4-options" value="B"> B. cowardice.</label><label><input type="radio" name="q-6-4-options" value="C"> C. reclaiming his personal honor, even though it means his death.</label><label><input type="radio" name="q-6-4-options" value="D"> D. trying to attack Danforth.</label></div></div>
+            <div class="question" id="q-6-5"><p class="question-text">5. The word <b>confession</b> in this context refers to an admission of:</p><div class="options"><label><input type="radio" name="q-6-5-options" value="A"> A. having committed a minor crime.</label><label><input type="radio" name="q-6-5-options" value="B"> B. having practiced witchcraft and seen the Devil.</label><label><input type="radio" name="q-6-5-options" value="C"> C. having lied to the court previously.</label><label><input type="radio" name="q-6-5-options" value="D"> D. having three children.</label></div></div>
+            <div class="question" id="q-6-6"><p class="question-text">6. The overall tone of the passage is:</p><div class="options"><label><input type="radio" name="q-6-6-options" value="A"> A. lighthearted and comedic.</label><label><input type="radio" name="q-6-6-options" value="B"> B. intense, tragic, and climactic.</label><label><input type="radio" name="q-6-6-options" value="C"> C. calm and philosophical.</label><label><input type="radio" name="q-6-6-options" value="D"> D. mysterious and confusing.</label></div></div>
+            <div class="question" id="q-6-7"><p class="question-text">7. Danforth's line, "The law knows nothing of souls," reveals that the court is:</p><div class="options"><label><input type="radio" name="q-6-7-options" value="A"> A. deeply concerned with moral and spiritual matters.</label><label><input type="radio" name="q-6-7-options" value="B"> B. flexible and willing to consider individual circumstances.</label><label><input type="radio" name="q-6-7-options" value="C"> C. rigid, impersonal, and concerned only with legal procedure, not truth or morality.</label><label><input type="radio" name="q-6-7-options" value="D"> D. secretly run by men who do not believe in God.</label></div></div>
+            <div class="question" id="q-6-8"><p class="question-text">8. Why does Proctor mention his three children?</p><div class="options"><label><input type="radio" name="q-6-8-options" value="A"> A. To emphasize the importance of leaving them a legacy of honor and integrity.</label><label><input type="radio" name="q-6-8-options" value="B"> B. To beg for his life so he can raise them.</label><label><input type="radio" name="q-6-8-options" value="C"> C. To ask the court to take care of them after he is gone.</label><label><input type="radio" name="q-6-8-options" value="D"> D. To remind Danforth that he is a family man.</label></div></div>
+            <div class="question" id="q-6-9"><p class="question-text">9. What does Proctor mean when he says, "I have given you my soul; leave me my name!"?</p><div class="options"><label><input type="radio" name="q-6-9-options" value="A"> A. He wants to be paid for his confession.</label><label><input type="radio" name="q-6-9-options" value="B"> B. He believes his soul is a physical object that he has handed over.</label><label><input type="radio" name="q-6-9-options" value="C"> C. He feels he has already damned himself with the lie; he begs to at least keep his public reputation intact for his family.</label><label><input type="radio" name="q-6-9-options" value="D"> D. He is making a final, sarcastic joke before his death.</label></div></div>
+            <div class="question" id="q-6-10"><p class="question-text">10. From this scene, it can be inferred that true "justice" in this court is:</p><div class="options"><label><input type="radio" name="q-6-10-options" value="A"> A. fair and impartial.</label><label><input type="radio" name="q-6-10-options" value="B"> B. corrupted and secondary to the court's need to maintain its authority.</label><label><input type="radio" name="q-6-10-options" value="C"> C. determined by God alone.</label><label><input type="radio" name="q-6-10-options" value="D"> D. based on the opinions of the majority.</label></div></div>
+        </div>
+        
+        <div id="test7" class="tab-pane">
+            <h2>7. Drama: from Twelve Angry Men by Reginald Rose</h2>
+            <div class="excerpt">
+<b>JUROR #3:</b> All right, let's get on with it...
+
+<b>JUROR #8:</b> (Quietly) There were eleven votes for "guilty." It's not so easy for me to raise my hand and send a boy off to die without talking about it first.
+
+<b>JUROR #7:</b> Who says it's easy for me?
+
+<b>JUROR #8:</b> No one. But we're talking about somebody's life here. We can't decide in five minutes. Supposing we're wrong?
+
+<b>JUROR #10:</b> Wrong? What's the matter with you? You saw the same evidence we did. The kid's a punk. I've lived among 'em all my life. You can't believe a word they say. You know that.
+
+<b>JUROR #8:</b> I don't know that. What a terrible thing for a man to believe! Since when is dishonesty a group characteristic? You have no monopoly on the truth—
+
+<b>JUROR #3:</b> (Interrupting) All right. It's not your business to be telling us what to believe. We have a job to do. Let's do it. Maybe you'd like to know why I think he's guilty. The old man who lived downstairs. He heard the boy yell, "I'm going to kill you." A second later, he heard a body hit the floor. He ran to the door, opened it, and saw the kid running down the stairs. What could be plainer than that?
+
+<b>JUROR #8:</b> I'd like to ask you something. You don't believe the boy's story. How come you believe the old man's? He's one of "them," too, isn't he?
+
+<b>JUROR #3:</b> (Stares at him, then flustered) He's an old man! A terrified old man who knows he's going to die. You're not going to tell me we're supposed to believe that scum's story and not the old man's?
+
+<b>JUROR #8:</b> He was an old man who had to walk with two canes. He said he went from his bedroom to his front door in fifteen seconds. Do you think that's possible?</div>
+            <div class="question" id="q-7-1"><p class="question-text">1. The central conflict in this scene is between:</p><div class="options"><label><input type="radio" name="q-7-1-options" value="A"> A. Juror #3 and Juror #10.</label><label><input type="radio" name="q-7-1-options" value="B"> B. Juror #8's call for careful deliberation and the other jurors' rush to a guilty verdict.</label><label><input type="radio" name="q-7-1-options" value="C"> C. the defendant and the old man who testified against him.</label><label><input type="radio" name="q-7-1-options" value="D"> D. the jurors' desire to go home and their duty to the court.</label></div></div>
+            <div class="question" id="q-7-2"><p class="question-text">2. Juror #10's statement, "I've lived among 'em all my life. You can't believe a word they say," reveals his:</p><div class="options"><label><input type="radio" name="q-7-2-options" value="A"> A. deep personal knowledge of the defendant.</label><label><input type="radio" name="q-7-2-options" value="B"> B. experience as a police officer.</label><label><input type="radio" name="q-7-2-options" value="C"> C. prejudice against the group to which the defendant belongs.</label><label><input type="radio" name="q-7-2-options" value="D"> D. logical and evidence-based reasoning.</label></div></div>
+            <div class="question" id="q-7-3"><p class="question-text">3. The word <b>deliberation</b>, as suggested by Juror #8's actions, means:</p><div class="options"><label><input type="radio" name="q-7-3-options" value="A"> A. a quick vote.</label><label><input type="radio" name="q-7-3-options" value="B"> B. arguing loudly.</label><label><input type="radio" name="q-7-3-options" value="C"> C. long and careful consideration or discussion.</label><label><input type="radio" name="q-7-3-options" value="D"> D. following the majority opinion.</label></div></div>
+            <div class="question" id="q-7-4"><p class="question-text">4. Juror #8 challenges the old man's testimony by questioning:</p><div class="options"><label><input type="radio" name="q-7-4-options" value="A"> A. his motives for testifying.</label><label><input type="radio" name="q-7-4-options" value="B"> B. his moral character.</label><label><input type="radio" name="q-7-4-options" value="C"> C. the physical possibility of his story.</label><label><input type="radio" name="q-7-4-options" value="D"> D. his hearing ability.</label></div></div>
+            <div class="question" id="q-7-5"><p class="question-text">5. Juror #8's line, "You have no monopoly on the truth," is directed at Juror #10 to challenge his:</p><div class="options"><label><input type="radio" name="q-7-5-options" value="A"> A. wealth and influence.</label><label><input type="radio" name="q-7-5-options" value="B"> B. desire to leave early.</label><label><input type="radio" name="q-7-5-options" value="C"> C. arrogant assumption that his prejudiced beliefs are facts.</label><label><input type="radio" name="q-7-5-options" value="D"> D. expert knowledge of the law.</label></div></div>
+            <div class="question" id="q-7-6"><p class="question-text">6. The stage direction "(Stares at him, then flustered)" indicates that Juror #3 is:</p><div class="options"><label><input type="radio" name="q-7-6-options" value="A"> A. agitated and unsettled by Juror #8's logical point about his own prejudice.</label><label><input type="radio" name="q-7-6-options" value="B"> B. confused about who Juror #8 is talking about.</label><label><input type="radio" name="q-7-6-options" value="C"> C. feeling sympathetic towards the old man.</label><label><input type="radio" name="q-7-6-options" value="D"> D. agreeing with Juror #8's point.</label></div></div>
+            <div class="question" id="q-7-7"><p class="question-text">7. The primary theme being explored in this excerpt is:</p><div class="options"><label><input type="radio" name="q-7-7-options" value="A"> A. the inefficiency of the legal system.</label><label><input type="radio" name="q-7-7-options" value="B"> B. the relationship between fathers and sons.</label><label><input type="radio" name="q-7-7-options" value="C"> C. justice, doubt, and the danger of prejudice.</label><label><input type="radio" name="q-7-7-options" value="D"> D. the right to a speedy trial.</label></div></div>
+            <div class="question" id="q-7-8"><p class="question-text">8. Juror #8's character is established as being:</p><div class="options"><label><input type="radio" name="q-7-8-options" value="A"> A. thoughtful, principled, and courageous.</label><label><input type="radio" name="q-7-8-options" value="B"> B. indecisive and easily swayed.</label><label><input type="radio" name="q-7-8-options" value="C"> C. arrogant and argumentative.</label><label><input type="radio" name="q-7-8-options" value="D"> D. emotional and irrational.</label></div></div>
+            <div class="question" id="q-7-9"><p class="question-text">9. What is the main tactic Juror #8 uses to challenge the other jurors?</p><div class="options"><label><input type="radio" name="q-7-9-options" value="A"> A. He insults their intelligence.</label><label><input type="radio" name="q-7-9-options" value="B"> B. He asks logical questions that poke holes in the evidence and expose prejudice.</label><label><input type="radio" name="q-7-9-options" value="C"> C. He appeals to their sense of pity for the defendant.</label><label><input type="radio" name="q-7-9-options" value="D"> D. He refuses to speak until they agree with him.</label></div></div>
+            <div class="question" id="q-7-10"><p class="question-text">10. The high stakes of the conversation are made clear by Juror #8's line:</p><div class="options"><label><input type="radio" name="q-7-10-options" value="A"> A. "I'd like to ask you something."</label><label><input type="radio" name="q-7-10-options" value="B"> B. "You have no monopoly on the truth."</label><label><input type="radio" name="q-7-10-options" value="C"> C. "It's not so easy for me to raise my hand and send a boy off to die."</label><label><input type="radio" name="q-7-10-options" value="D"> D. "Do you think that's possible?"</label></div></div>
+        </div>
+
+        <!-- POETRY -->
+        <div id="test8" class="tab-pane">
+            <h2>8. Poetry: "O Captain! My Captain!" by Walt Whitman</h2>
+            <div class="excerpt">O Captain! my Captain! our fearful trip is done,
+The ship has weather’d every rack, the prize we sought is won,
+The port is near, the bells I hear, the people all exulting,
+While follow eyes the steady keel, the vessel grim and daring;
+                         But O heart! heart! heart!
+                            O the bleeding drops of red,
+                               Where on the deck my Captain lies,
+                                  Fallen cold and dead.
+
+O Captain! my Captain! rise up and hear the bells;
+Rise up—for you the flag is flung—for you the bugle trills,
+For you bouquets and ribbon’d wreaths—for you the shores a-crowding,
+For you they call, the swaying mass, their eager faces turning;
+                         Here Captain! dear father!
+                            This arm beneath your head!
+                               It is some dream that on the deck,
+                                 You’ve fallen cold and dead.
+
+My Captain does not answer, his lips are pale and still,
+My father does not feel my arm, he has no pulse nor will,
+The ship is anchor’d safe and sound, its voyage closed and done,
+From fearful trip the victor ship comes in with object won;
+                         Exult O shores, and ring O bells!
+                            But I with mournful tread,
+                               Walk the deck my Captain lies,
+                                  Fallen cold and dead.</div>
+            <div class="question" id="q-8-1"><p class="question-text">1. The "Captain" in the poem is an extended metaphor for:</p><div class="options"><label><input type="radio" name="q-8-1-options" value="A"> A. a literal sea captain.</label><label><input type="radio" name="q-8-1-options" value="B"> B. Abraham Lincoln.</label><label><input type="radio" name="q-8-1-options" value="C"> C. the speaker's father.</label><label><input type="radio" name="q-8-1-options" value="D"> D. Walt Whitman himself.</label></div></div>
+            <div class="question" id="q-8-2"><p class="question-text">2. The "fearful trip" and the "prize we sought is won" refer to:</p><div class="options"><label><input type="radio" name="q-8-2-options" value="A"> A. a successful but dangerous whaling voyage.</label><label><input type="radio" name="q-8-2-options" value="B"> B. a race around the world.</label><label><input type="radio" name="q-8-2-options" value="C"> C. the American Civil War and the victory of the Union.</label><label><input type="radio" name="q-8-2-options" value="D"> D. the speaker's journey to a new country.</label></div></div>
+            <div class="question" id="q-8-3"><p class="question-text">3. The word <b>exulting</b> in the first stanza means:</p><div class="options"><label><input type="radio" name="q-8-3-options" value="A"> A. crying out in sorrow.</label><label><input type="radio" name="q-8-3-options" value="B"> B. showing or feeling great happiness and triumph.</label><label><input type="radio" name="q-8-3-options" value="C"> C. whispering quietly.</label><label><input type="radio" name="q-8-3-options" value="D"> D. leaving the port.</label></div></div>
+            <div class="question" id="q-8-4"><p class="question-text">4. The poem's central irony lies in the contrast between:</p><div class="options"><label><input type="radio" name="q-8-4-options" value="A"> A. the small size of the ship and the large size of the crowd.</label><label><input type="radio" name="q-8-4-options" value="B"> B. the speaker's love for the Captain and the Captain's indifference.</label><label><input type="radio" name="q-8-4-options" value="C"> C. the public celebration of victory and the private grief of the speaker over the leader's death.</label><label><input type="radio" name="q-8-4-options" value="D"> D. the bugle trills and the ringing bells.</label></div></div>
+            <div class="question" id="q-8-5"><p class="question-text">5. In the second stanza, the speaker's refusal to believe the Captain is dead ("It is some dream") illustrates which stage of grief?</p><div class="options"><label><input type="radio" name="q-8-5-options" value="A"> A. Anger</label><label><input type="radio" name="q-8-5-options" value="B"> B. Denial</label><label><input type="radio" name="q-8-5-options" value="C"> C. Bargaining</label><label><input type="radio" name="q-8-5-options" value="D"> D. Acceptance</label></div></div>
+            <div class="question" id="q-8-6"><p class="question-text">6. The overall mood of the poem is:</p><div class="options"><label><input type="radio" name="q-8-6-options" value="A"> A. triumphant and joyous.</label><label><input type="radio" name="q-8-6-options" value="B"> B. angry and vengeful.</label><label><input type="radio" name="q-8-6-options" value="C"> C. mournful and elegiac.</label><label><input type="radio" name="q-8-6-options" value="D"> D. fearful and suspenseful.</label></div></div>
+            <div class="question" id="q-8-7"><p class="question-text">7. The "ship" in the poem is a metaphor for:</p><div class="options"><label><input type="radio" name="q-8-7-options" value="A"> A. the speaker's heart.</label><label><input type="radio" name="q-8-7-options" value="B"> B. the United States of America (the "ship of state").</label><label><input type="radio" name="q-8-7-options" value="C"> C. the coffin of the fallen leader.</label><label><input type="radio" name="q-8-7-options" value="D"> D. the army of the Union.</label></div></div>
+            <div class="question" id="q-8-8"><p class="question-text">8. The indented lines in each stanza ("But O heart! heart! heart!") serve to:</p><div class="options"><label><input type="radio" name="q-8-8-options" value="A"> A. create a visual representation of a heartbeat on the page.</label><label><input type="radio" name="q-8-8-options" value="B"> B. make the poem longer.</label><label><input type="radio" name="q-8-8-options" value="C"> C. act as a sorrowful, personal refrain that contrasts with the celebratory tone of the other lines.</label><label><input type="radio" name="q-8-8-options" value="D"> D. provide instructions for how the poem should be read aloud.</label></div></div>
+            <div class="question" id="q-8-9"><p class="question-text">9. The word <b>tread</b> in the final stanza means:</p><div class="options"><label><input type="radio" name="q-8-9-options" value="A"> A. a type of tire pattern.</label><label><input type="radio" name="q-8-9-options" value="B"> B. a way of walking.</label><label><input type="radio" name="q-8-9-options" value="C"> C. a feeling of fear.</label><label><input type="radio" name="q-8-9-options" value="D"> D. a piece of thread.</label></div></div>
+            <div class="question" id="q-8-10"><p class="question-text">10. The poem's form, with its regular rhyme scheme and meter, is uncharacteristic of Walt Whitman's other poetry. This more traditional structure likely reflects:</p><div class="options"><label><input type="radio" name="q-8-10-options" value="A"> A. the poet's lack of skill.</label><label><input type="radio" name="q-8-10-options" value="B"> B. an attempt to write a more formal, traditional elegy to honor the solemnity of the occasion.</label><label><input type="radio" name="q-8-10-options" value="C"> C. the publisher's demand for a more popular style.</label><label><input type="radio" name="q-8-10-options" value="D"> D. a mistake in the printing of the poem.</label></div></div>
+        </div>
+       
+        <div id="test9" class="tab-pane">
+            <h2>9. Poetry: "Hope is the thing with feathers" by Emily Dickinson</h2>
+            <div class="excerpt">"Hope" is the thing with feathers -
+That perches in the soul -
+And sings the tune without the words -
+And never stops - at all -
+
+And sweetest - in the Gale - is heard -
+And sore must be the storm -
+That could abash the little Bird
+That kept so many warm -
+
+I've heard it in the chillest land -
+And on the strangest Sea -
+Yet - never - in Extremity,
+It asked a crumb - of Me.</div>
+            <div class="question" id="q-9-1"><p class="question-text">1. The entire poem is an extended metaphor that compares:</p><div class="options"><label><input type="radio" name="q-9-1-options" value="A"> A. a storm to a sea.</label><label><input type="radio" name="q-9-1-options" value="B"> B. hope to a bird.</label><label><input type="radio" name="q-9-1-options" value="C"> C. the soul to a house.</label><label><input type="radio" name="q-9-1-options" value="D"> D. a song to a crumb.</label></div></div>
+            <div class="question" id="q-9-2"><p class="question-text">2. The phrase "perches in the soul" suggests that hope is:</p><div class="options"><label><input type="radio" name="q-9-2-options" value="A"> A. a fleeting, external feeling.</label><label><input type="radio" name="q-9-2-options" value="B"> B. a logical thought.</label><label><input type="radio" name="q-9-2-options" value="C"> C. an innate, internal part of the human spirit.</label><label><input type="radio" name="q-9-2-options" value="D"> D. a temporary visitor.</label></div></div>
+            <div class="question" id="q-9-3"><p class="question-text">3. What does it mean that the bird "sings the tune without the words"?</p><div class="options"><label><input type="radio" name="q-9-3-options" value="A"> A. Hope is a feeling or an instinct, not a specific, rational thought.</label><label><input type="radio" name="q-9-3-options" value="B"> B. The bird in the poem cannot sing properly.</label><label><input type="radio" name="q-9-3-options" value="C"> C. The speaker does not understand the language of birds.</label><label><input type="radio" name="q-9-3-options" value="D"> D. Hope is a silent and unnoticeable emotion.</label></div></div>
+            <div class="question" id="q-9-4"><p class="question-text">4. The "Gale" and the "storm" in the second stanza are metaphors for:</p><div class="options"><label><input type="radio" name="q-9-4-options" value="A"> A. pleasant, sunny weather.</label><label><input type="radio" name="q-9-4-options" value="B"> B. times of great difficulty, hardship, and despair.</label><label><input type="radio" name="q-9-4-options" value="C"> C. loud arguments.</label><label><input type="radio" name="q-9-4-options" value="D"> D. moments of confusion.</label></div></div>
+            <div class="question" id="q-9-5"><p class="question-text">5. The word <b>abash</b> in the second stanza means:</p><div class="options"><label><input type="radio" name="q-9-5-options" value="A"> A. to feed or nourish.</label><label><input type="radio" name="q-9-5-options" value="B"> B. to encourage or strengthen.</label><label><input type="radio" name="q-9-5-options" value="C"> C. to destroy or make ashamed; to disconcert.</label><label><input type="radio" name="q-9-5-options" value="D"> D. to celebrate.</label></div></div>
+            <div class="question" id="q-9-6"><p class="question-text">6. What is the significance of the bird's song being "sweetest - in the Gale"?</p><div class="options"><label><input type="radio" name="q-9-6-options" value="A"> A. It suggests that hope is only present during easy times.</label><label><input type="radio" name="q-9-6-options" value="B"> B. It means that hope is most precious and most clearly felt during the most difficult times.</label><label><input type="radio" name="q-9-6-options" value="C"> C. It implies that storms make bird songs sound better.</label><label><input type="radio" name="q-9-6-options" value="D"> D. It shows that the bird is not afraid of the wind.</label></div></div>
+            <div class="question" id="q-9-7"><p class="question-text">7. The final two lines, "Yet - never - in Extremity, / It asked a crumb - of Me," reveal what quality about hope?</p><div class="options"><label><input type="radio" name="q-9-7-options" value="A"> A. It is demanding and requires constant attention.</label><label><input type="radio" name="q-9-7-options" value="B"> B. It is weak and needs to be fed.</label><label><input type="radio" name="q-9-7-options" value="C"> C. It is a selfless, giving force that expects nothing in return, even in the hardest times.</label><label><input type="radio" name="q-9-7-options" value="D"> D. It disappears when it is not rewarded.</label></div></div>
+            <div class="question" id="q-9-8"><p class="question-text">8. The "chillest land" and "strangest Sea" represent:</p><div class="options"><label><input type="radio" name="q-9-8-options" value="A"> A. specific geographical locations the speaker has visited.</label><label><input type="radio" name="q-9-8-options" value="B"> B. the most extreme and desolate situations imaginable.</label><label><input type="radio" name="q-9-8-options" value="C"> C. places the speaker would like to travel to.</label><label><input type="radio" name="q-9-8-options" value="D"> D. dreams the speaker has had.</label></div></div>
+            <div class="question" id="q-9-9"><p class="question-text">9. Dickinson's use of dashes ( - ) throughout the poem serves to:</p><div class="options"><label><input type="radio" name="q-9-9-options" value="A"> A. show where the poem is unfinished.</label><label><input type="radio" name="q-9-9-options" value="B"> B. indicate that the poet was in a hurry.</label><label><input type="radio" name="q-9-9-options" value="C"> C. create pauses for emphasis and to control the rhythm of the poem.</label><label><input type="radio" name="q-9-9-options" value="D"> D. separate the rhyming words.</label></div></div>
+            <div class="question" id="q-9-10"><p class="question-text">10. The overall tone of the poem is:</p><div class="options"><label><input type="radio" name="q-9-10-options" value="A"> A. sorrowful and despairing.</label><label><input type="radio" name="q-9-10-options" value="B"> B. angry and defiant.</label><label><input type="radio" name="q-9-10-options" value="C"> C. gentle, optimistic, and quietly certain.</label><label><input type="radio" name="q-9-10-options" value="D"> D. loud and boastful.</label></div></div>
+        </div>
+
+        <div id="test10" class="tab-pane">
+            <h2>10. Poetry: "Casey at the Bat" by Ernest Lawrence Thayer</h2>
+            <div class="excerpt">The outlook wasn’t brilliant for the Mudville nine that day:
+The score stood four to two, with but one inning more to play.
+And then when Cooney died at first, and Barrows did the same,
+A sickly silence fell upon the patrons of the game.
+
+A straggling few got up to go in deep despair. The rest
+Clung to that hope which springs eternal in the human breast;
+They thought, if only Casey could but get a whack at that—
+We’d put up even money, now, with Casey at the bat.
+
+But Flynn preceded Casey, as did also Jimmy Blake,
+And the former was a lulu and the latter was a cake;
+So upon that stricken multitude a death-like silence sat,
+For there seemed but little chance of Casey's getting to the bat.
+
+But Flynn let drive a single, to the wonderment of all,
+And Blake, the much despis-ed, tore the cover off the ball;
+And when the dust had lifted, and men saw what had occurred,
+There was Jimmy safe at second and Flynn a-hugging third.
+
+Then from five thousand throats and more there rose a lusty yell;
+It rumbled through the valley, it rattled in the dell;
+It pounded on the mountain and recoiled upon the flat,
+For Casey, mighty Casey, was advancing to the bat.
+
+There was ease in Casey’s manner as he stepped into his place;
+There was pride in Casey’s bearing and a smile on Casey’s face.
+And when, responding to the cheers, he lightly doffed his hat,
+No stranger in the crowd could doubt ’twas Casey at the bat.
+
+Ten thousand eyes were on him as he rubbed his hands with dirt;
+Five thousand tongues applauded when he wiped them on his shirt.
+Then while the writhing pitcher ground the ball into his hip,
+Defiance gleamed in Casey’s eye, a sneer curled Casey’s lip.
+
+And now the leather-covered sphere came hurtling through the air,
+And Casey stood a-watching it in haughty grandeur there.
+Close by the sturdy batsman the ball unheeded sped—
+"That ain't my style," said Casey. "Strike one," the umpire said.</div>
+            <div class="question" id="q-10-1"><p class="question-text">1. The primary purpose of this narrative poem is to:</p><div class="options"><label><input type="radio" name="q-10-1-options" value="A"> A. provide a factual account of a historical baseball game.</label><label><input type="radio" name="q-10-1-options" value="B"> B. offer a critique of the rules of baseball.</label><label><input type="radio" name="q-10-1-options" value="C"> C. build suspense and tell a dramatic story about a heroic but flawed baseball player.</label><label><input type="radio" name="q-10-1-options" value="D"> D. celebrate the inevitable victory of the Mudville nine.</label></div></div>
+            <div class="question" id="q-10-2"><p class="question-text">2. The mood at the very beginning of the poem can best be described as:</p><div class="options"><label><input type="radio" name="q-10-2-options" value="A"> A. joyful and festive.</label><label><input type="radio" name="q-10-2-options" value="B"> B. gloomy and hopeless.</label><label><input type="radio" name="q-10-2-options" value="C"> C. calm and peaceful.</label><label><input type="radio" name="q-10-2-options" value="D"> D. angry and violent.</label></div></div>
+            <div class="question" id="q-10-3"><p class="question-text">3. The phrase "the former was a lulu and the latter was a cake" suggests that Flynn and Blake were:</p><div class="options"><label><input type="radio" name="q-10-3-options" value="A"> A. highly skilled and talented players.</label><label><input type="radio" name="q-10-3-options" value="B"> B. considered to be very poor, unpromising players.</label><label><input type="radio" name="q-10-3-options" value="C"> C. popular and well-liked by the fans.</label><label><input type="radio" name="q-10-3-options" value="D"> D. the owners of a bakery.</label></div></div>
+            <div class="question" id="q-10-4"><p class="question-text">4. The line "hope which springs eternal in the human breast" means that people:</p><div class="options"><label><input type="radio" name="q-10-4-options" value="A"> A. are usually unrealistic.</label><label><input type="radio" name="q-10-4-options" value="B"> B. tend to keep hoping even in the most desperate situations.</label><label><input type="radio" name="q-10-4-options" value="C"> C. easily give up when things look bad.</label><label><input type="radio" name="q-10-4-options" value="D"> D. are not interested in the final outcome.</label></div></div>
+            <div class="question" id="q-10-5"><p class="question-text">5. How does the mood of the crowd change after Flynn and Blake get on base?</p><div class="options"><label><input type="radio" name="q-10-5-options" value="A"> A. They become even more silent and sad.</label><label><input type="radio" name="q-10-5-options" value="B"> B. They become angry and start to leave.</label><label><input type="radio" name="q-10-5-options" value="C"> C. They shift from despair to wild, roaring excitement.</label><label><input type="radio" name="q-10-5-options" value="D"> D. They become confused about what happened.</label></div></div>
+            <div class="question" id="q-10-6"><p class="question-text">6. The description of Casey's "ease in his manner" and "pride in his bearing" establishes him as a character who is:</p><div class="options"><label><input type="radio" name="q-10-6-options" value="A"> A. nervous and insecure.</label><label><input type="radio" name="q-10-6-options" value="B"> B. humble and modest.</label><label><input type="radio" name="q-10-6-options" value="C"> C. extremely confident, perhaps to the point of arrogance.</label><label><input type="radio" name="q-10-6-options" value="D"> D. unfriendly and mean.</label></div></div>
+            <div class="question" id="q-10-7"><p class="question-text">7. The word <b>haughty</b> in the final stanza means:</p><div class="options"><label><input type="radio" name="q-10-7-options" value="A"> A. graceful.</label><label><input type="radio" name="q-10-7-options" value="B"> B. focused.</label><label><input type="radio" name="q-10-7-options" value="C"> C. arrogantly superior and disdainful.</label><label><input type="radio" name="q-10-7-options" value="D"> D. clumsy.</label></div></div>
+            <div class="question" id="q-10-8"><p class="question-text">8. What does Casey's reaction to the first pitch ("That ain't my style") reveal about his character?</p><div class="options"><label><input type="radio" name="q-10-8-options" value="A"> A. He has poor judgment of the strike zone.</label><label><input type="radio" name="q-10-8-options" value="B"> B. He is a very careful and selective batter.</label><label><input type="radio" name="q-10-8-options" value="C"> C. He is arrogant and overly confident, believing he is too good to swing at the first pitch.</label><label><input type="radio" name="q-10-8-options" value="D"> D. He is trying to intimidate the pitcher.</label></div></div>
+            <div class="question" id="q-10-9"><p class="question-text">9. The poem uses hyperbole (exaggeration) in lines like "tore the cover off the ball" and "from five thousand throats and more there rose a lusty yell" to:</p><div class="options"><label><input type="radio" name="q-10-9-options" value="A"> A. provide precise, factual details.</label><label><input type="radio" name="q-10-9-options" value="B"> B. confuse the reader.</label><label><input type="radio" name="q-10-9-options" value="C"> C. create a larger-than-life, epic feeling for the baseball game.</label><label><input type="radio" name="q-10-9-options" value="D"> D. suggest that the events are not actually happening.</label></div></div>
+            <div class="question" id="q-10-10"><p class="question-text">10. The last line of the excerpt, "'Strike one,' the umpire said," serves to:</p><div class="options"><label><input type="radio" name="q-10-10-options" value="A"> A. confirm that Casey's judgment was correct.</label><label><input type="radio" name="q-10-10-options" value="B"> B. create a moment of anticlimax and introduce a conflict between Casey's confidence and reality.</label><label><input type="radio" name="q-10-10-options" value="C"> C. show that the umpire is biased against Mudville.</label><label><input type="radio" name="q-10-10-options" value="D"> D. signal that the game is over.</label></div></div>
+        </div>
+
+        <!-- Results Tab -->
+        <div id="results" class="tab-pane">
+            <h2>Test Results</h2>
+            <p>Click the button below to see your scores for each section. Your answers will not be saved after you close this page.</p>
+            <button id="calculate-btn">Calculate Scores</button>
+            <div id="results-display"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Tab Navigation Logic ---
+        function openTab(evt, tabId) {
+            let tabPanes = document.getElementsByClassName("tab-pane");
+            for (let i = 0; i < tabPanes.length; i++) {
+                tabPanes[i].style.display = "none";
+            }
+            let tabButtons = document.getElementsByClassName("tab-button");
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].className = tabButtons[i].className.replace(" active", "");
+            }
+            document.getElementById(tabId).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // --- Scoring Logic ---
+        function calculateScores() {
+            // UNENCODED, SIMPLE JAVASCRIPT OBJECT FOR THE ANSWER KEY
+            const correctAnswers = {
+                'test1': { 'q1': 'B', 'q2': 'C', 'q3': 'C', 'q4': 'C', 'q5': 'B', 'q6': 'C', 'q7': 'C', 'q8': 'C', 'q9': 'B', 'q10': 'C' },
+                'test2': { 'q1': 'C', 'q2': 'D', 'q3': 'B', 'q4': 'C', 'q5': 'B', 'q6': 'C', 'q7': 'B', 'q8': 'A', 'q9': 'C', 'q10': 'B' },
+                'test3': { 'q1': 'C', 'q2': 'B', 'q3': 'A', 'q4': 'B', 'q5': 'B', 'q6': 'C', 'q7': 'B', 'q8': 'C', 'q9': 'C', 'q10': 'C' },
+                'test4': { 'q1': 'B', 'q2': 'C', 'q3': 'D', 'q4': 'B', 'q5': 'B', 'q6': 'B', 'q7': 'B', 'q8': 'C', 'q9': 'B', 'q10': 'C' },
+                'test5': { 'q1': 'B', 'q2': 'C', 'q3': 'B', 'q4': 'A', 'q5': 'C', 'q6': 'B', 'q7': 'C', 'q8': 'A', 'q9': 'B', 'q10': 'C' },
+                'test6': { 'q1': 'C', 'q2': 'A', 'q3': 'B', 'q4': 'C', 'q5': 'B', 'q6': 'B', 'q7': 'C', 'q8': 'A', 'q9': 'C', 'q10': 'B' },
+                'test7': { 'q1': 'B', 'q2': 'C', 'q3': 'C', 'q4': 'C', 'q5': 'C', 'q6': 'A', 'q7': 'C', 'q8': 'A', 'q9': 'B', 'q10': 'C' },
+                'test8': { 'q1': 'B', 'q2': 'C', 'q3': 'B', 'q4': 'C', 'q5': 'B', 'q6': 'C', 'q7': 'B', 'q8': 'C', 'q9': 'B', 'q10': 'B' },
+                'test9': { 'q1': 'B', 'q2': 'C', 'q3': 'A', 'q4': 'B', 'q5': 'C', 'q6': 'B', 'q7': 'C', 'q8': 'B', 'q9': 'C', 'q10': 'C' },
+                'test10': { 'q1': 'C', 'q2': 'B', 'q3': 'B', 'q4': 'B', 'q5': 'C', 'q6': 'C', 'q7': 'C', 'q8': 'C', 'q9': 'C', 'q10': 'B' }
+            };
+
+            const resultsDisplay = document.getElementById('results-display');
+            resultsDisplay.innerHTML = ''; // Clear previous results
+            
+            const numTests = 10; 
+
+            for (let i = 1; i <= numTests; i++) {
+                const testId = 'test' + i;
+                const testData = correctAnswers[testId];
+                if (!testData) continue;
+
+                const testPane = document.getElementById(testId);
+                const testTitle = testPane.querySelector('h2').innerText.split('. ')[1];
+                let score = 0;
+                const totalQuestions = Object.keys(testData).length;
+
+                for (let j = 1; j <= totalQuestions; j++) {
+                    const questionKey = 'q' + j;
+                    const radioName = 'q-' + i + '-' + j + '-options';
+                    const selectedOption = document.querySelector('input[name="' + radioName + '"]:checked');
+
+                    if (selectedOption) {
+                        if (selectedOption.value === testData[questionKey]) {
+                            score++;
+                        }
+                    }
+                }
+               
+                const resultElement = document.createElement('p');
+                resultElement.textContent = `${testTitle}: ${score} / ${totalQuestions}`;
+                resultsDisplay.appendChild(resultElement);
+            }
+        }
+
+        // --- Initial Setup ---
+        document.getElementById('calculate-btn').addEventListener('click', calculateScores);
+        document.getElementById("defaultOpen").click();
+
+    </script>
+
+</body>
+</html>

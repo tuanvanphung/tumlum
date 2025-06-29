@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading: Literature (Fiction, Drama, Poetry)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        h2 {
+            color: #3498db;
+        }
+
+        .tab-nav {
+            overflow: hidden;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 20px;
+            padding-bottom: 5px;
+        }
+
+        .tab-nav button {
+            float: left;
+            background-color: inherit;
+            border: 1px solid #ccc;
+            margin: 2px;
+            outline: none;
+            cursor: pointer;
+            padding: 10px 14px;
+            transition: 0.3s;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        .tab-nav button:hover {
+            background-color: #ddd;
+        }
+
+        .tab-nav button.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+       
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .excerpt {
+            background-color: #f9f9f9;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            font-style: italic;
+            color: #555;
+            white-space: pre-wrap;
+        }
+
+        .question {
+            margin-bottom: 25px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .options label {
+            display: block;
+            margin: 5px 0 5px 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .options label:hover {
+            background-color: #ecf0f1;
+        }
+
+        .options input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        #calculate-btn {
+            display: block;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 12px 25px;
+            margin: 20px auto;
+            cursor: pointer;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        #calculate-btn:hover {
+            background-color: #27ae60;
+        }
+
+        #results-display p {
+            font-size: 1.1em;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            background-color: #fdfdfd;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Reading: Literature (Fiction, Drama, Poetry)</h1>
+
+        <div class="tab-nav">
+            <button class="tab-button" onclick="openTab(event, 'test1')" id="defaultOpen">1. Fiction: The Giver</button>
+            <button class="tab-button" onclick="openTab(event, 'test2')">2. Fiction: The Outsiders</button>
+            <button class="tab-button" onclick="openTab(event, 'test3')">3. Fiction: Holes</button>
+            <button class="tab-button" onclick="openTab(event, 'test4')">4. Fiction: Percy Jackson</button>
+            <button class="tab-button" onclick="openTab(event, 'test5')">5. Drama: A Raisin in the Sun</button>
+            <button class="tab-button" onclick="openTab(event, 'test6')">6. Drama: Romeo and Juliet</button>
+            <button class="tab-button" onclick="openTab(event, 'test7')">7. Drama: The Diary of Anne Frank</button>
+            <button class="tab-button" onclick="openTab(event, 'test8')">8. Poetry: The Road Not Taken</button>
+            <button class="tab-button" onclick="openTab(event, 'test9')">9. Poetry: Mother to Son</button>
+            <button class="tab-button" onclick="openTab(event, 'test10')">10. Poetry: Still I Rise</button>
+            <button class="tab-button" onclick="openTab(event, 'results')">Results</button>
+        </div>
+
+        <!-- FICTION -->
+        <div id="test1" class="tab-pane">
+            <h2>1. Fiction: from The Giver by Lois Lowry</h2>
+            <div class="excerpt">Jonas had never seen a private collection of books before. The only books in the community were the dictionary, the community map, and the Book of Rules. But here, in the Annex room, shelves lined every wall, filled to the ceiling. An old man, his eyes weary but kind, watched him from a chair. "You are the new Receiver of Memory," he said, his voice calm. Jonas, filled with a nervous apprehension, could only nod.
+
+"I am the Giver," the old man clarified. "It is my job to transmit to you all the memories of the past, the memories of the whole world." He gestured for Jonas to lie face-down on the padded table. "This will not hurt," he promised.
+
+Jonas obeyed, feeling the man's cool hands on his bare back. Suddenly, a new sensation enveloped him. It began with a perception of cold. He was no longer in the warm room but outdoors, sitting on something hard and flat. He was on a sled, perched at the top of a steep hill. With a gentle push, the sled began to move, gliding silently downhill. The wind, a concept he had never truly known, whistled past his ears. Beneath him, he could feel the smooth runners of the sled on a soft, packed substance: snow. He had never felt snow, or cold, or wind. It was a cascade of new feelings, both strange and wonderful.
+
+The sled accelerated, and a feeling of pure, unadulterated joy surged through him. It was exhilarating. His own world, the community, was flat and climate-controlled. There were no hills, no snow, no unpredictable weather. There was only the meticulously managed Sameness. As the memory faded and he found himself back in the quiet room, he struggled to find words for the experience.
+
+"How do you feel?" the Giver asked gently.
+
+"I feel... happy," Jonas managed, the word feeling inadequate.
+
+"It was 'joy'," the Giver corrected softly. "And what you felt was snow." He paused, his gaze distant. "I have thousands of memories like that one. And many that are not so pleasant. I have the memory of pain, and war, and hunger, and loneliness. It is my job to hold them. Now, it is your job to receive them."</div>
+            <div class="question" id="q-1-1"><p class="question-text">1. The central idea of this passage is to:</p><div class="options"><label><input type="radio" name="q-1-1-options" value="A"> A. describe the rules of Jonas's community.</label><label><input type="radio" name="q-1-1-options" value="B"> B. introduce the main characters and their family relationships.</label><label><input type="radio" name="q-1-1-options" value="C"> C. establish the unique bond between Jonas and the Giver and introduce the concept of receiving memories.</label><label><input type="radio" name="q-1-1-options" value="D"> D. explain the history of sledding and snow.</label></div></div>
+            <div class="question" id="q-1-2"><p class="question-text">2. The word <b>apprehension</b> in the first paragraph most nearly means:</p><div class="options"><label><input type="radio" name="q-1-2-options" value="A"> A. perfect understanding.</label><label><input type="radio" name="q-1-2-options" value="B"> B. great excitement.</label><label><input type="radio" name="q-1-2-options" value="C"> C. anxiety or fear that something bad will happen.</label><label><input type="radio" name="q-1-2-options" value="D"> D. physical exhaustion.</label></div></div>
+            <div class="question" id="q-1-3"><p class="question-text">3. What does the description of the Giver's room, filled with books, symbolize?</p><div class="options"><label><input type="radio" name="q-1-3-options" value="A"> A. The messiness and disorganization of the past.</label><label><input type="radio" name="q-1-3-options" value="B"> B. The Giver's failure to follow the community's rules.</label><label><input type="radio" name="q-1-3-options" value="C"> C. The vastness of human history, experience, and knowledge that the community has abandoned.</label><label><input type="radio" name="q-1-3-options" value="D"> D. The community's profound respect for literature.</label></div></div>
+            <div class="question" id="q-1-4"><p class="question-text">4. The community's practice of "Sameness" has eliminated all of the following EXCEPT:</p><div class="options"><label><input type="radio" name="q-1-4-options" value="A"> A. Hills and varied terrain.</label><label><input type="radio" name="q-1-4-options" value="B"> B. The sensation of joy.</label><label><input type="radio" name="q-1-4-options" value="C"> C. Books and rules.</label><label><input type="radio" name="q-1-4-options" value="D"> D. Snow and cold weather.</label></div></div>
+            <div class="question" id="q-1-5"><p class="question-text">5. What can be inferred about the community's attitude toward strong emotions?</p><div class="options"><label><input type="radio" name="q-1-5-options" value="A"> A. They are encouraged as a way to build character.</label><label><input type="radio" name="q-1-5-options" value="B"> B. They are expressed through community celebrations.</label><label><input type="radio" name="q-1-5-options" value="C"> C. They are suppressed or eliminated to the point that Jonas doesn't know the word for "joy."</label><label><input type="radio" name="q-1-5-options" value="D"> D. They are considered a sign of weakness and are punished.</label></div></div>
+            <div class="question" id="q-1-6"><p class="question-text">6. The primary conflict introduced in this passage is between:</p><div class="options"><label><input type="radio" name="q-1-6-options" value="A"> A. Jonas's fear and his curiosity.</label><label><input type="radio" name="q-1-6-options" value="B"> B. the controlled, predictable world of the community and the rich, unpredictable world of memory.</label><label><input type="radio" name="q-1-6-options" value="C"> C. The Giver's desire to keep the memories and his duty to transmit them.</label><label><input type="radio" name="q-1-6-options" value="D"> D. the safety of the community and the danger of the outside world.</label></div></div>
+            <div class="question" id="q-1-7"><p class="question-text">7. The author's choice to describe the memory from Jonas's first-person perspective primarily serves to:</p><div class="options"><label><input type="radio" name="q-1-7-options" value="A"> A. make the reader question if the memory is real.</label><label><input type="radio" name="q-1-7-options" value="B"> B. emphasize the newness and wonder of the sensations for Jonas.</label><label><input type="radio" name="q-1-7-options" value="C"> C. show that the Giver is not a reliable narrator.</label><label><input type="radio" name="q-1-7-options" value="D"> D. create a sense of distance between the reader and the main character.</label></div></div>
+            <div class="question" id="q-1-8"><p class="question-text">8. What does the Giver's statement, "I have the memory of pain. And war. And hunger. And love," foreshadow?</p><div class="options"><label><input type="radio" name="q-1-8-options" value="A"> A. That Jonas will get to choose which memories he receives.</label><label><input type="radio" name="q-1-8-options" value="B"> B. That Jonas's training will involve both wonderful and terrible experiences.</label><label><input type="radio" name="q-1-8-options" value="C"> C. That the Giver is tired and wants to forget these things.</label><label><input type="radio" name="q-1-8-options" value="D"> D. That the community will soon experience these things again.</label></div></div>
+            <div class="question" id="q-1-9"><p class="question-text">9. The word <b>transmit</b> in the third paragraph means:</p><div class="options"><label><input type="radio" name="q-1-9-options" value="A"> A. to hide or conceal.</label><label><input type="radio" name="q-1-9-options" value="B"> B. to pass or send from one to another.</label><label><input type="radio" name="q-1-9-options" value="C"> C. to create from nothing.</label><label><input type="radio" name="q-1-9-options" value="D"> D. to destroy or erase.</label></div></div>
+            <div class="question" id="q-1-10"><p class="question-text">10. From this passage, we can infer that the leaders of the community made the decision to adopt Sameness in order to:</p><div class="options"><label><input type="radio" name="q-1-10-options" value="A"> A. make life more exciting and unpredictable.</label><label><input type="radio" name="q-1-10-options" value="B"> B. encourage art and individual expression.</label><label><input type="radio" name="q-1-10-options" value="C"> C. increase their personal power and collections of books.</label><label><input type="radio" name="q-1-10-options" value="D"> D. protect the citizens from pain, strife, and difficult choices.</label></div></div>
+        </div>
+
+        <div id="test2" class="tab-pane">
+            <h2>2. Fiction: from The Outsiders by S.E. Hinton</h2>
+            <div class="excerpt">The sky was getting dark, and we were at the top of Jay Mountain. I was still shivering with cold and shock. Johnny sat leaning against a tree, his legs drawn up. He was pale, and his dark eyes were enormous. "Ponyboy," he said quietly.
+
+"Yeah?" I was still staring at the valley below us.
+
+"We're in a lot of trouble, ain't we?"
+
+"Yeah," I said, my voice trembling. I could still see the Soc, Bob, lying there in the moonlight, his face white and still. I could see the blood on my hands. "We gotta get out of here. Get somewhere."
+
+Johnny didn’t say anything. I looked at him. He was watching the stars. "That was a tough break," I said. "You couldn't help it."
+
+"I know," he said. He was still watching the stars. "You know, I never noticed colors and clouds and stuff until you started reminding me about them. It's like they were never there before." He was quiet for a minute. "It's like that poem you read to me. The one about the golden hour."
+
+I knew what he meant. The poem was by Robert Frost. "Nature's first green is gold, / Her hardest hue to hold. / Her early leaf's a flower; / But only so an hour."
+
+Johnny’s eyes were closed. "Stay gold, Ponyboy," he whispered. "Stay gold." The ground was getting damp, and I wondered if he was cold. His breathing was shallow.
+
+I remembered him in the fire, saving those kids. I remembered him standing up to Dally at the drive-in. He wasn’t a hero because he killed Bob. He was a hero because he was Johnny. And he was my best friend.
+
+He was silent for a long time, and I thought he was asleep. But then he spoke again, so softly I could barely hear him. "It's a shame... you can't see the stars from the city. They're too bright."
+
+I didn’t know what to say. I just sat there, beside him, watching the sky. The world felt big and empty. And I was scared.</div>
+            <div class="question" id="q-2-1"><p class="question-text">1. The setting on top of Jay Mountain primarily serves to:</p><div class="options"><label><input type="radio" name="q-2-1-options" value="A"> A. provide a beautiful backdrop for a happy memory.</label><label><input type="radio" name="q-2-1-options" value="B"> B. emphasize the characters' isolation and distance from their normal lives.</label><label><input type="radio" name="q-2-1-options" value="C"> C. create a sense of action and fast-paced excitement.</label><label><input type="radio" name="q-2-1-options" value="D"> D. show the characters' love for hiking and the outdoors.</label></div></div>
+            <div class="question" id="q-2-2"><p class="question-text">2. Johnny’s line, “Stay gold, Ponyboy,” is a reference to the poem, and in this context, it means:</p><div class="options"><label><input type="radio" name="q-2-2-options" value="A"> A. he wants Ponyboy to become wealthy.</label><label><input type="radio" name="q-2-2-options" value="B"> B. he is telling Ponyboy to stay hidden from the police.</label><label><input type="radio" name="q-2-2-options" value="C"> C. he wants Ponyboy to keep his hair dyed blond.</label><label><input type="radio" name="q-2-2-options" value="D"> D. he wants Ponyboy to hold onto his innocence, goodness, and appreciation for beauty.</label></div></div>
+            <div class="question" id="q-2-3"><p class="question-text">3. The word <b>trembling</b> as used to describe Ponyboy's voice suggests he is feeling:</p><div class="options"><label><input type="radio" name="q-2-3-options" value="A"> A. angry and defiant.</label><label><input type="radio" name="q-2-3-options" value="B"> B. cold, shocked, and frightened.</label><label><input type="radio" name="q-2-3-options" value="C"> C. excited and eager.</label><label><input type="radio" name="q-2-3-options" value="D"> D. bored and uninterested.</label></div></div>
+            <div class="question" id="q-2-4"><p class="question-text">4. The memory of Johnny saving the kids from the fire contrasts with the recent event of killing Bob to show that:</p><div class="options"><label><input type="radio" name="q-2-4-options" value="A"> A. Johnny is a violent and dangerous person.</label><label><input type="radio" name="q-2-4-options" value="B"> B. killing Bob was an act of heroism.</label><label><input type="radio" name="q-2-4-options" value="C"> C. Johnny's character is complex and not defined by a single, desperate act.</label><label><input type="radio" name="q-2-4-options" value="D"> D. Ponyboy is trying to forget what happened.</label></div></div>
+            <div class="question" id="q-2-5"><p class="question-text">5. What does Johnny mean when he says he "never noticed colors and clouds and stuff" before Ponyboy reminded him?</p><div class="options"><label><input type="radio" name="q-2-5-options" value="A"> A. That he has poor eyesight.</label><label><input type="radio" name="q-2-5-options" value="B"> B. That Ponyboy has helped him see the beauty and goodness in the world despite their harsh lives.</label><label><input type="radio" name="q-2-5-options" value="C"> C. That he was not interested in nature until now.</label><label><input type="radio" name="q-2-5-options" value="D"> D. That there are no colors or clouds in his neighborhood.</label></div></div>
+            <div class="question" id="q-2-6"><p class="question-text">6. The overall mood of the passage is best described as:</p><div class="options"><label><input type="radio" name="q-2-6-options" value="A"> A. cheerful and optimistic.</label><label><input type="radio" name="q-2-6-options" value="B"> B. tense and action-packed.</label><label><input type="radio" name="q-2-6-options" value="C"> C. somber, reflective, and sorrowful.</label><label><input type="radio" name="q-2-6-options" value="D"> D. humorous and light.</label></div></div>
+            <div class="question" id="q-2-7"><p class="question-text">7. The phrase "Her hardest hue to hold" from the poem means that:</p><div class="options"><label><input type="radio" name="q-2-7-options" value="A"> A. gold is a difficult color to paint.</label><label><input type="radio" name="q-2-7-options" value="B"> B. innocence and early beauty are precious and fleeting.</label><label><input type="radio" name="q-2-7-options" value="C"> C. it is hard to keep possession of gold jewelry.</label><label><input type="radio" name="q-2-7-options" value="D"> D. flowers do not last long.</label></div></div>
+            <div class="question" id="q-2-8"><p class="question-text">8. From the passage, we can infer that the relationship between Ponyboy and Johnny is one of:</p><div class="options"><label><input type="radio" name="q-2-8-options" value="A"> A. deep friendship and mutual respect.</label><label><input type="radio" name="q-2-8-options" value="B"> B. rivalry and competition.</label><label><input type="radio" name="q-2-8-options" value="C"> C. indifference and apathy.</label><label><input type="radio" name="q-2-8-options" value="D"> D. fear and mistrust.</label></div></div>
+            <div class="question" id="q-2-9"><p class="question-text">9. Johnny’s final comment about the stars suggests a feeling of:</p><div class="options"><label><input type="radio" name="q-2-9-options" value="A"> A. joy that he is away from the city.</label><label><input type="radio" name="q-2-9-options" value="B"> B. anger at the city for hiding the stars.</label><label><input type="radio" name="q-2-9-options" value="C"> C. sadness over the loss of natural beauty in the world he knows.</label><label><input type="radio" name="q-2-9-options" value="D"> D. scientific curiosity about astronomy.</label></div></div>
+            <div class="question" id="q-2-10"><p class="question-text">10. The narrator's internal thought, "The world felt big and empty," emphasizes his feelings of:</p><div class="options"><label><input type="radio" name="q-2-10-options" value="A"> A. excitement and freedom.</label><label><input type="radio" name="q-2-10-options" value="B"> B. loneliness, fear, and being overwhelmed.</label><label><input type="radio" name="q-2-10-options" value="C"> C. anger and a desire for revenge.</label><label><input type="radio" name="q-2-10-options" value="D"> D. contentment and peace.</label></div></div>
+        </div>
+
+        <div id="test3" class="tab-pane">
+            <h2>3. Fiction: from Holes by Louis Sachar</h2>
+            <div class="excerpt">Stanley felt the shovel strike something hard. He paused, his heart pounding. He had been at Camp Green Lake for what felt like an eternity, digging his hole five feet deep and five feet wide every single day under the brutal Texas sun. The Warden said it was to build character, but Stanley knew they were looking for something. He had never found anything but dirt and rocks. Until now.
+
+He dug around the object, then gently lifted it out of the hole. It was a small, golden tube, about the size of his finger. It was open at one end and closed at the other. He carefully wiped the dirt off on his pants. On the flat, closed end, there was an engraving: the letters KB, intertwined inside a heart. He had no idea what it meant. But he knew it was important. He knew, somehow, that this was what the Warden was looking for.
+
+A nervous energy coursed through him. What should he do? If he gave it to the Warden, she had promised the rest of the day off to anyone who found something interesting. He could get a double shower and relax in the Wreck Room. But what if she took it and claimed she found it herself? Or worse, what if this KB was something bad?
+
+He thought of X-Ray, the leader of his group of boys in Tent D. X-Ray had been there the longest and had the most influence. He had told Stanley that if he ever found anything, he should give it to him. X-Ray said it was because he deserved a day off more than a newcomer like Stanley. He argued it would build camaraderie, make Stanley look good in the long run.
+
+Stanley clutched the tube in his hand. It felt cool and smooth against his sweaty palm. He glanced over at the other boys, their orange jumpsuits dotting the barren landscape, each one a prisoner in his own five-foot-deep world. For the first time, he felt like he had a choice that mattered. This little tube held power, and he wasn't sure who to give it to, or if he should give it to anyone at all.</div>
+            <div class="question" id="q-3-1"><p class="question-text">1. The central conflict in this passage revolves around:</p><div class="options"><label><input type="radio" name="q-3-1-options" value="A"> A. Stanley's physical struggle with digging the hole.</label><label><input type="radio" name="q-3-1-options" value="B"> B. the harshness of the Warden's punishment.</label><label><input type="radio" name="q-3-1-options" value="C"> C. Stanley's internal dilemma about what to do with the gold tube.</label><label><input type="radio" name="q-3-1-options" value="D"> D. the competition between Stanley and X-Ray.</label></div></div>
+            <div class="question" id="q-3-2"><p class="question-text">2. The word <b>barren</b> used to describe the landscape means:</p><div class="options"><label><input type="radio" name="q-3-2-options" value="A"> A. lush and full of plants.</label><label><input type="radio" name="q-3-2-options" value="B"> B. bleak, empty, and unable to support life.</label><label><input type="radio" name="q-3-2-options" value="C"> C. crowded with buildings.</label><label><input type="radio" name="q-3-2-options" value="D"> D. hilly and mountainous.</label></div></div>
+            <div class="question" id="q-3-3"><p class="question-text">3. Stanley's initial assumption that "this was what the Warden was looking for" is an example of:</p><div class="options"><label><input type="radio" name="q-3-3-options" value="A"> A. foreshadowing.</label><label><input type="radio" name="q-3-3-options" value="B"> B. flashback.</label><label><input type="radio" name="q-3-3-options" value="C"> C. irony.</label><label><input type="radio" name="q-3-3-options" value="D"> D. hyperbole.</label></div></div>
+            <div class="question" id="q-3-4"><p class="question-text">4. What does X-Ray's argument for why Stanley should give him the object reveal about X-Ray's character?</p><div class="options"><label><input type="radio" name="q-3-4-options" value="A"> A. He is fair and wants what is best for Stanley.</label><label><input type="radio" name="q-3-4-options" value="B"> B. He is manipulative and uses his seniority to take advantage of others.</label><label><input type="radio" name="q-3-4-options" value="C"> C. He is afraid of the Warden.</label><label><input type="radio" name="q-3-4-options" value="D"> D. He does not care about getting a day off.</label></div></div>
+            <div class="question" id="q-3-5"><p class="question-text">5. The description of each boy being "a prisoner in his own five-foot-deep world" emphasizes their:</p><div class="options"><label><input type="radio" name="q-3-5-options" value="A"> A. sense of teamwork and unity.</label><label><input type="radio" name="q-3-5-options" value="B"> B. feelings of isolation and confinement.</label><label><input type="radio" name="q-3-5-options" value="C"> C. enjoyment of the daily digging.</label><label><input type="radio" name="q-3-5-options" value="D"> D. individual strength and character.</label></div></div>
+            <div class="question" id="q-3-6"><p class="question-text">6. The phrase "coursed through him" in the third paragraph suggests that the energy Stanley felt was:</p><div class="options"><label><input type="radio" name="q-3-6-options" value="A"> A. slow and gentle.</label><label><input type="radio" name="q-3-6-options" value="B"> B. weak and fading.</label><label><input type="radio" name="q-3-6-options" value="C"> C. flowing rapidly and powerfully, like a current.</label><label><input type="radio" name="q-3-6-options" value="D"> D. warm and comforting.</label></div></div>
+            <div class="question" id="q-3-7"><p class="question-text">7. From the passage, what can be inferred about the Warden's true reason for making the boys dig holes?</p><div class="options"><label><input type="radio" name="q-3-7-options" value="A"> A. She genuinely believes it builds character.</label><label><input type="radio" name="q-3-7-options" value="B"> B. She is using them as free labor to search for something specific.</label><label><input type="radio" name="q-3-7-options" value="C"> C. She is conducting a geological survey of the area.</label><label><input type="radio" name="q-3-7-options" value="D"> D. She does not have a reason; the digging is pointless.</label></div></div>
+            <div class="question" id="q-3-8"><p class="question-text">8. Stanley's hesitation to give the tube to the Warden suggests that he:</p><div class="options"><label><input type="radio" name="q-3-8-options" value="A"> A. is lazy and does not want a day off.</label><label><input type="radio" name="q-3-8-options" value="B"> B. thinks the tube is worthless.</label><label><input type="radio" name="q-3-8-options" value="C"> C. distrusts the Warden and fears being cheated or getting into trouble.</label><label><input type="radio" name="q-3-8-options" value="D"> D. wants to keep the tube as a good luck charm.</label></div></div>
+            <div class="question" id="q-3-9"><p class="question-text">9. The engraved letters "KB" on the tube serve as a plot device to create:</p><div class="options"><label><input type="radio" name="q-3-9-options" value="A"> A. humor.</label><label><input type="radio" name="q-3-9-options" value="B"> B. romance.</label><label><input type="radio" name="q-3-9-options" value="C"> C. mystery.</label><label><input type="radio" name="q-3-9-options" value="D"> D. closure.</label></div></div>
+            <div class="question" id="q-3-10"><p class="question-text">10. The statement "For the first time, he felt like he had a choice that mattered" indicates that finding the tube has given Stanley a sense of:</p><div class="options"><label><input type="radio" name="q-3-10-options" value="A"> A. fear.</label><label><input type="radio" name="q-3-10-options" value="B"> B. greed.</label><label><input type="radio" name="q-3-10-options" value="C"> C. agency and power.</label><label><input type="radio" name="q-3-10-options" value="D"> D. hopelessness.</label></div></div>
+        </div>
+
+        <div id="test4" class="tab-pane">
+            <h2>4. Fiction: from Percy Jackson & The Lightning Thief</h2>
+            <div class="excerpt">The next few days I settled into a routine that felt almost normal, if you don't count the fact that I was getting sword-fighting lessons from a centaur and my best friend was a satyr. I would wake up in the Hermes cabin, a place crammed with bunk beds and overflowing with the unclaimed children of the god of travelers, messengers, and thieves. My bunkmate, Luke, son of Hermes, would usually be practicing with his sword, a wicked-looking blade named Backbiter that was half celestial bronze, half tempered steel.
+
+After a breakfast of strawberries and ambrosia—which tasted like my mom's homemade blue chocolate-chip cookies—I'd head to the archery range, where I was hopelessly bad, or to the canoe lake, where I felt more at home. But the highlight of my day was sword practice. Mr. D (Dionysus, the camp director, who was being punished by Zeus and hated every minute of it) would watch us with bored disdain, while Chiron, the centaur activities director, would patiently guide me.
+
+"Your father's power is in you, Percy," Chiron would say. "The sea does not like to be restrained." I didn't know what he meant. I still didn't know who my father was. All I knew was that some monster, the Minotaur, had attacked me, and my mother had vanished in a flash of gold dust. Now I was here, at Camp Half-Blood, a place for demigods.
+
+One afternoon, Clarisse, a brutish daughter of Ares, the god of war, decided to give me her traditional welcome. She and her cronies dragged me toward the camp bathrooms. "Time for a swirlie, Prissy," she sneered. I struggled, but they were too strong. They shoved my head toward the toilet bowl. I remember feeling a strange tug in the pit of my stomach. The water in the pipes rumbled. Then, with a roar, every toilet and shower in the building exploded, blasting streams of water straight at Clarisse and her gang, knocking them off their feet. The water didn't touch me. I stood in the only dry spot in the entire room, completely untouched. Everyone stared at me, their mouths agape. And for the first time, I felt a surge of power, a connection to something ancient and vast. The sea, Chiron had said. I was starting to understand.</div>
+            <div class="question" id="q-4-1"><p class="question-text">1. The primary purpose of this passage is to:</p><div class="options"><label><input type="radio" name="q-4-1-options" value="A"> A. provide a detailed map and history of Camp Half-Blood.</label><label><input type="radio" name="q-4-1-options" value="B"> B. introduce Percy's daily routine and reveal his latent powers through a specific conflict.</label><label><input type="radio" name="q-4-1-options" value="C"> C. focus entirely on the sword-fighting lessons Percy receives.</label><label><input type="radio" name="q-4-1-options" value="D"> D. explain the family tree of the Greek gods.</label></div></div>
+            <div class="question" id="q-4-2"><p class="question-text">2. The word <b>disdain</b> in the second paragraph means:</p><div class="options"><label><input type="radio" name="q-4-2-options" value="A"> A. great interest and excitement.</label><label><input type="radio" name="q-4-2-options" value="B"> B. fear and nervousness.</label><label><input type="radio" name="q-4-2-options" value="C"> C. the feeling that someone or something is unworthy of one's respect; contempt.</label><label><input type="radio" name="q-4-2-options" value="D"> D. patience and understanding.</label></div></div>
+            <div class="question" id="q-4-3"><p class="question-text">3. What does Chiron's statement, "The sea does not like to be restrained," primarily foreshadow?</p><div class="options"><label><input type="radio" name="q-4-3-options" value="A"> A. That Percy will become a champion canoeist.</label><label><input type="radio" name="q-4-3-options" value="B"> B. That Percy's father is Poseidon, the god of the sea.</label><label><input type="radio" name="q-4-3-options" value="C"> C. That a large tidal wave is about to hit the camp.</label><label><input type="radio" name="q-4-3-options" value="D"> D. That Percy has a rebellious and powerful nature, much like the sea itself.</label></div></div>
+            <div class="question" id="q-4-4"><p class="question-text">4. The tone of the narrator, Percy Jackson, is best described as:</p><div class="options"><label><input type="radio" name="q-4-4-options" value="A"> A. detached and formal.</label><label><input type="radio" name="q-4-4-options" value="B"> B. sarcastic, confused, and relatable.</label><label><input type="radio" name="q-4-4-options" value="C"> C. arrogant and boastful.</label><label><input type="radio" name="q-4-4-options" value="D"> D. fearful and timid.</label></div></div>
+            <div class="question" id="q-4-5"><p class="question-text">5. The incident in the bathroom is significant because it is the first time that Percy:</p><div class="options"><label><input type="radio" name="q-4-5-options" value="A"> A. makes friends at camp.</label><label><input type="radio" name="q-4-5-options" value="B"> B. stands up to a bully.</label><label><input type="radio" name="q-4-5-options" value="C"> C. consciously uses his demigod powers.</label><label><input type="radio" name="q-4-5-options" value="D"> D. understands who his father is.</label></div></div>
+            <div class="question" id="q-4-6"><p class="question-text">6. The word <b>latent</b> as used in question 2 to describe Percy's powers means:</p><div class="options"><label><input type="radio" name="q-4-6-options" value="A"> A. weak and ineffective.</label><label><input type="radio" name="q-4-6-options" value="B"> B. existing but not yet developed or manifest; hidden.</label><label><input type="radio" name="q-4-6-options" value="C"> C. well-known and obvious to everyone.</label><label><input type="radio" name="q-4-6-options" value="D"> D. dangerous and uncontrollable.</label></div></div>
+            <div class="question" id="q-4-7"><p class="question-text">7. What can be inferred about the Hermes cabin?</p><div class="options"><label><input type="radio" name="q-4-7-options" value="A"> A. It is the most luxurious and well-organized cabin at camp.</label><label><input type="radio" name="q-4-7-options" value="B"> B. It is a catch-all cabin for many unclaimed or undetermined demigods.</label><label><input type="radio" name="q-4-7-options" value="C"> C. It is only for children of Hermes who are expert thieves.</label><label><input type="radio" name="q-4-7-options" value="D"> D. It is empty except for Percy and Luke.</label></div></div>
+            <div class="question" id="q-4-8"><p class="question-text">8. The contrast between Mr. D's "bored disdain" and Chiron's "patient guidance" serves to:</p><div class="options"><label><input type="radio" name="q-4-8-options" value="A"> A. show that all the adults at camp are incompetent.</label><label><input type="radio" name="q-4-8-options" value="B"> B. create a sense of conflict between the two camp leaders.</label><label><input type="radio" name="q-4-8-options" value="C"> C. highlight Chiron's role as a true mentor and teacher for Percy.</label><label><input type="radio" name="q-4-8-options" value="D"> D. suggest that Mr. D is secretly helping Percy.</label></div></div>
+            <div class="question" id="q-4-9"><p class="question-text">9. What does the fact that ambrosia tastes like Percy's mom's cookies suggest?</p><div class="options"><label><input type="radio" name="q-4-9-options" value="A"> A. That his mom is secretly a goddess who makes ambrosia.</label><label><input type="radio" name="q-4-9-options" value="B"> B. That the food of the gods tastes like whatever is most comforting to the person eating it.</label><label><input type="radio" name="q-4-9-options" value="C"> C. That all demigods love blue chocolate-chip cookies.</label><label><input type="radio" name="q-4-9-options" value="D"> D. That the camp's food is not actually magical.</label></div></div>
+            <div class="question" id="q-4-10"><p class="question-text">10. The main theme explored in this passage is:</p><div class="options"><label><input type="radio" name="q-4-10-options" value="A"> A. the importance of following rules.</label><label><input type="radio" name="q-4-10-options" value="B"> B. the challenges of making new friends.</label><label><input type="radio" name="q-4-10-options" value="C"> C. the journey of self-discovery and accepting one's identity.</label><label><input type="radio" name="q-4-10-options" value="D"> D. the conflict between gods and mortals.</label></div></div>
+        </div>
+
+        <!-- DRAMA -->
+        <div id="test5" class="tab-pane">
+            <h2>5. Drama: from A Raisin in the Sun by Lorraine Hansberry</h2>
+            <div class="excerpt">
+(MAMA comes out, drying her hands on her apron. She is a woman in her early sixties, full-bodied and strong. She has a certain grace and beauty to her that are not destroyed by time. Her speech is soft, but her eyes are alert and miss nothing. She comes to her plant, which is sitting on the windowsill, and gives it a drink of water.)
+
+<b>MAMA:</b> They spirited all right, my children. Got to admit they got spirit. Like this old plant that ain't never had enough sunshine or nothing—and look at it...
+
+(She has been talking to herself. Now she turns to RUTH.)
+
+Not enough sun in this house. Lord, I am tired of this place. I am tired of looking at this raggedy carpet and these worn-out chairs.
+
+<b>RUTH:</b> So am I, Mama. So am I.
+
+<b>MAMA:</b> That check... it’s coming tomorrow.
+
+<b>RUTH:</b> I know.
+
+<b>MAMA:</b> Ten thousand dollars. A whole lot of money.
+
+<b>RUTH:</b> I know it is.
+
+<b>MAMA:</b> It's a miracle to me. All that money. It’s the first time in my life I think I ever held that much money. Big Walter, he worked hisself to death. He was a good man, a fine man. Just couldn’t never catch up with his dreams, that’s all. You know, son, I been thinking about a house. A little old house somewhere. Three bedrooms. A yard where Travis could play. And I'd have a little garden. I could grow me some vegetables. Some flowers... (She stops) Lord, if this little old plant don’t get more sun than it’s been getting it ain’t never going to see spring. (She looks at RUTH) You think Walter’s going to listen to me this time?
+
+<b>RUTH:</b> I don't know, Mama. I just don't know what's gotten into him. He's always talking 'bout that liquor store...
+
+<b>MAMA:</b> We ain't going to have no liquor store in this family, not with my money. Not with my husband's flesh and blood.</div>
+            <div class="question" id="q-5-1"><p class="question-text">1. Mama’s plant, which "ain't never had enough sunshine," serves as a metaphor for:</p><div class="options"><label><input type="radio" name="q-5-1-options" value="A"> A. her children's lack of intelligence.</label><label><input type="radio" name="q-5-1-options" value="B"> B. her family's resilience and dreams despite their difficult circumstances.</label><label><input type="radio" name="q-5-1-options" value="C"> C. her desire to move to a warmer climate.</label><label><input type="radio" name="q-5-1-options" value="D"> D. the financial success she has always enjoyed.</label></div></div>
+            <div class="question" id="q-5-2"><p class="question-text">2. The stage direction describing Mama as having "grace and beauty... not destroyed by time" suggests that she possesses:</p><div class="options"><label><input type="radio" name="q-5-2-options" value="A"> A. great physical wealth.</label><label><input type="radio" name="q-5-2-options" value="B"> B. a life of ease and comfort.</label><label><input type="radio" name="q-5-2-options" value="C"> C. inner strength and dignity.</label><label><input type="radio" name="q-5-2-options" value="D"> D. a resentful and bitter attitude.</label></div></div>
+            <div class="question" id="q-5-3"><p class="question-text">3. The word <b>spirited</b> in Mama's first line most nearly means:</p><div class="options"><label><input type="radio" name="q-5-3-options" value="A"> A. ghostly or supernatural.</label><label><input type="radio" name="q-5-3-options" value="B"> B. full of energy, courage, and determination.</label><label><input type="radio" name="q-5-3-options" value="C"> C. quiet and obedient.</label><label><input type="radio" name="q-5-3-options" value="D"> D. artistic and creative.</label></div></div>
+            <div class="question" id="q-5-4"><p class="question-text">4. The conflict between Mama and her son Walter is revealed to be about:</p><div class="options"><label><input type="radio" name="q-5-4-options" value="A"> A. their differing views on how to spend the insurance money.</label><label><input type="radio" name="q-5-4-options" value="B"> B. Walter's decision to leave the family.</label><label><input type="radio" name="q-5-4-options" value="C"> C. Mama's disapproval of Ruth.</label><label><input type="radio" name="q-5-4-options" value="D"> D. their disagreement over who should water the plant.</label></div></div>
+            <div class="question" id="q-5-5"><p class="question-text">5. What does Mama's dream of a house with a garden represent?</p><div class="options"><label><input type="radio" name="q-5-5-options" value="A"> A. A desire for fame and recognition.</label><label><input type="radio" name="q-5-5-options" value="B"> B. A simple wish for a large fortune.</label><label><input type="radio" name="q-5-5-options" value="C"> C. A deep longing for dignity, space, and a better life for her family.</label><label><input type="radio" name="q-5-5-options" value="D"> D. A plan to start a commercial farming business.</label></div></div>
+            <div class="question" id="q-5-6"><p class="question-text">6. The overall tone of Mama's lines in this excerpt can be described as:</p><div class="options"><label><input type="radio" name="q-5-6-options" value="A"> A. angry and vengeful.</label><label><input type="radio" name="q-5-6-options" value="B"> B. a mix of weariness, hope, and firm principle.</label><label><input type="radio" name="q-5-6-options" value="C"> C. sarcastic and mocking.</label><label><input type="radio" name="q-5-6-options" value="D"> D. cheerful and lighthearted.</label></div></div>
+            <div class="question" id="q-5-7"><p class="question-text">7. The source of the ten thousand dollars is:</p><div class="options"><label><input type="radio" name="q-5-7-options" value="A"> A. a lottery winning.</label><label><input type="radio" name="q-5-7-options" value="B"> B. Walter's savings from his job.</label><label><input type="radio" name="q-5-7-options" value="C"> C. a life insurance payment from her late husband.</label><label><input type="radio" name="q-5-7-options" value="D"> D. a loan from the bank.</label></div></div>
+            <div class="question" id="q-5-8"><p class="question-text">8. Why does Mama object to the liquor store?</p><div class="options"><label><input type="radio" name="q-5-8-options" value="A"> A. She believes it is an immoral and inappropriate use of her husband's legacy.</label><label><input type="radio" name="q-5-8-options" value="B"> B. She thinks it will not be a profitable business venture.</label><label><input type="radio" name="q-5-8-options" value="C"> C. She wants to own the liquor store herself.</label><label><input type="radio" name="q-5-8-options" value="D"> D. She is worried that Walter will drink all the profits.</label></div></div>
+            <div class="question" id="q-5-9"><p class="question-text">9. The dialogue reveals that the family's current living situation is:</p><div class="options"><label><input type="radio" name="q-5-9-options" value="A"> A. new and exciting.</label><label><input type="radio" name="q-5-9-options" value="B"> B. spacious and comfortable.</label><label><input type="radio" name="q-5-9-options" value="C"> C. cramped and worn-out.</label><label><input type="radio" name="q-5-9-options" value="D"> D. located in a sunny, rural area.</label></div></div>
+            <div class="question" id="q-5-10"><p class="question-text">10. What can be inferred from Mama's line, "You think Walter’s going to listen to me this time?"</p><div class="options"><label><input type="radio" name="q-5-10-options" value="A"> A. Walter always does exactly what his mother says.</label><label><input type="radio" name="q-5-10-options" value="B"> B. This is the first time Mama and Walter have ever disagreed.</label><label><input type="radio" name="q-5-10-options" value="C"> C. There is a history of conflict and Walter not heeding his mother's advice.</label><label><input type="radio" name="q-5-10-options" value="D"> D. Mama is confident that Walter will agree with her plan.</label></div></div>
+        </div>
+
+        <div id="test6" class="tab-pane">
+            <h2>6. Drama: from Romeo and Juliet by William Shakespeare</h2>
+            <div class="excerpt">
+(Enter ROMEO)
+
+<b>JULIET:</b> O Romeo, Romeo! wherefore art thou Romeo?
+Deny thy father and refuse thy name;
+Or, if thou wilt not, be but sworn my love,
+And I'll no longer be a Capulet.
+
+<b>ROMEO:</b> (Aside) Shall I hear more, or shall I speak at this?
+
+<b>JULIET:</b> 'Tis but thy name that is my enemy;
+Thou art thyself, though not a Montague.
+What's Montague? It is nor hand, nor foot,
+Nor arm, nor face, nor any other part
+Belonging to a man. O, be some other name!
+What's in a name? That which we call a rose
+By any other name would smell as sweet;
+So Romeo would, were he not Romeo call'd,
+Retain that dear perfection which he owes
+Without that title. Romeo, doff thy name,
+And for that name which is no part of thee
+Take all myself.
+
+<b>ROMEO:</b> (To JULIET) I take thee at thy word:
+Call me but love, and I'll be new baptized;
+Henceforth I never will be Romeo.
+
+<b>JULIET:</b> What man art thou that thus bescreen'd in night
+So stumblest on my counsel?
+
+<b>ROMEO:</b> By a name
+I know not how to tell thee who I am:
+My name, dear saint, is hateful to myself,
+Because it is an enemy to thee;
+Had I it written, I would tear the word.
+
+<b>JULIET:</b> My ears have not yet drunk a hundred words
+Of that tongue's utterance, yet I know the sound:
+Art thou not Romeo and a Montague?
+
+<b>ROMEO:</b> Neither, fair maid, if either thee dislike.</div>
+            <div class="question" id="q-6-1"><p class="question-text">1. Juliet’s question, "wherefore art thou Romeo?" is asking:</p><div class="options"><label><input type="radio" name="q-6-1-options" value="A"> A. "Where are you, Romeo?"</label><label><input type="radio" name="q-6-1-options" value="B"> B. "When will I see you again, Romeo?"</label><label><input type="radio" name="q-6-1-options" value="C"> C. "Why must you be named Romeo, a Montague?"</label><label><input type="radio" name="q-6-1-options" value="D"> D. "Who is Romeo?"</label></div></div>
+            <div class="question" id="q-6-2"><p class="question-text">2. What is the central conflict expressed by Juliet in her monologue?</p><div class="options"><label><input type="radio" name="q-6-2-options" value="A"> A. Her love for Romeo is at odds with their feuding family names.</label><label><input type="radio" name="q-6-2-options" value="B"> B. She is unsure if she truly loves Romeo.</label><label><input type="radio" name="q-6-2-options" value="C"> C. She is afraid of heights and being on the balcony.</label><label><input type="radio" name="q-6-2-options" value="D"> D. She believes Romeo does not love her back.</label></div></div>
+            <div class="question" id="q-6-3"><p class="question-text">3. The line "What's in a name? That which we call a rose / By any other name would smell as sweet" is a famous metaphor arguing that:</p><div class="options"><label><input type="radio" name="q-6-3-options" value="A"> A. names are the most important part of a person's identity.</label><label><input type="radio" name="q-6-3-options" value="B"> B. a person's true nature is more important than their label or name.</label><label><input type="radio" name="q-6-3-options" value="C"> C. roses are the most beautiful of all flowers.</label><label><input type="radio" name="q-6-3-options" value="D"> D. Romeo should change his name to Rose.</label></div></div>
+            <div class="question" id="q-6-4"><p class="question-text">4. The word <b>doff</b> in the line "Romeo, doff thy name" means:</p><div class="options"><label><input type="radio" name="q-6-4-options" value="A"> A. to announce proudly.</label><label><input type="radio" name="q-6-4-options" value="B"> B. to keep secret.</label><label><input type="radio" name="q-6-4-options" value="C"> C. to take off or remove.</label><label><input type="radio" name="q-6-4-options" value="D"> D. to honor or praise.</label></div></div>
+            <div class="question" id="q-6-5"><p class="question-text">5. Romeo's line, "I'll be new baptized," suggests he is willing to:</p><div class="options"><label><input type="radio" name="q-6-5-options" value="A"> A. change his religion for Juliet.</label><label><input type="radio" name="q-6-5-options" value="B"> B. be completely reborn with a new identity for the sake of their love.</label><label><input type="radio" name="q-6-5-options" value="C"> C. swim in the river below the balcony.</label><label><input type="radio" name="q-6-5-options" value="D"> D. argue with his family about his name.</label></div></div>
+            <div class="question" id="q-6-6"><p class="question-text">6. The stage direction "(Aside)" indicates that Romeo is:</p><div class="options"><label><input type="radio" name="q-6-6-options" value="A"> A. yelling his lines to the audience.</label><label><input type="radio" name="q-6-6-options" value="B"> B. speaking his thoughts aloud to himself, unheard by Juliet.</label><label><input type="radio" name="q-6-6-options" value="C"> C. whispering his lines to Juliet.</label><label><input type="radio" name="q-6-6-options" value="D"> D. exiting the scene.</label></div></div>
+            <div class="question" id="q-6-7"><p class="question-text">7. The phrase "bescreen'd in night" means:</p><div class="options"><label><input type="radio" name="q-6-7-options" value="A"> A. wearing a mask.</label><label><input type="radio" name="q-6-7-options" value="B"> B. protected by a screen door.</label><label><input type="radio" name="q-6-7-options" value="C"> C. hidden by the darkness of night.</label><label><input type="radio" name="q-6-7-options" value="D"> D. blinded by the moonlight.</label></div></div>
+            <div class="question" id="q-6-8"><p class="question-text">8. What is the dramatic irony in the first part of this scene?</p><div class="options"><label><input type="radio" name="q-6-8-options" value="A"> A. Juliet thinks she is alone, but the audience knows Romeo is listening.</label><label><input type="radio" name="q-6-8-options" value="B"> B. Romeo knows Juliet's family will never accept him.</label><label><input type="radio" name="q-6-8-options" value="C"> C. The audience knows that Romeo and Juliet will die in the end.</label><label><input type="radio" name="q-6-8-options" value="D"> D. Romeo and Juliet both believe the other is not truly in love.</label></div></div>
+            <div class="question" id="q-6-9"><p class="question-text">9. Juliet’s line, "My ears have not yet drunk a hundred words / Of that tongue's utterance, yet I know the sound," implies that:</p><div class="options"><label><input type="radio" name="q-6-9-options" value="A"> A. she has excellent hearing.</label><label><input type="radio" name="q-6-9-options" value="B"> B. she thinks Romeo talks too much.</label><label><input type="radio" name="q-6-9-options" value="C"> C. although they have spoken very little, his voice is already familiar and recognizable to her.</label><label><input type="radio" name="q-6-9-options" value="D"> D. she does not believe it is really Romeo.</label></div></div>
+            <div class="question" id="q-6-10"><p class="question-text">10. Romeo's final line, "Neither, fair maid, if either thee dislike," shows his complete:</p><div class="options"><label><input type="radio" name="q-6-10-options" value="A"> A. confusion about his own identity.</label><label><input type="radio" name="q-6-10-options" value="B"> B. devotion to Juliet, willing to abandon his name and family for her.</label><label><input type="radio" name="q-6-10-options" value="C"> C. disrespect for his family's name.</label><label><input type="radio" name="q-6-10-options" value="D"> D. fear of being discovered by the Capulets.</label></div></div>
+        </div>
+        
+        <div id="test7" class="tab-pane">
+            <h2>7. Drama: from The Diary of Anne Frank by Goodrich & Hackett</h2>
+            <div class="excerpt">
+(It is late afternoon. The curtains are drawn. The room is still and dark. From outside, the sound of a barrel organ can be heard. ANNE is curled up on the sofa, reading. MARGOT is sitting at the table, studying. Suddenly, PETER enters from his room. He is holding a cat, a scrawny, black creature.)
+
+<b>PETER:</b> I've brought him. His name's Mouschi.
+
+<b>ANNE:</b> (Jumping up) A cat! Oh, Peter, a cat! I love cats. He's beautiful. What a beautiful, beautiful cat. (She reaches out to pet him, but PETER pulls back.)
+
+<b>PETER:</b> He's very shy. He's not used to people.
+
+<b>MRS. VAN DAAN:</b> (From the kitchen) Peter, what have you got there?
+
+<b>PETER:</b> A cat.
+
+<b>MRS. VAN DAAN:</b> (Entering) A cat! In here? We'll all be eaten alive by fleas! Take it out of here this minute!
+
+<b>PETER:</b> But Mother...
+
+<b>MR. FRANK:</b> (Entering, calmly) Mrs. Van Daan, it's just a cat. Peter, perhaps you should keep him in your room.
+
+<b>MR. VAN DAAN:</b> (Following his wife) It's not just a cat. It's another mouth to feed. We don't have enough for ourselves, and you bring a cat? Do you know what they're paying for a sack of potatoes on the black market? And you bring a cat.
+
+<b>ANNE:</b> He can have my food. I'll give him all my food.
+
+<b>MR. DUSSEL:</b> (From his corner, without looking up from his book) I am a man who has always been allergic to cats. They make me sneeze. My throat closes up. I could die.
+
+<b>PETER:</b> (To his cat) Don't worry, Mouschi. I'll take care of you.
+
+(He takes the cat and disappears into his room. ANNE looks after him, her face a mixture of disappointment and sympathy. MR. FRANK shakes his head slightly, a sad smile on his face.)
+
+<b>MR. FRANK:</b> We are all a little on edge. It's been a long time. We must remember to be patient with one another. We are all here for the same reason. To survive.</div>
+            <div class="question" id="q-7-1"><p class="question-text">1. The arrival of the cat, Mouschi, primarily serves to:</p><div class="options"><label><input type="radio" name="q-7-1-options" value="A"> A. provide a source of food for the families.</label><label><input type="radio" name="q-7-1-options" value="B"> B. reveal the underlying tensions and different personalities of the people in hiding.</label><label><input type="radio" name="q-7-1-options" value="C"> C. prove that Peter is irresponsible.</label><label><input type="radio" name="q-7-1-options" value="D"> D. create a moment of pure, uncomplicated joy for everyone.</label></div></div>
+            <div class="question" id="q-7-2"><p class="question-text">2. Which character's reaction to the cat is based on practicality and the scarcity of resources?</p><div class="options"><label><input type="radio" name="q-7-2-options" value="A"> A. Anne</label><label><input type="radio" name="q-7-2-options" value="B"> B. Mr. Frank</label><label><input type="radio" name="q-7-2-options" value="C"> C. Mr. Van Daan</label><label><input type="radio" name="q-7-2-options" value="D"> D. Mr. Dussel</label></div></div>
+            <div class="question" id="q-7-3"><p class="question-text">3. The phrase "scarcity of resources" in the previous question means:</p><div class="options"><label><input type="radio" name="q-7-3-options" value="A"> A. there is an abundance of supplies.</label><label><input type="radio" name="q-7-3-options" value="B"> B. the resources are of poor quality.</label><label><input type="radio" name="q-7-3-options" value="C"> C. there is a shortage or lack of supplies.</label><label><input type="radio" name="q-7-3-options" value="D"> D. the resources are being shared unfairly.</label></div></div>
+            <div class="question" id="q-7-4"><p class="question-text">4. Anne's offer to give the cat all her food reveals her character to be:</p><div class="options"><label><input type="radio" name="q-7-4-options" value="A"> A. selfish and thoughtless.</label><label><input type="radio" name="q-7-4-options" value="B"> B. dramatic and attention-seeking.</label><label><input type="radio" name="q-7-4-options" value="C"> C. impulsive, generous, and empathetic.</label><label><input type="radio" name="q-7-4-options" value="D"> D. practical and logical.</label></div></div>
+            <div class="question" id="q-7-5"><p class="question-text">5. Mr. Frank’s line, "We are all a little on edge," is an understatement for the feeling of:</p><div class="options"><label><input type="radio" name="q-7-5-options" value="A"> A. excitement from being in a new place.</label><label><input type="radio" name="q-7-5-options" value="B"> B. boredom from having nothing to do.</label><label><input type="radio" name="q-7-5-options" value="C"> C. extreme stress, fear, and frustration of being in constant hiding.</label><label><input type="radio" name="q-7-5-options" value="D"> D. mild annoyance with one another's habits.</label></div></div>
+            <div class="question" id="q-7-6"><p class="question-text">6. The stage directions describing Anne's face as a "mixture of disappointment and sympathy" show her conflicting feelings about:</p><div class="options"><label><input type="radio" name="q-7-6-options" value="A"> A. not getting to pet the cat, and feeling sorry for Peter.</label><label><input type="radio" name="q-7-6-options" value="B"> B. the cat being black, and feeling sorry for Mrs. Van Daan.</label><label><input type="radio" name="q-7-6-options" value="C"> C. being hungry, and feeling sorry for herself.</label><label><input type="radio" name="q-7-6-options" value="D"> D. Mr. Frank's decision, and feeling sorry for Mr. Dussel.</label></div></div>
+            <div class="question" id="q-7-7"><p class="question-text">7. Mr. Dussel's complaint about his allergy is an example of dramatic irony if the audience knows:</p><div class="options"><label><input type="radio" name="q-7-7-options" value="A"> A. he is secretly a cat lover.</label><label><input type="radio" name="q-7-7-options" value="B"> B. his allergy is real and life-threatening.</label><label><input type="radio" name="q-7-7-options" value="C"> C. he is often selfish and complains to get his own way.</label><label><input type="radio" name="q-7-7-options" value="D"> D. he is the one who brought the cat in.</label></div></div>
+            <div class="question" id="q-7-8"><p class="question-text">8. What does the cat symbolize for the characters in the Annex?</p><div class="options"><label><input type="radio" name="q-7-8-options" value="A"> A. For some, a connection to a normal life and a source of comfort; for others, another burden and source of conflict.</label><label><input type="radio" name="q-7-8-options" value="B"> B. A shared hope that they will all be rescued soon.</label><label><input type="radio" name="q-7-8-options" value="C"> C. A reminder of the dangerous outside world they left behind.</label><label><input type="radio" name="q-7-8-options" value="D"> D. A sign of bad luck and impending doom.</label></div></div>
+            <div class="question" id="q-7-9"><p class="question-text">9. The overall tone of the scene is:</p><div class="options"><label><input type="radio" name="q-7-9-options" value="A"> A. joyful and celebratory.</label><label><input type="radio" name="q-7-9-options" value="B"> B. tense and fraught with conflict, despite the seemingly small issue.</label><label><input type="radio" name="q-7-9-options" value="C"> C. mysterious and suspenseful.</label><label><input type="radio" name="q-7-9-options" value="D"> D. comical and lighthearted.</label></div></div>
+            <div class="question" id="q-7-10"><p class="question-text">10. Mr. Frank’s role in this scene is that of:</p><div class="options"><label><input type="radio" name="q-7-10-options" value="A"> A. an agitator who starts the argument.</label><label><input type="radio" name="q-7-10-options" value="B"> B. a tyrant who sides with the adults.</label><label><input type="radio" name="q-7-10-options" value="C"> C. a peacemaker who tries to be rational and calm the conflict.</label><label><input type="radio" name="q-7-10-options" value="D"> D. an indifferent observer who does not care about the outcome.</label></div></div>
+        </div>
+
+        <!-- POETRY -->
+        <div id="test8" class="tab-pane">
+            <h2>8. Poetry: "The Road Not Taken" by Robert Frost</h2>
+            <div class="excerpt">Two roads diverged in a yellow wood,
+And sorry I could not travel both
+And be one traveler, long I stood
+And looked down one as far as I could
+To where it bent in the undergrowth;
+
+Then took the other, as just as fair,
+And having perhaps the better claim,
+Because it was grassy and wanted wear;
+Though as for that the passing there
+Had worn them really about the same,
+
+And both that morning equally lay
+In leaves no step had trodden black.
+Oh, I kept the first for another day!
+Yet knowing how way leads on to way,
+I doubted if I should ever come back.
+
+I shall be telling this with a sigh
+Somewhere ages and ages hence:
+Two roads diverged in a wood, and I—
+I took the one less traveled by,
+And that has made all the difference.</div>
+            <div class="question" id="q-8-1"><p class="question-text">1. The "two roads diverged" is a metaphor for:</p><div class="options"><label><input type="radio" name="q-8-1-options" value="A"> A. a difficult journey through a forest.</label><label><input type="radio" name="q-8-1-options" value="B"> B. a choice between two paths in life.</label><label><input type="radio" name="q-8-1-options" value="C"> C. the speaker's love for nature.</label><label><input type="radio" name="q-8-1-options" value="D"> D. an argument between two people.</label></div></div>
+            <div class="question" id="q-8-2"><p class="question-text">2. In the second stanza, the speaker notes that the second road "wanted wear." This phrase means the road:</p><div class="options"><label><input type="radio" name="q-8-2-options" value="A"> A. was old and worn out.</label><label><input type="radio" name="q-8-2-options" value="B"> B. was an undesirable or bad path.</label><label><input type="radio" name="q-8-2-options" value="C"> C. seemed to lack travelers; it was not worn down.</label><label><input type="radio" name="q-8-2-options" value="D"> D. was in need of repair.</label></div></div>
+            <div class="question" id="q-8-3"><p class="question-text">3. How does the speaker almost immediately contradict his reason for taking the second road?</p><div class="options"><label><input type="radio" name="q-8-3-options" value="A"> A. By saying he will come back to the first road later.</label><label><input type="radio" name="q-8-3-options" value="B"> B. By admitting that the passing there had worn them "really about the same."</label><label><input type="radio" name="q-8-3-options" value="C"> C. By describing the wood as "yellow."</label><label><input type="radio" name="q-8-3-options" value="D"> D. By expressing regret for his choice.</label></div></div>
+            <div class="question" id="q-8-4"><p class="question-text">4. The "sigh" in the final stanza is best interpreted as a sign of:</p><div class="options"><label><input type="radio" name="q-8-4-options" value="A"> A. simple happiness and contentment.</label><label><input type="radio" name="q-8-4-options" value="B"> B. clear regret for making the wrong choice.</label><label><input type="radio" name="q-8-4-options" value="C"> C. physical exhaustion from the long journey.</label><label><input type="radio" name="q-8-4-options" value="D"> D. complex reflection, blending satisfaction, nostalgia, and perhaps a touch of melancholy.</label></div></div>
+            <div class="question" id="q-8-5"><p class="question-text">5. What does the line "Yet knowing how way leads on to way, / I doubted if I should ever come back" reveal about the nature of life's choices?</p><div class="options"><label><input type="radio" name="q-8-5-options" value="A"> A. That it is easy to reverse decisions we have made.</label><label><input type="radio" name="q-8-5-options" value="B"> B. That one choice often leads to another, making it difficult or impossible to return to the original point.</label><label><input type="radio" name="q-8-5-options" value="C"> C. That all paths eventually lead to the same destination.</label><label><input type="radio" name="q-8-5-options" value="D"> D. That the speaker is a poor navigator and is lost.</label></div></div>
+            <div class="question" id="q-8-6"><p class="question-text">6. The final two lines—"I took the one less traveled by, / And that has made all the difference"—suggest that:</p><div class="options"><label><input type="radio" name="q-8-6-options" value="A"> A. the speaker made the correct and best choice.</label><label><input type="radio" name="q-8-6-options" value="B"> B. the speaker made a terrible mistake.</label><label><input type="radio" name="q-8-6-options" value="C"> C. the choice of the less-traveled path has had a profound impact on his life, for better or worse.</label><label><input type="radio" name="q-8-6-options" value="D"> D. the speaker believes his life would be the same no matter which path he took.</label></div></div>
+            <div class="question" id="q-8-7"><p class="question-text">7. The overall mood of the poem is best described as:</p><div class="options"><label><input type="radio" name="q-8-7-options" value="A"> A. triumphant and celebratory.</label><label><input type="radio" name="q-8-7-options" value="B"> B. pensive and reflective.</label><label><input type="radio" name="q-8-7-options" value="C"> C. sorrowful and regretful.</label><label><input type="radio" name="q-8-7-options" value="D"> D. frightened and anxious.</label></div></div>
+            <div class="question" id="q-8-8"><p class="question-text">8. The word <b>diverged</b> in the first line means:</p><div class="options"><label><input type="radio" name="q-8-8-options" value="A"> A. joined together.</label><label><input type="radio" name="q-8-8-options" value="B"> B. ended abruptly.</label><label><input type="radio" name="q-8-8-options" value="C"> C. branched off or split.</label><label><input type="radio" name="q-8-8-options" value="D"> D. became difficult.</label></div></div>
+            <div class="question" id="q-8-9"><p class="question-text">9. By stating the roads were worn "really about the same," the poet implies that:</p><div class="options"><label><input type="radio" name="q-8-9-options" value="A"> A. the speaker's future claim of taking the "less traveled" path is more about creating a meaningful story than a literal fact.</label><label><input type="radio" name="q-8-9-options" value="B"> B. the speaker has poor eyesight and cannot see the paths clearly.</label><label><input type="radio" name="q-8-9-options" value="C"> C. there was no real choice to be made between the two paths.</label><label><input type="radio" name="q-8-9-options" value="D"> D. many people had traveled both roads that day.</label></div></div>
+            <div class="question" id="q-8-10"><p class="question-text">10. What is the central theme of the poem?</p><div class="options"><label><input type="radio" name="q-8-10-options" value="A"> A. The beauty of autumn.</label><label><input type="radio" name="q-8-10-options" value="B"> B. The importance of following the crowd.</label><label><input type="radio" name="q-8-10-options" value="C"> C. The way we reflect upon and give meaning to our choices long after we make them.</label><label><input type="radio" name="q-8-10-options" value="D"> D. The regret that comes from making any decision.</label></div></div>
+        </div>
+       
+        <div id="test9" class="tab-pane">
+            <h2>9. Poetry: "Mother to Son" by Langston Hughes</h2>
+            <div class="excerpt">Well, son, I'll tell you:
+Life for me ain't been no crystal stair.
+It's had tacks in it,
+And splinters,
+And boards torn up,
+And places with no carpet on the floor—
+Bare.
+But all the time
+I'se been a-climbin' on,
+And reachin' landin's,
+And turnin' corners,
+And sometimes goin' in the dark
+Where there ain't been no light.
+So boy, don't you turn back.
+Don't you set down on the steps
+'Cause you finds it's kinder hard.
+Don't you fall now—
+For I'se still goin', honey,
+I'se still climbin',
+And life for me ain't been no crystal stair.</div>
+            <div class="question" id="q-9-1"><p class="question-text">1. The "crystal stair" is a metaphor representing:</p><div class="options"><label><input type="radio" name="q-9-1-options" value="A"> A. a wealthy and powerful family.</label><label><input type="radio" name="q-9-1-options" value="B"> B. an easy, beautiful, and perfect life.</label><label><input type="radio" name="q-9-1-options" value="C"> C. a cold and emotionless existence.</label><label><input type="radio" name="q-9-1-options" value="D"> D. a physically dangerous staircase.</label></div></div>
+            <div class="question" id="q-9-2"><p class="question-text">2. The "tacks," "splinters," and "boards torn up" symbolize:</p><div class="options"><label><input type="radio" name="q-9-2-options" value="A"> A. the mother's poor construction skills.</label><label><input type="radio" name="q-9-2-options" value="B"> B. the son's messy habits.</label><label><input type="radio" name="q-9-2-options" value="C"> C. the hardships, pains, and difficulties the mother has faced in life.</label><label><input type="radio" name="q-9-2-options" value="D"> D. happy memories from the mother's childhood.</label></div></div>
+            <div class="question" id="q-9-3"><p class="question-text">3. The use of dialect (e.g., "ain't," "I'se," "kinder") in the poem primarily serves to:</p><div class="options"><label><input type="radio" name="q-9-3-options" value="A"> A. confuse the reader with improper grammar.</label><label><input type="radio" name="q-9-3-options" value="B"> B. make the mother's voice sound authentic, warm, and genuine.</label><label><input type="radio" name="q-9-3-options" value="C"> C. suggest the mother is uneducated and her advice is unreliable.</label><label><input type="radio" name="q-9-3-options" value="D"> D. mock the way people from the South speak.</label></div></div>
+            <div class="question" id="q-9-4"><p class="question-text">4. The central message or theme of the poem is:</p><div class="options"><label><input type="radio" name="q-9-4-options" value="A"> A. life is unfair, so it is better to give up.</label><label><input type="radio" name="q-9-4-options" value="B"> B. one must persevere through life's hardships and never give up.</label><label><input type="radio" name="q-9-4-options" value="C"> C. one should always avoid dark places and broken stairs.</label><label><input type="radio" name="q-9-4-options" value="D"> D. mothers always have more difficult lives than their sons.</label></div></div>
+            <div class="question" id="q-9-5"><p class="question-text">5. The mother's repeated phrase, "I'se still climbin'," emphasizes her:</p><div class="options"><label><input type="radio" name="q-9-5-options" value="A"> A. love for physical exercise.</label><label><input type="radio" name="q-9-5-options" value="B"> B. desire to reach the top of a literal staircase.</label><label><input type="radio" name="q-9-5-options" value="C"> C. ongoing resilience and refusal to quit despite her struggles.</label><label><input type="radio" name="q-9-5-options" value="D"> D. fear of falling down.</label></div></div>
+            <div class="question" id="q-9-6"><p class="question-text">6. The overall tone of the speaker (the mother) is:</p><div class="options"><label><input type="radio" name="q-9-6-options" value="A"> A. complaining and bitter.</label><label><input type="radio" name="q-9-6-options" value="B"> B. tough, loving, and encouraging.</label><label><input type="radio" name="q-9-6-options" value="C"> C. sad and defeated.</label><label><input type="radio" name="q-9-6-options" value="D"> D. cheerful and carefree.</label></div></div>
+            <div class="question" id="q-9-7"><p class="question-text">7. The structure of the poem, as a single, continuous stanza, mimics the idea of:</p><div class="options"><label><input type="radio" name="q-9-7-options" value="A"> A. a short, easy journey.</label><label><input type="radio" name="q-9-7-options" value="B"> B. a confusing and disorganized life.</label><label><input type="radio" name="q-9-7-options" value="C"> C. a long, unbroken, and continuous struggle upward.</label><label><input type="radio" name="q-9-7-options" value="D"> D. a conversation that is frequently interrupted.</label></div></div>
+            <div class="question" id="q-9-8"><p class="question-text">8. What does the mother mean by "reachin' landin's, / And turnin' corners"?</p><div class="options"><label><input type="radio" name="q-9-8-options" value="A"> A. She often gets lost.</label><label><input type="radio" name="q-9-8-options" value="B"> B. She has reached moments of rest or change in her life's journey.</label><label><input type="radio" name="q-9-8-options" value="C"> C. Her staircase has many decorative features.</label><label><input type="radio" name="q-9-8-options" value="D"> D. She is describing the architectural layout of her house.</label></div></div>
+            <div class="question" id="q-9-9"><p class="question-text">9. The poet uses imagery like "no carpet on the floor— / Bare" to evoke a feeling of:</p><div class="options"><label><input type="radio" name="q-9-9-options" value="A"> A. warmth and comfort.</label><label><input type="radio" name="q-9-9-options" value="B"> B. luxury and wealth.</label><label><input type="radio" name="q-9-9-options" value="C"> C. coldness, poverty, and difficulty.</label><label><input type="radio" name="q-9-9-options" value="D"> D. cleanliness and modern style.</label></div></div>
+            <div class="question" id="q-9-10"><p class="question-text">10. The poem is an example of an extended metaphor because:</p><div class="options"><label><input type="radio" name="q-9-10-options" value="A"> A. it uses rhyme and rhythm.</label><label><input type="radio" name="q-9-10-options" value="B"> B. it compares two unlike things in a single line.</label><label><input type="radio" name="q-9-10-options" value="C"> C. the central comparison between life and a staircase is developed throughout the entire poem.</label><label><input type="radio" name="q-9-10-options" value="D"> D. it tells a short story with characters and a plot.</label></div></div>
+        </div>
+
+        <div id="test10" class="tab-pane">
+            <h2>10. Poetry: from "Still I Rise" by Maya Angelou</h2>
+            <div class="excerpt">You may write me down in history
+With your bitter, twisted lies,
+You may trod me in the very dirt
+But still, like dust, I'll rise.
+
+Does my sassiness upset you?
+Why are you beset with gloom?
+’Cause I walk like I've got oil wells
+Pumping in my living room.
+
+Just like moons and like suns,
+With the certainty of tides,
+Just like hopes springing high,
+Still I'll rise.
+
+Did you want to see me broken?
+Bowed head and lowered eyes?
+Shoulders falling down like teardrops,
+Weakened by my soulful cries?
+
+Does my haughtiness offend you?
+Don't you take it awful hard
+’Cause I laugh like I've got gold mines
+Diggin’ in my own backyard.
+
+You may shoot me with your words,
+You may cut me with your eyes,
+You may kill me with your hatefulness,
+But still, like air, I’ll rise.
+
+Does my sexiness upset you?
+Does it come as a surprise
+That I dance like I've got diamonds
+At the meeting of my thighs?
+
+Out of the huts of history’s shame
+I rise
+Up from a past that’s rooted in pain
+I rise
+I'm a black ocean, leaping and wide,
+Welling and swelling I bear in the tide.
+Leaving behind nights of terror and fear
+I rise
+Into a daybreak that’s wondrously clear
+I rise
+Bringing the gifts that my ancestors gave,
+I am the dream and the hope of the slave.
+I rise
+I rise
+I rise.</div>
+            <div class="question" id="q-10-1"><p class="question-text">1. The central theme of this poem is:</p><div class="options"><label><input type="radio" name="q-10-1-options" value="A"> A. the pursuit of wealth.</label><label><input type="radio" name="q-10-1-options" value="B"> B. the pain of lost love.</label><label><input type="radio" name="q-10-1-options" value="C"> C. indomitable resilience, strength, and pride in the face of oppression.</label><label><input type="radio" name="q-10-1-options" value="D"> D. a description of the forces of nature.</label></div></div>
+            <div class="question" id="q-10-2"><p class="question-text">2. The comparisons to "moons and like suns" and "the certainty of tides" serve to emphasize that the speaker's rising is:</p><div class="options"><label><input type="radio" name="q-10-2-options" value="A"> A. a rare and surprising event.</label><label><input type="radio" name="q-10-2-options" value="B"> B. a powerful, natural, and inevitable force.</label><label><input type="radio" name="q-10-2-options" value="C"> C. dependent on the time of day.</label><label><input type="radio" name="q-10-2-options" value="D"> D. a quiet and gentle process.</label></div></div>
+            <div class="question" id="q-10-3"><p class="question-text">3. The word <b>haughtiness</b> in the fifth stanza means:</p><div class="options"><label><input type="radio" name="q-10-3-options" value="A"> A. sadness or grief.</label><label><input type="radio" name="q-10-3-options" value="B"> B. a feeling of arrogant superiority.</label><label><input type="radio" name="q-10-3-options" value="C"> C. extreme shyness.</label><label><input type="radio" name="q-10-3-options" value="D"> D. playfulness and humor.</label></div></div>
+            <div class="question" id="q-10-4"><p class="question-text">4. The similes "walk like I've got oil wells" and "laugh like I've got gold mines" are used to represent the speaker's:</p><div class="options"><label><input type="radio" name="q-10-4-options" value="A"> A. actual, literal wealth.</label><label><input type="radio" name="q-10-4-options" value="B"> B. immense inner richness, confidence, and self-worth.</label><label><input type="radio" name="q-10-4-options" value="C"> C. desire to own property and businesses.</label><label><input type="radio" name="q-10-4-options" value="D"> D. tendency to brag about things she doesn't have.</label></div></div>
+            <div class="question" id="q-10-5"><p class="question-text">5. The "you" being addressed throughout the poem is most likely:</p><div class="options"><label><input type="radio" name="q-10-5-options" value="A"> A. a close friend or family member.</label><label><input type="radio" name="q-10-5-options" value="B"> B. a former lover.</label><label><input type="radio" name="q-10-5-options" value="C"> C. an oppressive society or a specific oppressor.</label><label><input type="radio" name="q-10-5-options" value="D"> D. the speaker talking to herself.</label></div></div>
+            <div class="question" id="q-10-6"><p class="question-text">6. The repetition of the phrase "I rise" at the end of the poem creates a tone of:</p><div class="options"><label><input type="radio" name="q-10-6-options" value="A"> A. questioning and doubt.</label><label><input type="radio" name="q-10-6-options" value="B"> B. quiet resignation.</label><label><input type="radio" name="q-10-6-options" value="C"> C. triumphant, powerful, and defiant affirmation.</label><label><input type="radio" name="q-10-6-options" value="D"> D. growing anger and bitterness.</label></div></div>
+            <div class="question" id="q-10-7"><p class="question-text">7. The imagery in the lines "Shoulders falling down like teardrops, / Weakened by my soulful cries" describes:</p><div class="options"><label><input type="radio" name="q-10-7-options" value="A"> A. the posture of someone dancing.</label><label><input type="radio" name="q-10-7-options" value="B"> B. the physical appearance of strength and pride.</label><label><input type="radio" name="q-10-7-options" value="C"> C. a defeated and broken spirit, which the speaker rejects.</label><label><input type="radio" name="q-10-7-options" value="D"> D. the speaker's actual physical state.</label></div></div>
+            <div class="question" id="q-10-8"><p class="question-text">8. The metaphor "I'm a black ocean, leaping and wide" suggests that the speaker's strength is:</p><div class="options"><label><input type="radio" name="q-10-8-options" value="A"> A. small and contained.</label><label><input type="radio" name="q-10-8-options" value="B"> B. calm and still.</label><label><input type="radio" name="q-10-8-options" value="C"> C. vast, powerful, and rooted in collective identity.</label><label><input type="radio" name="q-10-8-options" value="D"> D. dark and dangerous.</label></div></div>
+            <div class="question" id="q-10-9"><p class="question-text">9. What "gifts that my ancestors gave" is the speaker most likely referring to?</p><div class="options"><label><input type="radio" name="q-10-9-options" value="A"> A. Jewelry and money.</label><label><input type="radio" name="q-10-9-options" value="B"> B. Recipes and family stories.</label><label><input type="radio" name="q-10-9-options" value="C"> C. The legacy of resilience, endurance, hope, and the dream of freedom.</label><label><input type="radio" name="q-10-9-options" value="D"> D. Genetic traits like eye color and height.</label></div></div>
+            <div class="question" id="q-10-10"><p class="question-text">10. The shift from "like dust" and "like air" to "a black ocean" shows the speaker's power becoming:</p><div class="options"><label><input type="radio" name="q-10-10-options" value="A"> A. weaker and more diffuse.</label><label><input type="radio" name="q-10-10-options" value="B"> B. more concrete, massive, and formidable.</label><label><input type="radio" name="q-10-10-options" value="C"> C. colder and less personal.</label><label><input type="radio" name="q-10-10-options" value="D"> D. less natural and more artificial.</label></div></div>
+        </div>
+
+        <!-- Results Tab -->
+        <div id="results" class="tab-pane">
+            <h2>Test Results</h2>
+            <p>Click the button below to see your scores for each section. Your answers will not be saved after you close this page.</p>
+            <button id="calculate-btn">Calculate Scores</button>
+            <div id="results-display"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Tab Navigation Logic ---
+        function openTab(evt, tabId) {
+            let tabPanes = document.getElementsByClassName("tab-pane");
+            for (let i = 0; i < tabPanes.length; i++) {
+                tabPanes[i].style.display = "none";
+            }
+            let tabButtons = document.getElementsByClassName("tab-button");
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].className = tabButtons[i].className.replace(" active", "");
+            }
+            document.getElementById(tabId).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // --- Scoring Logic ---
+        function calculateScores() {
+            // CORRECTED: Plain JavaScript object for answers. No more encoding.
+            const correctAnswers = {
+                'test1': { 'q1': 'C', 'q2': 'C', 'q3': 'C', 'q4': 'C', 'q5': 'C', 'q6': 'B', 'q7': 'B', 'q8': 'B', 'q9': 'B', 'q10': 'D' },
+                'test2': { 'q1': 'B', 'q2': 'D', 'q3': 'B', 'q4': 'C', 'q5': 'B', 'q6': 'C', 'q7': 'B', 'q8': 'A', 'q9': 'C', 'q10': 'B' },
+                'test3': { 'q1': 'C', 'q2': 'B', 'q3': 'A', 'q4': 'B', 'q5': 'B', 'q6': 'C', 'q7': 'B', 'q8': 'C', 'q9': 'C', 'q10': 'C' },
+                'test4': { 'q1': 'B', 'q2': 'C', 'q3': 'D', 'q4': 'B', 'q5': 'C', 'q6': 'B', 'q7': 'B', 'q8': 'C', 'q9': 'B', 'q10': 'C' },
+                'test5': { 'q1': 'B', 'q2': 'C', 'q3': 'B', 'q4': 'A', 'q5': 'C', 'q6': 'B', 'q7': 'C', 'q8': 'A', 'q9': 'C', 'q10': 'C' },
+                'test6': { 'q1': 'C', 'q2': 'A', 'q3': 'B', 'q4': 'C', 'q5': 'B', 'q6': 'B', 'q7': 'C', 'q8': 'A', 'q9': 'C', 'q10': 'B' },
+                'test7': { 'q1': 'B', 'q2': 'C', 'q3': 'C', 'q4': 'C', 'q5': 'C', 'q6': 'A', 'q7': 'C', 'q8': 'A', 'q9': 'B', 'q10': 'C' },
+                'test8': { 'q1': 'B', 'q2': 'C', 'q3': 'B', 'q4': 'D', 'q5': 'B', 'q6': 'C', 'q7': 'B', 'q8': 'C', 'q9': 'A', 'q10': 'C' },
+                'test9': { 'q1': 'B', 'q2': 'C', 'q3': 'B', 'q4': 'B', 'q5': 'C', 'q6': 'B', 'q7': 'C', 'q8': 'B', 'q9': 'C', 'q10': 'C' },
+                'test10': { 'q1': 'C', 'q2': 'B', 'q3': 'B', 'q4': 'B', 'q5': 'C', 'q6': 'C', 'q7': 'C', 'q8': 'C', 'q9': 'C', 'q10': 'B' }
+            };
+
+            const resultsDisplay = document.getElementById('results-display');
+            resultsDisplay.innerHTML = ''; // Clear previous results
+            
+            const numTests = 10; 
+
+            for (let i = 1; i <= numTests; i++) {
+                const testId = 'test' + i;
+                const testData = correctAnswers[testId];
+                if (!testData) continue;
+
+                const testPane = document.getElementById(testId);
+                const testTitle = testPane.querySelector('h2').innerText.split('. ')[1];
+                let score = 0;
+                const totalQuestions = Object.keys(testData).length;
+
+                for (let j = 1; j <= totalQuestions; j++) {
+                    const questionKey = 'q' + j;
+                    const radioName = 'q-' + i + '-' + j + '-options';
+                    const selectedOption = document.querySelector('input[name="' + radioName + '"]:checked');
+
+                    if (selectedOption) {
+                        if (selectedOption.value === testData[questionKey]) {
+                            score++;
+                        }
+                    }
+                }
+               
+                const resultElement = document.createElement('p');
+                resultElement.textContent = `${testTitle}: ${score} / ${totalQuestions}`;
+                resultsDisplay.appendChild(resultElement);
+            }
+        }
+
+        // --- Initial Setup ---
+        document.getElementById('calculate-btn').addEventListener('click', calculateScores);
+        document.getElementById("defaultOpen").click();
+
+    </script>
+
+</body>
+</html>
