@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebra: Solve for X with Order of Operations</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .controls-container { 
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 30px;
+            background-color: #fff; 
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .controls-container button {
+            padding: 12px 24px;
+            font-size: 1em;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 10px; 
+            transition: background-color 0.2s;
+            vertical-align: middle; 
+        }
+        #generateProblemsButton { background-color: #3498db; }
+        #generateProblemsButton:hover { background-color: #2980b9; }
+        
+        #showSolutionsButton { background-color: #27ae60; }
+        #showSolutionsButton:hover { background-color: #219150; }
+        #showSolutionsButton:disabled {
+            cursor: default;
+            opacity: 1; 
+        }
+
+        .problem-list {
+            list-style-type: none;
+            padding-left: 0;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .problem-list li {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .problem-header {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 15px;
+        }
+        .problem-number {
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+        }
+        .problem-expression {
+            font-family: 'Times New Roman', Times, serif; 
+            font-size: 1.4em;
+            color: #2c3e50;
+            word-wrap: break-word; 
+            font-style: italic; 
+        }
+        .problem-expression .fraction, 
+        .problem-expression sup {
+            font-style: normal; 
+        }
+        
+        .answer-input-container {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .answer-label {
+            font-size: 1.2em;
+            margin-right: 10px;
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+        }
+        .user-answer {
+            padding: 8px;
+            font-size: 1.1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 120px; 
+        }
+        
+        /* Feedback colors */
+        .user-answer.correct-input {
+            background-color: #d4edda; 
+            border-color: #c3e6cb;
+            color: #155724;
+            font-weight: bold;
+        }
+        .user-answer.incorrect-input {
+            background-color: #f8d7da; 
+            border-color: #f5c6cb;
+            color: #721c24;
+            font-weight: bold;
+        }
+        
+        /* Static Answer Spans (for print/save) */
+        .static-user-answer {
+            display: inline-block; 
+            padding: 5px 10px;
+            font-size: 1.1em;
+            border: 1px solid transparent; 
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .static-user-answer.correct-input {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .static-user-answer.incorrect-input {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Logic for "Solutions Shown" mode */
+        .problem-list li.solutions-shown {
+            border-color: #bdc3c7;
+        }
+        .problem-list li.solutions-shown .problem-expression { color: #7f8c8d; }
+
+        /* Fraction CSS */
+        sup, sub { line-height: 0; }
+        .fraction {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            margin: 0 0.2em;
+            position: relative;
+            font-size: 0.85em;
+        }
+        .fraction .numerator {
+            display: block;
+            border-bottom: 1px solid currentColor;
+            padding: 0 0.2em;
+        }
+        .fraction .denominator {
+            display: block;
+            padding: 0 0.2em;
+        }
+
+        /* Solution Steps Box */
+        .solution-steps {
+            display: none; 
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff; 
+            border-left: 5px solid #27ae60;
+            border-radius: 0 5px 5px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 1em; 
+        }
+        .solution-steps h4 { margin-top: 0; color: #27ae60; }
+        .solution-steps p { margin: 8px 0; border-bottom: 1px solid #eee; padding-bottom: 8px;}
+        .solution-steps .algebra-step {
+            font-family: 'Courier New', monospace;
+            background: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            color: #d35400;
+        }
+        .solution-steps .final-answer {
+            font-weight: bold;
+            color: #2980b9;
+            font-size: 1.2em;
+            margin-top: 15px;
+            border-top: 2px solid #ddd;
+            padding-top: 10px;
+            border-bottom: none;
+        }
+
+        /* Injected Report Header in Saved File */
+        .report-header {
+            text-align: center;
+            background-color: #e8f6f3;
+            border: 2px solid #27ae60;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            color: #2c3e50;
+        }
+
+        @media print {
+            body { margin: 0; background: white; }
+            .controls-container { display: none !important; }
+            h1 { font-size: 16pt; margin-bottom: 10px; }
+            .problem-list li { page-break-inside: avoid; border: 1px solid #ccc; margin-bottom: 15px; }
+            .user-answer { display: none !important; }
+            .static-user-answer { display: inline-block !important; border: 1px solid #999; }
+            .solution-steps { display: block !important; border: 1px solid #ccc; border-left: 1px solid #ccc; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Algebra Practice: Solving for <i>x</i></h1>
+    <p style="text-align:center; color:#666;">Simplify the expressions using Order of Operations, then isolate x.</p>
+
+    <div class="controls-container">
+        <button id="generateProblemsButton">Generate New Equations</button>
+        <button id="showSolutionsButton" style="display:none;">Check Answers & Show Steps</button> 
+    </div>
+
+    <ol class="problem-list" id="problemListContainer">
+        <!-- Problems inserted here -->
+    </ol>
+
+    <script>
+        const problemListContainer = document.getElementById('problemListContainer');
+        const generateBtn = document.getElementById('generateProblemsButton');
+        const showSolutionsBtn = document.getElementById('showSolutionsButton'); 
+
+        const EPSILON = 0.00001; 
+        const MAX_INTERMEDIATE_VALUE = 9999; 
+
+        // --- FRACTION LIBRARY (Same as before) ---
+        function simplifyFraction(num, den) {
+            function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+            if (den === 0) return { num: 0, den: 0, isFraction: true, value: NaN, error: "Div by zero" };
+            if (den < 0) { num = -num; den = -den; }
+            const common = gcd(Math.abs(num), Math.abs(den));
+            return { num: num / common, den: den / common, isFraction: true, value: num / den };
+        }
+
+        function toFraction(numInput) {
+            if (typeof numInput === 'object' && numInput.isFraction) return numInput; 
+            let num = Number(numInput);
+            if (Number.isInteger(num)) return { num: num, den: 1, isFraction: true, value: num };
+            // Simple decimal to fraction for inputs
+            const len = num.toString().length - 2;
+            const den = Math.pow(10, len);
+            return simplifyFraction(Math.round(num * den), den);
+        }
+
+        function addFrac(f1, f2) { return simplifyFraction(f1.num * f2.den + f2.num * f1.den, f1.den * f2.den); }
+        function subFrac(f1, f2) { return simplifyFraction(f1.num * f2.den - f2.num * f1.den, f1.den * f2.den); }
+        function mulFrac(f1, f2) { return simplifyFraction(f1.num * f2.num, f1.den * f2.den); }
+        function divFrac(f1, f2) { return simplifyFraction(f1.num * f2.den, f1.den * f2.num); }
+        function powFrac(base, exp) {
+            if (exp === 0) return toFraction(1);
+            if (exp < 0) return divFrac(toFraction(1), powFrac(base, -exp));
+            let res = toFraction(1);
+            for(let i=0; i<exp; i++) res = mulFrac(res, base);
+            return res;
+        }
+        function absFrac(f) { return { ...f, num: Math.abs(f.num), value: Math.abs(f.value) }; }
+
+        // --- FORMATTING ---
+        function formatFractionHTML(num, den) {
+            if (den === 1) return `${num}`;
+            return `<span class="fraction"><span class="numerator">${num}</span><span class="denominator">${den}</span></span>`;
+        }
+
+        function formatNumber(n) {
+            if (!n) return 'Error';
+            if (n.isFraction) {
+                if (n.den === 1) return n.num.toString();
+                return formatFractionHTML(n.num, n.den);
+            }
+            return n.toString();
+        }
+
+        // --- GENERATORS ---
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        function getRandomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        // Generate a complex "Order of Operations" expression string and its value
+        function generateComplexConstant(complexity = 1) {
+            const valA = toFraction(getRandomInt(1, 9));
+            const valB = toFraction(getRandomInt(2, 5));
+            
+            if (complexity === 1) { // Simple Bracket: 2 * (3 + 5)
+                const op = getRandomItem(['+', '-']);
+                const res = op === '+' ? addFrac(valA, valB) : subFrac(valA, valB);
+                const mult = toFraction(getRandomInt(2, 4));
+                const total = mulFrac(mult, res);
+                return {
+                    str: `${formatNumber(mult)} (${formatNumber(valA)} ${op} ${formatNumber(valB)})`,
+                    val: total,
+                    steps: [`Calculate parentheses: ${formatNumber(valA)} ${op} ${formatNumber(valB)} = ${formatNumber(res)}`, `Multiply by ${formatNumber(mult)}: ${formatNumber(total)}`]
+                };
+            }
+            if (complexity === 2) { // Exponents: 3^2 - 4
+                const base = toFraction(getRandomInt(2, 5));
+                const exp = getRandomInt(2, 3);
+                const sub = toFraction(getRandomInt(1, 10));
+                const powRes = powFrac(base, exp);
+                const total = subFrac(powRes, sub);
+                return {
+                    str: `${formatNumber(base)}<sup>${exp}</sup> - ${formatNumber(sub)}`,
+                    val: total,
+                    steps: [`Calculate exponent: ${formatNumber(base)}<sup>${exp}</sup> = ${formatNumber(powRes)}`, `Subtract ${formatNumber(sub)}: ${formatNumber(total)}`]
+                };
+            }
+            if (complexity === 3) { // Absolute Value with Fraction: | -10 / 2 + 3 |
+                const num = getRandomInt(-10, -2) * 2; // ensuring even for clean div
+                const den = 2;
+                const add = getRandomInt(1, 5);
+                const insideVal = toFraction(num/den + add);
+                const total = absFrac(insideVal);
+                return {
+                    str: `| ${num} &divide; ${den} + ${add} |`,
+                    val: total,
+                    steps: [`Inside absolute value: ${num}/${den} = ${num/den}`, `Add ${add}: ${num/den + add}`, `Absolute value of ${insideVal.num} is ${total.num}`]
+                };
+            }
+            return { str: formatNumber(valA), val: valA, steps: [] };
+        }
+
+        // --- ALGEBRA TEMPLATES ---
+        const algebraTemplates = [
+            function linearAddComplex() {
+                const xVal = toFraction(getRandomInt(-10, 10)); 
+                const complexConst = generateComplexConstant(getRandomItem([1, 2, 3])); 
+                const C = addFrac(xVal, complexConst.val);
+                this.problemHTML = `<i>x</i> + [ ${complexConst.str} ] = ${formatNumber(C)}`;
+                this.steps.push(`<h4>Step 1: Simplify the complex term</h4>`);
+                complexConst.steps.forEach(s => this.steps.push(s));
+                this.steps.push(`The equation becomes: <span class="algebra-step">x + ${formatNumber(complexConst.val)} = ${formatNumber(C)}</span>`);
+                this.steps.push(`<h4>Step 2: Isolate x</h4>`);
+                this.steps.push(`Subtract ${formatNumber(complexConst.val)} from both sides:`);
+                this.steps.push(`<span class="algebra-step">x = ${formatNumber(C)} - ${formatNumber(complexConst.val)}</span>`);
+                this.finalAnswer = xVal;
+                this.steps.push(`<span class="algebra-step">x = ${formatNumber(xVal)}</span>`);
+            },
+            function linearMulComplex() {
+                const xVal = toFraction(getRandomItem([-5, -4, -3, -2, 2, 3, 4, 5]));
+                const complexCoeff = generateComplexConstant(2); 
+                if(complexCoeff.val.num === 0) complexCoeff.val = toFraction(2);
+                const C = mulFrac(complexCoeff.val, xVal);
+                this.problemHTML = `( ${complexCoeff.str} ) <i>x</i> = ${formatNumber(C)}`;
+                this.steps.push(`<h4>Step 1: Simplify the coefficient</h4>`);
+                complexCoeff.steps.forEach(s => this.steps.push(s));
+                this.steps.push(`The equation becomes: <span class="algebra-step">${formatNumber(complexCoeff.val)}x = ${formatNumber(C)}</span>`);
+                this.steps.push(`<h4>Step 2: Isolate x</h4>`);
+                this.steps.push(`Divide both sides by ${formatNumber(complexCoeff.val)}:`);
+                this.steps.push(`<span class="algebra-step">x = ${formatNumber(C)} / ${formatNumber(complexCoeff.val)}</span>`);
+                this.finalAnswer = xVal;
+                this.steps.push(`<span class="algebra-step">x = ${formatNumber(xVal)}</span>`);
+            },
+            function fractionLinear() {
+                const xVal = toFraction(getRandomInt(-20, 20));
+                const A = getRandomInt(1, 10);
+                const B = getRandomInt(2, 9);
+                const num = addFrac(xVal, toFraction(A));
+                const C = divFrac(num, toFraction(B));
+                this.problemHTML = `<span class="fraction"><span class="numerator"><i>x</i> + ${A}</span><span class="denominator">${B}</span></span> = ${formatNumber(C)}`;
+                this.steps.push(`<h4>Step 1: Clear the fraction</h4>`);
+                this.steps.push(`Multiply both sides by ${B}:`);
+                const step1Res = mulFrac(C, toFraction(B));
+                this.steps.push(`<span class="algebra-step">x + ${A} = ${formatNumber(step1Res)}</span>`);
+                this.steps.push(`<h4>Step 2: Isolate x</h4>`);
+                this.steps.push(`Subtract ${A} from both sides:`);
+                this.finalAnswer = subFrac(step1Res, toFraction(A));
+                this.steps.push(`<span class="algebra-step">x = ${formatNumber(this.finalAnswer)}</span>`);
+            },
+            function complexTwoStep() {
+                const xVal = toFraction(getRandomInt(1, 10));
+                const A = getRandomInt(2, 5); 
+                const complexSub = generateComplexConstant(3); 
+                const term1 = mulFrac(toFraction(A), xVal);
+                const C = subFrac(term1, complexSub.val);
+                this.problemHTML = `${A}<i>x</i> - ${complexSub.str} = ${formatNumber(C)}`;
+                this.steps.push(`<h4>Step 1: Simplify the constant term</h4>`);
+                complexSub.steps.forEach(s => this.steps.push(s));
+                this.steps.push(`Equation: <span class="algebra-step">${A}x - ${formatNumber(complexSub.val)} = ${formatNumber(C)}</span>`);
+                this.steps.push(`<h4>Step 2: Isolate the x term</h4>`);
+                this.steps.push(`Add ${formatNumber(complexSub.val)} to both sides:`);
+                const step2Res = addFrac(C, complexSub.val);
+                this.steps.push(`<span class="algebra-step">${A}x = ${formatNumber(step2Res)}</span>`);
+                this.steps.push(`<h4>Step 3: Solve for x</h4>`);
+                this.steps.push(`Divide by ${A}:`);
+                this.finalAnswer = divFrac(step2Res, toFraction(A));
+                this.steps.push(`<span class="algebra-step">x = ${formatNumber(this.finalAnswer)}</span>`);
+            },
+            function distributiveOp() {
+                const xVal = toFraction(getRandomInt(5, 15));
+                const A = getRandomInt(2, 4);
+                const B = getRandomInt(1, 4);
+                const exp = 2;
+                const base = 3;
+                const expVal = Math.pow(base, exp);
+                const inner = subFrac(xVal, toFraction(B));
+                const term1 = mulFrac(toFraction(A), inner);
+                const C = addFrac(term1, toFraction(expVal));
+                this.problemHTML = `${A}(<i>x</i> - ${B}) + ${base}<sup>${exp}</sup> = ${formatNumber(C)}`;
+                this.steps.push(`<h4>Step 1: Evaluate the exponent</h4>`);
+                this.steps.push(`${base}<sup>${exp}</sup> = ${expVal}`);
+                this.steps.push(`Equation: <span class="algebra-step">${A}(x - ${B}) + ${expVal} = ${formatNumber(C)}</span>`);
+                this.steps.push(`<h4>Step 2: Isolate the parenthesis group</h4>`);
+                this.steps.push(`Subtract ${expVal} from both sides:`);
+                const step2Res = subFrac(C, toFraction(expVal));
+                this.steps.push(`<span class="algebra-step">${A}(x - ${B}) = ${formatNumber(step2Res)}</span>`);
+                this.steps.push(`<h4>Step 3: Eliminate the multiplier</h4>`);
+                this.steps.push(`Divide by ${A}:`);
+                const step3Res = divFrac(step2Res, toFraction(A));
+                this.steps.push(`<span class="algebra-step">x - ${B} = ${formatNumber(step3Res)}</span>`);
+                this.steps.push(`<h4>Step 4: Solve for x</h4>`);
+                this.steps.push(`Add ${B} to both sides:`);
+                this.finalAnswer = addFrac(step3Res, toFraction(B));
+                this.steps.push(`<span class="algebra-step">x = ${formatNumber(this.finalAnswer)}</span>`);
+            },
+            function nestedMess() {
+                const xVal = toFraction(getRandomInt(2, 12));
+                const A = getRandomInt(2, 5);
+                const B = getRandomInt(2, 3);
+                const C = getRandomInt(2, 4);
+                const D = getRandomInt(1, 10);
+                const AB = A*B;
+                const num = addFrac(xVal, toFraction(AB));
+                const fracPart = divFrac(num, toFraction(C));
+                const E = subFrac(fracPart, toFraction(D));
+                this.problemHTML = `<span class="fraction"><span class="numerator"><i>x</i> + ${A} &sdot; ${B}</span><span class="denominator">${C}</span></span> - ${D} = ${formatNumber(E)}`;
+                this.steps.push(`<h4>Step 1: Simplify inside the fraction</h4>`);
+                this.steps.push(`Multiply ${A} * ${B} = ${AB}`);
+                this.steps.push(`Equation: <span class="fraction"><span class="numerator">x + ${AB}</span><span class="denominator">${C}</span></span> - ${D} = ${formatNumber(E)}`);
+                this.steps.push(`<h4>Step 2: Isolate the fraction</h4>`);
+                this.steps.push(`Add ${D} to both sides:`);
+                const step2Res = addFrac(E, toFraction(D));
+                this.steps.push(`<span class="algebra-step">(x + ${AB}) / ${C} = ${formatNumber(step2Res)}</span>`);
+                this.steps.push(`<h4>Step 3: Clear the denominator</h4>`);
+                this.steps.push(`Multiply by ${C}:`);
+                const step3Res = mulFrac(step2Res, toFraction(C));
+                this.steps.push(`<span class="algebra-step">x + ${AB} = ${formatNumber(step3Res)}</span>`);
+                this.steps.push(`<h4>Step 4: Solve for x</h4>`);
+                this.steps.push(`Subtract ${AB}:`);
+                this.finalAnswer = subFrac(step3Res, toFraction(AB));
+                this.steps.push(`<span class="algebra-step">x = ${formatNumber(this.finalAnswer)}</span>`);
+            }
+        ];
+
+        // --- MAIN LOGIC ---
+
+        function generateProblem(templateFn) {
+            let context = { steps: [], problemHTML: '', finalAnswer: null };
+            templateFn.call(context);
+            return context;
+        }
+
+        function displayProblems() {
+            problemListContainer.innerHTML = ''; 
+            
+            showSolutionsBtn.style.display = 'inline-block'; 
+            showSolutionsBtn.disabled = false; 
+            showSolutionsBtn.textContent = 'Check Answers & Show Steps';
+            showSolutionsBtn.style.backgroundColor = '#27ae60'; 
+            showSolutionsBtn.style.color = '#fff';
+
+            algebraTemplates.forEach((template, index) => {
+                const generated = generateProblem(template);
+                const problemNumber = index + 1;
+                
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div class="problem-header">
+                        <span class="problem-number">#${problemNumber}</span>
+                        <div class="problem-expression">${generated.problemHTML}</div>
+                    </div>
+                    <div class="answer-input-container">
+                        <span class="answer-label">x = </span>
+                        <input type="text" id="user-answer-${problemNumber}" class="user-answer" placeholder="?" data-correct="${generated.finalAnswer.value}">
+                    </div>
+                    <div class="solution-steps" id="solution-${problemNumber}">
+                        ${generated.steps.map(s => `<p>${s}</p>`).join('')}
+                        <div class="final-answer">Answer: x = ${formatNumber(generated.finalAnswer)}</div>
+                    </div>
+                `;
+                problemListContainer.appendChild(li);
+            });
+        }
+
+        function parseInput(str) {
+            str = str.trim();
+            if(str.includes('/')) {
+                const parts = str.split('/');
+                return parseFloat(parts[0]) / parseFloat(parts[1]);
+            }
+            return parseFloat(str);
+        }
+
+        function checkAndShowSolutions() {
+            const problems = document.querySelectorAll('.problem-list li');
+            let correctCount = 0;
+            let totalCount = 0;
+
+            problems.forEach(li => {
+                const input = li.querySelector('.user-answer');
+                const solutionDiv = li.querySelector('.solution-steps');
+                const correctVal = parseFloat(input.dataset.correct);
+                const userVal = parseInput(input.value);
+                
+                totalCount++;
+
+                input.classList.remove('correct-input', 'incorrect-input');
+                let isCorrect = false;
+
+                if(!isNaN(userVal) && Math.abs(userVal - correctVal) < EPSILON) {
+                    input.classList.add('correct-input');
+                    isCorrect = true;
+                    correctCount++;
+                } else {
+                    input.classList.add('incorrect-input');
+                }
+
+                solutionDiv.style.display = 'block';
+                li.classList.add('solutions-shown');
+            });
+            
+            // Score Logic
+            let msg = `${correctCount}/${totalCount} Correct`;
+            let extraMsg = "";
+            if (correctCount === totalCount && totalCount > 0) {
+                extraMsg = " - Great Job!";
+                showSolutionsBtn.style.backgroundColor = '#27ae60';
+            } else {
+                showSolutionsBtn.style.backgroundColor = '#7f8c8d'; 
+            }
+            
+            // Time Logic
+            const now = new Date();
+            const dateTimeStr = now.toLocaleString(); 
+            
+            // Update Live Button
+            showSolutionsBtn.innerHTML = `${msg}${extraMsg}<br><span style="font-size:0.8em; font-weight:normal;">${dateTimeStr}</span>`;
+            showSolutionsBtn.disabled = true;
+            
+            // Prepare Header for Saved File
+            const headerHTML = `
+                <div class="report-header">
+                    <h2 style="margin:0;">Score: ${msg}${extraMsg}</h2>
+                    <p style="margin:5px 0 0 0; font-size:1.1em;">Completed on: ${dateTimeStr}</p>
+                </div>
+            `;
+            
+            setTimeout(() => generateAndDownloadStaticPage(headerHTML), 500);
+        }
+
+        function generateAndDownloadStaticPage(headerContent) {
+            const clone = document.documentElement.cloneNode(true);
+            
+            clone.querySelectorAll('script').forEach(s => s.remove());
+            clone.querySelector('.controls-container').remove();
+
+            // Inject Header at the top of the body
+            if (headerContent) {
+                const body = clone.querySelector('body');
+                if (body) {
+                    const headerDiv = document.createElement('div');
+                    headerDiv.innerHTML = headerContent;
+                    body.insertBefore(headerDiv, body.firstChild);
+                }
+            }
+
+            // Freeze inputs
+            const origInputs = document.querySelectorAll('.user-answer');
+            const cloneInputs = clone.querySelectorAll('.user-answer');
+            
+            cloneInputs.forEach((cInput, i) => {
+                const orig = origInputs[i];
+                const span = document.createElement('span');
+                span.className = 'static-user-answer ' + orig.className;
+                span.textContent = orig.value;
+                cInput.parentNode.replaceChild(span, cInput);
+            });
+
+            clone.querySelectorAll('.solution-steps').forEach(d => d.style.display = 'block');
+            
+            // Create filename: algebra_yymmdd_hhmm.html
+            const now = new Date();
+            const yy = now.getFullYear().toString().slice(-2);
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            
+            const filename = `algebra_${yy}${mm}${dd}_${hh}${min}.html`;
+
+            const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        generateBtn.addEventListener('click', displayProblems);
+        showSolutionsBtn.addEventListener('click', checkAndShowSolutions);
+
+        displayProblems();
+
+    </script>
+</body>
+</html>
