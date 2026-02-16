@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebra: Solve for X with Explanations</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        h1 { text-align: center; color: #1a2a6c; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        
+        .controls-container { 
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 30px;
+            background-color: #fff; 
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 12px 28px;
+            font-size: 1.05em;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px 10px; 
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        button:active { transform: scale(0.98); }
+        #generateBtn { background-color: #3498db; }
+        #showSolutionsBtn { background-color: #27ae60; }
+        #showSolutionsBtn:disabled { background-color: #bdc3c7; cursor: default; }
+
+        .problem-list {
+            list-style-type: none;
+            padding-left: 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .problem-card {
+            margin-bottom: 30px;
+            padding: 25px;
+            border-radius: 12px;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 8px solid #ddd;
+        }
+        .problem-card.is-correct { border-left-color: #2ecc71; }
+        .problem-card.is-incorrect { border-left-color: #e74c3c; }
+
+        .problem-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .problem-number { font-weight: bold; font-size: 1.3em; color: #95a5a6; }
+        .problem-expression {
+            font-family: 'Times New Roman', Times, serif; 
+            font-size: 1.6em;
+            color: #2c3e50;
+            font-style: italic;
+        }
+        
+        .answer-box {
+            display: flex;
+            align-items: center;
+            background: #fdfdfd;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+        .user-input {
+            padding: 10px;
+            font-size: 1.2em;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            width: 150px;
+            margin-left: 10px;
+            text-align: center;
+        }
+        
+        .correct-input { background-color: #d4edda; border-color: #28a745; color: #155724; font-weight: bold; }
+        .incorrect-input { background-color: #f8d7da; border-color: #dc3545; color: #721c24; font-weight: bold; }
+
+        /* Fraction Support */
+        .fraction { display: inline-block; vertical-align: middle; text-align: center; margin: 0 0.2em; font-style: normal; font-size: 0.85em; }
+        .numerator { display: block; border-bottom: 1px solid currentColor; padding: 0 3px; }
+        .denominator { display: block; padding: 0 3px; }
+
+        /* Solution Area */
+        .solution-area {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        .explanation-note {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border-left: 4px solid #ffeeba;
+            font-weight: 500;
+        }
+        .step-row { margin-bottom: 12px; }
+        .algebra-line {
+            display: block;
+            font-family: 'Courier New', monospace;
+            background: #fff;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            color: #d35400;
+            margin-top: 4px;
+            font-weight: bold;
+        }
+        .final-result {
+            color: #2980b9;
+            font-size: 1.25em;
+            font-weight: bold;
+            margin-top: 15px;
+            border-top: 2px solid #3498db;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Solve for <i>x</i></h1>
+    <p class="subtitle">Enter your answer as a whole number, decimal, or fraction (e.g., 5, 2.5, or 1/2).</p>
+
+    <div class="controls-container">
+        <button id="generateBtn">Generate New Problems</button>
+        <button id="showSolutionsBtn">Check My Answers</button> 
+    </div>
+
+    <div id="problemContainer" class="problem-list"></div>
+
+    <script>
+        // --- MATH ENGINE ---
+        function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+        
+        class Frac {
+            constructor(n, d = 1) {
+                if (d < 0) { n = -n; d = -d; }
+                let common = Math.abs(gcd(n, d));
+                this.n = n / common;
+                this.d = d / common;
+            }
+            get val() { return this.n / this.d; }
+            add(f) { return new Frac(this.n * f.d + f.n * this.d, this.d * f.d); }
+            sub(f) { return new Frac(this.n * f.d - f.n * this.d, this.d * f.d); }
+            mul(f) { return new Frac(this.n * f.n, this.d * f.d); }
+            div(f) { return new Frac(this.n * f.d, this.d * f.n); }
+            toString() {
+                if (this.d === 1) return `${this.n}`;
+                return `<span class="fraction"><span class="numerator">${this.n}</span><span class="denominator">${this.d}</span></span>`;
+            }
+        }
+
+        const container = document.getElementById('problemContainer');
+        const generateBtn = document.getElementById('generateBtn');
+        const showBtn = document.getElementById('showSolutionsBtn');
+        let currentProblems = [];
+
+        function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+        function generateProblem(id) {
+            const types = ['both_sides', 'right_side', 'subtraction', 'distribution'];
+            const type = types[getRandom(0, types.length - 1)];
+            const xVal = new Frac(getRandom(-8, 12));
+            
+            let prob = { id, lhs: "", rhs: "", steps: [], x: xVal, hint: "" };
+
+            if (type === 'both_sides') {
+                let A = getRandom(2, 7);
+                let C = getRandom(-4, 4); if (A === C) C = 1;
+                let B = getRandom(-10, 10);
+                let D = xVal.mul(new Frac(A - C)).add(new Frac(B));
+
+                prob.lhs = `${A}<i>x</i> ${B >= 0 ? '+' : '-'} ${Math.abs(B)}`;
+                prob.rhs = `${C === 0 ? '' : C + '<i>x</i>'} ${D.n >= 0 ? '+' : '-'} ${D.toString().replace('-', '')}`;
+                prob.hint = "When the variable is on both sides, use addition or subtraction to move all 'x' terms to one side first.";
+                prob.steps.push({m: `Subtract ${C}x from both sides:`, l: `${A-C}x ${B>=0?'+':'-'} ${Math.abs(B)} = ${D.toString()}`});
+                prob.steps.push({m: `Move the constant term:`, l: `${A-C}x = ${D.sub(new Frac(B)).toString()}`});
+            } 
+            else if (type === 'right_side') {
+                let A = getRandom(2, 6);
+                let B = getRandom(1, 15);
+                let total = xVal.mul(new Frac(A)).sub(new Frac(B));
+                
+                prob.lhs = total.toString();
+                prob.rhs = `${A}<i>x</i> - ${B}`;
+                prob.hint = "The variable is on the right side. You can still solve it by isolating x there, or flip the whole equation.";
+                prob.steps.push({m: `Add ${B} to both sides:`, l: `${total.add(new Frac(B)).toString()} = ${A}x`});
+            }
+            else if (type === 'subtraction') {
+                let A = getRandom(10, 30);
+                let total = new Frac(A).sub(xVal);
+                
+                prob.lhs = `${A} - <i>x</i>`;
+                prob.rhs = total.toString();
+                prob.hint = "Be careful with the negative sign in front of x. You are solving for 'x', not '-x'.";
+                prob.steps.push({m: `Subtract ${A} from both sides:`, l: `-x = ${total.sub(new Frac(A)).toString()}`});
+                prob.steps.push({m: `Multiply by -1 to solve for positive x:`, l: `x = ${xVal.toString()}`});
+            }
+            else {
+                let A = getRandom(2, 5);
+                let B = getRandom(1, 6);
+                let total = xVal.add(new Frac(B)).mul(new Frac(A));
+
+                prob.lhs = total.toString();
+                prob.rhs = `${A}(<i>x</i> + ${B})`;
+                prob.hint = "You can either distribute the number outside the parentheses or divide the entire equation by it first.";
+                prob.steps.push({m: `Divide both sides by ${A}:`, l: `${total.div(new Frac(A)).toString()} = x + ${B}`});
+            }
+            return prob;
+        }
+
+        function render() {
+            container.innerHTML = '';
+            currentProblems = [];
+            showBtn.disabled = false;
+            showBtn.textContent = "Check My Answers";
+
+            for (let i = 1; i <= 5; i++) {
+                const p = generateProblem(i);
+                currentProblems.push(p);
+                const div = document.createElement('div');
+                div.className = 'problem-card';
+                div.id = `card-${i}`;
+                div.innerHTML = `
+                    <div class="problem-header">
+                        <span class="problem-number">#${i}</span>
+                        <div class="problem-expression">${p.lhs} = ${p.rhs}</div>
+                    </div>
+                    <div class="answer-box">
+                        <label><i>x</i> = </label>
+                        <input type="text" class="user-input" id="input-${i}" placeholder="?">
+                    </div>
+                    <div class="solution-area" id="sol-${i}">
+                        <div class="explanation-note" id="note-${i}" style="display:none;"></div>
+                        <strong>Step-by-Step Solution:</strong>
+                        <div style="margin-top:10px;">
+                            ${p.steps.map(s => `<div class="step-row">${s.m}<span class="algebra-line">${s.l}</span></div>`).join('')}
+                        </div>
+                        <div class="final-result">Correct Answer: <i>x</i> = ${p.x.toString()}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        function check() {
+            let score = 0;
+            currentProblems.forEach(p => {
+                const input = document.getElementById(`input-${p.id}`);
+                const card = document.getElementById(`card-${p.id}`);
+                const sol = document.getElementById(`sol-${p.id}`);
+                const note = document.getElementById(`note-${p.id}`);
+                const val = input.value.trim();
+                
+                let userNum;
+                if(val.includes('/')) {
+                    const parts = val.split('/');
+                    userNum = parseFloat(parts[0]) / parseFloat(parts[1]);
+                } else {
+                    userNum = parseFloat(val);
+                }
+
+                const isCorrect = !isNaN(userNum) && Math.abs(userNum - p.x.val) < 0.01;
+                
+                input.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                card.classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
+                sol.style.display = 'block';
+
+                if (!isCorrect) {
+                    note.style.display = 'block';
+                    note.innerHTML = `<strong>Review Tip:</strong> ${p.hint}`;
+                } else {
+                    score++;
+                }
+            });
+
+            showBtn.disabled = true;
+            showBtn.textContent = `Result: ${score} / ${currentProblems.length}`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        generateBtn.addEventListener('click', render);
+        showBtn.addEventListener('click', check);
+        render();
+    </script>
+</body>
+</html>
