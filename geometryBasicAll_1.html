@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>geometrybasicall - Full 18 Problem Set</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f4f7f6; color: #333; }
+        h1 { text-align: center; color: #1a2a6c; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 20px; }
+
+        /* Full Formula Reference Section */
+        .formula-guide {
+            max-width: 1100px;
+            margin: 0 auto 30px auto;
+            background-color: #fff;
+            border: 2px solid #2980b9;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .formula-guide h2 { margin-top: 0; color: #2980b9; font-size: 1.3em; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; text-align: center; }
+        .formula-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; font-size: 0.82em; }
+        .formula-category { background: #f8fbfe; padding: 10px; border-radius: 6px; border-left: 4px solid #3498db; }
+        .formula-category h3 { margin: 0 0 5px 0; font-size: 0.95em; color: #2c3e50; text-transform: uppercase; }
+
+        .controls-container { text-align: center; padding: 20px; margin-bottom: 30px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        button { padding: 12px 28px; font-size: 1.05em; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 5px; transition: 0.2s; }
+        #generateBtn { background-color: #3498db; }
+        #showSolutionsBtn { background-color: #27ae60; }
+        #showSolutionsBtn:disabled { background-color: #bdc3c7; cursor: default; }
+
+        .problem-list { list-style: none; padding: 0; max-width: 900px; margin: 0 auto; }
+        .problem-card { margin-bottom: 30px; padding: 25px; border-radius: 12px; background: #fff; border-left: 8px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .problem-card.is-correct { border-left-color: #2ecc71; }
+        .problem-card.is-incorrect { border-left-color: #e74c3c; }
+
+        .figure-container { text-align: center; background: #fdfdfd; padding: 20px; border: 1px solid #f0f0f0; border-radius: 8px; margin: 15px 0; }
+        .answer-box { display: flex; align-items: center; background: #f8f9fa; padding: 15px; border-radius: 8px; gap: 10px; }
+        .user-input { padding: 8px; border: 2px solid #ccc; border-radius: 4px; width: 140px; text-align: center; font-size: 1.1em; }
+        
+        .solution-area { display: none; margin-top: 20px; padding: 15px; background: #f9f9f9; border: 1px dashed #3498db; border-radius: 8px; }
+        .math-line { display: block; font-family: 'Courier New', monospace; background: #fff; padding: 5px; border: 1px solid #eee; margin-top: 5px; color: #d35400; }
+        
+        .report-header { text-align: center; background: #e8f6f3; border: 2px solid #27ae60; padding: 20px; margin-bottom: 30px; border-radius: 10px; }
+
+        @media print { .controls-container { display: none; } .solution-area { display: block !important; } }
+    </style>
+</head>
+<body>
+
+    <h1>Geometry Mastery: geometrybasicall</h1>
+    <p class="subtitle">Complete the full 18-problem foundational set. All dimensions are rendered on the figures.</p>
+
+    <!-- FULL REFERENCE GUIDE -->
+    <div class="formula-guide">
+        <h2>Mathematical Reference Guide</h2>
+        <div class="formula-grid">
+            <div class="formula-category">
+                <h3>Angles & Lines</h3>
+                • <b>Supplementary:</b> Sum = 180°<br>
+                • <b>Complementary:</b> Sum = 90°<br>
+                • <b>Triangle Sum:</b> Int. Angles = 180°<br>
+                • <b>Parallel Lines:</b> Alt. Interior are equal
+            </div>
+            <div class="formula-category">
+                <h3>2D Area Formulas</h3>
+                • <b>Triangle:</b> A = ½ × b × h<br>
+                • <b>Parallelogram:</b> A = base × height<br>
+                • <b>Trapezoid:</b> A = ½(a + b)h<br>
+                • <b>Rhombus:</b> A = ½ × d₁ × d₂
+            </div>
+            <div class="formula-category">
+                <h3>Circles & Scaling</h3>
+                • <b>Circle:</b> A = πr² | C = 2πr (π≈3.14)<br>
+                • <b>Distance:</b> √((x₂-x₁)² + (y₂-y₁)²)<br>
+                • <b>Scale Factor:</b> New = Old × k<br>
+                • <b>Rounds:</b> Total = Perimeter × Rounds
+            </div>
+            <div class="formula-category">
+                <h3>3D Volume & Area</h3>
+                • <b>Cylinder:</b> V = πr²h | CSA = 2πrh<br>
+                • <b>Cone:</b> V = ⅓πr²h | CSA = πrl<br>
+                • <b>Sphere:</b> SA = 4πr²<br>
+                • <b>Prism:</b> V = lwh | SA = 2(lw+lh+wh)
+            </div>
+        </div>
+    </div>
+
+    <div class="controls-container">
+        <button id="generateBtn">Generate Full 18-Problem Set</button>
+        <button id="showSolutionsBtn">Check & Save All Progress</button> 
+    </div>
+
+    <div id="problemContainer" class="problem-list"></div>
+
+    <script>
+        const container = document.getElementById('problemContainer');
+        const generateBtn = document.getElementById('generateBtn');
+        const showBtn = document.getElementById('showSolutionsBtn');
+        let currentProblems = [];
+
+        function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+        const problemPool = [
+            // 1. Supplementary
+            function(id) {
+                const a = getRandom(45, 135); const ans = 180 - a;
+                return {
+                    id, text: "Angles on a straight line are shown. Solve for x.",
+                    svg: `<svg width="160" height="80"><line x1="10" y1="70" x2="150" y2="70" stroke="black" stroke-width="2"/><line x1="80" y1="70" x2="120" y2="20" stroke="black" stroke-width="2"/><text x="40" y="65">${a}°</text><text x="100" y="65">x=?</text></svg>`,
+                    answer: ans, steps: [{m:"Formula:", l:"180 - known angle"}, {m:"Calculation:", l:`180 - ${a} = ${ans}`}]
+                };
+            },
+            // 2. Complementary
+            function(id) {
+                const a = getRandom(20, 70); const ans = 90 - a;
+                return {
+                    id, text: "These angles form a right angle. Solve for x.",
+                    svg: `<svg width="120" height="120"><line x1="20" y1="100" x2="100" y2="100" stroke="black" stroke-width="2"/><line x1="20" y1="100" x2="20" y2="20" stroke="black" stroke-width="2"/><line x1="20" y1="100" x2="80" y2="40" stroke="black" stroke-width="2"/><rect x="20" y="90" width="10" height="10" fill="none" stroke="black"/><text x="45" y="90">${a}°</text><text x="30" y="60">x=?</text></svg>`,
+                    answer: ans, steps: [{m:"Formula:", l:"90 - known angle"}, {m:"Calculation:", l:`90 - ${a} = ${ans}`}]
+                };
+            },
+            // 3. Triangle Angle Sum
+            function(id) {
+                const a = getRandom(40, 70); const b = getRandom(40, 70); const ans = 180 - a - b;
+                return {
+                    id, text: "Find the missing interior angle x of the triangle.",
+                    svg: `<svg width="140" height="100"><polygon points="70,20 20,80 120,80" fill="none" stroke="black" stroke-width="2"/><text x="65" y="40">x</text><text x="35" y="75">${a}°</text><text x="95" y="75">${b}°</text></svg>`,
+                    answer: ans, steps: [{m:"Formula:", l:"180 - (Angle1 + Angle2)"}, {m:"Calculation:", l:`180 - (${a} + ${b}) = ${ans}`}]
+                };
+            },
+            // 4. Parallel Lines
+            function(id) {
+                const a = getRandom(50, 130);
+                return {
+                    id, text: "Lines L1 and L2 are parallel. Find the alternate interior angle x.",
+                    svg: `<svg width="160" height="100"><line x1="10" y1="30" x2="150" y2="30" stroke="black" stroke-width="2"/><line x1="10" y1="70" x2="150" y2="70" stroke="black" stroke-width="2"/><line x1="40" y1="90" x2="120" y2="10" stroke="red" stroke-width="1"/><text x="85" y="25">${a}°</text><text x="65" y="65">x=?</text></svg>`,
+                    answer: a, steps: [{m:"Rule:", l:"Alternate interior angles are equal when lines are parallel."}, {m:"Result:", l:`x = ${a}`}]
+                };
+            },
+            // 5. Right Triangle Area
+            function(id) {
+                const b = getRandom(6, 14); const h = getRandom(5, 10);
+                return {
+                    id, text: "Calculate the area of the right-angled triangle.",
+                    svg: `<svg width="120" height="100"><polygon points="20,80 20,20 100,80" fill="none" stroke="black" stroke-width="2"/><text x="5" y="50">${h}</text><text x="50" y="95">${b}</text></svg>`,
+                    answer: 0.5 * b * h, steps: [{m:"Formula:", l:"½ × base × height"}, {m:"Calculation:", l:`0.5 × ${b} × ${h} = ${0.5 * b * h}`}]
+                };
+            },
+            // 6. Parallelogram Area
+            function(id) {
+                const b = getRandom(10, 15); const h = getRandom(6, 9);
+                return {
+                    id, text: "Find the area of the parallelogram using the base and height shown.",
+                    svg: `<svg width="160" height="100"><polygon points="40,20 140,20 120,80 20,80" fill="none" stroke="black" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="80" stroke="red" stroke-dasharray="3"/><text x="70" y="95">base=${b}</text><text x="45" y="50" fill="red">${h}</text></svg>`,
+                    answer: b * h, steps: [{m:"Formula:", l:"base × height"}, {m:"Calculation:", l:`${b} × ${h} = ${b * h}`}]
+                };
+            },
+            // 7. Trapezoid Area
+            function(id) {
+                const a = getRandom(6, 10); const b = getRandom(12, 16); const h = 8;
+                const ans = 0.5 * (a + b) * h;
+                return {
+                    id, text: "Determine the area of the trapezoid.",
+                    svg: `<svg width="150" height="100"><polygon points="40,20 100,20 130,80 10,80" fill="none" stroke="black" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="80" stroke="red" stroke-dasharray="3"/><text x="70" y="15">a=${a}</text><text x="70" y="95">b=${b}</text><text x="45" y="55" fill="red">h=8</text></svg>`,
+                    answer: ans, steps: [{m:"Formula:", l:"½(a + b)h"}, {m:"Calculation:", l:`0.5 × (${a} + ${b}) × 8 = ${ans}`}]
+                };
+            },
+            // 8. Rhombus Area
+            function(id) {
+                const d1 = 10; const d2 = 14;
+                return {
+                    id, text: "Find the area of the rhombus based on its diagonals.",
+                    svg: `<svg width="140" height="100"><polygon points="70,10 120,50 70,90 20,50" fill="none" stroke="black"/><line x1="70" y1="10" x2="70" y2="90" stroke="blue" stroke-dasharray="2"/><line x1="20" y1="50" x2="120" y2="50" stroke="blue" stroke-dasharray="2"/><text x="75" y="30">10</text><text x="40" y="45">14</text></svg>`,
+                    answer: 70, steps: [{m:"Formula:", l:"½ × d₁ × d₂"}, {m:"Calculation:", l:"0.5 × 10 × 14 = 70"}]
+                };
+            },
+            // 9. Scale Factor
+            function(id) {
+                const s = 5; const k = getRandom(2, 4); const ans = s * k;
+                return {
+                    id, text: `The original side is 5. If the shape is scaled by a factor of ${k}, find the new side x.`,
+                    svg: `<svg width="180" height="100"><rect x="10" y="60" width="20" height="20" fill="none" stroke="black"/><rect x="60" y="20" width="80" height="80" fill="none" stroke="black"/><text x="15" y="95">5</text><text x="95" y="115">x=?</text></svg>`,
+                    answer: ans, steps: [{m:"Formula:", l:"Original × Scale Factor"}, {m:"Calculation:", l:`5 × ${k} = ${ans}`}]
+                };
+            },
+            // 10. Rounds of Fencing
+            function(id) {
+                const l = getRandom(15, 25); const w = getRandom(10, 14); const r = 3;
+                const perim = 2 * (l + w); const ans = perim * r;
+                return {
+                    id, text: "How much wire is needed for 3 rounds of fencing around the garden?",
+                    svg: `<svg width="150" height="90"><rect x="20" y="25" width="110" height="50" fill="none" stroke="green" stroke-width="2"/><text x="75" y="20" text-anchor="middle">L=${l}</text><text x="135" y="55">W=${w}</text></svg>`,
+                    answer: ans, steps: [{m:"Perimeter:", l:`2 × (${l} + ${w}) = ${perim}`}, {m:"3 Rounds:", l:`${perim} × 3 = ${ans}`}]
+                };
+            },
+            // 11. Rectangular Prism Volume
+            function(id) {
+                const l = 6, w = 4, h = 5;
+                return {
+                    id, text: "Find the volume of the rectangular prism.",
+                    svg: `<svg width="140" height="100"><rect x="20" y="40" width="80" height="40" fill="none" stroke="black"/><path d="M20 40 L40 20 L120 20 L100 40 M120 20 L120 60 L100 80" fill="none" stroke="black"/><text x="60" y="95">L=6</text><text x="125" y="50">W=4</text><text x="5" y="65">H=5</text></svg>`,
+                    answer: 120, steps: [{m:"Formula:", l:"length × width × height"}, {m:"Calculation:", l:"6 × 4 × 5 = 120"}]
+                };
+            },
+            // 12. Rectangular Prism Surface Area
+            function(id) {
+                const l = 3, w = 2, h = 5;
+                const ans = 2 * (3*2 + 3*5 + 2*5);
+                return {
+                    id, text: "Calculate the TOTAL Surface Area of the rectangular prism.",
+                    svg: `<svg width="140" height="100"><rect x="20" y="40" width="80" height="40" fill="none" stroke="black"/><path d="M20 40 L40 20 L120 20 L100 40 M120 20 L120 60 L100 80" fill="none" stroke="black"/><text x="60" y="95">L=3</text><text x="125" y="50">W=2</text><text x="5" y="65">H=5</text></svg>`,
+                    answer: ans, steps: [{m:"Formula:", l:"2(lw + lh + wh)"}, {m:"Calculation:", l:`2(${3*2} + ${3*5} + ${2*5}) = ${ans}`}]
+                };
+            },
+            // 13. Cylinder Volume
+            function(id) {
+                const r = 5, h = 10;
+                const ans = Math.round(3.14 * 25 * 10);
+                return {
+                    id, text: "Find the volume of the cylinder. (π ≈ 3.14)",
+                    svg: `<svg width="100" height="120"><ellipse cx="50" cy="20" rx="35" ry="10" fill="none" stroke="black"/><path d="M15 20 L15 90 A35 10 0 0 0 85 90 L85 20" fill="none" stroke="black"/><text x="50" y="105" text-anchor="middle">r=5</text><text x="90" y="60">h=10</text></svg>`,
+                    answer: ans, steps: [{m:"Formula:", l:"πr²h"}, {m:"Calculation:", l:"3.14 × 25 × 10 = 785"}]
+                };
+            },
+            // 14. Cylinder CSA
+            function(id) {
+                const r = 7, h = 10;
+                return {
+                    id, text: "Calculate the Curved Surface Area (CSA) of the cylinder. (π ≈ 22/7)",
+                    svg: `<svg width="100" height="120"><ellipse cx="50" cy="20" rx="35" ry="10" fill="none" stroke="black"/><path d="M15 20 L15 90 A35 10 0 0 0 85 90 L85 20" fill="none" stroke="black"/><text x="50" y="105" text-anchor="middle">r=7</text><text x="90" y="60">h=10</text></svg>`,
+                    answer: 440, steps: [{m:"Formula:", l:"2πrh"}, {m:"Calculation:", l:"2 × (22/7) × 7 × 10 = 440"}]
+                };
+            },
+            // 15. Cone Volume
+            function(id) {
+                const r = 3, h = 7;
+                return {
+                    id, text: "Find the volume of the cone. (π ≈ 22/7)",
+                    svg: `<svg width="120" height="120"><ellipse cx="60" cy="100" rx="40" ry="12" fill="none" stroke="black"/><line x1="20" y1="100" x2="60" y2="20" stroke="black"/><line x1="100" y1="100" x2="60" y2="20" stroke="black"/><line x1="60" y1="100" x2="60" y2="20" stroke="red" stroke-dasharray="3"/><text x="65" y="60" fill="red">h=7</text><text x="75" y="115">r=3</text></svg>`,
+                    answer: 66, steps: [{m:"Formula:", l:"⅓πr²h"}, {m:"Calculation:", l:"(1/3) × (22/7) × 9 × 7 = 66"}]
+                };
+            },
+            // 16. Cone CSA
+            function(id) {
+                const r = 7, l = 10;
+                return {
+                    id, text: "Calculate the Curved Surface Area (CSA) using slant height l. (π ≈ 22/7)",
+                    svg: `<svg width="120" height="120"><ellipse cx="60" cy="100" rx="40" ry="12" fill="none" stroke="black"/><line x1="20" y1="100" x2="60" y2="20" stroke="black"/><line x1="100" y1="100" x2="60" y2="20" stroke="black"/><text x="35" y="60" transform="rotate(-63 35 60)">slant l=10</text><text x="75" y="115">r=7</text></svg>`,
+                    answer: 220, steps: [{m:"Formula:", l:"πrl"}, {m:"Calculation:", l:"(22/7) × 7 × 10 = 220"}]
+                };
+            },
+            // 17. Sphere Surface Area
+            function(id) {
+                const r = getRandom(5, 10); const ans = Math.round(4 * 3.14 * r * r * 100) / 100;
+                return {
+                    id, text: "Find the surface area of the sphere. (π ≈ 3.14)",
+                    svg: `<svg width="120" height="120"><circle cx="60" cy="60" r="45" fill="none" stroke="black" stroke-width="2"/><ellipse cx="60" cy="60" rx="45" ry="15" fill="none" stroke="black" stroke-dasharray="2"/><line x1="60" y1="60" x2="105" y2="60" stroke="blue"/><text x="80" y="55" fill="blue">r=${r}</text></svg>`,
+                    answer: ans, steps: [{m:"Formula:", l:"4πr²"}, {m:"Calculation:", l:`4 × 3.14 × ${r*r} = ${ans}`}]
+                };
+            },
+            // 18. Pythagorean Theorem
+            function(id) {
+                const a = 9, b = 12;
+                return {
+                    id, text: "Calculate the missing hypotenuse c.",
+                    svg: `<svg width="120" height="100"><polygon points="20,80 20,20 100,80" fill="none" stroke="black" stroke-width="2"/><text x="5" y="50">9</text><text x="50" y="95">12</text><text x="65" y="45">c=?</text></svg>`,
+                    answer: 15, steps: [{m:"Calculation:", l:"9² + 12² = 81 + 144 = 225"}, {m:"Result:", l:"√225 = 15"}]
+                };
+            }
+        ];
+
+        function render() {
+            container.innerHTML = ''; currentProblems = [];
+            showBtn.disabled = false; showBtn.textContent = "Check & Save All Progress";
+            
+            // Loop through all 18 functions in order
+            for (let i = 0; i < problemPool.length; i++) {
+                const p = problemPool[i](i + 1);
+                currentProblems.push(p);
+                const card = document.createElement('div');
+                card.className = 'problem-card';
+                card.id = `card-${i+1}`;
+                card.innerHTML = `
+                    <div style="font-weight:bold; color:#7f8c8d; margin-bottom:10px;">Problem #${i+1}</div>
+                    <div style="font-size:1.1em; margin-bottom:10px;">${p.text}</div>
+                    <div class="figure-container">${p.svg}</div>
+                    <div class="answer-box">
+                        <label>Your Answer:</label>
+                        <input type="number" step="0.01" class="user-input" id="input-${i+1}" placeholder="?">
+                    </div>
+                    <div class="solution-area" id="sol-${i+1}">
+                        <strong>Step-by-Step Logic:</strong>
+                        ${p.steps.map(s => `<div class="math-line">${s.m} ${s.l}</div>`).join('')}
+                        <div style="margin-top:10px; font-weight:bold; color:#2980b9">Correct Value: ${p.answer}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            }
+        }
+
+        function check() {
+            let score = 0;
+            currentProblems.forEach(p => {
+                const input = document.getElementById(`input-${p.id}`);
+                const val = parseFloat(input.value);
+                const isCorrect = !isNaN(val) && Math.abs(val - p.answer) < 0.15;
+                
+                input.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                document.getElementById(`card-${p.id}`).classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
+                document.getElementById(`sol-${p.id}`).style.display = 'block';
+                if (isCorrect) score++;
+            });
+            showBtn.textContent = `Set Accuracy: ${score} / 18`;
+            showBtn.disabled = true;
+            setTimeout(() => downloadReport(score, 18), 800);
+        }
+
+        function downloadReport(correct, total) {
+            const clone = document.documentElement.cloneNode(true);
+            clone.querySelector('.controls-container').remove();
+            clone.querySelectorAll('script').forEach(s => s.remove());
+
+            const header = document.createElement('div');
+            header.className = 'report-header';
+            header.innerHTML = `<h2>geometrybasicall Final Report</h2><h3>Full Set Results: ${correct} / ${total}</h3><p>${new Date().toLocaleString()}</p>`;
+            clone.querySelector('body').prepend(header);
+
+            const origInputs = document.querySelectorAll('.user-input');
+            clone.querySelectorAll('.user-input').forEach((ci, idx) => {
+                const span = document.createElement('span');
+                span.textContent = origInputs[idx].value || "---";
+                span.className = origInputs[idx].className;
+                span.style.display = "inline-block";
+                span.style.padding = "5px 15px";
+                span.style.border = "1px solid #333";
+                ci.parentNode.replaceChild(span, ci);
+            });
+
+            clone.querySelectorAll('.solution-area').forEach(s => s.style.display = 'block');
+            const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `geometrybasicall_report_${Date.now()}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        generateBtn.addEventListener('click', render);
+        showBtn.addEventListener('click', check);
+        render(); // Initial load
+    </script>
+</body>
+</html>
