@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Algebra: Solve for X with Explanations</title>
+    <title>Algebra Report: Solving for X</title>
     <style>
+        /* Modern UI Style from File 2 */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
@@ -33,11 +34,12 @@
             cursor: pointer;
             margin: 5px 10px; 
             transition: transform 0.1s, background-color 0.2s;
+            vertical-align: middle;
         }
         button:active { transform: scale(0.98); }
         #generateBtn { background-color: #3498db; }
         #showSolutionsBtn { background-color: #27ae60; }
-        #showSolutionsBtn:disabled { background-color: #bdc3c7; cursor: default; }
+        #showSolutionsBtn:disabled { opacity: 1; cursor: default; }
 
         .problem-list {
             list-style-type: none;
@@ -53,9 +55,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             border-left: 8px solid #ddd;
         }
-        .problem-card.is-correct { border-left-color: #2ecc71; }
-        .problem-card.is-incorrect { border-left-color: #e74c3c; }
-
+        
         .problem-header {
             display: flex;
             align-items: center;
@@ -88,8 +88,10 @@
             text-align: center;
         }
         
-        .correct-input { background-color: #d4edda; border-color: #28a745; color: #155724; font-weight: bold; }
-        .incorrect-input { background-color: #f8d7da; border-color: #dc3545; color: #721c24; font-weight: bold; }
+        /* Feedback States */
+        .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
+        .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; font-weight: bold; }
+        .static-answer { padding: 8px 15px; border-radius: 6px; font-size: 1.2em; border: 1px solid #ccc; }
 
         /* Fraction Support */
         .fraction { display: inline-block; vertical-align: middle; text-align: center; margin: 0 0.2em; font-style: normal; font-size: 0.85em; }
@@ -105,16 +107,7 @@
             border-radius: 8px;
             border: 1px solid #eee;
         }
-        .explanation-note {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            border-left: 4px solid #ffeeba;
-            font-weight: 500;
-        }
-        .step-row { margin-bottom: 12px; }
+        .step-row { margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
         .algebra-line {
             display: block;
             font-family: 'Courier New', monospace;
@@ -134,12 +127,31 @@
             border-top: 2px solid #3498db;
             padding-top: 10px;
         }
+
+        /* Report Header Style */
+        .report-header {
+            text-align: center;
+            background-color: #ffffff;
+            border: 3px solid #27ae60;
+            padding: 20px;
+            margin: 0 auto 30px auto;
+            max-width: 800px;
+            border-radius: 12px;
+            color: #2c3e50;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        @media print {
+            .controls-container { display: none; }
+            .solution-area { display: block !important; }
+            body { background: white; }
+        }
     </style>
 </head>
 <body>
 
-    <h1>Solve for <i>x</i></h1>
-    <p class="subtitle">Enter your answer as a whole number, decimal, or fraction (e.g., 5, 2.5, or 1/2).</p>
+    <h1>Solve for <i>x</i>: Algebra Report</h1>
+    <p class="subtitle">Complete the problems. Clicking "Check" will generate your final score report.</p>
 
     <div class="controls-container">
         <button id="generateBtn">Generate New Problems</button>
@@ -181,49 +193,33 @@
             const types = ['both_sides', 'right_side', 'subtraction', 'distribution'];
             const type = types[getRandom(0, types.length - 1)];
             const xVal = new Frac(getRandom(-8, 12));
-            
-            let prob = { id, lhs: "", rhs: "", steps: [], x: xVal, hint: "" };
+            let prob = { id, lhs: "", rhs: "", steps: [], x: xVal };
 
             if (type === 'both_sides') {
-                let A = getRandom(2, 7);
-                let C = getRandom(-4, 4); if (A === C) C = 1;
+                let A = getRandom(2, 7), C = getRandom(-4, 4); if (A === C) C = 1;
                 let B = getRandom(-10, 10);
                 let D = xVal.mul(new Frac(A - C)).add(new Frac(B));
-
-                prob.lhs = `${A}<i>x</i> ${B >= 0 ? '+' : '-'} ${Math.abs(B)}`;
-                prob.rhs = `${C === 0 ? '' : C + '<i>x</i>'} ${D.n >= 0 ? '+' : '-'} ${D.toString().replace('-', '')}`;
-                prob.hint = "When the variable is on both sides, use addition or subtraction to move all 'x' terms to one side first.";
-                prob.steps.push({m: `Subtract ${C}x from both sides:`, l: `${A-C}x ${B>=0?'+':'-'} ${Math.abs(B)} = ${D.toString()}`});
-                prob.steps.push({m: `Move the constant term:`, l: `${A-C}x = ${D.sub(new Frac(B)).toString()}`});
+                prob.lhs = `${A}x ${B >= 0 ? '+' : '-'} ${Math.abs(B)}`;
+                prob.rhs = `${C === 0 ? '' : C + 'x'} ${D.n >= 0 ? '+' : '-'} ${Math.abs(D.n)}${D.d !== 1 ? '/' + D.d : ''}`;
+                prob.steps.push({m: `Move variables to one side:`, l: `${A-C}x ${B>=0?'+':'-'} ${Math.abs(B)} = ${D.toString()}`});
+                prob.steps.push({m: `Isolate x term:`, l: `${A-C}x = ${D.sub(new Frac(B)).toString()}`});
             } 
             else if (type === 'right_side') {
-                let A = getRandom(2, 6);
-                let B = getRandom(1, 15);
+                let A = getRandom(2, 6), B = getRandom(1, 15);
                 let total = xVal.mul(new Frac(A)).sub(new Frac(B));
-                
-                prob.lhs = total.toString();
-                prob.rhs = `${A}<i>x</i> - ${B}`;
-                prob.hint = "The variable is on the right side. You can still solve it by isolating x there, or flip the whole equation.";
+                prob.lhs = total.toString(); prob.rhs = `${A}x - ${B}`;
                 prob.steps.push({m: `Add ${B} to both sides:`, l: `${total.add(new Frac(B)).toString()} = ${A}x`});
             }
             else if (type === 'subtraction') {
                 let A = getRandom(10, 30);
                 let total = new Frac(A).sub(xVal);
-                
-                prob.lhs = `${A} - <i>x</i>`;
-                prob.rhs = total.toString();
-                prob.hint = "Be careful with the negative sign in front of x. You are solving for 'x', not '-x'.";
+                prob.lhs = `${A} - x`; prob.rhs = total.toString();
                 prob.steps.push({m: `Subtract ${A} from both sides:`, l: `-x = ${total.sub(new Frac(A)).toString()}`});
-                prob.steps.push({m: `Multiply by -1 to solve for positive x:`, l: `x = ${xVal.toString()}`});
             }
             else {
-                let A = getRandom(2, 5);
-                let B = getRandom(1, 6);
+                let A = getRandom(2, 5), B = getRandom(1, 6);
                 let total = xVal.add(new Frac(B)).mul(new Frac(A));
-
-                prob.lhs = total.toString();
-                prob.rhs = `${A}(<i>x</i> + ${B})`;
-                prob.hint = "You can either distribute the number outside the parentheses or divide the entire equation by it first.";
+                prob.lhs = total.toString(); prob.rhs = `${A}(x + ${B})`;
                 prob.steps.push({m: `Divide both sides by ${A}:`, l: `${total.div(new Frac(A)).toString()} = x + ${B}`});
             }
             return prob;
@@ -233,6 +229,7 @@
             container.innerHTML = '';
             currentProblems = [];
             showBtn.disabled = false;
+            showBtn.style.backgroundColor = '#27ae60';
             showBtn.textContent = "Check My Answers";
 
             for (let i = 1; i <= 5; i++) {
@@ -247,16 +244,15 @@
                         <div class="problem-expression">${p.lhs} = ${p.rhs}</div>
                     </div>
                     <div class="answer-box">
-                        <label><i>x</i> = </label>
+                        <label>x = </label>
                         <input type="text" class="user-input" id="input-${i}" placeholder="?">
                     </div>
                     <div class="solution-area" id="sol-${i}">
-                        <div class="explanation-note" id="note-${i}" style="display:none;"></div>
                         <strong>Step-by-Step Solution:</strong>
                         <div style="margin-top:10px;">
                             ${p.steps.map(s => `<div class="step-row">${s.m}<span class="algebra-line">${s.l}</span></div>`).join('')}
                         </div>
-                        <div class="final-result">Correct Answer: <i>x</i> = ${p.x.toString()}</div>
+                        <div class="final-result">Correct Answer: x = ${p.x.toString()}</div>
                     </div>
                 `;
                 container.appendChild(div);
@@ -267,36 +263,67 @@
             let score = 0;
             currentProblems.forEach(p => {
                 const input = document.getElementById(`input-${p.id}`);
-                const card = document.getElementById(`card-${p.id}`);
                 const sol = document.getElementById(`sol-${p.id}`);
-                const note = document.getElementById(`note-${p.id}`);
                 const val = input.value.trim();
-                
                 let userNum;
                 if(val.includes('/')) {
                     const parts = val.split('/');
                     userNum = parseFloat(parts[0]) / parseFloat(parts[1]);
-                } else {
-                    userNum = parseFloat(val);
-                }
+                } else { userNum = parseFloat(val); }
 
                 const isCorrect = !isNaN(userNum) && Math.abs(userNum - p.x.val) < 0.01;
-                
                 input.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
-                card.classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
                 sol.style.display = 'block';
-
-                if (!isCorrect) {
-                    note.style.display = 'block';
-                    note.innerHTML = `<strong>Review Tip:</strong> ${p.hint}`;
-                } else {
-                    score++;
-                }
+                if (isCorrect) score++;
             });
 
+            const now = new Date();
+            const timeStr = now.toLocaleString();
             showBtn.disabled = true;
-            showBtn.textContent = `Result: ${score} / ${currentProblems.length}`;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showBtn.style.backgroundColor = "#7f8c8d";
+            showBtn.innerHTML = `Score: ${score}/5<br><span style="font-size:0.7em">${timeStr}</span>`;
+
+            // Prepare for download
+            const reportHeader = `
+                <div class="report-header">
+                    <h1>Algebra Performance Report</h1>
+                    <h2 style="margin:0; color:#27ae60;">Score: ${score} / 5</h2>
+                    <p>Completed on: ${timeStr}</p>
+                </div>`;
+            
+            setTimeout(() => downloadReport(reportHeader), 600);
+        }
+
+        function downloadReport(headerHtml) {
+            const clone = document.documentElement.cloneNode(true);
+            clone.querySelectorAll('script').forEach(s => s.remove());
+            clone.querySelector('.controls-container').remove();
+            
+            const body = clone.querySelector('body');
+            const headerDiv = document.createElement('div');
+            headerDiv.innerHTML = headerHtml;
+            body.insertBefore(headerDiv, body.firstChild);
+
+            // Convert inputs to static text for the file
+            const origInputs = document.querySelectorAll('.user-input');
+            const cloneInputs = clone.querySelectorAll('.user-input');
+            cloneInputs.forEach((ci, idx) => {
+                const val = origInputs[idx].value || "None";
+                const isCorrect = origInputs[idx].classList.contains('correct-input');
+                const span = document.createElement('span');
+                span.className = isCorrect ? 'static-answer correct-input' : 'static-answer incorrect-input';
+                span.textContent = val;
+                ci.parentNode.replaceChild(span, ci);
+            });
+
+            // Force solutions to be visible in the download
+            clone.querySelectorAll('.solution-area').forEach(s => s.style.display = 'block');
+
+            const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Algebra_Report_${new Date().getTime()}.html`;
+            a.click();
         }
 
         generateBtn.addEventListener('click', render);
