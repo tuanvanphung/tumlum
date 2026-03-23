@@ -42,7 +42,7 @@ jobs:
                  f_name.endswith('.html') and \
                  f_name.lower() not in exclude_files_lower:
                   files.append(f_name)
-          files.sort()
+          files.sort(key=lambda f: os.path.getmtime(f), reverse=True)
 
           if not files:
               print(f"No HTML files found to index (excluding {', '.join(EXCLUDE_FILES)}).")
@@ -133,34 +133,4 @@ jobs:
                           width: 100%;
                       }}
                       a:hover {{
-                          color: #3498db; /* Default link hover color, can be more specific if needed */
-                      }}
-                  </style>
-              </head>
-              <body>
-                  <div class="container">
-                      <h1>{html.escape(INDEX_TITLE)}</h1>
-                      <ul>
-              {list_items}
-                      </ul>
-                  </div>
-              </body>
-              </html>
-              """
-
-          with open('index.html', 'w', encoding='utf-8') as f:
-              f.write(index_content)
-          print("index.html generated successfully with conditional styling.")
-        shell: python
-
-      - name: Commit and push if changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add index.html
-          if ! git diff --staged --quiet; then
-            git commit -m "Automated: Update index.html (conditional prefix styling)"
-            git push
-          else
-            echo "No changes to index.html. Nothing to commit."
-          fi
+                          color: #3498db; /* Default link hover color,
