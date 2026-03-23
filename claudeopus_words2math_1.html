@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Problems: Algebraic Thinking Report</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        h1 { text-align: center; color: #1a2a6c; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        .controls-container {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 30px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        button {
+            padding: 12px 28px;
+            font-size: 1.05em;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px 10px;
+            transition: transform 0.1s, background-color 0.2s;
+            vertical-align: middle;
+        }
+        button:active { transform: scale(0.98); }
+        #generateBtn { background-color: #3498db; }
+        #showSolutionsBtn { background-color: #27ae60; }
+        #showSolutionsBtn:disabled { opacity: 1; cursor: default; }
+        .progress-bar-container {
+            max-width: 850px;
+            margin: 0 auto 20px auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 15px 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: none;
+        }
+        .progress-label {
+            font-size: 0.95em;
+            color: #555;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .progress-track {
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #27ae60);
+            border-radius: 5px;
+            transition: width 0.4s ease;
+            width: 0%;
+        }
+        .problem-list {
+            list-style-type: none;
+            padding-left: 0;
+            max-width: 850px;
+            margin: 0 auto;
+        }
+        .problem-card {
+            margin-bottom: 30px;
+            padding: 25px;
+            border-radius: 12px;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 8px solid #ddd;
+        }
+        .problem-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 8px;
+        }
+        .problem-number { font-weight: bold; font-size: 1.3em; color: #95a5a6; }
+        .category-tag {
+            display: inline-block;
+            font-size: 0.75em;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 12px;
+            background: #eaf2f8;
+            color: #2980b9;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+        .problem-text {
+            font-family: 'Georgia', serif;
+            font-size: 1.2em;
+            color: #2c3e50;
+            line-height: 1.5;
+        }
+        .answer-box {
+            display: flex;
+            flex-direction: column;
+            background: #fdfdfd;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            gap: 10px;
+        }
+        .equation-row, .input-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .equation-input, .user-input {
+            padding: 10px;
+            font-size: 1.1em;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .user-input { width: 180px; }
+        .equation-input { width: 320px; font-family: 'Courier New', monospace; }
+        .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
+        .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; font-weight: bold; }
+        .static-answer { padding: 8px 15px; border-radius: 6px; font-size: 1.1em; border: 1px solid #ccc; display: inline-block; }
+        .solution-area {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f4faff;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+        }
+        .solution-area h4 {
+            margin: 0 0 6px 0;
+            color: #2980b9;
+            font-size: 1em;
+        }
+        .hint-explain {
+            margin-bottom: 14px;
+            padding: 10px 14px;
+            background: #fef9e7;
+            border-left: 4px solid #f39c12;
+            border-radius: 6px;
+            font-size: 0.95em;
+            color: #7d6608;
+        }
+        .step-row { margin-bottom: 12px; border-bottom: 1px solid #e1e8ed; padding-bottom: 8px; }
+        .final-result {
+            color: #2980b9;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .equation-feedback {
+            margin-top: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        .eq-correct { color: #28a745; }
+        .eq-incorrect { color: #dc3545; }
+        .report-header {
+            text-align: center;
+            background-color: #ffffff;
+            border: 3px solid #27ae60;
+            padding: 20px;
+            margin: 0 auto 30px auto;
+            max-width: 850px;
+            border-radius: 12px;
+            color: #2c3e50;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        @media print {
+            .controls-container, .progress-bar-container { display: none !important; }
+            .solution-area { display: block !important; }
+            body { background: white; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Translating Words to Math</h1>
+    <p class="subtitle">Word Problems & Algebraic Thinking: Scoring and Step-by-Step Solutions.</p>
+    <div class="controls-container">
+        <div class="controls-row">
+            <button id="generateBtn">Generate New Test</button>
+            <button id="showSolutionsBtn">Submit & Generate Report</button>
+        </div>
+    </div>
+    <div class="progress-bar-container" id="progressContainer">
+        <div class="progress-label">
+            <span id="progressText">Answered: 0 / 20</span>
+            <span id="progressPct">0%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+    <div id="problemContainer" class="problem-list"></div>
+    <script>
+        const container = document.getElementById('problemContainer');
+        const generateBtn = document.getElementById('generateBtn');
+        const showBtn = document.getElementById('showSolutionsBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const progressPct = document.getElementById('progressPct');
+        const TOTAL = 20;
+        let currentProblems = [];
+        let submitted = false;
+        const names = [
+            ["Maria","her brother"],["Alex","his sister"],["Priya","her cousin"],
+            ["James","his friend"],["Lina","her neighbor"],["Carlos","his uncle"],
+            ["Fatima","her aunt"],["David","his brother"],["Yuki","her classmate"],
+            ["Omar","his teammate"],["Sofia","her mentor"],["Ethan","his tutor"],
+            ["Nia","her pen pal"],["Leo","his coach"],["Ava","her grandmother"]
+        ];
+        function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        function shuffle(arr) { for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];} return arr; }
+        function rd(n, d) { return parseFloat(n.toFixed(d)); }
+        /* ═══════════════════════════════════════════
+           ORIGINAL 10 GENERATORS
+           ═══════════════════════════════════════════ */
+        function genConsecutive(id) {
+            let start = getRandomInt(50, 150);
+            let step = pick([1, 2, 2]);
+            let label = step === 2 ? 'consecutive even integers' : 'consecutive odd integers';
+            let nums = [start, start + step, start + 2 * step];
+            let sum = nums.reduce((a, b) => a + b, 0);
+            let eq = `x + (x+${step}) + (x+${2*step}) = ${sum}`;
+            return {
+                id, category: 'Consecutive Integers',
+                text: `The sum of three ${label} is ${sum}. What is the smallest of these integers?`,
+                hint: `Let x be the smallest integer. Since they are ${label}, the three numbers are x, x+${step}, and x+${2*step}. Add them together and set equal to ${sum}.`,
+                equation: eq,
+                acceptableEquations: [eq, `x+(x+${step})+(x+${2*step})=${sum}`, `3x+${3*step}=${sum}`],
+                answer: start,
+                solutionSteps: `
+                    <div class="step-row">Let the integers be x, x+${step}, and x+${2*step}.</div>
+                    <div class="step-row">Equation: x + (x+${step}) + (x+${2*step}) = ${sum}</div>
+                    <div class="step-row">Combine like terms: 3x + ${3*step} = ${sum}</div>
+                    <div class="step-row">Subtract ${3*step}: 3x = ${sum - 3*step}</div>
+                    <div class="step-row">Divide by 3: x = ${start}</div>`
+            };
+        }
+        function genGeometry(id) {
+            let w = getRandomInt(15, 40);
+            let extra = getRandomInt(5, 15);
+            let l = w + extra;
+            let p = 2 * (l + w);
+            let eq = `2(W + ${extra} + W) = ${p}`;
+            return {
+                id, category: 'Geometry — Perimeter',
+                text: `The length of a rectangle is ${extra} cm more than its width. If the perimeter is ${p} cm, find the width.`,
+                hint: `Let W = width. The length is W + ${extra}. The perimeter formula is P = 2(L + W). Substitute and solve for W.`,
+                equation: eq,
+                acceptableEquations: [eq, `2(w+${extra}+w)=${p}`, `2(2w+${extra})=${p}`, `4w+${2*extra}=${p}`],
+                answer: w,
+                solutionSteps: `
+                    <div class="step-row">Let W = width, then L = W + ${extra}</div>
+                    <div class="step-row">Perimeter formula: 2(L + W) = ${p}</div>
+                    <div class="step-row">Substitute: 2(W + ${extra} + W) = ${p}</div>
+                    <div class="step-row">Simplify: 4W + ${2*extra} = ${p}</div>
+                    <div class="step-row">Subtract ${2*extra}: 4W = ${p - 2*extra}</div>
+                    <div class="step-row">Divide by 4: W = ${w}</div>`
+            };
+        }
+        function genCoins(id) {
+            let d = getRandomInt(20, 40);
+            let extra = getRandomInt(5, 12);
+            let n = d + extra;
+            let val = (d * 0.10 + n * 0.05).toFixed(2);
+            let eq = `0.10d + 0.05(d + ${extra}) = ${val}`;
+            return {
+                id, category: 'Coin Problem',
+                text: `A collection of nickels and dimes has a total value of $${val}. There are ${extra} more nickels than dimes. How many dimes are there?`,
+                hint: `Let d = number of dimes. Nickels = d + ${extra}. Each dime is worth $0.10 and each nickel $0.05. Write a value equation and solve for d.`,
+                equation: eq,
+                acceptableEquations: [eq, `0.10d+0.05(d+${extra})=${val}`, `0.15d+${(0.05*extra).toFixed(2)}=${val}`, `.10d+.05(d+${extra})=${val}`],
+                answer: d,
+                solutionSteps: `
+                    <div class="step-row">Let d = dimes, nickels = d + ${extra}</div>
+                    <div class="step-row">Value equation: 0.10d + 0.05(d + ${extra}) = ${val}</div>
+                    <div class="step-row">Distribute: 0.10d + 0.05d + ${(0.05*extra).toFixed(2)} = ${val}</div>
+                    <div class="step-row">Combine: 0.15d + ${(0.05*extra).toFixed(2)} = ${val}</div>
+                    <div class="step-row">Subtract ${(0.05*extra).toFixed(2)}: 0.15d = ${(val - 0.05*extra).toFixed(2)}</div>
+                    <div class="step-row">Divide by 0.15: d = ${d}</div>`
+            };
+        }
+        function genAge(id) {
+            let pair = pick(names);
+            let younger = getRandomInt(20, 60);
+            let diff = getRandomInt(10, 25);
+            let sumAge = younger + (younger + diff);
+            let eq = `b + (b + ${diff}) = ${sumAge}`;
+            return {
+                id, category: 'Age Problem',
+                text: `${pair[0]} is ${diff} years older than ${pair[1]}. The sum of their ages is ${sumAge}. How old is ${pair[1]}?`,
+                hint: `Let b = ${pair[1]}'s age. Then ${pair[0]}'s age is b + ${diff}. Their ages add up to ${sumAge}. Write the equation and solve for b.`,
+                equation: eq,
+                acceptableEquations: [eq, `b+(b+${diff})=${sumAge}`, `2b+${diff}=${sumAge}`, `x+(x+${diff})=${sumAge}`],
+                answer: younger,
+                solutionSteps: `
+                    <div class="step-row">Let b = ${pair[1]}'s age, then ${pair[0]}'s age = b + ${diff}</div>
+                    <div class="step-row">Sum: b + (b + ${diff}) = ${sumAge}</div>
+                    <div class="step-row">Combine: 2b + ${diff} = ${sumAge}</div>
+                    <div class="step-row">Subtract ${diff}: 2b = ${sumAge - diff}</div>
+                    <div class="step-row">Divide by 2: b = ${younger}</div>`
+            };
+        }
+        function genBackwards(id) {
+            let x = getRandomInt(25, 80);
+            let mult = pick([4, 5]);
+            let add = getRandomInt(15, 50);
+            let res = x * mult + add;
+            let eq = `${mult}x + ${add} = ${res}`;
+            return {
+                id, category: 'Backwards / Inverse',
+                text: `A number is multiplied by ${mult}, then increased by ${add}. The result is ${res}. What was the original number?`,
+                hint: `Let x = the original number. Translate the operations into an equation: multiply by ${mult}, then add ${add}, equals ${res}. Work backwards to isolate x.`,
+                equation: eq,
+                acceptableEquations: [eq, `${mult}x+${add}=${res}`],
+                answer: x,
+                solutionSteps: `
+                    <div class="step-row">Let x = the original number.</div>
+                    <div class="step-row">Equation: ${mult}x + ${add} = ${res}</div>
+                    <div class="step-row">Subtract ${add}: ${mult}x = ${res - add}</div>
+                    <div class="step-row">Divide by ${mult}: x = ${x}</div>`
+            };
+        }
+        function genNumbers(id) {
+            let factor = getRandomInt(4, 8);
+            let small = getRandomInt(20, 60);
+            let big = small * factor;
+            let total = small + big;
+            let eq = `x + ${factor}x = ${total}`;
+            return {
+                id, category: 'Number Relationship',
+                text: `The sum of two numbers is ${total}. One number is ${factor} times as large as the other. Find the smaller number.`,
+                hint: `Let x = the smaller number. The larger number is ${factor}x. Together they equal ${total}. Combine like terms and solve.`,
+                equation: eq,
+                acceptableEquations: [eq, `x+${factor}x=${total}`, `${factor+1}x=${total}`],
+                answer: small,
+                solutionSteps: `
+                    <div class="step-row">Let x = smaller number, then larger = ${factor}x</div>
+                    <div class="step-row">Sum: x + ${factor}x = ${total}</div>
+                    <div class="step-row">Combine: ${factor+1}x = ${total}</div>
+                    <div class="step-row">Divide by ${factor+1}: x = ${small}</div>`
+            };
+        }
+        function genMixture(id) {
+            let pctA = pick([5, 8, 12]);
+            let pctB = pick([35, 42, 55]);
+            let pctMix = pick([20, 25, 28]);
+            let volA = getRandomInt(5, 15) * 10;
+            let num = volA * (pctMix - pctA);
+            let den = pctB - pctMix;
+            if (den <= 0 || num % den !== 0) { pctA=10; pctB=40; pctMix=20; volA=60; num=volA*(pctMix-pctA); den=pctB-pctMix; }
+            let volB = num / den;
+            let eq = `${pctA/100}(${volA}) + ${pctB/100}(x) = ${pctMix/100}(${volA} + x)`;
+            return {
+                id, category: 'Mixture Problem',
+                text: `A chemist has ${volA} mL of a ${pctA}% acid solution. How many mL of a ${pctB}% acid solution must be added to get a ${pctMix}% acid solution?`,
+                hint: `Let x = mL of the ${pctB}% solution to add. The acid from both solutions combined must equal the acid in the final mixture. Use: concentration × volume for each part.`,
+                equation: eq,
+                acceptableEquations: [eq, `${(pctA/100).toFixed(2)}*${volA}+${(pctB/100).toFixed(2)}*x=${(pctMix/100).toFixed(2)}*(${volA}+x)`],
+                answer: volB,
+                solutionSteps: `
+                    <div class="step-row">Let x = mL of ${pctB}% solution to add.</div>
+                    <div class="step-row">Acid from A: ${pctA/100} × ${volA} = ${pctA/100*volA}</div>
+                    <div class="step-row">Acid from B: ${pctB/100} × x</div>
+                    <div class="step-row">Mixture: ${pctMix/100} × (${volA} + x)</div>
+                    <div class="step-row">Equation: ${pctA/100*volA} + ${pctB/100}x = ${pctMix/100}(${volA} + x)</div>
+                    <div class="step-row">Expand: ${pctA/100*volA} + ${pctB/100}x = ${pctMix/100*volA} + ${pctMix/100}x</div>
+                    <div class="step-row">Collect x: ${rd(pctB/100 - pctMix/100,2)}x = ${pctMix/100*volA - pctA/100*volA}</div>
+                    <div class="step-row">Divide: x = ${volB}</div>`
+            };
+        }
+        function genRate(id) {
+            let speed1 = getRandomInt(5, 12) * 10;
+            let speed2 = speed1 + getRandomInt(2, 6) * 10;
+            let sumSpeed = speed1 + speed2;
+            let gap = sumSpeed * getRandomInt(4, 8);
+            let t = gap / sumSpeed;
+            let eq = `${speed1}t + ${speed2}t = ${gap}`;
+            return {
+                id, category: 'Rate / Distance / Time',
+                text: `Two cars start ${gap} miles apart and drive toward each other. One travels at ${speed1} mph and the other at ${speed2} mph. In how many hours will they meet?`,
+                hint: `Let t = hours until they meet. Each car covers distance = speed × time. Since they drive toward each other, their combined distances equal ${gap} miles.`,
+                equation: eq,
+                acceptableEquations: [eq, `${speed1}t+${speed2}t=${gap}`, `${sumSpeed}t=${gap}`],
+                answer: t,
+                solutionSteps: `
+                    <div class="step-row">Let t = hours until they meet.</div>
+                    <div class="step-row">Car 1: ${speed1}t miles, Car 2: ${speed2}t miles</div>
+                    <div class="step-row">Combined: ${speed1}t + ${speed2}t = ${gap}</div>
+                    <div class="step-row">Simplify: ${sumSpeed}t = ${gap}</div>
+                    <div class="step-row">Divide by ${sumSpeed}: t = ${t}</div>`
+            };
+        }
+        function genProportion(id) {
+            let base = getRandomInt(4, 10);
+            let scale = getRandomInt(4, 8);
+            let item1qty = base;
+            let item2qty = base * getRandomInt(2, 4);
+            let needed = item2qty * scale;
+            let answer = item1qty * scale;
+            let items = pick([
+                ['cups of flour','cookies'],['eggs','pancakes'],['gallons of paint','rooms'],['bags of cement','pillars']
+            ]);
+            let eq = `${item1qty}/${item2qty} = x/${needed}`;
+            return {
+                id, category: 'Proportion / Ratio',
+                text: `A recipe uses ${item1qty} ${items[0]} for every ${item2qty} ${items[1]}. How many ${items[0]} are needed for ${needed} ${items[1]}?`,
+                hint: `Set up a proportion comparing ${items[0]} to ${items[1]}. The ratio ${item1qty}/${item2qty} must equal x/${needed}. Cross-multiply to solve.`,
+                equation: eq,
+                acceptableEquations: [eq, `${item1qty}/${item2qty}=x/${needed}`, `x/${needed}=${item1qty}/${item2qty}`],
+                answer: answer,
+                solutionSteps: `
+                    <div class="step-row">Proportion: ${item1qty} / ${item2qty} = x / ${needed}</div>
+                    <div class="step-row">Cross multiply: ${item1qty} × ${needed} = ${item2qty} × x</div>
+                    <div class="step-row">${item1qty*needed} = ${item2qty}x</div>
+                    <div class="step-row">Divide by ${item2qty}: x = ${answer}</div>`
+            };
+        }
+        function genInequality(id) {
+            let budget = getRandomInt(100, 300);
+            let perItem = getRandomInt(8, 20);
+            let fixed = getRandomInt(15, 50);
+            let maxItems = Math.floor((budget - fixed) / perItem);
+            let eq = `${perItem}x + ${fixed} ≤ ${budget}`;
+            return {
+                id, category: 'Inequality',
+                text: `You have $${budget} to spend. A store charges a $${fixed} membership fee plus $${perItem} per item. What is the maximum number of whole items you can buy?`,
+                hint: `Let x = number of items. Total cost is ${perItem}x + ${fixed}. This must be ≤ $${budget}. Solve the inequality and round down.`,
+                equation: eq,
+                acceptableEquations: [eq, `${perItem}x+${fixed}<=${budget}`, `${perItem}x+${fixed}≤${budget}`, `${perItem}x+${fixed} <= ${budget}`],
+                answer: maxItems,
+                solutionSteps: `
+                    <div class="step-row">Let x = items purchased.</div>
+                    <div class="step-row">Inequality: ${perItem}x + ${fixed} ≤ ${budget}</div>
+                    <div class="step-row">Subtract ${fixed}: ${perItem}x ≤ ${budget - fixed}</div>
+                    <div class="step-row">Divide by ${perItem}: x ≤ ${rd((budget-fixed)/perItem,2)}</div>
+                    <div class="step-row">Round down: x = ${maxItems}</div>`
+            };
+        }
+        /* ═══════════════════════════════════════════
+           NEW 10 GENERATORS (11–20)
+           ═══════════════════════════════════════════ */
+        // 11. Work / Rate
+        function genWorkRate(id) {
+            let a = pick([3,4,5,6,8]);
+            let b = pick([4,5,6,8,10]);
+            while(b === a) b = pick([4,5,6,8,10]);
+            // 1/a + 1/b = 1/t  →  t = ab/(a+b)
+            let num = a * b;
+            let den = a + b;
+            let gcd = (x,y) => y===0?x:gcd(y,x%y);
+            let g = gcd(num, den);
+            let ansNum = num / g;
+            let ansDen = den / g;
+            let answer = rd(num / den, 2);
+            let eq = `1/${a} + 1/${b} = 1/t`;
+            let workerA = pick(["Alice","Ben","Chen","Dana","Erik"]);
+            let workerB = pick(["Fiona","Greg","Hana","Ivan","Jess"]);
+            while(workerB === workerA) workerB = pick(["Fiona","Greg","Hana","Ivan","Jess"]);
+            let fracStr = ansDen === 1 ? `${ansNum}` : `${ansNum}/${ansDen}`;
+            return {
+                id, category: 'Work / Rate',
+                text: `${workerA} can complete a job in ${a} hours. ${workerB} can complete the same job in ${b} hours. How many hours will it take them working together? (Round to 2 decimal places if needed.)`,
+                hint: `${workerA}'s rate is 1/${a} of the job per hour. ${workerB}'s rate is 1/${b}. Combined rate = 1/${a} + 1/${b}. Time = 1 ÷ combined rate.`,
+                equation: eq,
+                acceptableEquations: [eq, `1/${a}+1/${b}=1/t`],
+                answer: answer,
+                solutionSteps: `
+                    <div class="step-row">${workerA}'s rate: 1/${a} job per hour</div>
+                    <div class="step-row">${workerB}'s rate: 1/${b} job per hour</div>
+                    <div class="step-row">Combined rate: 1/${a} + 1/${b} = ${b}/${num} + ${a}/${num} = ${den}/${num}</div>
+                    <div class="step-row">Time = 1 ÷ (${den}/${num}) = ${num}/${den} = ${fracStr} ≈ ${answer} hours</div>`
+            };
+        }
+        // 12. Systems of Equations
+        function genSystems(id) {
+            let x = getRandomInt(5, 25);
+            let y = getRandomInt(5, 25);
+            while(y === x) y = getRandomInt(5, 25);
+            let a1 = getRandomInt(2, 6), b1 = getRandomInt(2, 6);
+            let c1 = a1*x + b1*y;
+            let a2 = getRandomInt(2, 6), b2 = getRandomInt(2, 6);
+            while(a1*b2 === a2*b1) { a2 = getRandomInt(2,6); b2 = getRandomInt(2,6); }
+            let c2 = a2*x + b2*y;
+            let itemA = pick(["adult tickets","large boxes","hardcover books","premium seats"]);
+            let itemB = pick(["child tickets","small boxes","paperback books","regular seats"]);
+            let eq = `${a1}x + ${b1}y = ${c1}, ${a2}x + ${b2}y = ${c2}`;
+            return {
+                id, category: 'Systems of Equations',
+                text: `A store sells ${itemA} and ${itemB}. ${a1} ${itemA} and ${b1} ${itemB} cost $${c1}. ${a2} ${itemA} and ${b2} ${itemB} cost $${c2}. What is the price of one of the ${itemA}? (Answer the price of the first item.)`,
+                hint: `Let x = price of one ${itemA.replace(/s$/,'')} and y = price of one ${itemB.replace(/s$/,'')}. Set up two equations from the given info and use elimination or substitution.`,
+                equation: eq,
+                acceptableEquations: [eq, `${a1}x+${b1}y=${c1},${a2}x+${b2}y=${c2}`],
+                answer: x,
+                solutionSteps: (() => {
+                    let mult1 = b2, mult2 = b1;
+                    let na1=a1*mult1, nc1=c1*mult1;
+                    let na2=a2*mult2, nc2=c2*mult2;
+                    let diffA = na1 - na2;
+                    let diffC = nc1 - nc2;
+                    return `
+                    <div class="step-row">Equation 1: ${a1}x + ${b1}y = ${c1}</div>
+                    <div class="step-row">Equation 2: ${a2}x + ${b2}y = ${c2}</div>
+                    <div class="step-row">Multiply Eq1 by ${mult1}: ${na1}x + ${b1*mult1}y = ${nc1}</div>
+                    <div class="step-row">Multiply Eq2 by ${mult2}: ${na2}x + ${b2*mult2}y = ${nc2}</div>
+                    <div class="step-row">Subtract: ${diffA}x = ${diffC}</div>
+                    <div class="step-row">x = ${diffC} ÷ ${diffA} = ${x}</div>`;
+                })()
+            };
+        }
+        // 13. Percent Change
+        function genPercentChange(id) {
+            let original = getRandomInt(40, 200);
+            let pct = pick([15, 20, 25, 30, 35, 40]);
+            let salePrice = rd(original * (1 - pct/100), 2);
+            let eq = `x - ${pct/100}x = ${salePrice}`;
+            return {
+                id, category: 'Percent Change',
+                text: `A jacket is on sale for ${pct}% off and now costs $${salePrice}. What was the original price?`,
+                hint: `If the jacket is ${pct}% off, you pay ${100-pct}% of the original. So ${(100-pct)/100} × original = ${salePrice}. Solve for the original price.`,
+                equation: eq,
+                acceptableEquations: [eq, `x-${pct/100}x=${salePrice}`, `${(100-pct)/100}x=${salePrice}`, `${rd(1-pct/100,2)}x=${salePrice}`],
+                answer: original,
+                solutionSteps: `
+                    <div class="step-row">Let x = original price.</div>
+                    <div class="step-row">${pct}% off means you pay ${100-pct}% of x.</div>
+                    <div class="step-row">Equation: ${rd(1-pct/100,2)}x = ${salePrice}</div>
+                    <div class="step-row">Divide by ${rd(1-pct/100,2)}: x = ${salePrice} ÷ ${rd(1-pct/100,2)} = ${original}</div>`
+            };
+        }
+        // 14. Simple & Compound Interest
+        function genInterest(id) {
+            let P = pick([500, 1000, 1500, 2000, 2500, 3000, 5000]);
+            let r = pick([4, 5, 6, 8, 10]);
+            let t = pick([2, 3, 4, 5]);
+            let A = rd(P * Math.pow(1 + r/100, t), 2);
+            let eq = `A = ${P}(1 + ${r/100})^${t}`;
+            return {
+                id, category: 'Compound Interest',
+                text: `$${P} is invested at ${r}% annual interest compounded yearly. What is the total amount after ${t} years? (Round to 2 decimal places.)`,
+                hint: `Use the compound interest formula: A = P(1 + r)^t where P = ${P}, r = ${r/100}, and t = ${t}.`,
+                equation: eq,
+                acceptableEquations: [eq, `A=${P}(1+${r/100})^${t}`, `A=${P}(${rd(1+r/100,2)})^${t}`],
+                answer: A,
+                solutionSteps: `
+                    <div class="step-row">Formula: A = P(1 + r)^t</div>
+                    <div class="step-row">Substitute: A = ${P}(1 + ${r/100})^${t}</div>
+                    <div class="step-row">A = ${P}(${rd(1+r/100,2)})^${t}</div>
+                    <div class="step-row">(${rd(1+r/100,2)})^${t} = ${rd(Math.pow(1+r/100,t),6)}</div>
+                    <div class="step-row">A = ${P} × ${rd(Math.pow(1+r/100,t),6)} = ${A}</div>`
+            };
+        }
+        // 15. Quadratic Word Problems
+        function genQuadratic(id) {
+            // Projectile: h = -16t² + v₀t + h₀, find when h = 0
+            let v0 = pick([64, 80, 96, 112, 128]);
+            let h0 = 0;
+            // -16t² + v0*t = 0  →  t(-16t + v0) = 0  →  t = v0/16
+            let tLand = v0 / 16;
+            let eq = `-16t^2 + ${v0}t = 0`;
+            return {
+                id, category: 'Quadratic Word Problem',
+                text: `A ball is launched straight up with an initial velocity of ${v0} ft/s from ground level. Its height is given by h = -16t² + ${v0}t. After how many seconds does it return to the ground?`,
+                hint: `Set h = 0: -16t² + ${v0}t = 0. Factor out t: t(-16t + ${v0}) = 0. Solve for the non-zero t value.`,
+                equation: eq,
+                acceptableEquations: [eq, `-16t^2+${v0}t=0`, `t(-16t+${v0})=0`],
+                answer: tLand,
+                solutionSteps: `
+                    <div class="step-row">Set height to 0: -16t² + ${v0}t = 0</div>
+                    <div class="step-row">Factor: t(-16t + ${v0}) = 0</div>
+                    <div class="step-row">Solutions: t = 0 (launch) or -16t + ${v0} = 0</div>
+                    <div class="step-row">-16t = -${v0} → t = ${v0}/16 = ${tLand}</div>
+                    <div class="step-row">The ball returns to ground at t = ${tLand} seconds.</div>`
+            };
+        }
+        // 16. Exponential Growth / Decay
+        function genExponential(id) {
+            // Half-life: A = A₀(1/2)^(t/h)
+            let A0 = pick([200, 400, 500, 800, 1000]);
+            let halfLife = pick([3, 4, 5, 6]);
+            let periods = pick([2, 3, 4]);
+            let t = halfLife * periods;
+            let A = rd(A0 * Math.pow(0.5, periods), 2);
+            let eq = `A = ${A0}(1/2)^(${t}/${halfLife})`;
+            return {
+                id, category: 'Exponential Decay',
+                text: `A radioactive substance has a half-life of ${halfLife} years. If you start with ${A0} grams, how many grams remain after ${t} years?`,
+                hint: `Use the half-life formula: A = A₀ × (1/2)^(t/half-life). Here A₀ = ${A0}, t = ${t}, half-life = ${halfLife}. Calculate how many half-lives have passed.`,
+                equation: eq,
+                acceptableEquations: [eq, `A=${A0}(1/2)^(${t}/${halfLife})`, `A=${A0}(0.5)^${periods}`],
+                answer: A,
+                solutionSteps: `
+                    <div class="step-row">Half-life formula: A = A₀ × (1/2)^(t / half-life)</div>
+                    <div class="step-row">Number of half-lives: ${t} ÷ ${halfLife} = ${periods}</div>
+                    <div class="step-row">A = ${A0} × (1/2)^${periods}</div>
+                    <div class="step-row">A = ${A0} × ${rd(Math.pow(0.5, periods), 6)} = ${A}</div>`
+            };
+        }
+        // 17. Direct & Inverse Variation
+        function genVariation(id) {
+            let isInverse = pick([true, false]);
+            if (isInverse) {
+                let k = pick([120, 180, 240, 360, 480]);
+                let x1 = pick([4, 5, 6, 8, 10, 12]);
+                let y1 = k / x1;
+                let x2 = pick([3, 4, 5, 6, 8, 10, 15, 20]);
+                while(x2 === x1 || k % x2 !== 0) x2 = pick([3,4,5,6,8,10,15,20]);
+                let y2 = k / x2;
+                let eq = `xy = ${k}`;
+                return {
+                    id, category: 'Inverse Variation',
+                    text: `y varies inversely with x. When x = ${x1}, y = ${y1}. Find y when x = ${x2}.`,
+                    hint: `Inverse variation: xy = k (constant). First find k using the given values, then use k to find y for the new x.`,
+                    equation: eq,
+                    acceptableEquations: [eq, `xy=${k}`, `y=${k}/x`, `${x2}y=${k}`],
+                    answer: y2,
+                    solutionSteps: `
+                        <div class="step-row">Inverse variation: xy = k</div>
+                        <div class="step-row">Find k: ${x1} × ${y1} = ${k}</div>
+                        <div class="step-row">Use k: ${x2} × y = ${k}</div>
+                        <div class="step-row">y = ${k} ÷ ${x2} = ${y2}</div>`
+                };
+            } else {
+                let k = pick([3, 4, 5, 6, 7, 8]);
+                let x1 = getRandomInt(5, 12);
+                let y1 = k * x1;
+                let x2 = getRandomInt(10, 25);
+                while(x2 === x1) x2 = getRandomInt(10, 25);
+                let y2 = k * x2;
+                let eq = `y/x = ${k}`;
+                return {
+                    id, category: 'Direct Variation',
+                    text: `y varies directly with x. When x = ${x1}, y = ${y1}. Find y when x = ${x2}.`,
+                    hint: `Direct variation: y = kx. First find k using the given pair, then multiply k by the new x.`,
+                    equation: eq,
+                    acceptableEquations: [eq, `y/x=${k}`, `y=${k}x`, `y=${k}*${x2}`],
+                    answer: y2,
+                    solutionSteps: `
+                        <div class="step-row">Direct variation: y = kx</div>
+                        <div class="step-row">Find k: ${y1} = k × ${x1} → k = ${k}</div>
+                        <div class="step-row">Use k: y = ${k} × ${x2} = ${y2}</div>`
+                };
+            }
+        }
+        // 18. Literal Equations
+        function genLiteral(id) {
+            let type = pick(['trapezoid', 'kinematic', 'cylinder']);
+            if (type === 'trapezoid') {
+                let b1 = getRandomInt(8, 20);
+                let b2 = getRandomInt(8, 20);
+                while(b2 === b1) b2 = getRandomInt(8, 20);
+                let h = getRandomInt(5, 15);
+                let A = rd(0.5 * (b1 + b2) * h, 2);
+                let eq = `A = 0.5(b1 + b2)h`;
+                return {
+                    id, category: 'Literal Equation',
+                    text: `The area of a trapezoid is A = ½(b₁ + b₂)h. If A = ${A}, b₁ = ${b1}, and h = ${h}, find b₂.`,
+                    hint: `Plug in the known values and solve for b₂. Start by multiplying both sides by 2, then divide by h, then subtract b₁.`,
+                    equation: eq,
+                    acceptableEquations: [eq, `A=0.5(b1+b2)h`, `${A}=0.5(${b1}+b2)${h}`],
+                    answer: b2,
+                    solutionSteps: `
+                        <div class="step-row">A = ½(b₁ + b₂)h</div>
+                        <div class="step-row">${A} = 0.5(${b1} + b₂)(${h})</div>
+                        <div class="step-row">Multiply by 2: ${2*A} = (${b1} + b₂)(${h})</div>
+                        <div class="step-row">Divide by ${h}: ${2*A/h} = ${b1} + b₂</div>
+                        <div class="step-row">Subtract ${b1}: b₂ = ${2*A/h} - ${b1} = ${b2}</div>`
+                };
+            } else if (type === 'kinematic') {
+                let u = getRandomInt(10, 30);
+                let a = getRandomInt(2, 8);
+                let t = getRandomInt(3, 8);
+                let v = u + a * t;
+                let eq = `v = u + at`;
+                return {
+                    id, category: 'Literal Equation',
+                    text: `Using the formula v = u + at, if the final velocity v = ${v} m/s, initial velocity u = ${u} m/s, and time t = ${t} s, find the acceleration a.`,
+                    hint: `Rearrange v = u + at to isolate a. Subtract u from both sides, then divide by t.`,
+                    equation: eq,
+                    acceptableEquations: [eq, `v=u+at`, `${v}=${u}+a(${t})`, `a=(v-u)/t`],
+                    answer: a,
+                    solutionSteps: `
+                        <div class="step-row">v = u + at</div>
+                        <div class="step-row">${v} = ${u} + a(${t})</div>
+                        <div class="step-row">Subtract ${u}: ${v - u} = ${t}a</div>
+                        <div class="step-row">Divide by ${t}: a = ${v - u} ÷ ${t} = ${a}</div>`
+                };
+            } else {
+                // Cylinder: V = πr²h, solve for h
+                let r = getRandomInt(3, 10);
+                let h = getRandomInt(5, 15);
+                let V = rd(Math.PI * r * r * h, 2);
+                let eq = `V = πr²h`;
+                return {
+                    id, category: 'Literal Equation',
+                    text: `The volume of a cylinder is V = πr²h. If V = ${V} and r = ${r}, find h. (Round to 2 decimal places. Use π ≈ 3.14159.)`,
+                    hint: `Plug in V and r, then solve for h: h = V / (πr²).`,
+                    equation: eq,
+                    acceptableEquations: [eq, `V=πr²h`, `h=V/(πr²)`, `${V}=π(${r})²h`],
+                    answer: h,
+                    solutionSteps: `
+                        <div class="step-row">V = πr²h</div>
+                        <div class="step-row">${V} = π(${r})²h = π(${r*r})h</div>
+                        <div class="step-row">h = ${V} ÷ (π × ${r*r})</div>
+                        <div class="step-row">h = ${V} ÷ ${rd(Math.PI * r * r, 4)} = ${h}</div>`
+                };
+            }
+        }
+        // 19. Absolute Value Equations
+        function genAbsoluteValue(id) {
+            let a = getRandomInt(2, 8);
+            let b = getRandomInt(5, 30);
+            let c = getRandomInt(10, 50);
+            // |ax - b| = c  →  ax - b = c or ax - b = -c
+            let sol1 = (c + b) / a;
+            let sol2 = (-c + b) / a;
+            // Make sure both are integers
+            while((c + b) % a !== 0 || (-c + b) % a !== 0) {
+                a = getRandomInt(2, 6);
+                b = getRandomInt(5, 20);
+                c = getRandomInt(10, 40);
+            }
+            sol1 = (c + b) / a;
+            sol2 = (-c + b) / a;
+            let smaller = Math.min(sol1, sol2);
+            let larger = Math.max(sol1, sol2);
+            let eq = `|${a}x - ${b}| = ${c}`;
+            return {
+                id, category: 'Absolute Value',
+                text: `Solve: |${a}x - ${b}| = ${c}. What is the larger of the two solutions?`,
+                hint: `An absolute value equation |expression| = ${c} splits into two cases: expression = ${c} and expression = -${c}. Solve each for x.`,
+                equation: eq,
+                acceptableEquations: [eq, `|${a}x-${b}|=${c}`],
+                answer: larger,
+                solutionSteps: `
+                    <div class="step-row">|${a}x - ${b}| = ${c} splits into two cases:</div>
+                    <div class="step-row">Case 1: ${a}x - ${b} = ${c} → ${a}x = ${c + b} → x = ${sol1}</div>
+                    <div class="step-row">Case 2: ${a}x - ${b} = -${c} → ${a}x = ${-c + b} → x = ${sol2}</div>
+                    <div class="step-row">The two solutions are x = ${smaller} and x = ${larger}.</div>
+                    <div class="step-row">The larger solution is ${larger}.</div>`
+            };
+        }
+        // 20. Geometry — Area & Volume
+        function genAreaVolume(id) {
+            let type = pick(['triangle', 'circle', 'composite']);
+            if (type === 'triangle') {
+                let base = getRandomInt(10, 30);
+                let height = getRandomInt(8, 25);
+                let area = rd(0.5 * base * height, 2);
+                let eq = `A = 0.5bh`;
+                return {
+                    id, category: 'Geometry — Area',
+                    text: `A triangle has an area of ${area} sq cm and a base of ${base} cm. What is its height?`,
+                    hint: `Area of triangle = ½ × base × height. Plug in A = ${area} and base = ${base}, then solve for height.`,
+                    equation: eq,
+                    acceptableEquations: [eq, `A=0.5bh`, `${area}=0.5(${base})h`],
+                    answer: height,
+                    solutionSteps: `
+                        <div class="step-row">Area = ½ × base × height</div>
+                        <div class="step-row">${area} = 0.5 × ${base} × h</div>
+                        <div class="step-row">${area} = ${rd(0.5*base,2)}h</div>
+                        <div class="step-row">h = ${area} ÷ ${rd(0.5*base,2)} = ${height}</div>`
+                };
+            } else if (type === 'circle') {
+                let r = getRandomInt(5, 15);
+                let area = rd(Math.PI * r * r, 2);
+                let eq = `A = πr²`;
+                return {
+                    id, category: 'Geometry — Area',
+                    text: `A circle has an area of ${area} sq cm. What is its radius? (Round to 2 decimal places. Use π ≈ 3.14159.)`,
+                    hint: `Area of circle = πr². So r² = A/π. Take the square root to find r.`,
+                    equation: eq,
+                    acceptableEquations: [eq, `A=πr²`, `${area}=πr²`, `r²=${area}/π`],
+                    answer: r,
+                    solutionSteps: `
+                        <div class="step-row">A = πr²</div>
+                        <div class="step-row">${area} = πr²</div>
+                        <div class="step-row">r² = ${area} ÷ π = ${rd(area/Math.PI, 4)}</div>
+                        <div class="step-row">r = √${rd(area/Math.PI, 4)} = ${r}</div>`
+                };
+            } else {
+                // Composite: rectangle with semicircle on one end, find total area, given total area solve for width
+                let w = getRandomInt(6, 16);
+                let l = getRandomInt(10, 25);
+                // Total = l*w + 0.5*π*(w/2)²
+                let rectArea = l * w;
+                let semiArea = rd(0.5 * Math.PI * (w/2) * (w/2), 4);
+                let totalArea = rd(rectArea + semiArea, 2);
+                let eq = `A = lw + 0.5π(w/2)²`;
+                return {
+                    id, category: 'Geometry — Composite Area',
+                    text: `A shape is a ${l} cm by ${w} cm rectangle with a semicircle on one of the shorter ends (diameter = ${w} cm). What is the total area? (Round to 2 decimal places.)`,
+                    hint: `Total area = area of rectangle + area of semicircle. Rectangle = ${l} × ${w}. Semicircle = ½π(${w}/2)².`,
+                    equation: eq,
+                    acceptableEquations: [eq, `A=lw+0.5π(w/2)²`],
+                    answer: totalArea,
+                    solutionSteps: `
+                        <div class="step-row">Rectangle area: ${l} × ${w} = ${rectArea}</div>
+                        <div class="step-row">Semicircle radius: ${w}/2 = ${w/2}</div>
+                        <div class="step-row">Semicircle area: ½ × π × (${w/2})² = ½ × π × ${(w/2)*(w/2)} = ${rd(semiArea,2)}</div>
+                        <div class="step-row">Total: ${rectArea} + ${rd(semiArea,2)} = ${totalArea}</div>`
+                };
+            }
+        }
+        /* ═══════════════════════════════════════════
+           ALL 20 TYPES
+           ═══════════════════════════════════════════ */
+        const allTypes = [
+            genConsecutive, genGeometry, genCoins, genAge, genBackwards,
+            genNumbers, genMixture, genRate, genProportion, genInequality,
+            genWorkRate, genSystems, genPercentChange, genInterest, genQuadratic,
+            genExponential, genVariation, genLiteral, genAbsoluteValue, genAreaVolume
+        ];
+        // ─── Progress tracking ───
+        function updateProgress() {
+            if (submitted) return;
+            let answered = 0;
+            currentProblems.forEach(p => {
+                const inp = document.getElementById(`input-${p.id}`);
+                if (inp && inp.value.trim() !== '') answered++;
+            });
+            const pct = Math.round(answered / TOTAL * 100);
+            progressFill.style.width = pct + '%';
+            progressText.textContent = `Answered: ${answered} / ${TOTAL}`;
+            progressPct.textContent = pct + '%';
+        }
+        // ─── Render ───
+        function render() {
+            container.innerHTML = '';
+            currentProblems = [];
+            submitted = false;
+            showBtn.disabled = false;
+            showBtn.style.backgroundColor = '#27ae60';
+            showBtn.textContent = 'Submit & Generate Report';
+            progressContainer.style.display = 'block';
+            progressFill.style.width = '0%';
+            progressText.textContent = `Answered: 0 / ${TOTAL}`;
+            progressPct.textContent = '0%';
+            const generators = shuffle([...allTypes]);
+            generators.forEach((gen, idx) => {
+                const p = gen(idx + 1);
+                currentProblems.push(p);
+                const div = document.createElement('div');
+                div.className = 'problem-card';
+                div.id = `card-${p.id}`;
+                div.innerHTML = `
+                    <div class="problem-header">
+                        <span class="problem-number">#${p.id}</span>
+                        <div>
+                            <span class="category-tag">${p.category}</span>
+                            <div class="problem-text">${p.text}</div>
+                        </div>
+                    </div>
+                    <div class="answer-box">
+                        <div class="equation-row">
+                            <label>Equation:</label>
+                            <input type="text" class="equation-input" id="eq-${p.id}" placeholder="Set up the equation...">
+                        </div>
+                        <div class="input-row">
+                            <label>Answer:</label>
+                            <input type="text" class="user-input" id="input-${p.id}" placeholder="?">
+                        </div>
+                    </div>
+                    <div class="solution-area" id="sol-${p.id}">
+                        <h4>💡 How to Think About This</h4>
+                        <div class="hint-explain">${p.hint}</div>
+                        <h4>📝 Step-by-Step Solution</h4>
+                        <div>${p.solutionSteps}</div>
+                        <div class="final-result">Correct Answer: ${p.answer}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+                document.getElementById(`input-${p.id}`).addEventListener('input', updateProgress);
+                document.getElementById(`input-${p.id}`).addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const nextIdx = idx + 1;
+                        if (nextIdx < TOTAL) {
+                            document.getElementById(`eq-${currentProblems[nextIdx].id}`).focus();
+                        } else {
+                            check();
+                        }
+                    }
+                });
+                document.getElementById(`eq-${p.id}`).addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        document.getElementById(`input-${p.id}`).focus();
+                    }
+                });
+            });
+        }
+        function normalizeEq(str) {
+            return str.replace(/\s+/g, '').replace(/[×·]/g, '*').replace(/÷/g, '/').toLowerCase();
+        }
+        // ─── Check / Grade ───
+        function check() {
+            if (submitted) return;
+            submitted = true;
+            let score = 0;
+            let eqScore = 0;
+            currentProblems.forEach(p => {
+                const input = document.getElementById(`input-${p.id}`);
+                const eqInput = document.getElementById(`eq-${p.id}`);
+                const sol = document.getElementById(`sol-${p.id}`);
+                input.disabled = true;
+                eqInput.disabled = true;
+                const userVal = parseFloat(input.value.trim());
+                const isCorrect = !isNaN(userVal) && Math.abs(userVal - p.answer) < 0.02;
+                input.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                if (isCorrect) score++;
+                const userEq = normalizeEq(eqInput.value);
+                let eqMatch = false;
+                if (userEq) {
+                    for (let ae of p.acceptableEquations) {
+                        if (normalizeEq(ae) === userEq) { eqMatch = true; break; }
+                    }
+                }
+                const eqFeedback = document.createElement('div');
+                eqFeedback.className = 'equation-feedback ' + (eqMatch ? 'eq-correct' : 'eq-incorrect');
+                if (eqInput.value.trim() === '') {
+                    eqFeedback.textContent = 'No equation entered. Expected: ' + p.equation;
+                } else if (eqMatch) {
+                    eqFeedback.textContent = '✔ Correct equation setup!';
+                    eqScore++;
+                } else {
+                    eqFeedback.textContent = '✘ Expected something like: ' + p.equation;
+                }
+                eqInput.parentNode.after(eqFeedback);
+                eqInput.classList.add(eqMatch ? 'correct-input' : 'incorrect-input');
+                sol.style.display = 'block';
+                const card = document.getElementById(`card-${p.id}`);
+                card.style.borderLeftColor = isCorrect ? '#28a745' : '#dc3545';
+            });
+            progressFill.style.width = '100%';
+            progressText.textContent = `Score: ${score} / ${TOTAL}`;
+            progressPct.textContent = `${Math.round(score / TOTAL * 100)}%`;
+            const timeStr = new Date().toLocaleString();
+            showBtn.disabled = true;
+            showBtn.style.backgroundColor = '#7f8c8d';
+            showBtn.innerHTML = `Score: ${score}/${TOTAL} | Equations: ${eqScore}/${TOTAL}<br><span style="font-size:0.7em">${timeStr}</span>`;
+            const reportHeader = `
+                <div class="report-header">
+                    <h1>Algebraic Thinking Performance Report</h1>
+                    <h2 style="margin:0; color:#27ae60;">Answer Score: ${score} / ${TOTAL}</h2>
+                    <h3 style="margin:5px 0 0 0; color:#2980b9;">Equation Setup Score: ${eqScore} / ${TOTAL}</h3>
+                    <p>Completed on: ${timeStr}</p>
+                </div>`;
+            setTimeout(() => downloadReport(reportHeader), 600);
+        }
+        function downloadReport(headerHtml) {
+            const clone = document.documentElement.cloneNode(true);
+            clone.querySelectorAll('script, .controls-container, .progress-bar-container').forEach(s => s.remove());
+            const body = clone.querySelector('body');
+            const headerDiv = document.createElement('div');
+            headerDiv.innerHTML = headerHtml;
+            body.insertBefore(headerDiv, body.firstChild);
+            const origInputs = document.querySelectorAll('.user-input');
+            const cloneInputs = clone.querySelectorAll('.user-input');
+            cloneInputs.forEach((ci, idx) => {
+                const val = origInputs[idx].value || 'None';
+                const isCorrect = origInputs[idx].classList.contains('correct-input');
+                const span = document.createElement('span');
+                span.className = 'static-answer ' + (isCorrect ? 'correct-input' : 'incorrect-input');
+                span.textContent = val;
+                ci.parentNode.replaceChild(span, ci);
+            });
+            const origEqs = document.querySelectorAll('.equation-input');
+            const cloneEqs = clone.querySelectorAll('.equation-input');
+            cloneEqs.forEach((ci, idx) => {
+                const val = origEqs[idx].value || 'None';
+                const isCorrect = origEqs[idx].classList.contains('correct-input');
+                const span = document.createElement('span');
+                span.className = 'static-answer ' + (isCorrect ? 'correct-input' : 'incorrect-input');
+                span.textContent = val;
+                ci.parentNode.replaceChild(span, ci);
+            });
+            clone.querySelectorAll('.solution-area').forEach(s => s.style.display = 'block');
+            const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Algebraic_Thinking_Report_${new Date().getTime()}.html`;
+            a.click();
+        }
+        generateBtn.addEventListener('click', render);
+        showBtn.addEventListener('click', check);
+        render();
+    </script>
+</body>
+</html>

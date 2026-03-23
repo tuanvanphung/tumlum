@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order of Operations Practice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .controls-container { 
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #f0f0f0; 
+            border-radius: 5px;
+        }
+        .controls-container button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 10px; 
+        }
+        #generateProblemsButton { background-color: #007bff; }
+        #generateProblemsButton:hover { background-color: #0056b3; }
+        #showSolutionsButton { background-color: #28a745; }
+        #showSolutionsButton:hover { background-color: #218838; }
+        #showSolutionsButton:disabled {
+            background-color: #6c757d; 
+            cursor: not-allowed;
+        }
+        .problem-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .problem-list li {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .problem-number {
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+        .problem-expression {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.2em;
+            color: #555;
+            display: block;
+            margin-bottom: 10px;
+            word-wrap: break-word; 
+        }
+        
+        .answer-input-container {
+            display: block;
+            margin-top: 10px;
+            color: #777;
+        }
+        .user-answer {
+            padding: 5px;
+            font-size: 1em;
+            margin-left: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            width: 150px; 
+        }
+        .user-answer.correct-input {
+            background-color: #d4edda; 
+            border-color: #c3e6cb;
+            color: #155724;
+            font-weight: bold;
+        }
+        .user-answer.incorrect-input {
+            background-color: #f8d7da; 
+            border-color: #f5c6cb;
+            color: #721c24;
+            font-weight: bold;
+        }
+        
+        .static-user-answer {
+            display: inline-block; 
+            padding: 5px;
+            font-size: 1em;
+            margin-left: 5px;
+            border: 1px solid transparent; 
+            border-radius: 3px;
+            min-width: 150px; 
+            box-sizing: border-box;
+            line-height: 1.4; 
+        }
+        .static-user-answer.correct-input {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+            font-weight: bold;
+        }
+        .static-user-answer.incorrect-input {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+            font-weight: bold;
+        }
+        .problem-list li.solutions-shown .problem-expression,
+        .problem-list li.solutions-shown .problem-number,
+        .problem-list li.solutions-shown .answer-input-container { 
+            color: #bbb !important; 
+        }
+        .problem-list li.solutions-shown .user-answer.correct-input { color: #155724 !important; }
+        .problem-list li.solutions-shown .user-answer.incorrect-input { color: #721c24 !important; }
+        sup, sub {
+            line-height: 0;
+        }
+        .fraction {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            margin: 0 0.2em;
+            position: relative;
+        }
+        .fraction .numerator, .fraction .denominator {
+            display: block;
+            padding: 0 0.3em;
+            line-height: 1.2;
+        }
+        .fraction .numerator {
+            border-bottom: 1.5px solid black;
+        }
+        .fraction .fraction { 
+            font-size: 0.9em; 
+            margin: 0 0.1em;
+        }
+        .fraction .numerator .fraction, .fraction .denominator .fraction {
+            padding: 0 0.1em;
+        }
+        .solution-steps {
+            display: none; 
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e9f5e9; 
+            border: 1px dashed #5cb85c;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.0em; 
+            line-height: 1.5;
+        }
+        .solution-steps p {
+            margin: 8px 0; 
+            word-wrap: break-word;
+        }
+        .solution-steps .final-answer {
+            font-weight: bold;
+            color: #337ab7;
+            margin-top: 10px;
+            padding-top: 5px;
+            border-top: 1px solid #ccc;
+        }
+        .highlight-op { 
+            color: #d9534f;
+            font-weight: bold;
+            background-color: #f9e6e5; 
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        @media print {
+            body { margin: 0.5in; }
+            .controls-container { display: none !important; }
+            h1 { font-size: 18pt; }
+            .problem-list li { page-break-inside: avoid; }
+            .problem-list li.solutions-shown .problem-expression,
+            .problem-list li.solutions-shown .answer-input-container, 
+            .problem-list li.solutions-shown .problem-number {
+                color: #555 !important; 
+            }
+            .user-answer.correct-input, .user-answer.incorrect-input,
+            .static-user-answer.correct-input, .static-user-answer.incorrect-input { 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact;
+                border: 1px solid #999 !important; 
+            }
+            .user-answer.correct-input, .static-user-answer.correct-input { background-color: #e9f5e9 !important; color: #155724 !important;}
+            .user-answer.incorrect-input, .static-user-answer.incorrect-input { background-color: #fce8e6 !important; color: #721c24 !important;}
+            .solution-steps {
+                background-color: #fff !important; 
+                border: 1px solid #ccc !important;
+                display: block !important; 
+            }
+            .user-answer { display: none !important; }
+            .static-user-answer { display: inline-block !important; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Order of Operations Practice</h1>
+    <div class="controls-container">
+        <button id="generateProblemsButton">Generate New Problems</button>
+        <button id="showSolutionsButton" style="display:none;">Check Answers & Show Solutions</button> 
+    </div>
+    <ol class="problem-list" id="problemListContainer"></ol>
+    <script>
+        const problemListContainer = document.getElementById('problemListContainer');
+        const generateBtn = document.getElementById('generateProblemsButton');
+        const showSolutionsBtn = document.getElementById('showSolutionsButton'); 
+        const EPSILON = 0.00001; 
+        const MAX_INTERMEDIATE_VALUE = 9999; 
+        // ===== UTILITY FUNCTIONS =====
+        function isValueTooLarge(frac) {
+            if (!frac || typeof frac.num === 'undefined' || typeof frac.den === 'undefined') return true;
+            return Math.abs(frac.num) > MAX_INTERMEDIATE_VALUE || Math.abs(frac.den) > MAX_INTERMEDIATE_VALUE;
+        }
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        function getRandomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+        // ===== FRACTION FORMATTING =====
+        
+        function formatFractionHTML(num, den) {
+            if (typeof num === 'object' && num.isFraction) { den = num.den; num = num.num; }
+            if (den === 1) return `${num}`; 
+            return `<span class="fraction"><span class="numerator">${num}</span><span class="denominator">${den}</span></span>`;
+        }
+        function formatNumber(n, isResultInStep = false, preferDecimalForOriginal = false) {
+            if (!n) return 'Error(null/undef_fmtNum)'; 
+            if (n.isFraction) {
+                if (preferDecimalForOriginal && n.originalDecimalValue !== undefined) {
+                    const easyDecimalString = n.originalDecimalValue.toString();
+                    if (/^-?\d+\.\d$/.test(easyDecimalString) || /^-?\d+$/.test(easyDecimalString)) { 
+                        if (!easyDecimalString.endsWith(".0") && /\.\d$/.test(easyDecimalString)) {
+                           return easyDecimalString;
+                        }
+                    }
+                }
+                if (n.den === 1) return n.num.toString();
+                if (Number.isNaN(n.value)) return "NaN";
+                if (n.value === Infinity) return "Infinity";
+                if (n.value === -Infinity) return "-Infinity";
+                return formatFractionHTML(n.num, n.den);
+            }
+            if (typeof n.value === 'number') {
+                if (Number.isNaN(n.value)) return "NaN";
+                if (n.value === Infinity) return "Infinity";
+                if (n.value === -Infinity) return "-Infinity";
+            }
+            return n && typeof n.value !== 'undefined' ? n.value.toString() : 'Error(no_val_fmtNum)';
+        }
+        function formatBaseForExponent(baseFraction, preferDecimal = false) {
+            if (!baseFraction) return '(ErrorBase)';
+            const formattedBase = formatNumber(baseFraction, false, preferDecimal);
+            if (baseFraction.num < 0 || 
+                (baseFraction.den !== 1 && baseFraction.den !== 0) || 
+                (typeof baseFraction.originalDecimalValue === 'number' && formatNumber(baseFraction,false,true).includes('.'))) {
+                return `(${formattedBase})`;
+            }
+            return formattedBase;
+        }
+        // ===== FRACTION ARITHMETIC =====
+        
+        function simplifyFraction(num, den) {
+            function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+            if (den === 0) {
+                if (num === 0) return { num: 0, den: 0, isFraction: true, value: NaN, error: "0/0 Undefined" };
+                return { num: num > 0 ? 1 : -1, den: 0, isFraction: true, value: Infinity * Math.sign(num), error: "Div by zero" };
+            }
+            if (den < 0) { num = -num; den = -den; }
+            const common = gcd(Math.abs(num), Math.abs(den));
+            let sN = num / common, sD = den / common;
+            return { num: sN, den: sD, isFraction: true, value: sN / sD };
+        }
+        function toFraction(numInput) {
+            if (typeof numInput === 'object' && numInput.isFraction) return numInput; 
+            let originalNumInputStr = String(numInput); 
+            let num = Number(numInput);
+            let originalDecimalValue = undefined;
+            if (originalNumInputStr.includes('.') && !originalNumInputStr.includes('e')) {
+                originalDecimalValue = parseFloat(originalNumInputStr); 
+            } else if (typeof numInput === 'number' && numInput % 1 !== 0) {
+                originalDecimalValue = numInput; 
+            }
+            if (Number.isNaN(num)) return { num: 0, den: 0, isFraction: true, value: NaN, error: "NaN input", originalDecimalValue };
+            if (num === Infinity) return { num: 1, den: 0, isFraction: true, value: Infinity, originalDecimalValue };
+            if (num === -Infinity) return { num: -1, den: 0, isFraction: true, value: -Infinity, originalDecimalValue };
+            if (num % 1 !== 0) { 
+                let s = num.toString(); 
+                if (s.includes('e')) {
+                    const parts = s.split('e');
+                    const significand = parseFloat(parts[0]);
+                    const exponent = parseInt(parts[1]);
+                    const sigDP = (parts[0].includes('.')) ? parts[0].split('.')[1].length : 0;
+                    let numerator = significand * Math.pow(10, sigDP);
+                    let denominator = Math.pow(10, sigDP);
+                    if (exponent > 0) numerator *= Math.pow(10, exponent);
+                    else denominator *= Math.pow(10, Math.abs(exponent));
+                    return { ...simplifyFraction(Math.round(numerator), Math.round(denominator)), originalDecimalValue: num };
+                }
+                if (originalNumInputStr.includes('.')) {
+                    const decimalPlaces = originalNumInputStr.split('.')[1].length;
+                    const denominator = Math.pow(10, decimalPlaces);
+                    const numerator = Math.round(num * denominator); 
+                    return { ...simplifyFraction(numerator, denominator), originalDecimalValue };
+                }
+            }
+            return { num: Math.round(num), den: 1, isFraction: true, value: Math.round(num), originalDecimalValue };
+        }
+        function addFrac(f1, f2) { return simplifyFraction(f1.num * f2.den + f2.num * f1.den, f1.den * f2.den); }
+        function subFrac(f1, f2) { return simplifyFraction(f1.num * f2.den - f2.num * f1.den, f1.den * f2.den); }
+        function mulFrac(f1, f2) { return simplifyFraction(f1.num * f2.num, f1.den * f2.den); }
+        function divFrac(f1, f2) {
+            if (f2.num === 0) {
+                if (f1.num === 0 && f1.den !== 0) return { num: 0, den: 0, isFraction: true, value: NaN, error: "0/0 Undefined" };
+                if (f1.num === 0 && f1.den === 0) return { num: 0, den: 0, isFraction: true, value: NaN, error: "NaN / 0 Undefined" };
+                return { num: Math.sign(f1.num) * (f2.den === 0 ? 1 : Math.sign(f2.den)), den: 0, isFraction: true, value: Infinity * Math.sign(f1.num) * (f2.den === 0 ? 1 : Math.sign(f2.den)), error: "Div by zero" };
+            }
+            return simplifyFraction(f1.num * f2.den, f1.den * f2.num);
+        }
+        function powFrac(base, exp) {
+            if (Number.isNaN(base.value)) return {num:0, den:0, value: NaN, isFraction:true, error: "Base is NaN for power"};
+            if (base.num === 0 && exp < 0) return { num: 1, den: 0, isFraction: true, value: Infinity, error: "0 to negative power" };
+            if (exp === 0) return toFraction(1);
+            if (exp % 1 !== 0) {
+                if (base.value < 0) return { num:0, den:0, value: NaN, isFraction:true, error: "Negative base to non-integer power"};
+                return toFraction(Math.pow(base.value, exp));
+            }
+            let result = toFraction(1);
+            let absExp = Math.abs(exp);
+            for (let i = 0; i < absExp; i++) { 
+                result = mulFrac(result, base); 
+                if (isValueTooLarge(result) && i < absExp - 1 && absExp > 1) {
+                    return { ...result, error: `Power intermediate too large: ${formatBaseForExponent(base)}^${i+1}`};
+                }
+            }
+            if (exp < 0) {
+                if (result.num === 0) return { num: 1, den: 0, isFraction: true, value: Infinity, error: "Division by zero from inverting 0 result in power"};
+                result = divFrac(toFraction(1), result);
+            }
+            return result;
+        }
+        function absFrac(f) { 
+            if (Number.isNaN(f.value)) return { ...f, value: NaN, error: "Absolute value of NaN" };
+            return { ...f, num: Math.abs(f.num), value: Math.abs(f.value || 0), originalDecimalValue: f.originalDecimalValue !== undefined ? Math.abs(f.originalDecimalValue) : undefined }; 
+        }
+        // ===== OPERAND GENERATION =====
+        function generateOperand(options = {}) {
+            const { min = -9, max = 9, forceFraction = false, nonZero = false, perfectSquare = false, allowDecimal = true, forceInteger = false, forceDecimal = false } = options;
+            if (perfectSquare) {
+                const base = getRandomItem([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+                return toFraction(base * base);
+            }
+            let value; 
+            let typeRoll = Math.random();
+            if (forceInteger) typeRoll = 0;
+            else if (forceDecimal) typeRoll = 0.70;
+            if (forceFraction) {
+                let den = getRandomItem([2, 3, 4, 5, 10]); 
+                let numLimit = den * 2; 
+                let num = getRandomInt(1, numLimit); 
+                if (Math.random() < 0.4 && (min < 0 || max < 0 || (min < 0 && max > 0))) num *= -1; 
+                value = simplifyFraction(num, den);
+            } else if (typeRoll < 0.65) { 
+                value = toFraction(getRandomInt(min, max));
+            } else if (allowDecimal && typeRoll < 0.90) { 
+                let intPartMin = Math.max(min, -7), intPartMax = Math.min(max, 7);
+                if (intPartMin > intPartMax && min <= max) { intPartMin = min; intPartMax = max; }
+                else if (intPartMin > intPartMax) { intPartMin = -1; intPartMax = 1; }
+                let intPart = getRandomInt(intPartMin, intPartMax);
+                let decDigit;
+                const decRoll = Math.random();
+                if (decRoll < 0.5) decDigit = 5;
+                else if (decRoll < 0.8) decDigit = getRandomItem([1, 2]);
+                else decDigit = getRandomItem([3, 4, 6, 7, 8, 9]);
+                value = toFraction(`${intPart}.${decDigit}`); 
+            } else { 
+                let den = getRandomItem([2, 3, 4, 5]);
+                let numLimit = den; 
+                if (Math.random() < 0.3) numLimit = Math.floor(den * 1.5); 
+                let num = getRandomInt(1, numLimit);
+                if (Math.random() < 0.4 && (min < 0 || max < 0 || (min < 0 && max > 0))) num *= -1;
+                value = simplifyFraction(num, den);
+            }
+            if (nonZero && value.num === 0 && value.den !== 0) { 
+                const wasLikelyDecimal = (typeRoll >= 0.65 && typeRoll < 0.90 && allowDecimal && !forceFraction);
+                const wasLikelyFraction = forceFraction || (typeRoll >= 0.90 && !forceFraction);
+                if (wasLikelyDecimal) value = toFraction(getRandomItem([-0.5, -0.2, -0.1, 0.1, 0.2, 0.5]));
+                else if (wasLikelyFraction) value = simplifyFraction(getRandomItem([-1,1]), getRandomItem([2,3,4,5]));
+                else value = toFraction(getRandomItem([-2,-1,1,2]));
+                if (value.value > max && max !== 0 && Math.abs(max) < 20) value = toFraction(max); 
+                else if (value.value < min && min !== 0 && Math.abs(min) < 20) value = toFraction(min);
+            }
+            return value;
+        }
+        function generatePowerOperands() {
+            let base, exp;
+            const expType = Math.random();
+            if (expType < 0.35) { 
+                exp = getRandomInt(-2, -1); 
+                base = generateOperand({min: -5, max: 5, nonZero: true, allowDecimal: true}); 
+            } else if (expType < 0.55) { 
+                exp = 0;
+                base = generateOperand({min: -7, max: 7, allowDecimal: true}); 
+            } else { 
+                exp = getRandomInt(2, 3); 
+                base = generateOperand({min: -7, max: 7, allowDecimal: true});
+            }
+            return { base, exp };
+        }
+        // =============================================================
+        // PROBLEM TEMPLATES (17 total)
+        // =============================================================
+        const problemTemplates = [
+            // ─────────────────────────────────────────────────────────
+            // T1: Basic PEMDAS — left-to-right, no grouping/exponents
+            // ─────────────────────────────────────────────────────────
+            function t1_basicPEMDAS() {
+                const A = generateOperand({min: 1, max: 12, forceInteger: true});
+                const B = generateOperand({min: 2, max: 9, forceInteger: true, nonZero: true});
+                const C = generateOperand({min: 2, max: 9, forceInteger: true, nonZero: true});
+                const E = generateOperand({min: 2, max: 9, forceInteger: true, nonZero: true});
+                const F_mult = generateOperand({min: 1, max: 9, forceInteger: true, nonZero: true});
+                const F = mulFrac(F_mult, E); // ensures clean division
+                const op1 = getRandomItem(['+', '-']);
+                const op2 = getRandomItem(['+', '-']);
+                this.steps.push(`1. Multiplication (left-to-right): <span class="highlight-op">${formatNumber(B)} &times; ${formatNumber(C)}</span>`);
+                let val_BC = mulFrac(B, C);
+                val_BC = this.checkIntermediate(val_BC, "T1S1");
+                this.steps.push(`   = ${formatNumber(val_BC, true)}`);
+                this.steps.push(`2. Division (left-to-right): <span class="highlight-op">${formatNumber(F)} &divide; ${formatNumber(E)}</span>`);
+                let val_FE = divFrac(F, E);
+                val_FE = this.checkIntermediate(val_FE, "T1S2");
+                this.steps.push(`   = ${formatNumber(val_FE, true)}`);
+                this.steps.push(`3. ${op1 === '+' ? 'Addition' : 'Subtraction'} (left-to-right): <span class="highlight-op">${formatNumber(A)} ${op1} ${formatNumber(val_BC)}</span>`);
+                let val3 = op1 === '+' ? addFrac(A, val_BC) : subFrac(A, val_BC);
+                val3 = this.checkIntermediate(val3, "T1S3");
+                this.steps.push(`   = ${formatNumber(val3, true)}`);
+                this.steps.push(`4. ${op2 === '+' ? 'Addition' : 'Subtraction'} (left-to-right): <span class="highlight-op">${formatNumber(val3)} ${op2} ${formatNumber(val_FE)}</span>`);
+                this.finalAnswer = op2 === '+' ? addFrac(val3, val_FE) : subFrac(val3, val_FE);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T1 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                this.problemString = `${formatNumber(A)} ${op1} ${formatNumber(B)} &times; ${formatNumber(C)} ${op2} ${formatNumber(F)} &divide; ${formatNumber(E)}`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T2: Basic parentheses changing natural order
+            // ─────────────────────────────────────────────────────────
+            function t2_basicParentheses() {
+                const A = generateOperand({min: 2, max: 9, forceInteger: true, nonZero: true});
+                const B = generateOperand({min: 1, max: 9, forceInteger: true});
+                const C = generateOperand({min: 1, max: 9, forceInteger: true});
+                const D_div = generateOperand({min: 2, max: 6, forceInteger: true, nonZero: true});
+                const D_mult = generateOperand({min: 1, max: 5, forceInteger: true, nonZero: true});
+                const D_num = mulFrac(D_div, D_mult);
+                const E = generateOperand({min: 1, max: 9, forceInteger: true});
+                const op_in = getRandomItem(['+', '-']);
+                const op_out = getRandomItem(['+', '-']);
+                this.steps.push(`1. Parentheses first: <span class="highlight-op">${formatNumber(B)} ${op_in} ${formatNumber(C)}</span>`);
+                let val_p = op_in === '+' ? addFrac(B, C) : subFrac(B, C);
+                val_p = this.checkIntermediate(val_p, "T2S1");
+                this.steps.push(`   = ${formatNumber(val_p, true)}`);
+                this.steps.push(`2. Multiplication: <span class="highlight-op">${formatNumber(A)} &times; ${formatNumber(val_p)}</span>`);
+                let val_m = mulFrac(A, val_p);
+                val_m = this.checkIntermediate(val_m, "T2S2");
+                this.steps.push(`   = ${formatNumber(val_m, true)}`);
+                this.steps.push(`3. Division: <span class="highlight-op">${formatNumber(D_num)} &divide; ${formatNumber(D_div)}</span>`);
+                let val_d = divFrac(D_num, D_div);
+                val_d = this.checkIntermediate(val_d, "T2S3");
+                this.steps.push(`   = ${formatNumber(val_d, true)}`);
+                this.steps.push(`4. ${op_out === '+' ? 'Addition' : 'Subtraction'}: <span class="highlight-op">${formatNumber(val_m)} ${op_out} ${formatNumber(val_d)}</span>`);
+                let val4 = op_out === '+' ? addFrac(val_m, val_d) : subFrac(val_m, val_d);
+                val4 = this.checkIntermediate(val4, "T2S4");
+                this.steps.push(`   = ${formatNumber(val4, true)}`);
+                this.steps.push(`5. Final addition: <span class="highlight-op">${formatNumber(val4)} + ${formatNumber(E)}</span>`);
+                this.finalAnswer = addFrac(val4, E);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T2 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                this.problemString = `${formatNumber(A)} &times; (${formatNumber(B)} ${op_in} ${formatNumber(C)}) ${op_out} ${formatNumber(D_num)} &divide; ${formatNumber(D_div)} + ${formatNumber(E)}`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T3: -a² vs (-a)² exponent nuance
+            // ─────────────────────────────────────────────────────────
+            function t3_negExponentNuance() {
+                const A_base = generateOperand({min: 2, max: 7, forceInteger: true, nonZero: true});
+                const exp_val = getRandomItem([2, 3]);
+                const B = generateOperand({min: -9, max: 9, forceInteger: true});
+                const op1 = getRandomItem(['+', '-']);
+                this.steps.push(`1. Exponent first — negation is NOT part of the base: <span class="highlight-op">-${formatNumber(A_base)}<sup>${exp_val}</sup></span> means <span class="highlight-op">-(${formatNumber(A_base)}<sup>${exp_val}</sup>)</span>`);
+                let val_pow = powFrac(A_base, exp_val);
+                val_pow = this.checkIntermediate(val_pow, "T3S1");
+                let val_neg_pow = mulFrac(toFraction(-1), val_pow);
+                val_neg_pow = this.checkIntermediate(val_neg_pow, "T3S1b");
+                this.steps.push(`   ${formatNumber(A_base)}<sup>${exp_val}</sup> = ${formatNumber(val_pow, true)}, so -${formatNumber(A_base)}<sup>${exp_val}</sup> = ${formatNumber(val_neg_pow, true)}`);
+                this.steps.push(`2. Exponent with negative base in parentheses: <span class="highlight-op">(-${formatNumber(A_base)})<sup>${exp_val}</sup></span>`);
+                let neg_base = mulFrac(toFraction(-1), A_base);
+                let val_negbase_pow = powFrac(neg_base, exp_val);
+                val_negbase_pow = this.checkIntermediate(val_negbase_pow, "T3S2");
+                this.steps.push(`   = ${formatNumber(val_negbase_pow, true)}`);
+                this.steps.push(`3. ${op1 === '+' ? 'Addition' : 'Subtraction'}: <span class="highlight-op">${formatNumber(val_neg_pow)} ${op1} ${formatNumber(val_negbase_pow)}</span>`);
+                let val3 = op1 === '+' ? addFrac(val_neg_pow, val_negbase_pow) : subFrac(val_neg_pow, val_negbase_pow);
+                val3 = this.checkIntermediate(val3, "T3S3");
+                this.steps.push(`   = ${formatNumber(val3, true)}`);
+                this.steps.push(`4. Final addition: <span class="highlight-op">${formatNumber(val3)} + ${formatNumber(B)}</span>`);
+                this.finalAnswer = addFrac(val3, B);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T3 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                this.problemString = `-${formatNumber(A_base)}<sup>${exp_val}</sup> ${op1} (-${formatNumber(A_base)})<sup>${exp_val}</sup> + ${formatNumber(B)}`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T4: Exponents on fractions/decimals directly
+            // ─────────────────────────────────────────────────────────
+            function t4_exponentFracDec() {
+                const frac_base = simplifyFraction(getRandomInt(1, 4), getRandomItem([2, 3, 4, 5]));
+                const exp1 = getRandomItem([2, 3]);
+                const dec_base = toFraction(getRandomItem(["0.1", "0.2", "0.3", "0.5", "1.5", "2.5"]));
+                const exp2 = getRandomItem([2, 3]);
+                const C = generateOperand({min: -5, max: 5, forceInteger: true});
+                const op1 = getRandomItem(['+', '-']);
+                const op2 = getRandomItem(['+', '-']);
+                this.steps.push(`1. Fraction exponent: <span class="highlight-op">(${formatNumber(frac_base)})<sup>${exp1}</sup></span>`);
+                let v1 = powFrac(frac_base, exp1);
+                v1 = this.checkIntermediate(v1, "T4S1");
+                this.steps.push(`   = ${formatNumber(v1, true)}`);
+                this.steps.push(`2. Decimal exponent: <span class="highlight-op">(${formatNumber(dec_base, false, true)})<sup>${exp2}</sup></span>`);
+                let v2 = powFrac(dec_base, exp2);
+                v2 = this.checkIntermediate(v2, "T4S2");
+                this.steps.push(`   = ${formatNumber(v2, true)}`);
+                this.steps.push(`3. ${op1 === '+' ? 'Addition' : 'Subtraction'}: <span class="highlight-op">${formatNumber(v1)} ${op1} ${formatNumber(v2)}</span>`);
+                let v3 = op1 === '+' ? addFrac(v1, v2) : subFrac(v1, v2);
+                v3 = this.checkIntermediate(v3, "T4S3");
+                this.steps.push(`   = ${formatNumber(v3, true)}`);
+                this.steps.push(`4. Final ${op2 === '+' ? 'addition' : 'subtraction'}: <span class="highlight-op">${formatNumber(v3)} ${op2} ${formatNumber(C)}</span>`);
+                this.finalAnswer = op2 === '+' ? addFrac(v3, C) : subFrac(v3, C);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T4 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                this.problemString = `(${formatNumber(frac_base)})<sup>${exp1}</sup> ${op1} (${formatNumber(dec_base, false, true)})<sup>${exp2}</sup> ${op2} ${formatNumber(C)}`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T5: Distribution / implicit multiplication
+            // ─────────────────────────────────────────────────────────
+            function t5_distribution() {
+                const A = generateOperand({min: 2, max: 8, forceInteger: true, nonZero: true});
+                const B = generateOperand({min: 1, max: 9, forceInteger: true});
+                const C = generateOperand({min: 1, max: 9, forceInteger: true});
+                const D = generateOperand({min: 2, max: 8, forceInteger: true, nonZero: true});
+                const E = generateOperand({min: 1, max: 9, forceInteger: true});
+                const F = generateOperand({min: 1, max: 9, forceInteger: true});
+                const G = generateOperand({min: -5, max: 5, forceInteger: true});
+                const op_i1 = getRandomItem(['+', '-']);
+                const op_i2 = getRandomItem(['+', '-']);
+                const op_bet = getRandomItem(['+', '-']);
+                const op_fin = getRandomItem(['+', '-']);
+                this.steps.push(`1. First parentheses: <span class="highlight-op">${formatNumber(B)} ${op_i1} ${formatNumber(C)}</span>`);
+                let p1 = op_i1 === '+' ? addFrac(B, C) : subFrac(B, C);
+                p1 = this.checkIntermediate(p1, "T5S1");
+                this.steps.push(`   = ${formatNumber(p1, true)}`);
+                this.steps.push(`2. Second parentheses: <span class="highlight-op">${formatNumber(E)} ${op_i2} ${formatNumber(F)}</span>`);
+                let p2 = op_i2 === '+' ? addFrac(E, F) : subFrac(E, F);
+                p2 = this.checkIntermediate(p2, "T5S2");
+                this.steps.push(`   = ${formatNumber(p2, true)}`);
+                this.steps.push(`3. Implicit multiplication: <span class="highlight-op">${formatNumber(A)}(${formatNumber(p1)}) = ${formatNumber(A)} &times; ${formatNumber(p1)}</span>`);
+                let d1 = mulFrac(A, p1);
+                d1 = this.checkIntermediate(d1, "T5S3");
+                this.steps.push(`   = ${formatNumber(d1, true)}`);
+                this.steps.push(`4. Implicit multiplication: <span class="highlight-op">${formatNumber(D)}(${formatNumber(p2)}) = ${formatNumber(D)} &times; ${formatNumber(p2)}</span>`);
+                let d2 = mulFrac(D, p2);
+                d2 = this.checkIntermediate(d2, "T5S4");
+                this.steps.push(`   = ${formatNumber(d2, true)}`);
+                this.steps.push(`5. ${op_bet === '+' ? 'Addition' : 'Subtraction'}: <span class="highlight-op">${formatNumber(d1)} ${op_bet} ${formatNumber(d2)}</span>`);
+                let v5 = op_bet === '+' ? addFrac(d1, d2) : subFrac(d1, d2);
+                v5 = this.checkIntermediate(v5, "T5S5");
+                this.steps.push(`   = ${formatNumber(v5, true)}`);
+                this.steps.push(`6. Final ${op_fin === '+' ? 'addition' : 'subtraction'}: <span class="highlight-op">${formatNumber(v5)} ${op_fin} ${formatNumber(G)}</span>`);
+                this.finalAnswer = op_fin === '+' ? addFrac(v5, G) : subFrac(v5, G);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T5 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                this.problemString = `${formatNumber(A)}(${formatNumber(B)} ${op_i1} ${formatNumber(C)}) ${op_bet} ${formatNumber(D)}(${formatNumber(E)} ${op_i2} ${formatNumber(F)}) ${op_fin} ${formatNumber(G)}`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T6: Fraction bar as grouping symbol (simple)
+            // ─────────────────────────────────────────────────────────
+            function t6_fractionBarGrouping() {
+                const A = generateOperand({min: 1, max: 12, forceInteger: true});
+                const B = generateOperand({min: 1, max: 12, forceInteger: true});
+                const C = generateOperand({min: 1, max: 9, forceInteger: true});
+                const D = generateOperand({min: 1, max: 9, forceInteger: true});
+                const E = generateOperand({min: -9, max: 9, forceInteger: true});
+                const op_n = getRandomItem(['+', '-', '×']);
+                const op_d = getRandomItem(['+', '-']);
+                const op_f = getRandomItem(['+', '-']);
+                this.steps.push(`1. Evaluate numerator: <span class="highlight-op">${formatNumber(A)} ${op_n === '×' ? '&times;' : op_n} ${formatNumber(B)}</span>`);
+                let vn;
+                if (op_n === '+') vn = addFrac(A, B);
+                else if (op_n === '-') vn = subFrac(A, B);
+                else vn = mulFrac(A, B);
+                vn = this.checkIntermediate(vn, "T6S1");
+                this.steps.push(`   = ${formatNumber(vn, true)}`);
+                this.steps.push(`2. Evaluate denominator: <span class="highlight-op">${formatNumber(C)} ${op_d} ${formatNumber(D)}</span>`);
+                let vd = op_d === '+' ? addFrac(C, D) : subFrac(C, D);
+                vd = this.checkIntermediate(vd, "T6S2");
+                if (vd.num === 0) throw new Error("Denominator is zero in T6");
+                this.steps.push(`   = ${formatNumber(vd, true)}`);
+                this.steps.push(`3. Division (fraction bar): <span class="highlight-op">${formatNumber(vn)} &divide; ${formatNumber(vd)}</span>`);
+                let vf = divFrac(vn, vd);
+                vf = this.checkIntermediate(vf, "T6S3");
+                this.steps.push(`   = ${formatNumber(vf, true)}`);
+                this.steps.push(`4. Final ${op_f === '+' ? 'addition' : 'subtraction'}: <span class="highlight-op">${formatNumber(vf)} ${op_f} ${formatNumber(E)}</span>`);
+                this.finalAnswer = op_f === '+' ? addFrac(vf, E) : subFrac(vf, E);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T6 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                this.problemString = `<span class="fraction"><span class="numerator">${formatNumber(A)} ${op_n === '×' ? '&times;' : op_n} ${formatNumber(B)}</span><span class="denominator">${formatNumber(C)} ${op_d} ${formatNumber(D)}</span></span> ${op_f} ${formatNumber(E)}`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T7: Square root as grouping symbol
+            // ─────────────────────────────────────────────────────────
+            function t7_sqrtGrouping() {
+                const perfectSquares = [4, 9, 16, 25, 36, 49, 64, 81, 100];
+                const target = getRandomItem(perfectSquares);
+                const sqrtA = getRandomInt(1, target - 1);
+                const sqrtB = target - sqrtA;
+                const sqrtResult = toFraction(Math.round(Math.sqrt(target)));
+                const standalone_base = getRandomInt(1, 7);
+                const standalone_sq = standalone_base * standalone_base;
+                const standalone_result = toFraction(standalone_base);
+                const C = generateOperand({min: 2, max: 6, forceInteger: true, nonZero: true});
+                const D = generateOperand({min: 1, max: 9, forceInteger: true});
+                const op1 = getRandomItem(['+', '-']);
+                const op2 = getRandomItem(['+', '-']);
+                this.steps.push(`1. Evaluate under the radical (grouping symbol): <span class="highlight-op">&radic;(${sqrtA} + ${sqrtB})</span>`);
+                this.steps.push(`   ${sqrtA} + ${sqrtB} = ${target}`);
+                this.steps.push(`   &radic;${target} = ${formatNumber(sqrtResult, true)}`);
+                this.steps.push(`2. Standalone square root: <span class="highlight-op">&radic;${standalone_sq}</span> = ${standalone_base}`);
+                this.steps.push(`3. Multiplication (before add/sub): <span class="highlight-op">${standalone_base} &times; ${formatNumber(C)}</span>`);
+                let vm = mulFrac(standalone_result, C);
+                vm = this.checkIntermediate(vm, "T7S3");
+                this.steps.push(`   = ${formatNumber(vm, true)}`);
+                this.steps.push(`4. ${op1 === '+' ? 'Addition' : 'Subtraction'}: <span class="highlight-op">${formatNumber(sqrtResult)} ${op1} ${formatNumber(vm)}</span>`);
+                let v4 = op1 === '+' ? addFrac(sqrtResult, vm) : subFrac(sqrtResult, vm);
+                v4 = this.checkIntermediate(v4, "T7S4");
+                this.steps.push(`   = ${formatNumber(v4, true)}`);
+                this.steps.push(`5. Final ${op2 === '+' ? 'addition' : 'subtraction'}: <span class="highlight-op">${formatNumber(v4)} ${op2} ${formatNumber(D)}</span>`);
+                this.finalAnswer = op2 === '+' ? addFrac(v4, D) : subFrac(v4, D);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T7 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                this.problemString = `&radic;(${sqrtA} + ${sqrtB}) ${op1} &radic;${standalone_sq} &times; ${formatNumber(C)} ${op2} ${formatNumber(D)}`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T8: Absolute value with internal PEMDAS
+            // ─────────────────────────────────────────────────────────
+            function t8_absInternalPEMDAS() {
+                const A = generateOperand({min: 1, max: 9, forceInteger: true});
+                const B = generateOperand({min: 2, max: 7, forceInteger: true, nonZero: true});
+                const C = generateOperand({min: 2, max: 7, forceInteger: true, nonZero: true});
+                const op_in = getRandomItem(['+', '-']);
+                const op_out1 = getRandomItem(['+', '-']);
+                const op_out2 = getRandomItem(['×', '÷']);
+                let D, E;
+                if (op_out2 === '÷') {
+                    E = generateOperand({min: 2, max: 5, forceInteger: true, nonZero: true});
+                    const mult = generateOperand({min: 1, max: 5, forceInteger: true, nonZero: true});
+                    D = mulFrac(E, mult);
+                } else {
+                    D = generateOperand({min: 1, max: 9, forceInteger: true});
+                    E = generateOperand({min: 2, max: 5, forceInteger: true, nonZero: true});
+                }
+                this.steps.push(`1. Multiplication inside | | (PEMDAS applies inside): <span class="highlight-op">${formatNumber(B)} &times; ${formatNumber(C)}</span>`);
+                let vBC = mulFrac(B, C);
+                vBC = this.checkIntermediate(vBC, "T8S1");
+                this.steps.push(`   = ${formatNumber(vBC, true)}`);
+                this.steps.push(`2. ${op_in === '+' ? 'Addition' : 'Subtraction'} inside | |: <span class="highlight-op">${formatNumber(A)} ${op_in} ${formatNumber(vBC)}</span>`);
+                let vIn = op_in === '+' ? addFrac(A, vBC) : subFrac(A, vBC);
+                vIn = this.checkIntermediate(vIn, "T8S2");
+                this.steps.push(`   = ${formatNumber(vIn, true)}`);
+                this.steps.push(`3. Absolute value: <span class="highlight-op">|${formatNumber(vIn)}|</span>`);
+                let vAbs = absFrac(vIn);
+                this.checkIntermediate(vAbs, "T8S3");
+                this.steps.push(`   = ${formatNumber(vAbs, true)}`);
+                this.steps.push(`4. ${op_out2 === '×' ? 'Multiplication' : 'Division'}: <span class="highlight-op">${formatNumber(D)} ${op_out2 === '×' ? '&times;' : '&divide;'} ${formatNumber(E)}</span>`);
+                let vDE = op_out2 === '×' ? mulFrac(D, E) : divFrac(D, E);
+                vDE = this.checkIntermediate(vDE, "T8S4");
+                this.steps.push(`   = ${formatNumber(vDE, true)}`);
+                this.steps.push(`5. Final ${op_out1 === '+' ? 'addition' : 'subtraction'}: <span class="highlight-op">${formatNumber(vAbs)} ${op_out1} ${formatNumber(vDE)}</span>`);
+                this.finalAnswer = op_out1 === '+' ? addFrac(vAbs, vDE) : subFrac(vAbs, vDE);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T8 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                this.problemString = `|${formatNumber(A)} ${op_in} ${formatNumber(B)} &times; ${formatNumber(C)}| ${op_out1} ${formatNumber(D)} ${op_out2 === '×' ? '&times;' : '&divide;'} ${formatNumber(E)}`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T9: Decimal-focused operations
+            // ─────────────────────────────────────────────────────────
+            function t9_decimalFocus() {
+                const A = toFraction(getRandomItem(["0.5", "1.5", "2.5", "0.2", "0.4", "0.8", "1.2"]));
+                const B = toFraction(getRandomItem(["2.0", "3.0", "4.0", "5.0", "6.0", "1.5", "2.5"]));
+                const D = toFraction(getRandomItem(["0.2", "0.5", "0.4", "0.25", "2.0", "2.5"]));
+                const C = mulFrac(toFraction(getRandomInt(1, 5)), D);
+                const E_base = toFraction(getRandomItem(["0.1", "0.2", "0.5", "1.5", "0.3"]));
+                const E_exp = getRandomItem([2, 3]);
+                const op1 = getRandomItem(['+', '-']);
+                const op2 = getRandomItem(['+', '-']);
+                this.steps.push(`1. Exponent: <span class="highlight-op">(${formatNumber(E_base, false, true)})<sup>${E_exp}</sup></span>`);
+                let vE = powFrac(E_base, E_exp);
+                vE = this.checkIntermediate(vE, "T9S1");
+                this.steps.push(`   = ${formatNumber(vE, true)}`);
+                this.steps.push(`2. Multiplication: <span class="highlight-op">${formatNumber(A, false, true)} &times; ${formatNumber(B, false, true)}</span>`);
+                let vAB = mulFrac(A, B);
+                vAB = this.checkIntermediate(vAB, "T9S2");
+                this.steps.push(`   = ${formatNumber(vAB, true)}`);
+                this.steps.push(`3. Division: <span class="highlight-op">${formatNumber(C, false, true)} &divide; ${formatNumber(D, false, true)}</span>`);
+                let vCD = divFrac(C, D);
+                vCD = this.checkIntermediate(vCD, "T9S3");
+                this.steps.push(`   = ${formatNumber(vCD, true)}`);
+                this.steps.push(`4. ${op1 === '+' ? 'Addition' : 'Subtraction'}: <span class="highlight-op">${formatNumber(vAB)} ${op1} ${formatNumber(vCD)}</span>`);
+                let v4 = op1 === '+' ? addFrac(vAB, vCD) : subFrac(vAB, vCD);
+                v4 = this.checkIntermediate(v4, "T9S4");
+                this.steps.push(`   = ${formatNumber(v4, true)}`);
+                this.steps.push(`5. Final ${op2 === '+' ? 'addition' : 'subtraction'}: <span class="highlight-op">${formatNumber(v4)} ${op2} ${formatNumber(vE)}</span>`);
+                this.finalAnswer = op2 === '+' ? addFrac(v4, vE) : subFrac(v4, vE);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T9 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                this.problemString = `${formatNumber(A, false, true)} &times; ${formatNumber(B, false, true)} ${op1} ${formatNumber(C, false, true)} &divide; ${formatNumber(D, false, true)} ${op2} (${formatNumber(E_base, false, true)})<sup>${E_exp}</sup>`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T10: Exponent evaluation order (right-to-left)
+            // ─────────────────────────────────────────────────────────
+            function t10_exponentOrder() {
+                const A = toFraction(getRandomItem([2, 3]));
+                const B = toFraction(getRandomItem([2, 3]));
+                const C = toFraction(2);
+                const D = generateOperand({min: -5, max: 5, forceInteger: true});
+                const op1 = getRandomItem(['+', '-']);
+                this.steps.push(`1. Exponents evaluate right-to-left. Top exponent first: <span class="highlight-op">${formatNumber(B)}<sup>${formatNumber(C)}</sup></span>`);
+                let vBC = powFrac(B, C.value);
+                vBC = this.checkIntermediate(vBC, "T10S1");
+                this.steps.push(`   = ${formatNumber(vBC, true)}`);
+                this.steps.push(`2. Base raised to that result: <span class="highlight-op">${formatNumber(A)}<sup>${formatNumber(vBC)}</sup></span>`);
+                let vA_BC = powFrac(A, vBC.value);
+                vA_BC = this.checkIntermediate(vA_BC, "T10S2");
+                this.steps.push(`   = ${formatNumber(vA_BC, true)}`);
+                this.steps.push(`3. Final ${op1 === '+' ? 'addition' : 'subtraction'}: <span class="highlight-op">${formatNumber(vA_BC)} ${op1} ${formatNumber(D)}</span>`);
+                this.finalAnswer = op1 === '+' ? addFrac(vA_BC, D) : subFrac(vA_BC, D);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T10 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                this.problemString = `${formatNumber(A)}<sup>${formatNumber(B)}<sup>${formatNumber(C)}</sup></sup> ${op1} ${formatNumber(D)}`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T11: Double negatives / sign management
+            // ─────────────────────────────────────────────────────────
+            function t11_doubleNegatives() {
+                const A = generateOperand({min: 1, max: 12, forceInteger: true});
+                const B = generateOperand({min: 1, max: 9, forceInteger: true, nonZero: true});
+                const C = generateOperand({min: 1, max: 9, forceInteger: true, nonZero: true});
+                const D = generateOperand({min: 1, max: 9, forceInteger: true, nonZero: true});
+                const E = generateOperand({min: 1, max: 9, forceInteger: true});
+                this.steps.push(`1. Simplify -(-${formatNumber(B)}): <span class="highlight-op">-(-${formatNumber(B)}) = +${formatNumber(B)}</span>`);
+                this.steps.push(`   Subtracting a negative = adding the positive.`);
+                this.steps.push(`2. Simplify +(-${formatNumber(C)}): <span class="highlight-op">+(-${formatNumber(C)}) = -${formatNumber(C)}</span>`);
+                this.steps.push(`   Adding a negative = subtracting the positive.`);
+                this.steps.push(`3. Simplify -(-(-${formatNumber(D)})): Work inside out:`);
+                this.steps.push(`   Inner: -${formatNumber(D)} = -${formatNumber(D)}`);
+                this.steps.push(`   Middle: -(-${formatNumber(D)}) = +${formatNumber(D)}`);
+                this.steps.push(`   Outer: <span class="highlight-op">-(-(-${formatNumber(D)})) = -(${formatNumber(D)}) = -${formatNumber(D)}</span>`);
+                this.steps.push(`4. Rewritten: <span class="highlight-op">${formatNumber(A)} + ${formatNumber(B)} - ${formatNumber(C)} - ${formatNumber(D)} + ${formatNumber(E)}</span>`);
+                this.steps.push(`5. Evaluate left-to-right:`);
+                let r = addFrac(A, B);
+                this.steps.push(`   ${formatNumber(A)} + ${formatNumber(B)} = ${formatNumber(r, true)}`);
+                r = subFrac(r, C);
+                this.steps.push(`   ... - ${formatNumber(C)} = ${formatNumber(r, true)}`);
+                r = subFrac(r, D);
+                r = this.checkIntermediate(r, "T11S5");
+                this.steps.push(`   ... - ${formatNumber(D)} = ${formatNumber(r, true)}`);
+                this.finalAnswer = addFrac(r, E);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T11 Final");
+                this.steps.push(`   ... + ${formatNumber(E)} = ${formatNumber(this.finalAnswer, true)}`);
+                this.problemString = `${formatNumber(A)} - (-${formatNumber(B)}) + (-${formatNumber(C)}) - (-(-${formatNumber(D)})) + ${formatNumber(E)}`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T12: Mixed numbers
+            // ─────────────────────────────────────────────────────────
+            function t12_mixedNumbers() {
+                const w1 = getRandomInt(1, 4);
+                const d1 = getRandomItem([2, 3, 4]);
+                const n1 = getRandomInt(1, d1 - 1);
+                const frac1 = simplifyFraction(n1, d1);
+                const mixed1 = addFrac(toFraction(w1), frac1);
+                const w2 = getRandomInt(1, 3);
+                const d2 = getRandomItem([2, 3, 4, 5]);
+                const n2 = getRandomInt(1, d2 - 1);
+                const frac2 = simplifyFraction(n2, d2);
+                const mixed2 = addFrac(toFraction(w2), frac2);
+                const C = generateOperand({min: 2, max: 6, forceInteger: true, nonZero: true});
+                const op1 = getRandomItem(['+', '-']);
+                this.steps.push(`1. Convert mixed numbers to improper fractions:`);
+                this.steps.push(`   <span class="highlight-op">${w1}${formatFractionHTML(frac1.num, frac1.den)}</span> = ${formatFractionHTML(mixed1.num, mixed1.den)}`);
+                this.steps.push(`   <span class="highlight-op">${w2}${formatFractionHTML(frac2.num, frac2.den)}</span> = ${formatFractionHTML(mixed2.num, mixed2.den)}`);
+                this.steps.push(`2. Multiplication first (PEMDAS): <span class="highlight-op">${formatNumber(mixed2)} &times; ${formatNumber(C)}</span>`);
+                let vm = mulFrac(mixed2, C);
+                vm = this.checkIntermediate(vm, "T12S2");
+                this.steps.push(`   = ${formatNumber(vm, true)}`);
+                this.steps.push(`3. ${op1 === '+' ? 'Addition' : 'Subtraction'}: <span class="highlight-op">${formatNumber(mixed1)} ${op1} ${formatNumber(vm)}</span>`);
+                this.finalAnswer = op1 === '+' ? addFrac(mixed1, vm) : subFrac(mixed1, vm);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T12 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                this.problemString = `${w1}${formatFractionHTML(frac1.num, frac1.den)} ${op1} ${w2}${formatFractionHTML(frac2.num, frac2.den)} &times; ${formatNumber(C)}`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T13 (orig T2): Abs val, fractions, exponents
+            // ─────────────────────────────────────────────────────────
+            function t13_absValFracExp() { 
+                const A_frac = generateOperand({forceFraction: true, allowDecimal: false}); 
+                const B_int = generateOperand({min: 1, max: 5, nonZero: true, allowDecimal: false}); 
+                const C = generateOperand({min: -4, max: 4, allowDecimal: true});
+                const D_neg = generateOperand({min: -7, max: -1, allowDecimal: true});
+                let {base: E_base, exp: E_exp} = generatePowerOperands(); 
+                if (E_base.num === 0 && E_exp < 0) E_exp = getRandomInt(0,2); 
+                this.steps.push(`1. Division inside absolute value: <span class="highlight-op">${formatNumber(A_frac, false, true)} &divide; ${formatNumber(B_int, false, true)}</span>`);
+                let vdiv = divFrac(A_frac, B_int);
+                vdiv = this.checkIntermediate(vdiv, "T13S1");
+                this.steps.push(`   = ${formatNumber(vdiv, true)}`);
+                this.steps.push(`2. Subtraction inside absolute value: <span class="highlight-op">${formatNumber(vdiv)} - ${formatNumber(C, false, true)}</span>`);
+                let vins = subFrac(vdiv, C);
+                vins = this.checkIntermediate(vins, "T13S2");
+                this.steps.push(`   = ${formatNumber(vins, true)}`);
+                this.steps.push(`3. Absolute value: <span class="highlight-op">|${formatNumber(vins)}|</span>`);
+                const vabs = absFrac(vins); 
+                this.checkIntermediate(vabs, "T13S3");
+                this.steps.push(`   = ${formatNumber(vabs, true)}`);
+                this.steps.push(`4. Exponent: <span class="highlight-op">${formatBaseForExponent(E_base, true)}<sup>${E_exp}</sup></span>`);
+                let vpow = powFrac(E_base, E_exp);
+                vpow = this.checkIntermediate(vpow, "T13S4");
+                this.steps.push(`   = ${formatNumber(vpow, true)}`);
+                this.steps.push(`5. Addition in parentheses: <span class="highlight-op">${formatNumber(D_neg, false, true)} + ${formatNumber(vpow)}</span>`);
+                let vpar = addFrac(D_neg, vpow);
+                vpar = this.checkIntermediate(vpar, "T13S5");
+                this.steps.push(`   = ${formatNumber(vpar, true)}`);
+                this.steps.push(`6. Final multiplication: <span class="highlight-op">${formatNumber(vabs)} &times; ${formatNumber(vpar)}</span>`);
+                this.finalAnswer = mulFrac(vabs, vpar);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T13 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                this.problemString = `|${formatNumber(A_frac, false, true)} &divide; ${formatNumber(B_int, false, true)} - ${formatNumber(C, false, true)}| &times; (${formatNumber(D_neg, false, true)} + ${formatBaseForExponent(E_base, true)}<sup>${E_exp}</sup>)`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T14 (orig T3): Complex fraction with exponents
+            // ─────────────────────────────────────────────────────────
+            function t14_complexFraction() { 
+                let {base: A, exp: exp_A} = generatePowerOperands();
+                if (A.num === 0 && exp_A < 0) exp_A = getRandomInt(0,2);
+                const B_frac = generateOperand({forceFraction: true, allowDecimal: true}); 
+                const C_frac = generateOperand({forceFraction: true, nonZero: true, allowDecimal: true}); 
+                let {base: D, exp: exp_D} = generatePowerOperands();
+                if (D.num === 0 && exp_D < 0) exp_D = getRandomInt(0,2);
+                const E_neg = generateOperand({min:-4, max:-1, allowDecimal: true});
+                this.steps.push(`1. Numerator exponent: <span class="highlight-op">${formatBaseForExponent(A, true)}<sup>${exp_A}</sup></span>`);
+                let vAe = powFrac(A, exp_A);
+                vAe = this.checkIntermediate(vAe, "T14S1");
+                this.steps.push(`   = ${formatNumber(vAe, true)}`);
+                this.steps.push(`2. Numerator addition: <span class="highlight-op">${formatNumber(vAe)} + ${formatNumber(B_frac, false, true)}</span>`);
+                let vNum = addFrac(vAe, B_frac);
+                vNum = this.checkIntermediate(vNum, "T14S2");
+                this.steps.push(`   = ${formatNumber(vNum, true)}`);
+                this.steps.push(`3. Denominator exponent: <span class="highlight-op">${formatBaseForExponent(D, true)}<sup>${exp_D}</sup></span>`);
+                let vDe = powFrac(D, exp_D);
+                vDe = this.checkIntermediate(vDe, "T14S3");
+                this.steps.push(`   = ${formatNumber(vDe, true)}`);
+                this.steps.push(`4. Denominator subtraction: <span class="highlight-op">${formatNumber(C_frac, false, true)} - ${formatNumber(vDe)}</span>`);
+                let vDen = subFrac(C_frac, vDe);
+                vDen = this.checkIntermediate(vDen, "T14S4");
+                this.steps.push(`   = ${formatNumber(vDen, true)}`);
+                this.steps.push(`5. Main fraction division: <span class="highlight-op">${formatNumber(vNum)} &divide; ${formatNumber(vDen)}</span>`);
+                let vMain = divFrac(vNum, vDen);
+                vMain = this.checkIntermediate(vMain, "T14S5");
+                this.steps.push(`   = ${formatNumber(vMain, true)}`);
+                
+                this.steps.push(`6. Final multiplication: <span class="highlight-op">${formatNumber(vMain)} &times; ${formatNumber(E_neg, false, true)}</span>`);
+                this.finalAnswer = mulFrac(vMain, E_neg);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T14 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                
+                this.problemString = `(<span class="fraction"><span class="numerator">${formatBaseForExponent(A, true)}<sup>${exp_A}</sup> + ${formatNumber(B_frac, false, true)}</span><span class="denominator">${formatNumber(C_frac, false, true)} - ${formatBaseForExponent(D, true)}<sup>${exp_D}</sup></span></span>) &times; ${formatNumber(E_neg, false, true)}`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T15 (orig T4): Nested brackets { [ ( ) ] }
+            // ─────────────────────────────────────────────────────────
+            function t15_nestedBrackets() { 
+                const a = generateOperand({min: -10, max: 10, allowDecimal: true});
+                const b = generateOperand({min: -5, max: 5, nonZero: true, allowDecimal: true});
+                const c = generateOperand({min: 1, max: 10, allowDecimal: true});
+                let {base: d_base, exp: d_exp} = generatePowerOperands();
+                if (d_base.num === 0 && d_exp < 0) d_exp = getRandomInt(0,2);
+                const op1 = getRandomItem(['+', '-']);
+                const op2 = getRandomItem(['*', '/']); 
+                const op3 = getRandomItem(['+', '-']);
+                this.steps.push(`1. Innermost exponent: <span class="highlight-op">${formatBaseForExponent(d_base, true)}<sup>${d_exp}</sup></span>`);
+                let vdp = powFrac(d_base, d_exp);
+                vdp = this.checkIntermediate(vdp, "T15S1");
+                this.steps.push(`   = ${formatNumber(vdp, true)}`);
+                let step2Str = `${formatNumber(c, false, true)} ${op2 === '/' ? '&divide;' : '&times;'} ${formatNumber(vdp)}`;
+                this.steps.push(`2. Innermost parentheses: <span class="highlight-op">${step2Str}</span>`);
+                let v2 = op2 === '*' ? mulFrac(c, vdp) : divFrac(c, vdp);
+                v2 = this.checkIntermediate(v2, "T15S2");
+                this.steps.push(`   = ${formatNumber(v2, true)}`);
+                this.steps.push(`3. Brackets: <span class="highlight-op">${formatNumber(b, false, true)} ${op1} ${formatNumber(v2)}</span>`);
+                let v3 = op1 === '+' ? addFrac(b, v2) : subFrac(b, v2);
+                v3 = this.checkIntermediate(v3, "T15S3");
+                this.steps.push(`   = ${formatNumber(v3, true)}`);
+                this.steps.push(`4. Braces/Final: <span class="highlight-op">${formatNumber(a, false, true)} ${op3} ${formatNumber(v3)}</span>`);
+                this.finalAnswer = op3 === '+' ? addFrac(a, v3) : subFrac(a, v3);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T15 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                
+                this.problemString = `{${formatNumber(a, false, true)} ${op3} [${formatNumber(b, false, true)} ${op1} (${formatNumber(c, false, true)} ${op2 === '/' ? '&divide;' : '&times;'} ${formatBaseForExponent(d_base, true)}<sup>${d_exp}</sup>)]}`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T16 (orig T5): Abs val, sqrt, complex fraction
+            // ─────────────────────────────────────────────────────────
+            function t16_absValSqrtFraction() {
+                const A = generateOperand({min: -5, max: 5, nonZero: true, allowDecimal: true});
+                let {base: B, exp: exp1} = generatePowerOperands();
+                if (B.num === 0 && exp1 < 0) exp1 = getRandomInt(0,2);
+                const C_sqrt_base = getRandomItem([1,2,3,4,5,6,7]); 
+                const C_sqrt_val = toFraction(C_sqrt_base * C_sqrt_base);
+                const D_frac = generateOperand({forceFraction: true, allowDecimal: true}); 
+                const E = generateOperand({min: -5, max: 5, allowDecimal: true});
+                const F = generateOperand({min: -5, max: 5, allowDecimal: true});
+                let { exp: exp2 } = generatePowerOperands();
+                this.steps.push(`1. Exponent (numerator): <span class="highlight-op">${formatBaseForExponent(B, true)}<sup>${exp1}</sup></span>`);
+                let vBe = powFrac(B, exp1);
+                vBe = this.checkIntermediate(vBe, "T16S1");
+                this.steps.push(`   = ${formatNumber(vBe, true)}`);
+                this.steps.push(`2. Multiplication (numerator): <span class="highlight-op">${formatNumber(A, false, true)} &times; ${formatNumber(vBe)}</span>`);
+                let vABe = mulFrac(A, vBe);
+                vABe = this.checkIntermediate(vABe, "T16S2");
+                this.steps.push(`   = ${formatNumber(vABe, true)}`);
+                this.steps.push(`3. Square root (numerator): <span class="highlight-op">&radic;${C_sqrt_val.num}</span>`);
+                const vSqrt = powFrac(C_sqrt_val, 0.5);
+                this.checkIntermediate(vSqrt, "T16S3");
+                this.steps.push(`   = ${formatNumber(vSqrt, true)}`);
+                
+                this.steps.push(`4. Subtraction for absolute value (numerator): <span class="highlight-op">${formatNumber(vABe)} - ${formatNumber(vSqrt)}</span>`);
+                let vInsAbs = subFrac(vABe, vSqrt);
+                vInsAbs = this.checkIntermediate(vInsAbs, "T16S4");
+                this.steps.push(`   = ${formatNumber(vInsAbs, true)}`);
+                this.steps.push(`5. Absolute value (numerator): <span class="highlight-op">|${formatNumber(vInsAbs)}|</span>`);
+                const vNumerator = absFrac(vInsAbs);
+                this.checkIntermediate(vNumerator, "T16S5");
+                this.steps.push(`   = ${formatNumber(vNumerator, true)}`);
+                this.steps.push(`6. Parentheses (denominator): <span class="highlight-op">${formatNumber(E, false, true)} - ${formatNumber(F, false, true)}</span>`);
+                let vEF = subFrac(E, F);
+                vEF = this.checkIntermediate(vEF, "T16S6");
+                this.steps.push(`   = ${formatNumber(vEF, true)}`);
+                if (vEF.num === 0 && exp2 < 0) exp2 = getRandomInt(0,2);
+                this.steps.push(`7. Exponent (denominator): <span class="highlight-op">${formatBaseForExponent(vEF, true)}<sup>${exp2}</sup></span>`);
+                let vEFe = powFrac(vEF, exp2);
+                vEFe = this.checkIntermediate(vEFe, "T16S7");
+                this.steps.push(`   = ${formatNumber(vEFe, true)}`);
+                this.steps.push(`8. Addition (denominator): <span class="highlight-op">${formatNumber(D_frac, false, true)} + ${formatNumber(vEFe)}</span>`);
+                let vDenom = addFrac(D_frac, vEFe);
+                vDenom = this.checkIntermediate(vDenom, "T16S8");
+                this.steps.push(`   = ${formatNumber(vDenom, true)}`);
+                this.steps.push(`9. Final division: <span class="highlight-op">${formatNumber(vNumerator)} &divide; ${formatNumber(vDenom)}</span>`);
+                this.finalAnswer = divFrac(vNumerator, vDenom);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T16 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                this.problemString = `<span class="fraction"><span class="numerator">|${formatNumber(A, false, true)} &times; ${formatBaseForExponent(B, true)}<sup>${exp1}</sup> - &radic;${C_sqrt_val.num}|</span><span class="denominator">{${formatNumber(D_frac, false, true)} + (${formatNumber(E, false, true)} - ${formatNumber(F, false, true)})<sup>${exp2}</sup>}</span></span>`;
+            },
+            // ─────────────────────────────────────────────────────────
+            // T17 (orig T6): Deep nesting, neg exponents, abs val
+            // ─────────────────────────────────────────────────────────
+            function t17_deepNesting() {
+                const G_neg = generateOperand({min: -10, max: -1, allowDecimal: true});
+                const H = generateOperand({min: -5, max: 5, allowDecimal: true});
+                const I_frac = generateOperand({forceFraction: true, allowDecimal: true}); 
+                const J_op = generateOperand({min: -7, max: 7, allowDecimal: true}); 
+                const K_val = generateOperand({min: -9, max: 9, allowDecimal: true}); 
+                const exp_neg = getRandomInt(-2, -1); 
+                this.steps.push(`1. Innermost absolute value: <span class="highlight-op">|${formatNumber(K_val, false, true)}|</span>`);
+                const vKabs = absFrac(K_val);
+                this.checkIntermediate(vKabs, "T17S1");
+                this.steps.push(`   = ${formatNumber(vKabs, true)}`);
+                this.steps.push(`2. Subtraction (divisor): <span class="highlight-op">${formatNumber(J_op, false, true)} - ${formatNumber(vKabs)}</span>`);
+                let vDiv = subFrac(J_op, vKabs);
+                vDiv = this.checkIntermediate(vDiv, "T17S2");
+                this.steps.push(`   = ${formatNumber(vDiv, true)}`);
+                this.steps.push(`3. Division inside brackets: <span class="highlight-op">${formatNumber(I_frac, false, true)} &divide; ${formatNumber(vDiv)}</span>`);
+                let vDivResult = divFrac(I_frac, vDiv);
+                vDivResult = this.checkIntermediate(vDivResult, "T17S3");
+                this.steps.push(`   = ${formatNumber(vDivResult, true)}`);
+                
+                this.steps.push(`4. Negative exponent: <span class="highlight-op">${formatBaseForExponent(vDivResult, true)}<sup>${exp_neg}</sup></span>`);
+                let vBrExp = powFrac(vDivResult, exp_neg);
+                vBrExp = this.checkIntermediate(vBrExp, "T17S4");
+                this.steps.push(`   = ${formatNumber(vBrExp, true)}`);
+                this.steps.push(`5. Addition inside braces: <span class="highlight-op">${formatNumber(H, false, true)} + ${formatNumber(vBrExp)}</span>`);
+                let vBraces = addFrac(H, vBrExp);
+                vBraces = this.checkIntermediate(vBraces, "T17S5");
+                this.steps.push(`   = ${formatNumber(vBraces, true)}`);
+                this.steps.push(`6. Final subtraction: <span class="highlight-op">${formatNumber(G_neg, false, true)} - ${formatNumber(vBraces)}</span>`);
+                this.finalAnswer = subFrac(G_neg, vBraces);
+                this.finalAnswer = this.checkIntermediate(this.finalAnswer, "T17 Final");
+                this.steps.push(`   = ${formatNumber(this.finalAnswer, true)}`);
+                this.problemString = `${formatNumber(G_neg, false, true)} - {${formatNumber(H, false, true)} + [${formatNumber(I_frac, false, true)} &divide; (${formatNumber(J_op, false, true)} - |${formatNumber(K_val, false, true)}|)]<sup>${exp_neg}</sup>}`;
+            }
+        ];
+        // =============================================================
+        // PROBLEM GENERATION ENGINE
+        // =============================================================
+        function generateProblemAndSolution(templateFn) { 
+            function checkIntermediate(value, stepDescription = "Intermediate") {
+                if (!value || typeof value.num === 'undefined' || typeof value.den === 'undefined') {
+                    throw new Error(`${stepDescription} resulted in undefined or malformed fraction value.`);
+                }
+                const fatalErrors = ["NaN input", "Base is NaN for power", "Negative base to non-integer power", "Absolute value of NaN"];
+                if (value.error) {
+                    if (fatalErrors.includes(value.error) || value.error.startsWith("Power intermediate too large")) {
+                        throw new Error(`${stepDescription} fatal: ${value.error}`);
+                    }
+                }
+                if (Number.isFinite(value.value) && isValueTooLarge(value)) {
+                    throw new Error(`${stepDescription} too large: num=${value.num}, den=${value.den}`);
+                }
+                return value;
+            }
+            
+            let attemptLimit = 25; 
+            let ctx = { steps: [], problemString: '', finalAnswer: undefined, checkIntermediate };
+            while (attemptLimit > 0) {
+                ctx.steps = []; ctx.problemString = ''; ctx.finalAnswer = undefined;
+                try {
+                    templateFn.call(ctx);
+                    let stepsHTML = '<p><strong>Step-by-step solution:</strong></p>';
+                    ctx.steps.forEach(s => stepsHTML += `<p>${s}</p>`);
+                    if (ctx.finalAnswer && ctx.finalAnswer.value !== undefined) { 
+                        stepsHTML += `<p class="final-answer">Final Answer: ${formatNumber(ctx.finalAnswer, true)}</p>`;
+                    } else {
+                        throw new Error("Final answer undefined for: " + (templateFn.name || 'anonymous'));
+                    }
+                    return { problemHTML: ctx.problemString, stepsHTML, answer: ctx.finalAnswer };
+                } catch (e) { 
+                    attemptLimit--;
+                    if (attemptLimit === 0) {
+                        console.error(`Exhausted attempts for '${templateFn.name || 'anonymous'}':`, e.message);
+                        throw e; 
+                    }
+                }
+            }
+            throw new Error(`Exhausted attempts for '${templateFn.name || 'anonymous'}'`);
+        }
+        // =============================================================
+        // USER INPUT PARSING
+        // =============================================================
+        function parseUserFractionInput(inputStr) {
+            inputStr = String(inputStr).trim().toLowerCase(); 
+            if (inputStr === "infinity" || inputStr === "inf") return Infinity;
+            if (inputStr === "-infinity" || inputStr === "-inf") return -Infinity;
+            if (inputStr === "nan") return NaN;
+            if (inputStr.includes('/')) {
+                const parts = inputStr.split('/');
+                if (parts.length === 2) {
+                    const num = parseFloat(parts[0]), den = parseFloat(parts[1]);
+                    if (!isNaN(num) && !isNaN(den)) {
+                        if (den === 0) return num === 0 ? NaN : (num > 0 ? Infinity : -Infinity);
+                        return num / den;
+                    }
+                }
+            }
+            return parseFloat(inputStr);
+        }
+        // =============================================================
+        // DISPLAY & UI
+        // =============================================================
+        function displayProblems() {
+            problemListContainer.innerHTML = ''; 
+            showSolutionsBtn.textContent = 'Check Answers & Show Solutions';
+            showSolutionsBtn.style.display = 'inline-block'; 
+            showSolutionsBtn.disabled = false; 
+            let successCount = 0;
+            const total = problemTemplates.length;
+            for (let i = 0; i < total; i++) {
+                const templateFn = problemTemplates[i];
+                const problemNumber = i + 1;
+                let generated = null;
+                try { generated = generateProblemAndSolution(templateFn); } catch (e) { generated = null; }
+                const li = document.createElement('li');
+                li.dataset.problemIndex = i; // Robust index for static export
+                li.innerHTML = `<span class="problem-number">${problemNumber}.</span>`;
+                if (!generated || generated.answer === undefined || generated.answer.value === undefined) {
+                    li.innerHTML += `<span class="problem-expression" style="color:orange;">Could not generate a valid problem for this type (${templateFn.name || 'Type '+(i+1)}). Try again.</span>`;
+                } else {
+                    const { problemHTML, stepsHTML, answer } = generated;
+                    li.innerHTML += `
+                        <span class="problem-expression">${problemHTML}</span>
+                        <div class="answer-input-container">
+                            Answer: <input type="text" class="user-answer" data-problem-index="${i}" data-correct-answer-value="${answer.value}">
+                        </div>
+                        <div class="solution-steps" id="solution-${problemNumber}" style="display:none;">
+                            ${stepsHTML}
+                        </div>`;
+                    successCount++;
+                }
+                problemListContainer.appendChild(li);
+            }
+            // Enter key navigation between inputs
+            const allInputs = problemListContainer.querySelectorAll('.user-answer');
+            allInputs.forEach((input, idx) => {
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (idx < allInputs.length - 1) {
+                            allInputs[idx + 1].focus();
+                        } else {
+                            // Last input — trigger check
+                            showSolutionsBtn.click();
+                        }
+                    }
+                });
+            });
+            if (successCount < total) {
+                console.warn(`Generated ${successCount}/${total} problems successfully.`);
+            }
+        }
+        
+        // =============================================================
+        // TIMESTAMP & STATIC EXPORT
+        // =============================================================
+        function getTimestamp() {
+            const d = new Date();
+            const pad = (n) => n.toString().padStart(2, '0');
+            return `${d.getFullYear().toString().slice(-2)}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+        }
+        function generateAndDownloadStaticPage() {
+            const cloned = document.documentElement.cloneNode(true);
+            cloned.querySelectorAll('script').forEach(s => s.remove());
+            const controls = cloned.querySelector('.controls-container');
+            if (controls) controls.remove();
+            const clonedItems = cloned.querySelectorAll('.problem-list > li');
+            const liveItems = document.querySelectorAll('.problem-list > li');
+            clonedItems.forEach(item => {
+                const idx = item.dataset.problemIndex;
+                const inputField = item.querySelector('.user-answer');
+                if (inputField) {
+                    // Find matching live input by data-problem-index
+                    let liveInput = null;
+                    liveItems.forEach(li => {
+                        const inp = li.querySelector(`.user-answer[data-problem-index="${idx}"]`);
+                        if (inp) liveInput = inp;
+                    });
+                    const span = document.createElement('span');
+                    span.textContent = liveInput ? liveInput.value : inputField.value;
+                    span.classList.add('static-user-answer');
+                    if (inputField.classList.contains('correct-input')) span.classList.add('correct-input');
+                    else if (inputField.classList.contains('incorrect-input')) span.classList.add('incorrect-input');
+                    inputField.parentNode.replaceChild(span, inputField);
+                }
+                const sol = item.querySelector('.solution-steps');
+                if (sol) sol.style.display = 'block';
+                item.classList.add('solutions-shown');
+            });
+            
+            const staticHtml = '<!DOCTYPE html>\n' + cloned.outerHTML;
+            const filename = `OrderOfOperationsPractice_${getTimestamp()}.html`;
+            const blob = new Blob([staticHtml], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        // =============================================================
+        // CHECK ANSWERS & SHOW SOLUTIONS
+        // =============================================================
+        function checkAndShowSolutions() { 
+            const items = problemListContainer.querySelectorAll('li');
+            items.forEach(item => {
+                const input = item.querySelector('.user-answer');
+                const sol = item.querySelector('.solution-steps');
+                if (input) { 
+                    input.classList.remove('correct-input', 'incorrect-input'); 
+                    const userStr = input.value;
+                    const correctStr = input.dataset.correctAnswerValue;
+                    if (correctStr !== undefined) { 
+                        const correct = parseFloat(correctStr); 
+                        const user = parseUserFractionInput(userStr); 
+                        let isCorrect = false;
+                        if (Number.isNaN(correct) && Number.isNaN(user)) isCorrect = true;
+                        else if (correct === Infinity && user === Infinity) isCorrect = true;
+                        else if (correct === -Infinity && user === -Infinity) isCorrect = true;
+                        else if (!Number.isNaN(correct) && !Number.isNaN(user) && isFinite(correct) && isFinite(user)) {
+                            isCorrect = Math.abs(user - correct) < EPSILON;
+                        }
+                        input.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                    }
+                }
+                if (sol) sol.style.display = 'block';
+                item.classList.add('solutions-shown');
+            });
+            generateAndDownloadStaticPage();
+            showSolutionsBtn.textContent = 'Solutions Shown / Answers Checked & Saved';
+            showSolutionsBtn.disabled = true; 
+        }
+        // =============================================================
+        // EVENT LISTENERS & INIT
+        // =============================================================
+        generateBtn.addEventListener('click', displayProblems);
+        showSolutionsBtn.addEventListener('click', checkAndShowSolutions); 
+        displayProblems();
+    </script>
+</body>
+</html>
