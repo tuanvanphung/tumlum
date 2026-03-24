@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Arts 125 Mastery Match</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --bg: #f4f7f9;
+            --white: #ffffff;
+            --correct: #27ae60;
+            --wrong: #e74c3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1400px;
+            background: var(--white);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+        }
+
+        h1 { color: var(--primary); margin: 0; font-size: 2.2em; }
+        .instr { color: #666; margin-top: 10px; font-weight: 500; font-size: 1.1em; }
+
+        .unit-nav {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .unit-btn {
+            padding: 12px 18px;
+            border: none;
+            background: #e0e6ed;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+            color: #444;
+        }
+
+        .unit-btn.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .bank-container {
+            position: sticky;
+            top: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #d1d8e0;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bank-title {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #topic-bank {
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 5px;
+        }
+
+        .draggable-topic {
+            background: var(--accent);
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: grab;
+            text-align: center;
+            font-size: 0.95em;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+        }
+
+        .draggable-topic:active { cursor: grabbing; transform: scale(0.98); }
+
+        .match-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .match-card {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 25px;
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #e0e6ed;
+            align-items: center;
+            transition: box-shadow 0.2s;
+        }
+
+        .match-card:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-color: var(--accent); }
+
+        .drop-zone {
+            height: 70px;
+            border: 2px dashed #cbd5e0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            transition: 0.3s;
+        }
+
+        .drop-zone.drag-over { background: #ebf8ff; border-color: var(--accent); }
+
+        .placed-item {
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.1em;
+            text-align: center;
+            padding: 5px;
+        }
+
+        .description-box { font-size: 1em; line-height: 1.6; color: #2d3748; }
+
+        .examples-label {
+            display: block;
+            margin-top: 12px;
+            font-weight: bold;
+            color: #4a5568;
+            background: #edf2f7;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            border-left: 4px solid var(--accent);
+        }
+
+        .submit-section {
+            margin-top: 50px;
+            text-align: center;
+            padding: 30px;
+            border-top: 2px solid #edf2f7;
+        }
+
+        #submit-btn {
+            background: var(--correct);
+            color: white;
+            border: none;
+            padding: 18px 60px;
+            font-size: 1.3em;
+            font-weight: bold;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(39, 174, 96, 0.2);
+            transition: 0.3s;
+        }
+
+        #submit-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(39, 174, 96, 0.3); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Language Arts 7-8 Mastery Match</h1>
+        <p class="instr">Drag Topics to their matching descriptions. This assessment is grouped into 5 thematic units.</p>
+    </header>
+
+    <nav class="unit-nav" id="unit-nav"></nav>
+
+    <div class="game-area">
+        <aside class="bank-container">
+            <div class="bank-title">Available Topics</div>
+            <div id="topic-bank"></div>
+        </aside>
+
+        <main class="match-list" id="match-list"></main>
+    </div>
+
+    <div class="submit-section">
+        <button id="submit-btn">Final Submission & Download Report</button>
+    </div>
+</div>
+
+<script>
+const UNIT_NAMES = ["Mechanics", "Analysis", "Rhetoric", "Research", "Style"];
+const allData = [
+    // UNIT 1: GRAMMAR
+    { id: 1, u: 1, t: "Nouns", d: "These are words used to name a person, place, thing, or idea. They serve as the building blocks for the primary actors in your sentences. Without this part of speech, we wouldn't know who or what the sentence is about.", ex: "1. Astronaut, 2. Paris, 3. Honesty." },
+    { id: 2, u: 1, t: "Verbs", d: "These words express physical action, mental action, or a state of being. Every complete sentence must have this element to show what is happening. They are the 'engines' that drive the meaning of a thought.", ex: "1. Run, 2. Imagine, 3. Is." },
+    { id: 3, u: 1, t: "Adjectives", d: "These are descriptive words that modify or provide more detail about certain other parts of speech. They help the reader visualize specific qualities like size, color, or shape. They usually answer questions like 'Which one?' or 'What kind?'", ex: "1. Enormous, 2. Azure, 3. Grumpy." },
+    { id: 4, u: 1, t: "Adverbs", d: "These words modify actions, qualities, or other modifiers to tell how, when, where, or to what extent. Most are easily identified because they end in '-ly.' They add precision to the behaviors described in writing.", ex: "1. Quickly, 2. Extremely, 3. Yesterday." },
+    { id: 5, u: 1, t: "Pronouns", d: "These are words that take the place of more specific names to avoid repetitive writing. They must always agree in number and gender with the element they replace. Common examples include words like 'he,' 'it,' or 'theirs.'", ex: "1. She, 2. They, 3. Someone." },
+    { id: 6, u: 1, t: "Prepositions", d: "These words show the relationship between a name and another part of the sentence, often regarding time or space. They help establish the 'where' and 'when' of an event. They always begin a phrase that ends with a name or substitute word.", ex: "1. Under, 2. Between, 3. After." },
+    { id: 7, u: 1, t: "Conjunctions", d: "These are connector words that join words, phrases, or clauses together. A common group of these is used to link equal parts of a sentence. They help create flow and prevent choppy writing.", ex: "1. And, 2. But, 3. Because." },
+    { id: 8, u: 1, t: "Interjections", d: "These are words or phrases used to express strong emotion or sudden feeling. They are often followed by an exclamation point and are grammatically independent from the rest of the sentence. They are mostly used in dialogue or informal writing.", ex: "1. Ouch!, 2. Wow!, 3. Hey!" },
+    { id: 9, u: 1, t: "Gerunds", d: "These are action forms ending in '-ing' that function entirely as names for things. Even though they look like actions, they represent a concept or activity. You can use them as the primary actor or the object in a sentence.", ex: "1. Swimming is fun, 2. I enjoy reading, 3. Running burns calories." },
+    { id: 10, u: 1, t: "Participles", d: "These are action forms that act as modifiers to describe a person or object. Present versions end in '-ing,' while past versions usually end in '-ed' or '-en.' They help add descriptive action to a name.", ex: "1. The crying baby, 2. The broken window, 3. A shining star." },
+    { id: 11, u: 1, t: "Infinitives", d: "This is the base form of an action preceded by the word 'to.' They can function as different parts of speech depending on their placement. They often express a purpose or an intended goal.", ex: "1. To sleep, 2. To eat, 3. To win." },
+    { id: 12, u: 1, t: "Subject", d: "This element is the person, place, thing, or idea that is doing or being something in the sentence. It is the 'star' of the sentence that the action revolves around. A simple version is just the name, while a complete version includes all modifiers.", ex: "1. The cat napped, 2. Rain fell, 3. My older brother called." },
+    { id: 13, u: 1, t: "Predicate", d: "This is the part of the sentence that contains the action and tells something about the main actor. It describes the action being taken or the state the actor is in. Every complete sentence must have both this and a main actor.", ex: "1. ...ran home, 2. ...is very tall, 3. ...felt happy." },
+    { id: 14, u: 1, t: "Independent Clause", d: "This is a group of words that contains a main actor and an action and expresses a complete thought. Because it makes sense on its own, it can stand as a simple sentence. It is the fundamental building block of all complex writing.", ex: "1. I like pizza, 2. The sun rose, 3. She laughed." },
+    { id: 15, u: 1, t: "Dependent Clause", d: "These contain a main actor and an action but do not express a complete thought. They usually begin with a 'marker word' like because or while that leaves the reader hanging. They must be attached to a complete thought to be correct.", ex: "1. Because it rained, 2. While I was sleeping, 3. If you go." },
+    { id: 16, u: 1, t: "Simple Sentence", d: "This structure consists of exactly one complete independent thought. It contains a main actor and an action and expresses a single clear idea. While short, they are powerful for making direct points.", ex: "1. The dog barked, 2. Mary smiled, 3. Computers are useful." },
+    { id: 17, u: 1, t: "Compound Sentence", d: "These are created by joining two complete independent thoughts with a comma and a conjunction or a semicolon. They allow writers to link two related ideas of equal importance. They help vary the rhythm of your writing.", ex: "1. I cooked, and he cleaned, 2. It was cold; we wore coats, 3. She studied, but she failed." },
+    { id: 18, u: 1, t: "Complex Sentence", d: "This structure combines one complete independent thought with at least one incomplete thought. This structure shows a relationship where one idea is more important than the other. They are essential for explaining 'why' or 'when' something happened.", ex: "1. Although it was late, he stayed, 2. Since I'm tired, I'm leaving, 3. I ran because I was late." },
+    { id: 19, u: 1, t: "Compound-Complex Sentence", d: "These are the most advanced structures, containing at least two independent thoughts and one dependent thought. They allow for very detailed and sophisticated explanations. Using them shows a high level of writing maturity.", ex: "1. Though he was tired, John went to the gym..., 2. If it rains, the game is canceled..., 3. I forgot my wallet because I was in a rush..." },
+    { id: 20, u: 1, t: "Run-on Sentence", d: "These occur when two or more independent thoughts are joined without any punctuation or connectors. They are common errors that make writing difficult to follow. They should be fixed by adding a period, semicolon, or connector.", ex: "1. I am tired I want to sleep, 2. It is sunny let's go outside, 3. My car broke I need a ride." },
+    { id: 21, u: 1, t: "Sentence Fragment", d: "This is a group of words that is punctuated like a full thought but is missing an actor, an action, or a complete thought. They are 'broken' pieces of ideas that cannot stand alone. To fix them, you must add the missing parts or join them to a nearby full thought.", ex: "1. Walking to the store, 2. Because he was angry, 3. A beautiful day." },
+    { id: 22, u: 1, t: "Comma Splice", d: "This specific error happens when you join two complete thoughts with only a single mark of punctuation and no connector. It is one of the most frequent mistakes in student writing. You can fix it by adding a connector or a stronger stop mark.", ex: "1. I love apples, they are crunchy, 2. The bell rang, we left, 3. He is fast, he won." },
+    { id: 23, u: 1, t: "Semicolon", d: "This punctuation mark is used to connect two independent thoughts that are closely related. It acts as a 'stronger comma' but a 'weaker period.' It helps keep two ideas together without starting a brand new statement.", ex: "1. My dad is a chef; he makes great pasta, 2. Winter is coming; it's getting cold, 3. I have a test tomorrow; I need to study." },
+    { id: 24, u: 1, t: "Colon", d: "This mark is used to introduce a list, a long quote, or an explanation after a complete statement. It signals to the reader that 'here is the information I promised.' It should only follow a phrase that could stand as its own full thought.", ex: "1. Bring three items: a tent, a bag, and a lamp, 2. He had one goal: success, 3. The teacher said: 'Please sit down.'" },
+    { id: 25, u: 1, t: "Dash", d: "These are used to signal a sudden interruption in thought or to emphasize a specific part of a statement. They are more dramatic than commas and add a conversational tone. They can also be used to set off extra info with emphasis.", ex: "1. The cake—which was chocolate—was delicious, 2. He was my friend—or so I thought, 3. Everything—the house, the car, the yard—was gone." },
+    { id: 26, u: 1, t: "Ellipsis", d: "These three dots indicate that words have been omitted from a direct quote or that a thought is trailing off. In research, they help keep quotes concise by removing unnecessary filler. In creative writing, they create suspense or a pause.", ex: "1. 'Four score and seven years ago... our fathers...', 2. I was wondering..., 3. The secret is..." },
+    { id: 27, u: 1, t: "Active Voice", d: "In this style, the main actor of the sentence performs the action. This makes writing direct, clear, and more engaging for the reader. Most academic teachers prefer this style over its opposite.", ex: "1. The chef prepared the meal, 2. I wrote the letter, 3. The dog chased the ball." },
+    { id: 28, u: 1, t: "Passive Voice", d: "In this style, the main actor receives the action rather than doing it. This often makes statements wordier and less clear. It is used when the 'doer' of the action is unknown or less important than the object.", ex: "1. The meal was prepared by the chef, 2. The letter was written by me, 3. The ball was chased by the dog." },
+    { id: 29, u: 1, t: "Subject-Verb Agreement", d: "This rule states that a singular actor must have a singular action, and a plural actor must have a plural action. It is a fundamental rule that ensures sentences sound correct. Errors usually happen when words come between the actor and the action.", ex: "1. The boy runs, 2. The boys run, 3. She is happy." },
+    { id: 30, u: 1, t: "Pronoun-Antecedent Agreement", d: "This requires a substitute word to match the name it replaces in both number and gender. If the name is singular, the substitute must also be singular. If this rule is broken, the statement becomes confusing for the reader.", ex: "1. Sarah forgot her bag, 2. The students did their homework, 3. The dog wagged its tail." },
+    { id: 31, u: 1, t: "Parallel Structure", d: "This means using the same grammatical pattern for all items in a list or comparison. It creates a sense of balance and rhythm in your writing. If this is missing, the writing sounds awkward and clunky.", ex: "1. I like hiking, biking, and swimming, 2. To be honest and to be kind..., 3. He was quick, smart, and brave." },
+    { id: 32, u: 1, t: "Appositive", d: "This is a name or phrase that renames another name right next to it. It provides extra information about a person or object without starting a new sentence. They are usually set off by commas.", ex: "1. My dog, a beagle, is loud, 2. Mr. Smith, the teacher, is nice, 3. The capital, Paris, is beautiful." },
+
+    // UNIT 2: ANALYSIS
+    { id: 33, u: 2, t: "Exposition", d: "This is the beginning of the story where the author introduces the people, the place, and the basic situation. It provides the background information necessary to understand the upcoming struggle. Without this clear opening, the reader may feel lost.", ex: "1. Intro of Harry Potter at Dursleys, 2. Description of District 12, 3. Meeting the kids in The Outsiders." },
+    { id: 34, u: 2, t: "Rising Action", d: "This part of the timeline develops the struggle through a series of events that build suspense. It is usually the longest part of a story. During this stage, the main figure faces obstacles that lead toward the high point.", ex: "1. Cinderella's sisters stopping her, 2. Tributes training, 3. Journey toward Mount Doom." },
+    { id: 35, u: 2, t: "Climax", d: "This is the turning point and the most intense moment of the story. It is the point where the main struggle is finally addressed or the figure makes a life-changing decision. Everything in the story builds up to this specific moment.", ex: "1. Final battle Harry vs Voldemort, 2. Wolf blowing down house of bricks, 3. Katniss and Peeta with the berries." },
+    { id: 36, u: 2, t: "Falling Action", d: "These are the events that occur immediately after the turning point as the tension begins to ease. It shows the consequences of the high point and how the people are dealing with the outcome. It leads the story toward its final end.", ex: "1. Cinderella trying on slipper, 2. Tributes rescued from arena, 3. Hobbits returning home." },
+    { id: 37, u: 2, t: "Resolution", d: "This is the end of the story where the loose ends are tied up and the struggle is finally settled. It provides the reader with a sense of closure, even if the ending is sad. It often reveals how the people have changed.", ex: "1. Living happily ever after, 2. War finally ending, 3. Protagonist reflecting on change." },
+    { id: 38, u: 2, t: "Protagonist", d: "This is the main figure of the story who drives the plot forward. They are the person the audience usually roots for, even if they aren't perfect. The story is centered around their growth or struggle.", ex: "1. Harry Potter, 2. Luke Skywalker, 3. Wonder Woman." },
+    { id: 39, u: 2, t: "Antagonist", d: "This is the force or person that works against the main figure. They create the obstacles and struggle that the lead must overcome. This can be a villain, but can also be a group or even a force of nature.", ex: "1. Lord Voldemort, 2. Darth Vader, 3. The Joker." },
+    { id: 40, u: 2, t: "Internal Conflict", d: "This is a struggle that takes place inside a person's mind. It involves making difficult choices or battling emotions like fear, guilt, or doubt. This type of struggle is essential for deep development of a person.", ex: "1. Choosing between two friends, 2. Overcoming a fear of heights, 3. Battling the urge to lie." },
+    { id: 41, u: 2, t: "Man vs. Man", d: "This is a struggle between two people, usually the lead and their opponent. It can be a physical fight, a verbal argument, or a competition. It is the most common form of struggle in literature.", ex: "1. A boxing match, 2. Two students arguing, 3. A sword fight." },
+    { id: 42, u: 2, t: "Man vs. Nature", d: "In this struggle, a person fights against outside forces like weather, animals, or survival. It tests the person's physical strength and willpower. It often highlights the power of the natural world.", ex: "1. A sailor in a storm, 2. A hiker lost in the woods, 3. A town surviving a volcano." },
+    { id: 43, u: 2, t: "Man vs. Society", d: "This occurs when a person fights against laws, traditions, or social expectations. It often involves a lead who believes something is wrong with the way the world works. This struggle is common in 'Dystopian' novels.", ex: "1. Fighting a corrupt government, 2. Breaking an unfair tradition, 3. Standing up for an unpopular belief." },
+    { id: 44, u: 2, t: "Setting", d: "This includes the time, place, and social environment in which a story occurs. It influences the mood of the story and the behavior of the people in it. A well-described version of this can feel like its own character.", ex: "1. London in the 1800s, 2. A futuristic colony on Mars, 3. A small, creepy forest cabin." },
+    { id: 45, u: 2, t: "1st Person POV", d: "The narrator is a person in the story and uses pronouns like 'I' and 'me.' This allows the reader to see that person's private thoughts and feelings directly. However, the teller might be biased or limited in what they know.", ex: "1. 'I walked down the street', 2. 'I felt my heart race', 3. 'My mother told me to wait.'" },
+    { id: 46, u: 2, t: "3rd Person Limited", d: "The teller is outside the story and uses pronouns like 'he' or 'she.' This perspective focuses on the thoughts and feelings of only one person. It gives a broad view of the action while keeping an emotional connection to the lead.", ex: "1. 'He wondered if she liked him', 2. 'Sarah felt nervous', 3. 'Tom didn't know what was behind the door.'" },
+    { id: 47, u: 2, t: "3rd Person Omniscient", d: "The teller is 'all-knowing' and can describe the thoughts and feelings of every person. This perspective provides the most objective and complete view of the story's world. It allows the author to jump between different locations and people easily.", ex: "1. 'The teacher was angry, but kids excited', 2. 'While Jack planned, guards slept', 3. 'Everyone in the room had a secret.'" },
+    { id: 48, u: 2, t: "Tone", d: "This is the author’s attitude toward the subject or the audience. It is conveyed through word choice and writing style. For example, an author can write about a serious topic in a humorous or sarcastic manner.", ex: "1. Sarcastic, 2. Joyful, 3. Critical." },
+    { id: 49, u: 2, t: "Mood", d: "This is the emotional atmosphere created for the reader. While one element is the author's feeling, this is the reader's feeling. Place, imagery, and word choice all contribute to this feeling.", ex: "1. Eerie, 2. Hopeful, 3. Gloomy." },
+    { id: 50, u: 2, t: "Foreshadowing", d: "This is a device where the author gives hints or clues about what will happen later in the story. It builds suspense and prepares the reader for the turning point. If a person mentions a 'strange feeling,' it is often an example of this.", ex: "1. Mentioning a broken gun early, 2. Dark clouds gathering before disaster, 3. A fortune teller’s warning." },
+    { id: 51, u: 2, t: "Flashback", d: "This interrupts the chronological flow of a story to show an event that happened in the past. It helps explain a person's current motivations or provides necessary background info. It often helps the reader understand trauma or secrets.", ex: "1. Soldier remembering a battle, 2. Man recalling childhood home, 3. Seeing how a villain became evil." },
+    { id: 52, u: 2, t: "Situational Irony", d: "This occurs when the outcome of an event is the exact opposite of what was expected. It is often used to surprise the reader or make a point about life's unpredictability. It is not just 'bad luck'; it must be a total reversal.", ex: "1. A fire station burning down, 2. A pilot with a fear of heights, 3. A police station being robbed." },
+    { id: 53, u: 2, t: "Verbal Irony", d: "This is when a person says one thing but means the complete opposite. It is very similar to sarcasm. The person's manner of speaking usually helps the reader understand the true meaning.", ex: "1. Saying 'Great weather!' in hurricane, 2. Saying 'I love cleaning!' while frowning, 3. Calling a giant dog 'Tiny.'" },
+    { id: 54, u: 2, t: "Dramatic Irony", d: "This happens when the audience knows something that the people in the story do not. It creates tension and suspense because the reader can see a disaster coming. It is a favorite tool in horror and classic plays.", ex: "1. Audience knowing the killer is in closet, 2. Knowing a character walks into a surprise party, 3. Knowing Juliet isn't actually dead." },
+    { id: 55, u: 2, t: "Symbolism", d: "This occurs when an object, person, or place represents a deeper, abstract idea. For example, a red flower might represent love, while a storm might represent internal chaos. This helps authors communicate complex ideas without saying them directly.", ex: "1. A dove (peace), 2. A lightbulb (a new idea), 3. Chains (loss of freedom)." },
+    { id: 56, u: 2, t: "Direct Characterization", d: "This is when the author explicitly tells the reader what a person is like. There is no guesswork involved because the traits are stated clearly. It is often used to establish a person's nature quickly.", ex: "1. 'He was a mean man', 2. 'She was smartest girl', 3. 'The knight was brave.'" },
+    { id: 57, u: 2, t: "Indirect Characterization", d: "This is when the author shows a person's traits through their speech, thoughts, effects on others, actions, and looks. The reader must make an inference about what the person is like. This makes the figure feel more realistic and complex.", ex: "1. Sharing lunch (kindness), 2. Hands shaking (nervousness), 3. Ignoring a person in need (selfishness)." },
+    { id: 58, u: 2, t: "Static Character", d: "This type of figure remains essentially the same throughout the entire story. Their personality, beliefs, and goals do not change despite the events of the plot. They often serve as background figures or opposites to the lead.", ex: "1. Sherlock Holmes, 2. Lord Voldemort, 3. Scar from The Lion King." },
+    { id: 59, u: 2, t: "Dynamic Character", d: "This type of figure undergoes a significant internal change over the course of the story. This change is usually a result of the struggle they faced. Growth, maturity, or a change in perspective are signs of this.", ex: "1. Ebenezer Scrooge, 2. Simba, 3. Katniss Everdeen." },
+    { id: 60, u: 2, t: "Theme", d: "This is the central message or 'big idea' that the author wants the reader to take away from the story. It is not a summary of the plot, but a statement about human nature or life. Common versions include 'The power of friendship' or 'The danger of greed.'", ex: "1. Love conquers all, 2. Treat others well, 3. Courage is facing your fears." },
+    { id: 61, u: 2, t: "Ambiguity", d: "This is when a part of a story is left intentionally unclear. It allows for multiple interpretations by the reader. This challenges the reader to think deeply about what might have happened.", ex: "1. Story ending before a character speaks, 2. Motives never explained, 3. Ending that could be a dream." },
+    { id: 62, u: 2, t: "Soliloquy", d: "This is a long speech delivered by a person who is alone on stage. It reveals that person's innermost thoughts and secrets to the audience. It is a common device in classic plays.", ex: "1. Hamlet’s 'To be or not to be', 2. Romeo talking to himself, 3. Villain explaining plan to empty air." },
+    { id: 63, u: 2, t: "Monologue", d: "Similar to a private stage speech, this is a long speech by one person, but it is directed at others on stage. It is used to express a strong opinion or tell a detailed story. It is a 'one-sided' conversation.", ex: "1. A coach giving a pep-talk, 2. Hero explaining backstory, 3. Lawyer's closing argument." },
+    { id: 64, u: 2, t: "Aside", d: "This is a short comment made by a person directly to the audience that the other people 'cannot hear.' It provides a quick glimpse into the person's true feelings or reactions. It breaks the 'fourth wall' between the story and the viewer.", ex: "1. Eye roll to audience, 2. 'I knew this would happen' to camera, 3. Explaining secret plan." },
+    { id: 65, u: 2, t: "Stage Directions", d: "These are instructions in a script that tell actors how to move, look, or speak. They are usually written in italics and are not meant to be spoken aloud. They help the reader or actor visualize the physical action.", ex: "1. (Exit, stage left), 2. (He whispers quietly), 3. (A loud crash is heard)." },
+
+    // UNIT 3: RHETORIC
+    { id: 66, u: 3, t: "Thesis Statement", d: "This is the single most important sentence in an essay. It clearly states your main argument and provides a roadmap for the rest of your writing. It usually appears at the very end of the introduction.", ex: "1. 'Uniforms should be banned because...', 2. 'Dogs make better pets...', 3. 'Recycling is essential...'" },
+    { id: 67, u: 3, t: "Claim", d: "This is a statement that you believe to be true and that you intend to prove. In an argument, this must be 'debatable,' meaning someone could reasonably disagree with it. Every body paragraph should support this main point.", ex: "1. 'Video games improve skills', 2. 'Soda should be taxed', 3. 'Summer break is too long.'" },
+    { id: 68, u: 3, t: "Evidence", d: "This consists of facts, statistics, quotes, or examples that support your point. Without this, an argument is just an opinion. In high school, you must cite this to show where you found it.", ex: "1. NASA study, 2. '80% of students agreed', 3. 'The text states on page 5...'" },
+    { id: 69, u: 3, t: "Reasoning (Warrant)", d: "This is the part of your argument where you explain how your facts prove your point. It connects the dots for the reader so they don't have to guess your logic. It is the 'bridge' between the facts and your opinion.", ex: "1. 'This data proves that...', 2. 'Because the author used this...', 3. 'This example shows why...'" },
+    { id: 70, u: 3, t: "Counter-argument", d: "This is when you acknowledge the opposing side’s viewpoint. Doing this shows that you have researched the topic thoroughly and are being fair. It makes your own argument look stronger.", ex: "1. 'Some might argue uniforms save time', 2. 'Opponents believe...', 3. 'While it is true that...'" },
+    { id: 71, u: 3, t: "Rebuttal", d: "This follows the acknowledgment of the other side and explains why the opposing view is wrong or weak. This is your chance to 'defeat' the other side's logic. A strong version of this is the key to winning an argument.", ex: "1. 'However, this is incorrect because...', 2. 'Logic fails to consider...', 3. 'While true, evidence shows...'" },
+    { id: 72, u: 3, t: "Ethos", d: "This is an appeal to ethics, character, or credibility. It involves proving that you (or your source) are trustworthy and know what you're talking about. People are more likely to believe an expert than a random person.", ex: "1. 'As a doctor with 30 years exp...', 2. 'I have studied this for a decade', 3. 'Being a victim, I know...'" },
+    { id: 73, u: 3, t: "Pathos", d: "This is an appeal to the audience's emotions. It uses stories, vivid language, or sad images to make the reader feel something. These appeals can be very powerful but should be used carefully in academic writing.", ex: "1. 'Think of starving children', 2. 'Imagine the fear in their eyes', 3. 'Our homes will be destroyed.'" },
+    { id: 74, u: 3, t: "Logos", d: "This is an appeal to logic, reason, and facts. It uses data, statistics, and clear 'if/then' statements to convince the reader. This is generally considered the strongest type of appeal in formal essays.", ex: "1. 'Data shows 20% increase', 2. 'If A equals B, then C...', 3. 'Factually speaking...'" },
+    { id: 75, u: 3, t: "Rhetorical Question", d: "This is a question asked for effect or to make a point, rather than to get a real answer. It forces the reader to think about a topic in a specific way. It is a common tool in speeches and persuasive writing.", ex: "1. 'Want to live in fear?', 2. 'Can we afford to wait?', 3. 'Who wouldn't save a life?'" },
+    { id: 76, u: 3, t: "Purpose: Persuade", d: "The author's goal is to convince the reader to do something or believe in a certain idea. This is common in advertisements, political speeches, and opinion pieces. The writing is usually biased in favor of one side.", ex: "1. Campaign speech, 2. Cereal commercial, 3. Letter to principal." },
+    { id: 77, u: 3, t: "Purpose: Inform", d: "The author’s goal is to provide facts and explain a topic without giving an opinion. This type of writing is usually objective and straightforward. You find this in textbooks and news reports.", ex: "1. Encyclopedia entry, 2. Recipe for cake, 3. History textbook." },
+    { id: 78, u: 3, t: "Purpose: Entertain", d: "The author writes to tell a story or provide enjoyment for the reader. This is the primary goal of most fiction books, poems, and plays. The focus is on the experience of reading rather than learning facts.", ex: "1. Mystery novel, 2. Comic book, 3. Funny poem." },
+    { id: 79, u: 3, t: "Bias", d: "This is a prejudice in favor of or against one thing, person, or group, usually in a way considered to be unfair. It means the author is not being objective. Recognizing this is a critical skill for evaluating sources.", ex: "1. Fan writing on favorite team, 2. Politician attacking rival, 3. Company praising own product." },
+    { id: 80, u: 3, t: "Objective", d: "Writing that is like this is based on cold, hard facts and does not include personal feelings or opinions. It is 'unbiased' and fair. Science reports and dictionaries are examples of this style of writing.", ex: "1. 'Temperature is 70 degrees', 2. 'Book has 300 pages', 3. 'Water freezes at 32.'" },
+    { id: 81, u: 3, t: "Subjective", d: "Writing like this is based on or influenced by personal tastes, feelings, or opinions. It tells you how someone feels about a fact rather than just stating the fact. Reviews and diaries are usually in this style.", ex: "1. 'Movie was boring', 2. 'Beautiful painting', 3. 'Test was too hard.'" },
+    { id: 82, u: 3, t: "Main Idea", d: "This is the most important point an author is making in a specific paragraph or section. It is the 'point' of the writing. It is usually supported by several smaller pieces of information.", ex: "1. 'Wolves essential to ecosystem', 2. 'Invention changed the world', 3. 'Exercise helps mental health.'" },
+    { id: 83, u: 3, t: "Supporting Details", d: "These are specific facts or examples that explain and 'prove' the central point. They add depth to your writing and help the reader understand the 'why' and 'how.' A paragraph without these is empty and weak.", ex: "1. 'Wolves control deer population', 2. 'Lightbulb allowed night factory work', 3. 'Endorphins released during running.'" },
+    { id: 84, u: 3, t: "Cause and Effect", d: "This text structure explains why something happened and what the result was. It shows the relationship between an event and its consequence. Words like because, since, and as a result signal this structure.", ex: "1. It rained, so ground got wet, 2. Studied hard and got an A, 3. Oven left on causing fire." },
+    { id: 85, u: 3, t: "Compare and Contrast", d: "This structure examines the similarities and differences between two or more things. It helps the reader understand a topic by placing it next to something familiar. Specific diagrams are often used to organize this type of thinking.", ex: "1. Apples and oranges diff skin, 2. HS harder than MS, 3. Gas vs Electric cars." },
+    { id: 86, u: 3, t: "Chronological Order", d: "This is the arrangement of events in the order in which they happened in time. It is common in history books, biographies, and instructions. Signal words include first, next, then, and finally.", ex: "1. Timeline of war, 2. Recipe for bread, 3. Life story of famous person." },
+
+    // UNIT 4: RESEARCH
+    { id: 87, u: 4, t: "Plagiarism", d: "This is the act of taking someone else's work or ideas and passing them off as your own. It is a serious academic offense that can lead to failing grades or expulsion. You must always give credit to your sources to avoid it.", ex: "1. Copying from Wikipedia, 2. Using a friend’s essay, 3. Quote without citation." },
+    { id: 88, u: 4, t: "Paraphrasing", d: "This is the process of rewriting a passage from a source in your own words. Even though the words are yours, the idea still belongs to the original author, so you still need a citation. It shows you actually understand the material.", ex: "1. Summarizing into one sentence, 2. Explaining science simply, 3. Retelling news story." },
+    { id: 89, u: 4, t: "MLA Format", d: "This is a specific set of rules for formatting academic papers and citing sources. It includes rules for margins, font size, and headers. Following this makes your paper look professional.", ex: "1. Double-spaced lines, 2. 1-inch margins, 3. Name top left." },
+    { id: 90, u: 4, t: "In-text Citation", d: "This is a brief reference within your essay that tells the reader exactly where a piece of information came from. In a common style, it usually consists of the author's last name and the page number. Every time you quote or restate, you must use one.", ex: "1. (Smith 42), 2. (García 101), 3. (Johnson 12)." },
+    { id: 91, u: 4, t: "Works Cited", d: "This is a list at the very end of your essay that provides full bibliographic information for every source you mentioned. It allows the reader to find your sources for themselves. It must be organized in alphabetical order.", ex: "1. Website list, 2. Book list, 3. Interview list." },
+    { id: 92, u: 4, t: "Primary Source", d: "This is an original document or object created at the time of an event. It is 'first-hand' evidence. Examples include diaries, letters, photographs, and original speeches.", ex: "1. The Constitution, 2. Anne Frank's Diary, 3. Photo of moon landing." },
+    { id: 93, u: 4, t: "Secondary Source", d: "This is a document that analyzes or interprets an original document. It is 'second-hand' information created by someone who did not experience the event personally. Textbooks and encyclopedias are common versions.", ex: "1. History textbook on WWII, 2. Biography of Washington, 3. Movie review." },
+    { id: 94, u: 4, t: "Credibility", d: "This refers to how trustworthy and believable a source is. When researching, you must check the author’s expertise and the date the info was published. Specific web domains like .gov or .edu are generally better.", ex: "1. Article by professor, 2. Report from CDC, 3. Peer-reviewed journal." },
+    { id: 95, u: 4, t: "Annotation", d: "This is the act of taking notes directly on a text while you read. It involves underlining key points, circling unknown words, and writing questions in the margins. It is the best way to ensure active engagement.", ex: "1. Highlighting thesis, 2. Writing 'True!' in margin, 3. Circling unknown word." },
+
+    // UNIT 5: STYLE
+    { id: 96, u: 5, t: "Simile", d: "This is a comparison between two unlike things using the words 'like' or 'as.' It helps the reader understand a concept by linking it to something familiar. These are very common in both poetry and everyday speech.", ex: "1. Busy as a bee, 2. Quiet like a mouse, 3. Strong as an ox." },
+    { id: 97, u: 5, t: "Metaphor", d: "A direct comparison between two unlike things without using 'like' or 'as.' It states that one thing is another thing. These are often more powerful and symbolic than other simple comparisons.", ex: "1. Snow is a white blanket, 2. You are my sunshine, 3. Life is a highway." },
+    { id: 98, u: 5, t: "Personification", d: "This is when you give human qualities or emotions to non-human things, like animals or objects. It helps the reader relate to the world in a more personal way. It makes descriptions more vivid and imaginative.", ex: "1. Wind whispered, 2. Sun smiled down, 3. Engine groaned." },
+    { id: 99, u: 5, t: "Hyperbole", d: "This is an extreme exaggeration used to make a point or add emphasis. It is not meant to be taken literally. It is often used for humor or to show strong emotion.", ex: "1. Hungry I could eat a horse, 2. Bag weighs a ton, 3. Told you a million times." },
+    { id: 100, u: 5, t: "Onomatopoeia", d: "These are words that imitate the natural sounds of a thing. They create a sound effect that mimics the thing described. They make writing more sensory and 'loud.'", ex: "1. Buzz, 2. Bang, 3. Sizzle." },
+    { id: 101, u: 5, t: "Alliteration", d: "The repetition of the same consonant sound at the beginning of several words in a row. It creates a musical or rhythmic effect in writing. It is a favorite tool of poets and advertisers.", ex: "1. Peter Piper picked, 2. Seven silver swans, 3. Big bad bear." },
+    { id: 102, u: 5, t: "Allusion", d: "A brief and indirect reference to a person, place, thing, or idea of historical or literary significance. It assumes the reader has enough background knowledge. Common references involve the Bible or myths.", ex: "1. Real Romeo, 2. Garden of Eden, 3. Don't be a Scrooge." },
+    { id: 103, u: 5, t: "Idiom", d: "An expression where the meaning is not literal and cannot be understood by looking at the individual words. Every language has its own unique versions of these. They add flavor and personality to writing.", ex: "1. Piece of cake, 2. Break a leg, 3. Under the weather." },
+    { id: 104, u: 5, t: "Imagery", d: "Vivid and descriptive language that appeals to the five senses. It helps the reader create a 'mental movie' of what is happening. High-quality use of this makes a story feel real.", ex: "1. Golden sun dipped, 2. Sweet smell of cookies, 3. Icy wind bit my nose." },
+    { id: 105, u: 5, t: "Oxymoron", d: "A figure of speech in which two contradictory terms appear side by side. It is often used to show a complex truth or to create a dramatic effect. It sounds like a paradox in just two words.", ex: "1. Jumbo shrimp, 2. Deafening silence, 3. Bitter sweet." },
+    { id: 106, u: 5, t: "Euphemism", d: "A mild or indirect word used in place of one considered to be too harsh or blunt. It is often used to talk about uncomfortable topics like death. It makes language sound more polite.", ex: "1. 'Passed away' for died, 2. 'Let go' for fired, 3. 'Pre-owned' for used." },
+    { id: 107, u: 5, t: "Pun", d: "A joke based on the different possible meanings of a word or sounds that are similar. These are often called 'the lowest form of wit' but are very popular for humor.", ex: "1. Vacuum sucks, 2. Book on anti-gravity, 3. Bicycle is two-tired." },
+    { id: 108, u: 5, t: "Consonance", d: "The repetition of consonant sounds anywhere within words (not just at the beginning). It creates a subtle, pleasing sound in poetry. It is often confused with other sound-repetition tools.", ex: "1. Pitter patter, 2. All's well ends well, 3. Lumpy bumpy road." },
+    { id: 109, u: 5, t: "Assonance", d: "The repetition of vowel sounds within nearby words. It creates a sense of internal rhyme and rhythm. It is primarily used in poetry and song lyrics.", ex: "1. Rain in Spain stays mainly, 2. Go slow over the road, 3. Light of the fire is bright." },
+    { id: 110, u: 5, t: "Stanza", d: "This is a group of lines in a poem, similar to a paragraph in an essay. These are separated by spaces and often follow a specific pattern. They help organize the ideas of a poem.", ex: "1. Couplet (2 lines), 2. Quatrain (4 lines), 3. Sestet (6 lines)." },
+    { id: 111, u: 5, t: "Meter", d: "The rhythmic structure of a poem, determined by the arrangement of stressed and unstressed syllables. It is the 'beat' of the poem. One specific version is very famous in classic drama.", ex: "1. Da-DUM da-DUM, 2. Beat of a heart, 3. Ticking clock." },
+    { id: 112, u: 5, t: "Sonnet", d: "A specific type of poem consisting of 14 lines and a strict pattern. One famous writer is known for using this form to discuss love. They usually end with two lines that provide a final thought.", ex: "1. Sonnet 18, 2. Poem with 14 lines, 3. ABAB CDCD pattern." },
+    { id: 113, u: 5, t: "Free Verse", d: "Poetry that does not have a regular rhythm or rhyme scheme. It follows the natural flow of speech. This allows the poet to focus on emotion without being restricted by rules.", ex: "1. Looks like paragraph, 2. No rhyming words, 3. Modern poetry." },
+    { id: 114, u: 5, t: "Rhyme Scheme", d: "The ordered pattern of sounds at the ends of the lines of a poem. We use letters to map out these patterns. For example, one pattern means the first two lines match and the next two lines match.", ex: "1. AABB, 2. ABAB, 3. ABCB." },
+    { id: 115, u: 5, t: "Denotation", d: "The literal, 'dictionary' definition of a word. It is the objective meaning without any emotional baggage. Most words have one version of this but many emotional associations.", ex: "1. Home: Place where lives, 2. Snake: Reptile, 3. Blue: Primary color." },
+    { id: 116, u: 5, t: "Connotation", d: "The emotional or cultural feeling associated with a word. For example, one word for a house has a positive feeling, while another has a negative feeling. Writers choose words based on these to influence mood.", ex: "1. Skinny vs Slender, 2. Stubborn vs Persistent, 3. Nosy vs Inquisitive." },
+    { id: 117, u: 5, t: "Diction", d: "This refers to the author's specific choice of words. It can be formal, informal, or slang-heavy. This is what creates the author's unique 'voice.'", ex: "1. 'Apparel' vs 'clothes', 2. 'Kid' vs 'child', 3. 'Y'all' vs 'you all.'" },
+    { id: 118, u: 5, t: "Syntax", d: "This is the way words are put together to form phrases and sentences. It is the 'math' of grammar. Changing this can change the emphasis or meaning of a sentence.", ex: "1. Boy hit ball vs ball hit boy, 2. Short punchy sentences, 3. Long flowing sentences." },
+    { id: 119, u: 5, t: "Context Clues", d: "These are hints found within a text that help you figure out the meaning of an unknown word. They can be synonyms, antonyms, or examples. Using these is a faster way to read.", ex: "1. 'Furious, or very angry', 2. 'Cheerful vs morose', 3. 'Terrain was rocky.'" },
+    { id: 120, u: 5, t: "Root Word", d: "The most basic part of a word that carries the main meaning. Many English versions come from Greek or Latin. If you know this, you can often guess the meaning of related words.", ex: "1. Bio (life), 2. Graph (write), 3. Phon (sound)." },
+    { id: 121, u: 5, t: "Prefix", d: "A group of letters added to the beginning of a word to change its meaning. For example, one of these means 'not.' Knowing these helps you quickly expand your vocabulary.", ex: "1. Preview, 2. Unhappy, 3. Redo." },
+    { id: 122, u: 5, t: "Suffix", d: "A group of letters added to the end of a word. These often change the word's part of speech. For example, one of these means 'without.'", ex: "1. Hopeless, 2. Quickly, 3. Teacher." },
+    { id: 123, u: 5, t: "Synonym", d: "A word that means the same, or nearly the same, as another word. Using these helps you avoid repeating yourself in an essay. They allow for more precise descriptions.", ex: "1. Happy/Joyful, 2. Fast/Quick, 3. Big/Large." },
+    { id: 124, u: 5, t: "Antonym", d: "A word that means the opposite of another word. These are useful for showing contrast in your writing. They help define a concept by showing what it is not.", ex: "1. Hot/Cold, 2. Brave/Cowardly, 3. Fast/Slow." },
+    { id: 125, u: 5, t: "Formal Tone", d: "This is a style of writing used for academic and professional purposes. It avoids slang, contractions, and first-person pronouns. It makes your writing sound serious and authoritative.", ex: "1. 'It is important', 2. 'Do not', 3. 'Results indicate'." }
+];
+
+// App State
+let userAnswers = {}; // id: topic_text
+
+// DOM Elements
+const unitNav = document.getElementById('unit-nav');
+const topicBank = document.getElementById('topic-bank');
+const matchList = document.getElementById('match-list');
+const submitBtn = document.getElementById('submit-btn');
+
+function init() {
+    UNIT_NAMES.forEach((name, i) => {
+        const btn = document.createElement('button');
+        btn.className = `unit-btn ${i === 0 ? 'active' : ''}`;
+        btn.innerText = `Unit ${i+1}: ${name}`;
+        btn.onclick = () => switchUnit(i + 1);
+        unitNav.appendChild(btn);
+    });
+    renderUnit(1);
+}
+
+function switchUnit(num) {
+    document.querySelectorAll('.unit-btn').forEach((b, idx) => b.classList.toggle('active', idx + 1 === num));
+    renderUnit(num);
+    window.scrollTo(0, 0);
+}
+
+function renderUnit(unitId) {
+    const data = allData.filter(item => item.u === unitId);
+    topicBank.innerHTML = '';
+    matchList.innerHTML = '';
+
+    const placedTopics = Object.values(userAnswers);
+    const available = data.filter(item => !placedTopics.includes(item.t)).map(i => i.t).sort(() => Math.random() - 0.5);
+
+    available.forEach(tText => {
+        const div = document.createElement('div');
+        div.className = 'draggable-topic';
+        div.innerText = tText;
+        div.draggable = true;
+        div.ondragstart = (e) => e.dataTransfer.setData('text', tText);
+        topicBank.appendChild(div);
+    });
+
+    data.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'match-card';
+        const dropZone = document.createElement('div');
+        dropZone.className = 'drop-zone';
+        dropZone.dataset.id = item.id;
+
+        if (userAnswers[item.id]) {
+            const placed = document.createElement('div');
+            placed.className = 'placed-item';
+            placed.innerText = userAnswers[item.id];
+            placed.onclick = () => { delete userAnswers[item.id]; renderUnit(unitId); };
+            dropZone.appendChild(placed);
+        }
+
+        dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); };
+        dropZone.ondragleave = () => dropZone.classList.remove('drag-over');
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            const tText = e.dataTransfer.getData('text');
+            for (let key in userAnswers) { if (userAnswers[key] === tText) delete userAnswers[key]; }
+            userAnswers[item.id] = tText;
+            renderUnit(unitId);
+        };
+
+        const desc = document.createElement('div');
+        desc.className = 'description-box';
+        desc.innerHTML = `${item.d} <span class="examples-label">Examples: ${item.ex}</span>`;
+
+        card.appendChild(dropZone);
+        card.appendChild(desc);
+        matchList.appendChild(card);
+    });
+}
+
+function getTimestamp() {
+    const now = new Date();
+    const pad = (n) => n.toString().padStart(2, '0');
+    const yymmdd = now.getFullYear().toString().slice(2) + pad(now.getMonth() + 1) + pad(now.getDate());
+    const hhmm = pad(now.getHours()) + pad(now.getMinutes());
+    return `${yymmdd}_${hhmm}`;
+}
+
+submitBtn.onclick = () => {
+    const ts = getTimestamp();
+    const currentFileName = window.location.pathname.split('/').pop().split('.')[0] || "LA_Mastery_Test";
+    const reportFileName = `${currentFileName}_${ts}.html`;
+    
+    let totalCorrect = 0;
+    let sectionsHtml = '';
+
+    for (let uIdx = 1; uIdx <= 5; uIdx++) {
+        const unitData = allData.filter(item => item.u === uIdx);
+        let rows = '';
+        let unitCorrect = 0;
+
+        unitData.forEach(item => {
+            const studentAns = userAnswers[item.id] || "No Answer";
+            const isCorrect = studentAns === item.t;
+            if (isCorrect) { unitCorrect++; totalCorrect++; }
+
+            let review = isCorrect ? "Result: Perfect Match." : 
+                        (studentAns === "No Answer" ? "Result: Blank." : 
+                        `Review: Your selection "${studentAns}" actually defines: <em>"${allData.find(x => x.t === studentAns)?.d || 'N/A'}"</em>`);
+
+            rows += `
+                <tr style="background: ${isCorrect ? '#f0fff4' : '#fff5f5'}">
+                    <td style="padding:12px; border:1px solid #cbd5e0; font-weight:bold; width:15%;">${item.t}</td>
+                    <td style="padding:12px; border:1px solid #cbd5e0; width:15%;">${studentAns}</td>
+                    <td style="padding:12px; border:1px solid #cbd5e0; text-align:center; width:5%;">${isCorrect ? '✅' : '❌'}</td>
+                    <td style="padding:12px; border:1px solid #cbd5e0; width:35%; font-size:0.9em;">${item.d}<br><strong>Ex:</strong> ${item.ex}</td>
+                    <td style="padding:12px; border:1px solid #cbd5e0; width:30%; font-size:0.85em; color:#4a5568;">${review}</td>
+                </tr>`;
+        });
+
+        sectionsHtml += `
+            <div style="margin-top:40px;">
+                <h2 style="background:#edf2f7; padding:10px; border-left:5px solid #2d3748; color:#2d3748;">Unit ${uIdx}: ${UNIT_NAMES[uIdx-1]} (${unitCorrect}/${unitData.length})</h2>
+                <table style="width:100%; border-collapse: collapse; margin-top:10px;">
+                    <thead style="background:#4a5568; color:white;">
+                        <tr>
+                            <th>Topic</th><th>Your Answer</th><th>Status</th><th>Concept</th><th>Analysis</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>`;
+    }
+
+    const reportHtml = `
+    <html>
+    <head>
+        <title>Report: ${reportFileName}</title>
+        <style>body { font-family: sans-serif; padding: 40px; background:#f7fafc; color:#1a202c; } th, td { border: 1px solid #cbd5e0; text-align: left; }</style>
+    </head>
+    <body>
+        <div style="max-width: 1400px; margin: auto; background:white; padding:40px; border-radius:15px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+            <h1 style="border-bottom: 3px solid #e2e8f0; padding-bottom:15px;">Language Arts Mastery Assessment Report</h1>
+            <p style="font-size:1.4em; font-weight:bold;">Final Grade: ${totalCorrect} / 125 (${((totalCorrect/125)*100).toFixed(1)}%)</p>
+            <p>Generated: ${new Date().toLocaleString()}</p>
+            ${sectionsHtml}
+        </div>
+    </body>
+    </html>`;
+
+    const blob = new Blob([reportHtml], { type: 'text/html' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = reportFileName;
+    link.click();
+};
+
+init();
+</script>
+
+</body>
+</html>
