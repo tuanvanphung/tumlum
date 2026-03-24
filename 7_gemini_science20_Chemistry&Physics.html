@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Science Mastery 80: Part 2</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #e67e22; --bg: #fdfaf6; --white: #ffffff; --correct: #27ae60; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 98%; max-width: 1400px; background: var(--white); padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 20px; padding-bottom: 15px; }
+        .unit-nav { display: flex; justify-content: center; gap: 8px; margin-bottom: 25px; flex-wrap: wrap; }
+        .unit-btn { padding: 12px 18px; border: none; background: #e0e6ed; border-radius: 6px; cursor: pointer; font-weight: 600; color: #444; transition: 0.3s; }
+        .unit-btn.active { background: var(--accent); color: white; box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3); }
+        .game-area { display: grid; grid-template-columns: 280px 1fr; gap: 30px; align-items: start; }
+        .bank-container { position: sticky; top: 20px; background: #fff; padding: 15px; border-radius: 10px; border: 2px solid #d1d8e0; max-height: 85vh; display: flex; flex-direction: column; }
+        #topic-bank { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px; }
+        .draggable-topic { background: #3498db; color: white; padding: 10px; border-radius: 6px; cursor: grab; text-align: center; font-size: 0.85em; font-weight: bold; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
+        .match-list { display: flex; flex-direction: column; gap: 12px; }
+        .match-card { display: grid; grid-template-columns: 200px 1fr; gap: 20px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e0e6ed; align-items: center; }
+        .drop-zone { height: 60px; border: 2px dashed #cbd5e0; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #f8fafc; transition: 0.3s; }
+        .drop-zone.drag-over { background: #fff3e0; border-color: #e67e22; }
+        .placed-item { width: 100%; height: 100%; background: var(--primary); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; text-align: center; font-size: 0.9em; padding: 5px; }
+        .description-box { font-size: 0.92em; line-height: 1.5; color: #2d3748; }
+        .examples-list { margin-top: 8px; font-size: 0.82em; color: #4a5568; background: #fdfdfd; padding: 10px; border-radius: 6px; border-left: 3px solid var(--accent); }
+        .examples-list div { margin-bottom: 4px; }
+        .submit-section { margin-top: 50px; text-align: center; padding: 30px; border-top: 2px solid #edf2f7; }
+        #submit-btn { background: var(--correct); color: white; border: none; padding: 18px 60px; font-size: 1.3em; font-weight: bold; border-radius: 60px; cursor: pointer; box-shadow: 0 10px 20px rgba(39, 174, 96, 0.2); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Science Mastery Assessment (Part 2 of 2)</h1>
+        <p class="instr">Match the final 40 Chemistry and Physics facts. Sorted from Easy to Hard.</p>
+    </header>
+    <nav class="unit-nav" id="unit-nav"></nav>
+    <div class="game-area">
+        <aside class="bank-container"><div id="topic-bank"></div></aside>
+        <main class="match-list" id="match-list"></main>
+    </div>
+    <div class="submit-section"><button id="submit-btn">Final Submit & Download Report</button></div>
+</div>
+
+<script>
+const UNIT_NAMES = ["Chemistry", "Physics"];
+const allData = [
+    // --- UNIT 3: CHEMISTRY (41-60: Easy to Hard) ---
+    { id: 41, u: 3, t: "Atoms", d: "These are the smallest units of an element that maintain its properties. They consist of a dense core surrounded by a negative cloud. They are the fundamental particles that make up all matter.", ex: [
+        "A single gold particle: It is the smallest piece of gold that still functions as gold.",
+        "Carbon in a pencil: It is made of specific units that have exactly six protons.",
+        "Hydrogen: It is the simplest version of this unit in the universe.",
+        "Oxygen: It is the unit that allows for breathing and fire to exist.",
+        "Iron: It is the magnetic unit used to build large steel structures."
+    ]},
+    { id: 42, u: 3, t: "Protons", d: "These are positively charged subatomic particles located in the center of a unit. The number of these particles determines the identity of the element. They contribute significantly to the total mass.", ex: [
+        "Hydrogen's core: It has exactly one of these, making it the first element.",
+        "Helium's core: It has two of these, which determines its place on the chart.",
+        "Carbon's core: Having six of these defines it as the basis for life.",
+        "Oxygen's core: Eight of these are required to form this specific gas.",
+        "Gold's core: It has 79 of these, giving it its unique heavy properties."
+    ]},
+    { id: 43, u: 3, t: "Neutrons", d: "These subatomic particles have no electrical charge and are found in the nucleus. They act as glue to help hold positive particles together. Changing their number creates different versions of an element.", ex: [
+        "Carbon-14: Having extra versions of these makes the atom useful for dating fossils.",
+        "Uranium-235: The number of these determines if the material can be used for power.",
+        "Helium-4: It has two of these to balance the two positive particles in the center.",
+        "Deuterium: This is a version of hydrogen that contains one of these neutral particles.",
+        "Stable Lead: It has many of these to keep a large number of protons from pushing apart."
+    ]},
+    { id: 44, u: 3, t: "Electrons", d: "These are tiny, negatively charged particles that orbit the center in specific energy levels. They are involved in forming chemical bonds between different units. Their mass is considered negligible.", ex: [
+        "Static shock: This is caused by a sudden movement of these particles from your hand.",
+        "Electric current: It is the flow of these particles through a conductive wire.",
+        "Chemical bonding: These particles are shared or traded to hold molecules together.",
+        "Lightning: A massive stream of these moving through the atmosphere.",
+        "Oxidation: This occurs when a substance loses these negative particles during a reaction."
+    ]},
+    { id: 45, u: 3, t: "Elements", d: "These are pure substances consisting of only one type of atom. They cannot be broken down into simpler substances by chemical means. All versions are organized on a specific table.", ex: [
+        "Pure Iron: Every single atom in this sample has 26 protons.",
+        "Oxygen Gas: A container filled only with this specific type of atom.",
+        "24K Gold: A bar that contains no other types of atoms besides gold.",
+        "Aluminum Foil: A thin sheet made entirely of one type of metal atom.",
+        "Helium: A gas that consists of single, independent atoms of one kind."
+    ]},
+    { id: 46, u: 3, t: "Compounds", d: "These substances are made of two or more different elements chemically bonded. They have properties that are entirely different from the elements that make them up. They have a fixed ratio.", ex: [
+        "Water: It is a bond of hydrogen and oxygen that functions differently than both gases.",
+        "Table Salt: A bond of explosive sodium and poisonous chlorine that is safe to eat.",
+        "Carbon Dioxide: A bond that plants use for food but humans breathe out.",
+        "Sugar: A complex bond of carbon, hydrogen, and oxygen that tastes sweet.",
+        "Rust: A bond of iron and oxygen that creates a new brittle orange material."
+    ]},
+    { id: 47, u: 3, t: "Mixtures", d: "These are formed when substances are combined physically but not chemically. Each component retains its own original properties and identities. They can be separated by physical methods.", ex: [
+        "Salt and Pepper: You can still see and pick out the individual grains.",
+        "Air: A blend of nitrogen and oxygen that can be separated by cooling.",
+        "Salad: A combination of vegetables where each piece stays the same.",
+        "Sandy water: The sand stays as sand and can be filtered out of the liquid.",
+        "Trail mix: A physical combination of nuts and fruit that are not bonded."
+    ]},
+    { id: 48, u: 3, t: "Periodic Table", d: "This is a tabular arrangement of all known chemical elements organized by properties. It is arranged by atomic number and groups similar behaviors. It allows scientists to predict reactions.", ex: [
+        "Noble Gas column: All elements on the far right refuse to react with others.",
+        "Alkali Metal group: Elements on the far left that explode in water.",
+        "Halogen family: A group of highly reactive non-metals used for cleaning.",
+        "The Metalloid staircase: A line that separates the metals from the non-metals.",
+        "Atomic Weight: The chart provides the average mass for every known element."
+    ]},
+    { id: 49, u: 3, t: "Metals", d: "These elements are typically shiny, conductive, and can be easily shaped. They make up the majority of the known elements and are found on the left. They usually lose electrons in bonds.", ex: [
+        "Copper: It is used in wires because it allows electricity to flow perfectly.",
+        "Gold: It is used in jewelry because it stays shiny and is easy to shape.",
+        "Aluminum: A lightweight material used for soda cans and airplanes.",
+        "Iron: A strong material that is the main ingredient in steel.",
+        "Silver: A highly reflective material used in mirrors and high-end electronics."
+    ]},
+    { id: 50, u: 3, t: "Non-metals", d: "These elements are usually poor conductors and are often brittle or gaseous. They are located on the right side of the standard chart. They tend to gain particles during reactions.", ex: [
+        "Oxygen: A gas that is essential for life and supporting combustion.",
+        "Sulfur: A brittle yellow solid that is a very poor conductor of heat.",
+        "Neon: A gas that glows when electricity passes through it but never bonds.",
+        "Carbon: A solid that can be soft like graphite or hard like a diamond.",
+        "Chlorine: A highly reactive gas used to kill bacteria in swimming pools."
+    ]},
+    { id: 51, u: 3, t: "Valence Electrons", d: "These are the particles located in the outermost energy level of a unit. They determine how a unit will bond and react with others. Elements in the same column have the same count.", ex: [
+        "Carbon's four: These allow the atom to bond with four other things at once.",
+        "Sodium's one: This makes the atom extremely desperate to lose it and react.",
+        "Neon's eight: These create a full shell that makes the atom totally stable.",
+        "Chlorine's seven: This makes the atom very aggressive in trying to steal one more.",
+        "Oxygen's six: These determine that the atom needs to share two more to be happy."
+    ]},
+    { id: 52, u: 3, t: "Ionic Bond", d: "This type of chemical connection forms when one unit gives up a particle to another, creating charged versions. These oppositely charged parts are then pulled together. It usually happens between a metal and nonmetal.", ex: [
+        "Table Salt: Sodium gives an electron to Chlorine, and they stick together.",
+        "Calcium Chloride: This substance used to melt ice is held by this charged pull.",
+        "Magnesium Oxide: A white powder formed by the attraction of metal and gas ions.",
+        "Baking Soda: A complex version where different parts are held by electrical attraction.",
+        "Fluoride in toothpaste: It involves a charged atom bonding to strengthen teeth."
+    ]},
+    { id: 53, u: 3, t: "Covalent Bond", d: "This happens when two units share one or more pairs of particles to stay together. It allows both units to feel like their outer shells are full. These connections are common in living molecules.", ex: [
+        "H2O: Two hydrogens and one oxygen share electrons to stay as one molecule.",
+        "CO2: Carbon shares multiple pairs with Oxygen to create a stable gas.",
+        "Sugar: Massive chains of atoms are held together by this sharing process.",
+        "Methane: One carbon shares with four hydrogens to create natural gas.",
+        "DNA: The entire ladder of life is held together by these shared electron pairs."
+    ]},
+    { id: 54, u: 3, t: "Ions", d: "These are units or groups of units that have an electrical charge from gaining or losing particles. They are highly reactive and essential for batteries and nerves. Opposite charges attract.", ex: [
+        "Na+: A sodium atom that has lost a negative particle and became positive.",
+        "Cl-: A chlorine atom that gained a negative particle and became negative.",
+        "Electrolytes: These charged particles in sports drinks help muscles move.",
+        "Battery acid: It is filled with these charged particles to allow electricity to flow.",
+        "Nerve signals: Your brain uses the movement of these charged units to think."
+    ]},
+    { id: 55, u: 3, t: "Chemical Equation", d: "This is a symbolic representation of a reaction showing starting materials and results. It must be balanced to prove no matter was lost. It uses formulas to describe rearrangements.", ex: [
+        "Photosynthesis: It shows how CO2 and Water turn into Sugar and Oxygen.",
+        "Rusting: A formula showing Iron plus Oxygen results in Iron Oxide.",
+        "Burning: It maps out how a fuel plus Oxygen produces Heat and CO2.",
+        "Digestion: A symbolic map of how complex food turns into simple energy.",
+        "Vinegar/Baking Soda: It shows how two liquids produce a gas and a salt."
+    ]},
+    { id: 56, u: 3, t: "Reactants", d: "These are the starting substances in a process that undergo a change. They are found on the left side of a symbolic representation. During the event, their internal bonds are broken.", ex: [
+        "Vinegar: The liquid you pour before the volcano erupts.",
+        "Baking Soda: The powder that is used to start the fizzing reaction.",
+        "Hydrogen Gas: The fuel needed before you can make a water explosion.",
+        "Uncooked Flour: One of the starting materials needed to bake a cake.",
+        "Gasoline: The liquid that enters an engine before it is burned for power."
+    ]},
+    { id: 57, u: 3, t: "Products", d: "These are the new substances created as a result of a chemical process. They are shown on the right of a symbolic representation. They have different traits than the starting materials.", ex: [
+        "Rust: The orange coating that exists after metal is left in the rain.",
+        "Smoke: The airborne particles created after a fire has occurred.",
+        "Oxygen: The gas that is created by a plant after it finishes its food-making.",
+        "ATP: The energy molecules created by a cell after it processes nutrients.",
+        "Table Salt: The white crystals that exist after sodium and chlorine react."
+    ]},
+    { id: 58, u: 3, t: "pH Scale", d: "This logarithmic scale measures the concentration of hydrogen ions in liquid. It ranges from 0 to 14, with 7 being neutral. It classifies substances as acidic or alkaline.", ex: [
+        "Lemon juice: It has a value of 2, meaning it is a very strong acid.",
+        "Soap: It has a value of 10, meaning it is a common base/alkaline.",
+        "Pure water: It sits at exactly 7, meaning it is perfectly neutral.",
+        "Stomach acid: It has a value of 1, allowing it to dissolve food quickly.",
+        "Bleach: It has a value of 13, making it a very powerful base."
+    ]},
+    { id: 59, u: 3, t: "Acids", d: "These are chemicals that release hydrogen ions in water. They typically taste sour and react with metals to produce hydrogen gas. They turn specific paper indicators red.", ex: [
+        "Vinegar: A weak version used to preserve food and add flavor.",
+        "Battery Fluid: A dangerous version that can dissolve metal and skin.",
+        "Orange Juice: It contains citric versions of these that give it a tang.",
+        "Aspirin: A medical version used to reduce pain and swelling.",
+        "Hydrochloric: A version found in your stomach to aid in digestion."
+    ]},
+    { id: 60, u: 3, t: "Bases", d: "These are chemicals that feel slippery and produce hydroxide ions in water. They typically taste bitter and are used for cleaning. They turn specific paper indicators blue.", ex: [
+        "Baking Soda: A common household version used to neutralize odors.",
+        "Drain Cleaner: A powerful version that dissolves hair and grease.",
+        "Antacids: These are used to neutralize excess chemicals in the stomach.",
+        "Ammonia: A strong-smelling version used for cleaning windows.",
+        "Hand Soap: It has the slippery feel and bitter taste typical of this group."
+    ]},
+
+    // --- UNIT 4: PHYSICS (61-80: Easy -> Hard) ---
+    { id: 61, u: 4, t: "Force", d: "This is defined as a push or pull acting upon an object. It can cause an object to change its velocity, direction, or shape. It is a vector quantity measured in Newtons.", ex: [
+        "A kick: It provides the push needed to move a soccer ball.",
+        "Gravity: The invisible pull that keeps the planets orbiting the sun.",
+        "Magnetism: The pull that makes a paperclip jump toward a magnet.",
+        "Tension: The pull exerted by a stretched rubber band or rope.",
+        "Normal: The push from the floor that keeps you from falling through it."
+    ]},
+    { id: 62, u: 4, t: "Gravity", d: "This is a universal force of attraction between all objects with mass. Its strength depends on mass and the distance between centers. It keeps planets in their orbits.", ex: [
+        "The Tides: The moon's pull causes the ocean level to rise and fall.",
+        "Falling Apple: The earth's mass pulls the fruit toward the ground.",
+        "Planetary Orbit: The sun's mass prevents the earth from flying into space.",
+        "Your Weight: A measurement of how hard the planet is pulling on your mass.",
+        "Black Hole: An object with so much mass that its pull traps light."
+    ]},
+    { id: 63, u: 4, t: "Friction", d: "This force opposes the motion of one surface as it moves across another. It works in the opposite direction and generates heat. Its strength depends on surface types.", ex: [
+        "Brake Pads: They rub against wheels to stop a car's motion.",
+        "Rubbing Hands: The resistance between your palms creates heat.",
+        "Cleats: They provide extra resistance to keep a runner from slipping.",
+        "Air Resistance: The 'wind' that slows down a falling parachute.",
+        "Matchstick: Rubbing it creates enough heat from resistance to start a fire."
+    ]},
+    { id: 64, u: 4, t: "Speed", d: "This quantity measures how fast an object is moving over a certain time. It is calculated by dividing total distance by time elapsed. It does not provide direction info.", ex: [
+        "55 MPH: It tells you how far the car goes in one hour.",
+        "Snail crawl: A measurement of a few centimeters over many minutes.",
+        "Speedometer: The dial in a car that shows the current rate of travel.",
+        "Light: It travels at 300,000 kilometers every single second.",
+        "Runner's Pace: Calculating that it took 4 minutes to cover one mile."
+    ]},
+    { id: 65, u: 4, t: "Velocity", d: "This quantity describes the rate of position change in a specific direction. It is different from simple speed because it includes a vector. Direction change alters this.", ex: [
+        "60 MPH North: It tells you both the rate and the destination.",
+        "A plane turning: The speed stays the same, but this value changes.",
+        "Wind forecast: Knowing the air is moving 15 MPH toward the East.",
+        "Elevator: It has a specific rate of movement in the upward direction.",
+        "Orbiting Satellite: It has a constant speed but a constantly changing version of this."
+    ]},
+    { id: 66, u: 4, t: "Acceleration", d: "This is the rate at which velocity changes over time. It can mean speeding up, slowing down, or changing direction. It occurs when unbalanced forces act.", ex: [
+        "Green Light: A car increasing its rate of travel from zero.",
+        "Slamming Brakes: A rapid decrease in the rate of movement.",
+        "Roller Coaster Loop: The change in direction creates this effect for riders.",
+        "Falling Object: Gravity causes a constant increase in its downward rate.",
+        "Rounding a corner: Even at the same speed, this is occurring due to direction shift."
+    ]},
+    { id: 67, u: 4, t: "Newton's First Law", d: "This law states that an object's motion will not change unless acted upon by an outside force. It explains why objects at rest stay at rest. It is also known as the law of inertia.", ex: [
+        "Seatbelts: They provide the force to stop you when the car stops.",
+        "Puck on Ice: It continues sliding because there is very little friction to stop it.",
+        "Dusting a rug: Hitting the rug moves it, but the dust wants to stay still.",
+        "Ball on Grass: It will never move until someone provides a kick.",
+        "Space Probe: It continues moving forever in the vacuum where there is no resistance."
+    ]},
+    { id: 68, u: 4, t: "Newton's Second Law", d: "This law states that the push required is equal to the mass multiplied by the change in motion. It explains why heavier objects are harder to move. It defines force/mass.", ex: [
+        "Empty vs Full Cart: The full one requires much more push to speed up.",
+        "F1 Racing: Engines are powerful and cars are light to get max change in motion.",
+        "Throwing a Shotput: It requires a massive push compared to a baseball.",
+        "Tugging a Boat: A tiny motor can only change the boat's motion very slowly.",
+        "Rocket Launch: Massive thrust is needed to move the huge mass of the fuel."
+    ]},
+    { id: 100, u: 4, t: "Newton's Third Law", d: "This law states that for every action, there is an equal and opposite reaction. Forces always come in pairs. It explains how rockets generate lift by pushing gas down.", ex: [
+        "Gun Recoil: The force pushing the bullet out also pushes the gun back.",
+        "Walking: You push the floor backward, and the floor pushes you forward.",
+        "Bird Wings: They push the air down so that the air pushes the bird up.",
+        "Leaping from a Boat: Pushing yourself forward pushes the boat backward.",
+        "Skateboard Kick: Pushing the ground behind you moves the board ahead."
+    ]},
+    { id: 70, u: 4, t: "Kinetic Energy", d: "This is the energy that an object possesses due to its motion. The amount depends on both mass and the square of the speed. When movement stops, this value becomes zero.", ex: [
+        "Rolling Bowling Ball: It has the power to knock down pins due to its motion.",
+        "Wind: Moving air particles that can turn a massive turbine.",
+        "Flying Bullet: It has high energy because its speed is extremely high.",
+        "Flowing River: The movement of the water can carve through solid rock.",
+        "Running Child: They have more of this energy than a child standing still."
+    ]},
+    { id: 71, u: 4, t: "Potential Energy", d: "This is the energy stored in an object due to its position or condition. It has the ability to do work but is not currently in motion. It can be gravitational or chemical.", ex: [
+        "Rock on a Cliff: It has stored energy that will be released if it falls.",
+        "Stretched Bow: The string is ready to snap back and move an arrow.",
+        "Unlit Match: It has chemical energy stored in the tip.",
+        "Compressed Spring: It is holding energy that will release when let go.",
+        "Battery: It contains stored electrical energy waiting to be used."
+    ]},
+    { id: 72, u: 4, t: "Work", d: "In this field, this occurs only when force is applied to an object causing it to move distance. If the object does not move, no matter the force, this value is zero. It is measured in Joules.", ex: [
+        "Lifting a Box: You applied force and the object moved upward.",
+        "Pushing a Mower: The machine moves across the lawn because of your input.",
+        "Climbing Stairs: Your muscles move your entire body mass up a distance.",
+        "Pushing a Wall: Even if you are tired, this value is zero because the wall didn't move.",
+        "Pulling a Wagon: The force you use moves the wagon down the sidewalk."
+    ]},
+    { id: 73, u: 4, t: "Power", d: "This describes the rate at which energy is transferred or a task is performed. It measures how quickly work is completed by dividing it by time. It is measured in Watts.", ex: [
+        "100W Bulb: It uses energy at a specific rate to produce light.",
+        "Sprinting: You are doing the same work as walking, but much faster.",
+        "Dragster Engine: It can move a car a distance in much less time than a sedan.",
+        "Powerful Vacuum: It can pull air and dirt at a very high rate.",
+        "Microwave: High-rated versions cook food in less time by using more energy per second."
+    ]},
+    { id: 74, u: 4, t: "Momentum", d: "This property describes the 'quantity of motion' an object has. It depends on both how heavy the object is and how fast it moves. It is transferred during collisions.", ex: [
+        "Semi-Truck: It is very hard to stop because it is extremely heavy.",
+        "Fast Baseball: It is hard to stop because it is moving at a high speed.",
+        "Bowling: The heavy ball hits the pins and transfers its motion to them.",
+        "Football Tackle: A player uses their mass and speed to knock another over.",
+        "Newton's Cradle: The clicking balls transfer this value from one end to the other."
+    ]},
+    { id: 75, u: 4, t: "Inertia", d: "This property is the tendency of an object to resist any change in its motion. Objects at rest want to stay at rest. It is directly related to the object's mass.", ex: [
+        "Sudden Stop: Your body keeps moving forward when the car brakes.",
+        "Heavy Couch: It is very hard to start moving it due to this property.",
+        "Spinning Top: It wants to keep spinning and resists falling over.",
+        "Card and Coin Trick: Flicking the card moves it, but the coin stays put.",
+        "Stalled Car: It is difficult to get it rolling from a dead stop."
+    ]},
+    { id: 76, u: 4, t: "Circuits", d: "This is a complete, closed path through which electric current can flow. It must contain a power source, a load, and a conductive path. It can be arranged in series or parallel.", ex: [
+        "Flashlight: A loop connecting a battery, a switch, and a bulb.",
+        "House Wiring: A complex network that allows power to reach every outlet.",
+        "Computer Board: Tiny paths that allow electricity to reach different chips.",
+        "Holiday Lights: A string where electricity flows from the plug through every bulb.",
+        "Toaster: A path that sends current through coils to generate heat."
+    ]},
+    { id: 77, u: 4, t: "Reflection", d: "This occurs when a wave hits a surface and bounces back. The angle at which it hits is equal to the angle at which it leaves. It allows us to see non-light sources.", ex: [
+        "Mirror: Light hits the silver surface and bounces perfectly back to your eye.",
+        "Echo: A sound wave hits a distant wall and returns to your ears.",
+        "Moonlight: The moon doesn't glow; it just bounces sunlight to the earth.",
+        "Still Pond: The water surface acts as a mirror for the trees above.",
+        "Shiny Car: The smooth paint bounces light rays in a uniform direction."
+    ]},
+    { id: 78, u: 4, t: "Refraction", d: "This occurs when a wave changes direction as it passes from one medium into another. It happens because the speed changes in different materials. It is responsible for many optical illusions.", ex: [
+        "Bent Straw: A straw in water looks disconnected because light slows down in liquid.",
+        "Eyeglasses: The lenses bend light so that it focuses correctly on your retina.",
+        "Rainbow: Sunlight bends and splits as it enters and leaves raindrops.",
+        "Magnifying Glass: The curved glass bends light to make an object look larger.",
+        "Prism: A glass triangle that bends different colors of light at different angles."
+    ]},
+    { id: 79, u: 4, t: "Wavelength", d: "This is the distance between two consecutive identical points on a wave. It determines many properties, including color for light and pitch for sound. It is inversely related to frequency.", ex: [
+        "Red Light: It has a very long version of this compared to blue light.",
+        "Bass Notes: These deep sounds are created by very long physical waves.",
+        "X-rays: These have an extremely short version, allowing them to pass through skin.",
+        "Radio Waves: These can be as long as a football field.",
+        "Ocean Swells: Measuring the distance from one crest of water to the next."
+    ]},
+    { id: 80, u: 4, t: "Doppler Effect", d: "This is the change in frequency of a wave relative to an observer who is moving. It causes a pitch shift as a sound source passes by. It also applies to light from stars.", ex: [
+        "Passing Siren: The sound gets higher as it approaches and lower as it leaves.",
+        "Race Car: The 'neee-yoom' sound as the vehicle flies past the stands.",
+        "Radar Gun: Police use this shift in waves to calculate a car's speed.",
+        "Redshift: Astronomers see stars moving away because their light waves stretch.",
+        "Train Whistle: The sudden change in tone as the locomotive passes a station."
+    ]}
+];
+
+let userAnswers = {};
+
+function init() {
+    const nav = document.getElementById('unit-nav');
+    UNIT_NAMES.forEach((name, i) => {
+        const btn = document.createElement('button');
+        btn.className = `unit-btn ${i === 0 ? 'active' : ''}`;
+        btn.innerText = name;
+        btn.onclick = () => switchUnit(i + 1);
+        nav.appendChild(btn);
+    });
+    renderUnit(1);
+}
+
+function switchUnit(num) {
+    document.querySelectorAll('.unit-btn').forEach((b, idx) => b.classList.toggle('active', idx + 1 === num));
+    renderUnit(num);
+    window.scrollTo(0, 0);
+}
+
+function renderUnit(uId) {
+    // Offset uId because allData uses u:3 and u:4
+    const actualU = uId + 2; 
+    const data = allData.filter(item => item.u === actualU);
+    const bank = document.getElementById('topic-bank');
+    const list = document.getElementById('match-list');
+    bank.innerHTML = ''; list.innerHTML = '';
+
+    const placed = Object.values(userAnswers);
+    const available = data.filter(i => !placed.includes(i.t)).map(i => i.t).sort(() => Math.random() - 0.5);
+
+    available.forEach(txt => {
+        const div = document.createElement('div');
+        div.className = 'draggable-topic'; div.innerText = txt; div.draggable = true;
+        div.ondragstart = (e) => e.dataTransfer.setData('text', txt);
+        bank.appendChild(div);
+    });
+
+    data.forEach(item => {
+        const card = document.createElement('div'); card.className = 'match-card';
+        const drop = document.createElement('div'); drop.className = 'drop-zone'; drop.dataset.id = item.id;
+
+        if (userAnswers[item.id]) {
+            const pi = document.createElement('div'); pi.className = 'placed-item'; pi.innerText = userAnswers[item.id];
+            pi.onclick = () => { delete userAnswers[item.id]; renderUnit(uId); };
+            drop.appendChild(pi);
+        }
+
+        drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('drag-over'); };
+        drop.ondragleave = () => drop.classList.remove('drag-over');
+        drop.ondrop = (e) => {
+            e.preventDefault();
+            const txt = e.dataTransfer.getData('text');
+            for (let k in userAnswers) { if (userAnswers[k] === txt) delete userAnswers[k]; }
+            userAnswers[item.id] = txt; renderUnit(uId);
+        };
+
+        const desc = document.createElement('div'); desc.className = 'description-box';
+        let exHtml = item.ex.map(exStr => `<div>• ${exStr}</div>`).join('');
+        desc.innerHTML = `${item.d} <div class="examples-list"><strong>5 Examples & Reasoning:</strong>${exHtml}</div>`;
+        card.appendChild(drop); card.appendChild(desc); list.appendChild(card);
+    });
+}
+
+function getTS() {
+    const d = new Date();
+    const f = (n) => n.toString().padStart(2, '0');
+    return `${d.getFullYear().toString().slice(2)}${f(d.getMonth()+1)}${f(d.getDate())}_${f(d.getHours())}${f(d.getMinutes())}`;
+}
+
+document.getElementById('submit-btn').onclick = () => {
+    const ts = getTS();
+    const fname = window.location.pathname.split('/').pop().split('.')[0] || "Science_Part2";
+    const reportName = `${fname}_${ts}.html`;
+    
+    let total = 0; let sections = '';
+    for (let i = 3; i <= 4; i++) {
+        const uData = allData.filter(x => x.u === i);
+        let rows = ''; let uCorrect = 0;
+
+        uData.forEach(item => {
+            const ans = userAnswers[item.id] || "No Answer";
+            const isCorrect = ans === item.t;
+            if (isCorrect) { uCorrect++; total++; }
+            const review = isCorrect ? "Result: Perfect Match." : (ans === "No Answer" ? "Result: Blank." : `Correction: You chose "${ans}", which describes: "${allData.find(x => x.t === ans)?.d || 'N/A'}"`);
+            rows += `<tr style="background: ${isCorrect ? '#f0fff4' : '#fff5f5'}">
+                <td style="padding:10px; border:1px solid #ddd; font-weight:bold;">${item.t}</td>
+                <td style="padding:10px; border:1px solid #ddd;">${ans}</td>
+                <td style="padding:10px; border:1px solid #ddd; text-align:center;">${isCorrect ? '✅' : '❌'}</td>
+                <td style="padding:10px; border:1px solid #ddd; font-size:0.85em;">${item.d}</td>
+                <td style="padding:10px; border:1px solid #ddd; font-size:0.8em; color:#555;">${review}</td></tr>`;
+        });
+
+        sections += `<div style="margin-top:30px;"><h2 style="background:#2c3e50; color:white; padding:10px;">${UNIT_NAMES[i-3]} (${uCorrect}/${uData.length})</h2>
+            <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+                <thead style="background:#edf2f7;"><tr><th style="padding:10px; border:1px solid #ddd;">Fact</th><th style="padding:10px; border:1px solid #ddd;">Your Match</th><th style="padding:10px; border:1px solid #ddd;">Status</th><th style="padding:10px; border:1px solid #ddd;">Definition</th><th style="padding:10px; border:1px solid #ddd;">Analysis</th></tr></thead>
+                <tbody>${rows}</tbody></table></div>`;
+    }
+
+    const html = `<html><head><title>Score Report ${ts}</title></head><body style="font-family:sans-serif; padding:30px; background:#fdfdfd;">
+        <div style="max-width:1400px; margin: auto; background:white; padding:30px; border-radius:10px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+            <h1>Science Mastery Score Report (Part 2)</h1><p style="font-size:1.4em;">Total Correct: ${total} / 40</p><p>Generated: ${new Date().toLocaleString()}</p>${sections}</div></body></html>`;
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = reportName; link.click();
+};
+init();
+</script>
+</body>
+</html>

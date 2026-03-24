@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Science Mastery Part 1 (1-40)</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #2980b9; --bg: #f4f7f9; --white: #ffffff; --correct: #27ae60; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 98%; max-width: 1400px; background: var(--white); padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 20px; padding-bottom: 15px; }
+        .unit-nav { display: flex; justify-content: center; gap: 8px; margin-bottom: 25px; flex-wrap: wrap; }
+        .unit-btn { padding: 12px 18px; border: none; background: #e0e6ed; border-radius: 6px; cursor: pointer; font-weight: 600; color: #444; transition: 0.3s; }
+        .unit-btn.active { background: var(--accent); color: white; box-shadow: 0 4px 12px rgba(41, 128, 185, 0.3); }
+        .game-area { display: grid; grid-template-columns: 280px 1fr; gap: 30px; align-items: start; }
+        .bank-container { position: sticky; top: 20px; background: #fff; padding: 15px; border-radius: 10px; border: 2px solid #d1d8e0; max-height: 85vh; display: flex; flex-direction: column; }
+        #topic-bank { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px; }
+        .draggable-topic { background: #3498db; color: white; padding: 10px; border-radius: 6px; cursor: grab; text-align: center; font-size: 0.85em; font-weight: bold; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
+        .match-list { display: flex; flex-direction: column; gap: 12px; }
+        .match-card { display: grid; grid-template-columns: 200px 1fr; gap: 20px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e0e6ed; align-items: center; }
+        .drop-zone { height: 60px; border: 2px dashed #cbd5e0; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #f8fafc; transition: 0.3s; }
+        .drop-zone.drag-over { background: #e1f5fe; border-color: #3498db; }
+        .placed-item { width: 100%; height: 100%; background: var(--primary); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; text-align: center; font-size: 0.9em; padding: 5px; }
+        .description-box { font-size: 0.92em; line-height: 1.5; color: #2d3748; }
+        .examples-list { margin-top: 8px; font-size: 0.82em; color: #4a5568; background: #fdfdfd; padding: 10px; border-radius: 6px; border-left: 3px solid var(--accent); }
+        .examples-list div { margin-bottom: 4px; }
+        .submit-section { margin-top: 50px; text-align: center; padding: 30px; border-top: 2px solid #edf2f7; }
+        #submit-btn { background: var(--correct); color: white; border: none; padding: 18px 60px; font-size: 1.3em; font-weight: bold; border-radius: 60px; cursor: pointer; box-shadow: 0 10px 20px rgba(39, 174, 96, 0.2); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Science Mastery Assessment: Part 1</h1>
+        <p class="instr">Match the first 40 facts (Physical Science & Biology) sorted from Easy to Hard.</p>
+    </header>
+    <nav class="unit-nav" id="unit-nav"></nav>
+    <div class="game-area">
+        <aside class="bank-container"><div id="topic-bank"></div></aside>
+        <main class="match-list" id="match-list"></main>
+    </div>
+    <div class="submit-section"><button id="submit-btn">Submit & Download Score Report</button></div>
+</div>
+
+<script>
+const UNIT_NAMES = ["Physical Science", "Biology"];
+const allData = [
+    // --- PHYSICAL SCIENCE (1-20: Easy to Hard) ---
+    { id: 1, u: 1, t: "Matter", d: "This refers to anything that possesses mass and occupies physical space. It is composed of infinitesimal particles and can manifest in various states. All physical objects in the observable universe consist of this.", ex: [
+        "A rock: It is a solid that has a measurable weight and takes up room.",
+        "Air: Even though invisible, it consists of gas molecules that have mass and fill space.",
+        "Water: It is a liquid substance that can be weighed and occupies a volume.",
+        "A tree: It is composed of biological molecules that occupy space on Earth.",
+        "Dust: Though tiny, each speck contains atoms that have a specific mass."
+    ]},
+    { id: 2, u: 1, t: "Solids", d: "In this state, particles are packed closely together in a fixed, regular pattern. These objects have a definite shape and a definite volume. The particles only vibrate in place and do not flow.", ex: [
+        "An iron bar: Its particles are locked in place, maintaining a rigid shape.",
+        "An ice cube: It keeps its square shape until enough heat energy is added.",
+        "A diamond: The carbon atoms are bonded tightly, preventing any flow of the material.",
+        "A wooden desk: It remains the same size and shape regardless of the container it is in.",
+        "A frozen coin: The metal atoms are fixed in a pattern, giving it a solid feel."
+    ]},
+    { id: 3, u: 1, t: "Liquids", d: "This state has a definite volume but takes the shape of its container. The particles are close together but are free to move past one another. It cannot be compressed easily but can flow.", ex: [
+        "Juice in a glass: It takes the cylindrical shape of the cup but stays the same volume.",
+        "Molten lava: The rock is hot enough for particles to slide past each other and flow.",
+        "Mercury: This metal is in a state where it can be poured at room temperature.",
+        "Raindrops: They are clusters of water molecules that flow together due to gravity.",
+        "Ocean water: It fills the basins of the Earth, changing shape with the tide."
+    ]},
+    { id: 4, u: 1, t: "Gases", d: "This state has no definite shape or volume and expands to fill all available space. The particles move at high speeds and are far apart. This form can be easily compressed into smaller volumes.", ex: [
+        "Helium in a balloon: It expands to fill the rubber skin completely.",
+        "Steam from a kettle: The water molecules move rapidly and spread through the room air.",
+        "Air in a tire: It can be squeezed into a small space to provide high pressure.",
+        "Carbon dioxide in soda: The gas is compressed into the liquid until the bottle is opened.",
+        "Oxygen in a tank: High pressure is used to fit a large volume into a small container."
+    ]},
+    { id: 5, u: 1, t: "Mass", d: "This is a measure of the total amount of material contained within an object. It remains constant regardless of the object's location or gravity. It is typically measured in grams or kilograms.", ex: [
+        "A 5kg bag of flour: It contains 5 kilograms of substance no matter where it is.",
+        "An astronaut: Their body contains the same amount of matter on Earth as in space.",
+        "A lead weight: It has a high amount of matter packed into a small area.",
+        "A feather: It has a very small amount of matter compared to its size.",
+        "A planet: It is defined by the massive amount of matter it has pulled together."
+    ]},
+    { id: 6, u: 1, t: "Volume", d: "This term describes the total amount of three-dimensional space that an object occupies. It is often measured in liters for fluids or cubic units for solids. This property changes if a gas is compressed.", ex: [
+        "A gallon of milk: It occupies the space of exactly 3.78 liters.",
+        "The air in a room: It fills the entire three-dimensional capacity of the walls.",
+        "Water in a measuring cup: The height of the liquid shows how much space it takes.",
+        "A brick: Its length, width, and height determine how much space it fills in a wall.",
+        "A storage box: It is rated by how much internal space is available for items."
+    ]},
+    { id: 7, u: 1, t: "Physical Change", d: "This involves a transformation in the form or appearance of a substance without altering its chemical makeup. These events are typically reversible and do not produce new substances. The internal molecules remain identical.", ex: [
+        "Melting ice: The water changes from solid to liquid but is still H2O.",
+        "Tearing paper: The appearance is different, but the chemical fibers remain the same.",
+        "Dissolving sugar: The crystals disappear into water, but the sugar molecules are unchanged.",
+        "Breaking a glass: The object is now in pieces, but the material is still glass.",
+        "Braiding hair: The shape of the hair is altered, but its biological makeup is identical."
+    ]},
+    { id: 8, u: 1, t: "Chemical Change", d: "This process results in the creation of one or more entirely different substances. It involves the breaking and forming of bonds between atoms. Signs include color shifts, heat release, or the formation of a precipitate.", ex: [
+        "Iron rusting: Oxygen and iron bond to create a new orange substance.",
+        "Burning wood: The cellulose turns into ash, smoke, and carbon dioxide.",
+        "Baking a cake: Heat causes the ingredients to react and form a new structure.",
+        "Digesting food: Enzymes break down molecules to create new energy sources for the body.",
+        "Fireworks: A rapid reaction creates light, sound, and new chemical gases."
+    ]},
+    { id: 9, u: 1, t: "Weight", d: "This is a measure of the force of gravity acting on an object's amount of matter. Because it depends on gravity, this value changes depending on which planet or moon you are on. It is measured in Newtons.", ex: [
+        "Standing on a scale: The device measures how hard Earth's gravity is pulling you down.",
+        "Moon jumping: You feel much lighter because the Moon's gravity is only 1/6th of Earth's.",
+        "Floating in space: Without a nearby large mass, the gravitational pull on you is near zero.",
+        "Jupiter visit: You would weigh much more because the planet's mass is so large.",
+        "Lifting a heavy box: You are fighting against the gravitational force pulling the mass down."
+    ]},
+    { id: 10, u: 1, t: "Density", d: "This property quantifies the amount of mass contained within a specific unit of volume. It dictates whether an object will submerge or remain buoyant in a fluid. It is determined by calculating the ratio of mass to volume.", ex: [
+        "Lead sinking in water: The metal has much more mass per unit of volume than water.",
+        "Oil floating on water: The oil molecules are less tightly packed than the water molecules.",
+        "Helium balloons: The gas inside is less 'thick' than the surrounding air, causing it to rise.",
+        "An iron bolt: It is very heavy for its small size because its particles are crowded.",
+        "Styrofoam: It is very light for its size because it contains many air pockets."
+    ]},
+    { id: 11, u: 1, t: "Melting Point", d: "This is the specific temperature at which a substance transitions from a solid state to a liquid state. At this stage, particles gain enough energy to break free from fixed positions. This value is unique for every pure substance.", ex: [
+        "Ice at 0°C: This is the exact moment water molecules begin to slide past each other.",
+        "Iron at 1538°C: Extremely high heat is needed to turn this metal into a liquid.",
+        "Chocolate in the sun: It reaches its transition temperature easily on a warm day.",
+        "Solder in a circuit: A hot iron is used to reach the specific temperature where the metal flows.",
+        "Candle wax: The heat of the flame maintains the temperature needed for the solid to liquefy."
+    ]},
+    { id: 12, u: 1, t: "Boiling Point", d: "This is the temperature where the pressure of a liquid equals the surrounding atmospheric pressure. At this stage, the substance rapidly turns into a gas. It can be lowered by decreasing the pressure.", ex: [
+        "Water at 100°C: At sea level, this is when liquid water turns into steam bubbles.",
+        "Liquid nitrogen at -196°C: It turns into a gas at temperatures far below freezing.",
+        "Cooking at high altitude: Water turns to gas at a lower temperature due to less air pressure.",
+        "Distilling alcohol: It is separated from water because it turns to gas at a lower temperature.",
+        "Antifreeze in a car: It is added to the radiator to raise the temperature at which the coolant turns to gas."
+    ]},
+    { id: 13, u: 1, t: "Mixture", d: "This is a combination of two or more substances that are combined physically but not chemically. Each component retains its own original properties and identities. They can be separated through physical methods.", ex: [
+        "A bowl of cereal: You can physically see and separate the milk from the flakes.",
+        "Sand and salt: The two solids are mixed together but remain separate chemical entities.",
+        "Air: It is a combination of nitrogen, oxygen, and other gases that are not bonded.",
+        "Soil: It contains rocks, organic matter, and minerals that are loosely combined.",
+        "Trail mix: Each nut and raisin stays exactly as it was before being put in the bag."
+    ]},
+    { id: 14, u: 1, t: "Solution", d: "This is a homogeneous combination that is uniform in composition throughout. The individual parts are spread evenly and cannot be seen separately. It consists of a medium and the material dissolved within it.", ex: [
+        "Saltwater: The salt particles are so evenly spread that you cannot see them in the water.",
+        "Kool-Aid: The powder dissolves completely, creating a drink that is the same throughout.",
+        "Brass: This is a solid version where zinc is dissolved into copper at a high temperature.",
+        "Clean air: The different gases are mixed so perfectly that the air looks transparent.",
+        "Steel: Carbon is mixed into iron to create a uniform metal with new properties."
+    ]},
+    { id: 15, u: 1, t: "Solubility", d: "This refers to the maximum amount of a substance that can dissolve in a specific solvent at a given temperature. It depends on the chemical nature of both materials. Heat usually increases this for solids.", ex: [
+        "Sugar in hot tea: More sweetener can be dissolved because the heat spreads the molecules.",
+        "Oil and water: These two have a value of zero for this because they will not mix.",
+        "Oxygen in a lake: Fish rely on the fact that a small amount of gas can dissolve in water.",
+        "Saturated syrup: This is reached when no more sugar can possibly fit in the liquid.",
+        "Vitamin C: This nutrient is easily dissolved in water for absorption by the body."
+    ]},
+    { id: 16, u: 1, t: "Conduction", d: "This is the transfer of heat or electricity through a material by direct contact. It occurs when energetic particles collide with neighboring particles. It is most effective in solid materials.", ex: [
+        "Touching a hot stove: Heat moves directly from the burner to your finger upon contact.",
+        "Metal spoon in soup: The end in the liquid gets hot, and the heat travels up to the handle.",
+        "Copper wiring: Electrons flow easily through the metal due to direct contact between atoms.",
+        "Ironing a shirt: The hot metal plate transfers thermal energy directly to the fabric.",
+        "Ice melting in your hand: Your body heat moves into the ice through the point of touch."
+    ]},
+    { id: 17, u: 1, t: "Convection", d: "This is the transfer of thermal energy by the physical movement of a fluid. Warmer, less dense parts of the fluid rise, while cooler, denser parts sink. This creates a continuous cycle of movement.", ex: [
+        "Boiling water: Hot water at the bottom rises to the top while cooler water sinks.",
+        "Hot air balloons: The heater warms the air inside, making it rise above the cooler outside air.",
+        "Ocean currents: Warm water from the equator moves toward the poles in a massive loop.",
+        "Home heating: Warm air comes out of a vent and rises to the ceiling of a room.",
+        "Wind: Uneven heating of the Earth's surface causes air to move in large patterns."
+    ]},
+    { id: 18, u: 1, t: "Radiation", d: "This is the transfer of energy through space by electromagnetic waves. It does not require any matter or contact to move from one place to another. This is how energy from the sun reaches the earth.", ex: [
+        "Sunlight: Energy travels through the vacuum of space to warm the planet.",
+        "Microwave oven: Waves move through the air to vibrate water molecules in food.",
+        "Campfire warmth: You can feel the heat on your face even if the air is cold.",
+        "X-rays: High energy waves pass through soft tissue to show bones on film.",
+        "Radio signals: Information is carried through the air by invisible energy waves."
+    ]},
+    { id: 19, u: 1, t: "Conservation of Mass", d: "This fundamental principle states that in an isolated system, the total amount of matter remains constant. It implies that substances can neither be created nor destroyed during a process. The total input always equals the output.", ex: [
+        "Balanced equations: The number of atoms on the left side always equals the number on the right.",
+        "Burning wood: If you capture all smoke and ash, the weight equals the original wood and oxygen.",
+        "Sealed reaction: A chemical change in a closed jar shows no change in total weight on a scale.",
+        "Ice melting: A sealed bag of ice weighs the same after it has turned into liquid water.",
+        "Rusting nail: The weight of the rusted nail equals the original nail plus the oxygen it pulled from the air."
+    ]},
+    { id: 20, u: 1, t: "Plasma", d: "This is a high-energy state of matter consisting of ionized particles. It occurs at extremely high temperatures where electrons are stripped from atoms. It is the most common state of matter in the universe.", ex: [
+        "The Sun: It is a massive ball of superheated, ionized gas that provides light.",
+        "Lightning: The intense electricity creates a temporary path of high-energy particles in the air.",
+        "Neon signs: Electricity excites the gas inside the tube until it reaches this glowing state.",
+        "Stars: Distant celestial bodies are composed of this state, held together by gravity.",
+        "Welding arcs: The blue glow at the tip of the torch is matter in its most energetic form."
+    ]},
+
+    // --- BIOLOGY (21-40: Easy to Hard) ---
+    { id: 21, u: 2, t: "Cells", d: "These are the basic structural and functional units of all living organisms. They are often called the building blocks of life. All living things are composed of one or more of these tiny units.", ex: [
+        "Bacteria: These simple organisms consist of only one single unit of life.",
+        "Human skin: It is made of millions of tiny units working together to form a barrier.",
+        "Onion skin: Under a microscope, you can see the individual rectangular units.",
+        "Blood: It contains specialized units like red and white versions to carry oxygen and fight germs.",
+        "Nerve tissue: It is composed of long, thin units that send electrical signals."
+    ]},
+    { id: 22, u: 2, t: "Nucleus", d: "This organelle acts as the control center of the biological unit and contains the genetic material. It coordinates cell activities like growth and reproduction. It is found in eukaryotic organisms.", ex: [
+        "Brain of the cell: It sends out instructions for what the rest of the unit should do.",
+        "DNA storage: This is where the twisted ladder molecules are kept safe.",
+        "Division starter: It is the first part of the unit to begin the copying process.",
+        "Ribosome maker: It contains a sub-part that produces the protein-building machinery.",
+        "Genetic library: It holds all the information needed to build the entire organism."
+    ]},
+    { id: 23, u: 2, t: "Cell Membrane", d: "This is a thin, flexible barrier that surrounds all biological units. It regulates the passage of materials entering and exiting the interior environment. It is composed primarily of a lipid bilayer.", ex: [
+        "Security guard: It decides which nutrients can come in and which wastes must leave.",
+        "Balloon skin: It holds all the internal parts of the unit together in one shape.",
+        "Signal receiver: It has receptors that 'listen' for chemical messages from other units.",
+        "Waste exit: It allows carbon dioxide to move out of the unit and into the blood.",
+        "Filter: It prevents harmful large molecules from entering the delicate interior."
+    ]},
+    { id: 24, u: 2, t: "Cell Wall", d: "This is a rigid exterior layer found in plants, fungi, and some bacteria. It provides structural support and protection to the unit. It is composed of tough materials like cellulose or chitin.", ex: [
+        "Tree trunk: Millions of these rigid layers provide the support for the tree to grow tall.",
+        "Celery crunch: When you bite it, you are breaking these tough, fiber-filled structures.",
+        "Mushroom: The units have an outer layer that keeps them upright without bones.",
+        "Plant armor: It acts like a suit of armor against physical damage and bugs.",
+        "Pressure holder: It prevents the unit from bursting when it is full of water."
+    ]},
+    { id: 25, u: 2, t: "DNA", d: "This complex molecule carries the genetic instructions for the functioning of all living things. It is shaped like a twisted ladder known as a double helix. It consists of four unique nitrogen bases.", ex: [
+        "Heredity: This is the actual substance passed from parents to children to determine traits.",
+        "Forensics: Investigators use it to identify a specific person from a tiny sample.",
+        "Instruction manual: It contains the codes for building every protein in your body.",
+        "Identical twins: They are the only people who share a 100% match of this molecule.",
+        "Evolutionary trace: Scientists compare this across species to see how they are related."
+    ]},
+    { id: 26, u: 2, t: "Mitochondria", d: "These organelles are known as powerhouses because they generate energy. They convert nutrients into a usable energy molecule (ATP) through a process involving oxygen. They have their own DNA.", ex: [
+        "Muscle fuel: These are found in high numbers in your leg units to power running.",
+        "Oxygen users: This is where the oxygen you breathe is actually put to work.",
+        "ATP factory: The main job here is to produce the tiny batteries that power life.",
+        "Metabolism: This is where the calories from your food are converted to energy.",
+        "Heart power: These work 24/7 to keep your cardiac units contracting."
+    ]},
+    { id: 27, u: 2, t: "Chloroplasts", d: "These structures are found in plants and algae and capture light energy. They contain a specific pigment that facilitates the production of food. They are the site of energy conversion.", ex: [
+        "Solar panels: They capture sunlight to provide the power needed for the plant to live.",
+        "Green color: The pigment inside these structures gives plants their familiar hue.",
+        "Sugar maker: This is where the plant builds glucose from air and water.",
+        "Algae growth: These allow pond scum to grow simply by sitting in the sun.",
+        "Oxygen source: As these structures work, they release the oxygen that humans breathe."
+    ]},
+    { id: 28, u: 2, t: "Photosynthesis", d: "This is the process by which organisms use sunlight to synthesize foods. It converts light energy into chemical energy stored in glucose. During this, oxygen is released as a byproduct.", ex: [
+        "Leaf activity: The green parts of the plant are busy converting sun into sugar.",
+        "Forest air: The massive number of plants doing this keeps the atmosphere breathable.",
+        "Crop growth: Farmers rely on this process for corn and wheat to produce food.",
+        "Base of food chain: Every calorie you eat started with this process in a plant.",
+        "Carbon sink: This process takes carbon dioxide out of the air to build plant matter."
+    ]},
+    { id: 29, u: 2, t: "Cellular Respiration", d: "This is the process by which organisms break down nutrients to produce usable energy. It occurs within specialized organelles and typically requires oxygen. It releases carbon dioxide and water as waste.", ex: [
+        "Exercise: Your body speeds up this process to provide more power to your muscles.",
+        "Weight loss: This process is how your body 'burns' fat to get energy.",
+        "Warmth: A byproduct of this energy release is the heat that keeps us warm.",
+        "Yeast rising: Tiny organisms do this to get energy, releasing gas that makes bread fluffy.",
+        "Dormancy: Animals in hibernation slow this process down to save fuel."
+    ]},
+    { id: 30, u: 2, t: "Homeostasis", d: "This is the ability of an organism to maintain a stable internal environment despite outside changes. It involves constant monitoring and adjustments to variables like temperature. Failure to achieve this can lead to illness.", ex: [
+        "Sweating: When you get too hot, your body releases liquid to cool you down.",
+        "Shivering: When you get too cold, your muscles vibrate to create heat energy.",
+        "Blood sugar: Your pancreas releases insulin to keep energy levels in a safe range.",
+        "Thirst: Your brain tells you to drink water when your internal fluids get too low.",
+        "Breathing fast: Your body takes in more oxygen to balance the CO2 made during exercise."
+    ]},
+    { id: 31, u: 2, t: "Mitosis", d: "This is a type of division that results in two daughter units having the same number of chromosomes as the parent. It is used for growth and tissue repair. It ensures genetic consistency across the body.", ex: [
+        "Scrape healing: New skin units are made through this process to cover a wound.",
+        "Growing taller: Your bones and muscles get longer as units copy themselves.",
+        "Hair growth: Units at the root of the hair are constantly doing this to extend the strand.",
+        "Blood replacement: Your body makes millions of new red units every day this way.",
+        "Tadpole to frog: The massive change in size and shape is driven by this division."
+    ]},
+    { id: 32, u: 2, t: "Meiosis", d: "This is a specialized type of division that reduces the chromosome number by half. It results in the production of reproductive units. It is essential for genetic variation in sexual reproduction.", ex: [
+        "Pollen formation: A flower produces these tiny grains which contain half of its DNA.",
+        "Unique siblings: This process ensures that every reproductive unit is slightly different.",
+        "Fertilization prep: It makes sure that when two units join, the child has the correct count.",
+        "Species health: By mixing genes, this process helps a population survive diseases.",
+        "Evolution: The variety created here allows natural selection to have 'choices'."
+    ]},
+    { id: 33, u: 2, t: "Evolution", d: "This is the process by which different kinds of living organisms developed from earlier forms. It occurs through changes in the genetic makeup of populations over many generations. It explains diversity.", ex: [
+        "Whale leg bones: Small leftover bones show these animals had land-dwelling ancestors.",
+        "Bird beaks: Different shapes show how a single ancestor changed to eat different foods.",
+        "Antibiotic resistance: Bacteria change over time to survive the medicines we use.",
+        "The fossil record: Buried bones show a clear timeline of how life has changed.",
+        "DNA similarities: Humans and chimps share much of their code, showing a common past."
+    ]},
+    { id: 34, u: 2, t: "Natural Selection", d: "This is the process where organisms better adapted to their environment tend to survive and produce more offspring. It is the mechanism of change over time. Traits are passed based on survival.", ex: [
+        "Giraffe necks: Animals that could reach higher leaves survived longer and had more babies.",
+        "Peppered moths: Darker versions were hidden better from birds during the industrial age.",
+        "Deer speed: Faster animals escaped predators more often, passing on 'fast' genes.",
+        "Cactus spines: Plants with protection against thirsty animals survived to drop seeds.",
+        "Peacock tails: Males with the best displays attracted more mates, passing on those traits."
+    ]},
+    { id: 35, u: 2, t: "Adaptation", d: "This is a trait or behavior that improves an organism's ability to survive in its environment. It results from natural selection over many generations. These can be structural, functional, or behavioral.", ex: [
+        "Polar bear fur: The thick white coat provides warmth and camouflage in the snow.",
+        "Bat sonar: High-pitched sound allows the animal to hunt in total darkness.",
+        "Camel humps: Stored fat allows the animal to go long periods without food or water.",
+        "Bird migration: Moving south for the winter is a behavior that ensures food survival.",
+        "Venus flytrap: The ability to catch bugs is a way to get nutrients in poor soil."
+    ]},
+    { id: 36, u: 2, t: "Ecosystem", d: "This consists of all the living organisms in a given area interacting with the non-living environment. It involves complex cycles of energy and nutrients. Changes to one part can affect the entire network.", ex: [
+        "A pond: It includes the fish, the plants, the water, the sunlight, and the mud.",
+        "A rotten log: It is a small world of fungi, bugs, moisture, and decaying wood.",
+        "The Amazon: It is a massive network of rain, trees, animals, and soil working together.",
+        "A coral reef: It depends on the balance between tiny polyps, fish, and warm salt water.",
+        "Your backyard: It is a community of grass, birds, worms, and local weather patterns."
+    ]},
+    { id: 37, u: 2, t: "Biome", d: "This is a large naturally occurring community occupying a major habitat. It is defined by its climate, soil, and dominant vegetation. Examples include deserts, tundras, and tropical forests.", ex: [
+        "The Sahara: It is defined by extreme heat, very low rainfall, and sandy soil.",
+        "The Tundra: It is characterized by permafrost, cold winds, and lack of trees.",
+        "The Savanna: It is a grassland region with a distinct wet and dry season.",
+        "The Deciduous Forest: It is defined by trees that lose their leaves in the winter.",
+        "The Ocean: It is the largest version, defined by salt water and various depths."
+    ]},
+    { id: 38, u: 2, t: "Food Web", d: "This is a system of interlocking chains showing how energy moves through life. It represents the complex feeding relationships in an environment. It shows that most organisms eat more than one thing.", ex: [
+        "Forest links: A hawk might eat a mouse, a snake, or a small bird.",
+        "Ocean network: Sharks eat many types of fish, which in turn eat smaller creatures.",
+        "Garden connections: Birds eat seeds, but they also eat the worms that eat dead leaves.",
+        "Energy pyramid: It shows that there are many more plants at the bottom than lions at the top.",
+        "Disruption: If one species dies out, every other connected line in the web is affected."
+    ]},
+    { id: 39, u: 2, t: "Symbiosis", d: "This is any type of close and long-term biological interaction between two different species. It can be beneficial, neutral, or harmful. It is essential for the balance of environments.", ex: [
+        "Bees and flowers: Both win as the bee gets food and the flower gets pollinated.",
+        "Tick on a dog: One wins by getting a meal, while the other is harmed by blood loss.",
+        "Sharks and remora: The small fish gets protection and scraps while the shark is cleaned.",
+        "Lichen: It is a partnership between a fungus and an algae living as one unit.",
+        "Bacteria in your gut: You provide a home, and the organisms help you digest your food."
+    ]},
+    { id: 40, u: 2, t: "Mutation", d: "This is a change in the sequence of a genetic code. It can occur due to errors during copying or exposure to environmental factors. This process is a primary source of genetic diversity in populations.", ex: [
+        "Extra digits: A change in the instructions can cause an animal to be born with an extra toe.",
+        "Color blindness: A shift in a specific gene results in the inability to see certain colors.",
+        "Sickle cell: A single letter change in the code causes blood units to change shape.",
+        "Beneficial camouflage: A random change might help a bug hide better, helping it survive.",
+        "Fruit variety: Many types of seedless fruits were originally discovered as these random changes."
+    ]}
+];
+
+let userAnswers = {};
+
+function init() {
+    const nav = document.getElementById('unit-nav');
+    UNIT_NAMES.forEach((name, i) => {
+        const btn = document.createElement('button');
+        btn.className = `unit-btn ${i === 0 ? 'active' : ''}`;
+        btn.innerText = name;
+        btn.onclick = () => switchUnit(i + 1);
+        nav.appendChild(btn);
+    });
+    renderUnit(1);
+}
+
+function switchUnit(num) {
+    document.querySelectorAll('.unit-btn').forEach((b, idx) => b.classList.toggle('active', idx + 1 === num));
+    renderUnit(num);
+    window.scrollTo(0, 0);
+}
+
+function renderUnit(uId) {
+    const data = allData.filter(item => item.u === uId);
+    const bank = document.getElementById('topic-bank');
+    const list = document.getElementById('match-list');
+    bank.innerHTML = ''; list.innerHTML = '';
+
+    const placed = Object.values(userAnswers);
+    const available = data.filter(i => !placed.includes(i.t)).map(i => i.t).sort(() => Math.random() - 0.5);
+
+    available.forEach(txt => {
+        const div = document.createElement('div');
+        div.className = 'draggable-topic'; div.innerText = txt; div.draggable = true;
+        div.ondragstart = (e) => e.dataTransfer.setData('text', txt);
+        bank.appendChild(div);
+    });
+
+    data.forEach(item => {
+        const card = document.createElement('div'); card.className = 'match-card';
+        const drop = document.createElement('div'); drop.className = 'drop-zone'; drop.dataset.id = item.id;
+
+        if (userAnswers[item.id]) {
+            const pi = document.createElement('div'); pi.className = 'placed-item'; pi.innerText = userAnswers[item.id];
+            pi.onclick = () => { delete userAnswers[item.id]; renderUnit(uId); };
+            drop.appendChild(pi);
+        }
+
+        drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('drag-over'); };
+        drop.ondragleave = () => drop.classList.remove('drag-over');
+        drop.ondrop = (e) => {
+            e.preventDefault();
+            const txt = e.dataTransfer.getData('text');
+            for (let k in userAnswers) { if (userAnswers[k] === txt) delete userAnswers[k]; }
+            userAnswers[item.id] = txt; renderUnit(uId);
+        };
+
+        const desc = document.createElement('div'); desc.className = 'description-box';
+        let exHtml = item.ex.map(exStr => `<div>• ${exStr}</div>`).join('');
+        desc.innerHTML = `${item.d} <div class="examples-list"><strong>5 Examples & Reasoning:</strong>${exHtml}</div>`;
+        card.appendChild(drop); card.appendChild(desc); list.appendChild(card);
+    });
+}
+
+function getTS() {
+    const d = new Date();
+    const f = (n) => n.toString().padStart(2, '0');
+    return `${d.getFullYear().toString().slice(2)}${f(d.getMonth()+1)}${f(d.getDate())}_${f(d.getHours())}${f(d.getMinutes())}`;
+}
+
+document.getElementById('submit-btn').onclick = () => {
+    const ts = getTS();
+    const fname = window.location.pathname.split('/').pop().split('.')[0] || "Science_Part1";
+    const reportName = `${fname}_${ts}.html`;
+    
+    let total = 0; let sections = '';
+    for (let i = 1; i <= 2; i++) {
+        const uData = allData.filter(x => x.u === i);
+        let rows = ''; let uCorrect = 0;
+
+        uData.forEach(item => {
+            const ans = userAnswers[item.id] || "No Answer";
+            const isCorrect = ans === item.t;
+            if (isCorrect) { uCorrect++; total++; }
+            const review = isCorrect ? "Result: Perfect Match." : (ans === "No Answer" ? "Result: Blank." : `Correction: You chose "${ans}", which describes: "${allData.find(x => x.t === ans)?.d || 'N/A'}"`);
+            rows += `<tr style="background: ${isCorrect ? '#f0fff4' : '#fff5f5'}">
+                <td style="padding:10px; border:1px solid #ddd; font-weight:bold;">${item.t}</td>
+                <td style="padding:10px; border:1px solid #ddd;">${ans}</td>
+                <td style="padding:10px; border:1px solid #ddd; text-align:center;">${isCorrect ? '✅' : '❌'}</td>
+                <td style="padding:10px; border:1px solid #ddd; font-size:0.85em;">${item.d}</td>
+                <td style="padding:10px; border:1px solid #ddd; font-size:0.8em; color:#555;">${review}</td></tr>`;
+        });
+
+        sections += `<div style="margin-top:30px;"><h2 style="background:#2c3e50; color:white; padding:10px;">${UNIT_NAMES[i-1]} (${uCorrect}/${uData.length})</h2>
+            <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+                <thead style="background:#edf2f7;"><tr><th style="padding:10px; border:1px solid #ddd;">Fact</th><th style="padding:10px; border:1px solid #ddd;">Your Match</th><th style="padding:10px; border:1px solid #ddd;">Status</th><th style="padding:10px; border:1px solid #ddd;">Definition</th><th style="padding:10px; border:1px solid #ddd;">Analysis</th></tr></thead>
+                <tbody>${rows}</tbody></table></div>`;
+    }
+
+    const html = `<html><head><title>Score Report ${ts}</title></head><body style="font-family:sans-serif; padding:30px; background:#f7fafc;">
+        <div style="max-width:1400px; margin: auto; background:white; padding:30px; border-radius:10px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+            <h1>Science Mastery Score Report (Part 1)</h1><p style="font-size:1.4em;">Total Correct: ${total} / 40</p><p>Generated: ${new Date().toLocaleString()}</p>${sections}</div></body></html>`;
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = reportName; link.click();
+};
+init();
+</script>
+</body>
+</html>
