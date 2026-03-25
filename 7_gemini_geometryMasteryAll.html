@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometry Mastery: Complete Edition</title>
+    <style>
+        :root {
+            --primary: #1a2a6c;
+            --accent: #e67e22;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --blue: #3498db;
+            --bg: #f4f7f6;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: var(--bg); color: #333; }
+        h1 { text-align: center; color: var(--primary); margin-bottom: 5px; font-size: 1.8em; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 20px; font-size: 1em; }
+        .progress-wrapper { max-width: 1000px; margin: 0 auto 20px auto; }
+        .progress-bar-bg { width: 100%; height: 28px; background: #dfe6e9; border-radius: 14px; overflow: hidden; position: relative; }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--success)); border-radius: 14px; transition: width 0.4s ease; width: 0%; }
+        .progress-text { position: absolute; top: 0; left: 0; right: 0; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85em; color: #2c3e50; }
+        .formula-guide { max-width: 1000px; margin: 0 auto 25px auto; background-color: #fff; border: 2px solid var(--accent); border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .formula-guide h2 { margin-top: 0; color: var(--accent); font-size: 1.3em; border-bottom: 2px solid #fdf2e9; padding-bottom: 10px; text-align: center; }
+        .formula-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; font-size: 0.85em; }
+        .formula-category { background: #fffaf5; padding: 10px 12px; border-radius: 6px; border-left: 4px solid var(--accent); }
+        .formula-category h3 { margin: 0 0 5px 0; font-size: 0.95em; color: #2c3e50; }
+        .formula-toggle { text-align: center; margin-bottom: 10px; }
+        .formula-toggle button { background: var(--accent); color: #fff; padding: 6px 18px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.9em; }
+        .formula-collapsible { max-height: 800px; overflow: hidden; transition: max-height 0.4s ease; }
+        .formula-collapsible.collapsed { max-height: 0; }
+        .controls-container { text-align: center; padding: 18px; margin-bottom: 25px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 1000px; margin-left: auto; margin-right: auto; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; }
+        button { padding: 11px 24px; font-size: 1em; color: white; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-weight: 600; }
+        button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
+        #generateBtn { background-color: var(--blue); }
+        #showSolutionsBtn { background-color: var(--success); }
+        #showSolutionsBtn:disabled { background-color: #bdc3c7; cursor: default; transform: none; box-shadow: none; }
+        .problem-list { list-style: none; padding: 0; max-width: 900px; margin: 0 auto; }
+        .problem-card { margin-bottom: 28px; padding: 22px 25px; border-radius: 12px; background: #fff; border-left: 8px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: border-color 0.3s; }
+        .problem-card.is-correct { border-left-color: var(--success); background: #f0faf4; }
+        .problem-card.is-incorrect { border-left-color: var(--danger); background: #fdf2f2; }
+        .problem-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px; }
+        .problem-number { font-weight: bold; color: #7f8c8d; font-size: 0.95em; }
+        .problem-badges { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .problem-tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.75em; font-weight: 600; color: #fff; }
+        .difficulty-tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.7em; font-weight: 700; }
+        .diff-easy { background: #d5f5e3; color: #1e8449; }
+        .diff-medium { background: #fef9e7; color: #b7950b; }
+        .diff-hard { background: #fadbd8; color: #c0392b; }
+        .tag-trig { background: #9b59b6; } .tag-area { background: #27ae60; } .tag-volume { background: #2980b9; }
+        .tag-angles { background: #e67e22; } .tag-distance { background: #1abc9c; } .tag-surface { background: #e74c3c; }
+        .tag-arc { background: #f39c12; } .tag-similarity { background: #8e44ad; } .tag-special { background: #d35400; }
+        .tag-composite { background: #16a085; } .tag-transform { background: #c0392b; } .tag-coordinate { background: #2c3e50; }
+        .tag-pythag { background: #6c3483; } .tag-transversal { background: #1a5276; } .tag-exterior { background: #784212; }
+        .figure-container { text-align: center; background: #fdfdfd; padding: 18px; border: 1px solid #eee; border-radius: 8px; margin: 12px 0; min-height: 100px; }
+        .figure-container svg { max-width: 100%; height: auto; }
+        .answer-section { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+        .answer-box { flex: 1; min-width: 220px; display: flex; align-items: center; background: #f8f9fa; padding: 12px 15px; border-radius: 8px; gap: 10px; }
+        .answer-box label { font-weight: 600; color: #555; white-space: nowrap; font-size: 0.95em; }
+        .user-input { padding: 8px 10px; border: 2px solid #ccc; border-radius: 5px; width: 130px; text-align: center; font-size: 1.05em; transition: border-color 0.3s; }
+        .user-input:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px rgba(52,152,219,0.15); }
+        .user-input.correct-input { border-color: var(--success); background: #eafaf1; }
+        .user-input.incorrect-input { border-color: var(--danger); background: #fdedec; }
+        .user-input:disabled { background: #ecf0f1; }
+        .result-icon { font-size: 1.3em; min-width: 28px; text-align: center; display: none; }
+        .solution-area { display: none; margin-top: 20px; padding: 0; border: 2px solid var(--blue); border-radius: 10px; overflow: hidden; background: #fff; }
+        .solution-header { background: linear-gradient(135deg, #2980b9, #1a5276); color: #fff; padding: 12px 18px; font-weight: 700; font-size: 1.05em; display: flex; align-items: center; gap: 8px; }
+        .solution-body { padding: 18px 20px; }
+        .step-row { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+        .step-row:last-child { border-bottom: none; }
+        .step-badge { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--blue); color: #fff; font-weight: 800; font-size: 0.85em; display: flex; align-items: center; justify-content: center; }
+        .step-content { flex: 1; }
+        .step-label { font-weight: 700; color: #2c3e50; font-size: 0.92em; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
+        .step-label .step-icon { font-size: 1em; }
+        .step-detail { font-size: 0.9em; color: #555; line-height: 1.55; }
+        .step-math { display: inline-block; font-family: 'Courier New', monospace; background: #fef9e7; padding: 3px 10px; border-radius: 4px; border: 1px solid #f9e79f; color: #d35400; font-weight: 600; margin-top: 4px; font-size: 0.95em; }
+        .final-answer-row { margin-top: 14px; padding: 14px 18px; background: linear-gradient(135deg, #eafaf1, #d5f5e3); border: 2px solid var(--success); border-radius: 8px; display: flex; align-items: center; gap: 10px; }
+        .final-answer-row .fa-icon { font-size: 1.5em; }
+        .final-answer-row .fa-text { font-weight: 800; color: #1e8449; font-size: 1.15em; }
+        .score-display { max-width: 900px; margin: 0 auto 25px auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; display: none; }
+        .score-display h2 { margin: 0 0 10px 0; }
+        .score-big { font-size: 2.8em; font-weight: 800; }
+        .score-big.excellent { color: var(--success); }
+        .score-big.good { color: var(--blue); }
+        .score-big.needs-work { color: var(--danger); }
+        .score-bar { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 12px; font-size: 0.95em; }
+        .score-stat { padding: 5px 14px; border-radius: 20px; font-weight: 600; }
+        .report-header { text-align: center; background: linear-gradient(135deg, #e8f6f3, #d5f5e3); border: 2px solid var(--success); padding: 20px; margin-bottom: 30px; border-radius: 10px; }
+        .section-divider { max-width: 900px; margin: 35px auto 25px auto; padding: 12px 20px; background: linear-gradient(135deg, var(--primary), #2c3e50); color: #fff; border-radius: 10px; font-size: 1.1em; font-weight: 700; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.15); }
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .formula-grid { grid-template-columns: 1fr; }
+            .answer-section { flex-direction: column; }
+            .user-input { width: 100%; }
+            .step-row { gap: 10px; }
+        }
+        @media print {
+            .controls-container, .progress-wrapper, .formula-toggle { display: none; }
+            .solution-area { display: block !important; }
+            .formula-collapsible { max-height: none !important; }
+            .score-display { display: block !important; }
+        }
+    </style>
+</head>
+<body>
+    <h1>📐 Geometry Mastery: Complete Edition</h1>
+    <p class="subtitle">30 problems — sorted easy → advanced — fixed topic order, randomized values each generation</p>
+    <div class="progress-wrapper">
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressFill"></div>
+            <div class="progress-text" id="progressText">0 / 30 answered</div>
+        </div>
+    </div>
+    <div class="formula-guide">
+        <h2>📚 Mathematical Reference Guide</h2>
+        <div class="formula-toggle"><button id="toggleFormulas" onclick="toggleFormulas()">Hide Formulas ▲</button></div>
+        <div class="formula-collapsible" id="formulaBody">
+            <div class="formula-grid">
+                <div class="formula-category">
+                    <h3>Pythagorean & Trigonometry</h3>
+                    • <b>Pythagorean:</b> a² + b² = c²<br>
+                    • <b>sin</b> = Opposite / Hypotenuse<br>
+                    • <b>cos</b> = Adjacent / Hypotenuse<br>
+                    • <b>tan</b> = Opposite / Adjacent<br>
+                    • <b>45-45-90:</b> Hyp = Leg × √2<br>
+                    • <b>30-60-90:</b> Sides = x, x√3, 2x
+                </div>
+                <div class="formula-category">
+                    <h3>Coordinate Geometry</h3>
+                    • <b>Distance:</b> d = √((x₂−x₁)² + (y₂−y₁)²)<br>
+                    • <b>Midpoint:</b> M = ((x₁+x₂)/2, (y₁+y₂)/2)<br>
+                    • <b>Slope:</b> m = (y₂−y₁) / (x₂−x₁)<br>
+                    • <b>Shoelace Area:</b><br>
+                    &nbsp; ½|x₁(y₂−y₃)+x₂(y₃−y₁)+x₃(y₁−y₂)|
+                </div>
+                <div class="formula-category">
+                    <h3>2D Areas</h3>
+                    • <b>Triangle:</b> A = ½ × b × h<br>
+                    • <b>Trapezoid:</b> A = ½ × (a + b) × h<br>
+                    • <b>Rhombus:</b> A = ½ × d₁ × d₂<br>
+                    • <b>Parallelogram:</b> A = b × h<br>
+                    • <b>Annulus:</b> A = π(R² − r²)<br>
+                    • <b>Similar Figures:</b> a₁/a₂ = b₁/b₂
+                </div>
+                <div class="formula-category">
+                    <h3>Angles</h3>
+                    • <b>Interior Sum:</b> (n − 2) × 180°<br>
+                    • <b>Each Interior (regular):</b> (n−2)×180° / n<br>
+                    • <b>Exterior Angle (tri):</b> = sum of 2 remote interior<br>
+                    • <b>Transversal:</b> Alternate interior = equal<br>
+                    • <b>Co-interior (same-side):</b> sum = 180°<br>
+                    • <b>Corresponding angles:</b> equal
+                </div>
+                <div class="formula-category">
+                    <h3>Circles, Arcs & Sectors</h3>
+                    • <b>Area:</b> A = πr² &nbsp;|&nbsp; <b>Circum:</b> C = 2πr<br>
+                    • <b>Sector Area:</b> (θ/360) × πr²<br>
+                    • <b>Arc Length:</b> (θ/360) × 2πr<br>
+                    • <b>Semicircle Area:</b> ½πr²<br>
+                    • <b>Annulus:</b> π(R² − r²)<br>
+                    • <b>π ≈ 3.14</b> or <b>22/7</b>
+                </div>
+                <div class="formula-category">
+                    <h3>3D Volume & Surface Area</h3>
+                    • <b>Prism V:</b> Base Area × h<br>
+                    • <b>Cylinder V:</b> πr²h &nbsp; <b>SA:</b> 2πr² + 2πrh<br>
+                    • <b>Cone V:</b> ⅓πr²h<br>
+                    • <b>Pyramid V:</b> ⅓ × Base Area × h<br>
+                    • <b>Sphere V:</b> ⁴⁄₃πr³ &nbsp; <b>SA:</b> 4πr²
+                </div>
+                <div class="formula-category">
+                    <h3>Transformations</h3>
+                    • <b>Reflection x-axis:</b> (x, y) → (x, −y)<br>
+                    • <b>Reflection y-axis:</b> (x, y) → (−x, y)<br>
+                    • <b>Rotation 90° CW:</b> (x, y) → (y, −x)<br>
+                    • <b>Rotation 180°:</b> (x, y) → (−x, −y)<br>
+                    • <b>Dilation:</b> (x, y) → (kx, ky)
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="controls-container">
+        <button id="generateBtn">🎲 Generate New Values</button>
+        <button id="showSolutionsBtn">✅ Check & Save All Answers</button>
+    </div>
+    <div class="score-display" id="scoreDisplay"></div>
+    <div id="problemContainer" class="problem-list"></div>
+    <script>
+        const container=document.getElementById('problemContainer');
+        const generateBtn=document.getElementById('generateBtn');
+        const showBtn=document.getElementById('showSolutionsBtn');
+        const progressFill=document.getElementById('progressFill');
+        const progressText=document.getElementById('progressText');
+        const scoreDisplay=document.getElementById('scoreDisplay');
+        let currentProblems=[];
+        function R(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+        function r2(v){return Math.round(v*100)/100;}
+        function toggleFormulas(){
+            const b=document.getElementById('formulaBody'),t=document.getElementById('toggleFormulas');
+            b.classList.toggle('collapsed');
+            t.textContent=b.classList.contains('collapsed')?'Show Formulas ▼':'Hide Formulas ▲';
+        }
+        function updateProgress(){
+            if(!currentProblems.length)return;
+            let a=0;currentProblems.forEach((_,i)=>{const inp=document.getElementById(`input-${i+1}`);if(inp&&inp.value.trim()!=='')a++;});
+            const p=Math.round(a/currentProblems.length*100);
+            progressFill.style.width=p+'%';
+            progressText.textContent=`${a} / ${currentProblems.length} answered (${p}%)`;
+        }
+        function buildSteps(steps){
+            const icons=['🔍','📐','✏️','🔢','🧮','📏'];
+            return steps.map((s,i)=>`<div class="step-row"><div class="step-badge">${i+1}</div><div class="step-content"><div class="step-label"><span class="step-icon">${icons[i%icons.length]}</span> ${s.label}</div><div class="step-detail">${s.explain}</div>${s.math?`<div class="step-math">${s.math}</div>`:''}</div></div>`).join('');
+        }
+        // SVG helpers
+        function arcPath(cx,cy,r,startDeg,endDeg){
+            const s=startDeg*Math.PI/180,e=endDeg*Math.PI/180;
+            const sx=cx+r*Math.cos(s),sy=cy-r*Math.sin(s);
+            const ex=cx+r*Math.cos(e),ey=cy-r*Math.sin(e);
+            const lg=(endDeg-startDeg>180)?1:0;
+            return`M${r2(sx)} ${r2(sy)} A${r} ${r} 0 ${lg} 0 ${r2(ex)} ${r2(ey)}`;
+        }
+        function arrow(x1,y1,x2,y2,color){
+            const ang=Math.atan2(y2-y1,x2-x1);const hl=8;const ha=0.5;
+            const ax=x2-hl*Math.cos(ang-ha),ay=y2-hl*Math.sin(ang-ha);
+            const bx=x2-hl*Math.cos(ang+ha),by=y2-hl*Math.sin(ang+ha);
+            return`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1.8"/><polygon points="${r2(x2)},${r2(y2)} ${r2(ax)},${r2(ay)} ${r2(bx)},${r2(by)}" fill="${color}"/>`;
+        }
+        function dimLine(x1,y1,x2,y2,label,color,offset){
+            const mx=(x1+x2)/2,my=(y1+y2)/2;
+            const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);
+            const nx=-dy/len*(offset||12),ny=dx/len*(offset||12);
+            return`<line x1="${r2(x1+nx)}" y1="${r2(y1+ny)}" x2="${r2(x2+nx)}" y2="${r2(y2+ny)}" stroke="${color}" stroke-width="1.5" marker-start="url(#dimS)" marker-end="url(#dimE)"/><text x="${r2(mx+nx*1.8)}" y="${r2(my+ny*1.8)}" font-size="12" fill="${color}" font-weight="bold" text-anchor="middle" dominant-baseline="middle">${label}</text>`;
+        }
+        const svgDefs=`<defs>
+            <marker id="dimS" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><line x1="3" y1="0" x2="3" y2="6" stroke="#555" stroke-width="1.5"/></marker>
+            <marker id="dimE" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><line x1="3" y1="0" x2="3" y2="6" stroke="#555" stroke-width="1.5"/></marker>
+            <linearGradient id="gBlue" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#d6eaf8"/><stop offset="100%" stop-color="#aed6f1"/></linearGradient>
+            <linearGradient id="gGreen" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#d5f5e3"/><stop offset="100%" stop-color="#a9dfbf"/></linearGradient>
+            <linearGradient id="gOrange" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#fef9e7"/><stop offset="100%" stop-color="#fdebd0"/></linearGradient>
+            <linearGradient id="gPurple" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#f5eef8"/><stop offset="100%" stop-color="#e8daef"/></linearGradient>
+            <linearGradient id="gRed" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#fdedec"/><stop offset="100%" stop-color="#fadbd8"/></linearGradient>
+            <linearGradient id="gYellow" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff9c4"/><stop offset="100%" stop-color="#fff176"/></linearGradient>
+            <radialGradient id="gSphere"><stop offset="20%" stop-color="#bbdefb"/><stop offset="100%" stop-color="#1976d2" stop-opacity="0.3"/></radialGradient>
+            <radialGradient id="gSphereR"><stop offset="20%" stop-color="#ffcdd2"/><stop offset="100%" stop-color="#e53935" stop-opacity="0.3"/></radialGradient>
+        </defs>`;
+        // ═══════════════════════════════════════════════
+        //  30 TEMPLATES — FIXED ORDER: EASY → ADVANCED
+        // ═══════════════════════════════════════════════
+        const templates=[
+        // ═══ #1 — Interior Angle Sum ═══
+        function(id){
+            const n=R(5,12);const ans=(n-2)*180;
+            const names={5:'Pentagon',6:'Hexagon',7:'Heptagon',8:'Octagon',9:'Nonagon',10:'Decagon',11:'Hendecagon',12:'Dodecagon'};
+            const name=names[n]||n+'-gon';
+            const cn=Math.min(n,10);
+            let pts='',lines='';
+            for(let i=0;i<cn;i++){
+                const a=(2*Math.PI*i/cn)-Math.PI/2;
+                const x=r2(120+75*Math.cos(a)),y=r2(95+75*Math.sin(a));
+                pts+=(i?'L':'M')+x+' '+y;
+            }
+            pts+='Z';
+            // draw diagonals from first vertex to show triangles
+            for(let i=2;i<cn-1;i++){
+                const a=(2*Math.PI*i/cn)-Math.PI/2;
+                const x=r2(120+75*Math.cos(a)),y=r2(95+75*Math.sin(a));
+                const a0=(2*Math.PI*0/cn)-Math.PI/2;
+                const x0=r2(120+75*Math.cos(a0)),y0=r2(95+75*Math.sin(a0));
+                lines+=`<line x1="${x0}" y1="${y0}" x2="${x}" y2="${y}" stroke="#e67e22" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>`;
+            }
+            return{id,tag:'Angles',tagClass:'tag-angles',diff:'Easy',
+                text:`A ${name} has ${n} sides. Find the sum of all interior angles.`,
+                svg:`<svg width="240" height="200" viewBox="0 0 240 200">${svgDefs}<path d="${pts}" fill="url(#gOrange)" stroke="#e67e22" stroke-width="2.5" stroke-linejoin="round"/>${lines}<text x="120" y="100" text-anchor="middle" font-size="18" fill="#e67e22" font-weight="bold">n = ${n}</text><text x="120" y="118" text-anchor="middle" font-size="11" fill="#888">${n-2} triangles inside</text></svg>`,
+                answer:ans,unit:'°',
+                steps:[
+                    {label:"Understand the concept",explain:"Any polygon can be split into triangles by drawing diagonals from one vertex. Each triangle contributes 180°."},
+                    {label:"Count the triangles",explain:"An n-sided polygon always splits into exactly <b>(n − 2)</b> triangles.",math:`Triangles = ${n} − 2 = ${n-2}`},
+                    {label:"Multiply",explain:"Each triangle has 180°, so multiply.",math:`Sum = ${n-2} × 180° = ${ans}°`}
+                ]};
+        },
+        // ═══ #2 — Exterior Angle Theorem ═══
+        function(id){
+            const a=R(25,65),b=R(30,70);const ext=a+b;const c=180-a-b;
+            return{id,tag:'Ext. Angle',tagClass:'tag-exterior',diff:'Easy',
+                text:`In a triangle, two remote interior angles are ${a}° and ${b}°. Find the exterior angle.`,
+                svg:`<svg width="280" height="180" viewBox="0 0 280 180">${svgDefs}<polygon points="40,150 170,150 110,35" fill="url(#gOrange)" stroke="#d35400" stroke-width="2.5" stroke-linejoin="round"/><line x1="170" y1="150" x2="260" y2="150" stroke="#e74c3c" stroke-width="2.5" stroke-dasharray="8,4"/><path d="${arcPath(40,150,22,0,56)}" fill="none" stroke="#e67e22" stroke-width="2"/><text x="68" y="143" font-size="13" fill="#d35400" font-weight="bold">${a}°</text><path d="${arcPath(110,35,20,235,295)}" fill="none" stroke="#e67e22" stroke-width="2"/><text x="108" y="68" font-size="13" fill="#d35400" font-weight="bold">${b}°</text><text x="188" y="145" font-size="12" fill="#888">${c}°</text><rect x="200" y="130" width="45" height="22" rx="4" fill="#e74c3c" opacity="0.15"/><text x="222" y="146" text-anchor="middle" font-size="15" fill="#e74c3c" font-weight="bold">x?</text></svg>`,
+                answer:ext,unit:'°',
+                steps:[
+                    {label:"Identify the exterior angle",explain:"An <b>exterior angle</b> is formed by extending one side of a triangle. It sits outside the triangle at one vertex."},
+                    {label:"Recall the theorem",explain:"The <b>Exterior Angle Theorem</b>: an exterior angle equals the <b>sum of the two non-adjacent (remote) interior angles</b>.",math:"Exterior = Remote₁ + Remote₂"},
+                    {label:"Add the remote angles",explain:"The two remote interior angles are "+a+"° and "+b+"°.",math:`x = ${a}° + ${b}° = ${ext}°`}
+                ]};
+        },
+        // ═══ #3 — Parallel Lines & Transversal ═══
+        function(id){
+            const ang=R(40,75);const coInt=180-ang;
+            const rad=ang*Math.PI/180;
+            const cx=140, cy=90;
+            const dx40 = 40/Math.tan(rad);
+            const dx80 = 80/Math.tan(rad);
+            const xTop = r2(cx + dx40), xBot = r2(cx - dx40);
+            const x1 = r2(cx + dx80), y1 = 10;
+            const x2 = r2(cx - dx80), y2 = 170;
+            return{id,tag:'Transversal',tagClass:'tag-transversal',diff:'Easy',
+                text:`Two parallel lines are cut by a transversal. One angle is ${ang}°. Find the co-interior (same-side interior) angle.`,
+                svg:`<svg width="280" height="180" viewBox="0 0 280 180">${svgDefs}<line x1="20" y1="50" x2="260" y2="50" stroke="#2c3e50" stroke-width="2.5"/><line x1="20" y1="130" x2="260" y2="130" stroke="#2c3e50" stroke-width="2.5"/><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#e74c3c" stroke-width="2.5"/><path d="M20 47 L15 50 L20 53" stroke="#2c3e50" stroke-width="1.5" fill="none"/><path d="M20 127 L15 130 L20 133" stroke="#2c3e50" stroke-width="1.5" fill="none"/><text x="30" y="43" font-size="11" fill="#7f8c8d" font-weight="bold">ℓ₁</text><text x="30" y="123" font-size="11" fill="#7f8c8d" font-weight="bold">ℓ₂</text><text x="250" y="43" font-size="10" fill="#aaa">parallel</text><text x="250" y="123" font-size="10" fill="#aaa">parallel</text><path d="${arcPath(xBot,130,20,0,ang)}" fill="rgba(230,126,34,0.2)" stroke="#e67e22" stroke-width="2"/><text x="${r2(xBot + 32*Math.cos(rad/2))}" y="${r2(130 - 32*Math.sin(rad/2))}" font-size="14" fill="#d35400" font-weight="bold" text-anchor="middle" dominant-baseline="middle">${ang}°</text><path d="${arcPath(xTop,50,20,180+ang,360)}" fill="rgba(231,76,60,0.15)" stroke="#e74c3c" stroke-width="2"/><text x="${r2(xTop + 35*Math.cos((180+ang+360)/2 * Math.PI/180))}" y="${r2(50 - 35*Math.sin((180+ang+360)/2 * Math.PI/180))}" text-anchor="middle" dominant-baseline="middle" font-size="15" fill="#e74c3c" font-weight="bold">x?</text></svg>`,
+                answer:coInt,unit:'°',
+                steps:[
+                    {label:"Identify the angle relationship",explain:"The given angle and x are on the <b>same side</b> of the transversal, between the parallel lines — they are <b>co-interior</b> angles."},
+                    {label:"Recall the rule",explain:"Co-interior angles are <b>supplementary</b> — they add up to 180°.",math:"angle₁ + angle₂ = 180°"},
+                    {label:"Solve",explain:"Subtract the known angle from 180°.",math:`x = 180° − ${ang}° = ${coInt}°`}
+                ]};
+        },
+        // ═══ #4 — Midpoint Formula ═══
+        function(id){
+            const x1=R(-8,-1),y1=R(-6,-1),x2=R(2,10),y2=R(2,10);
+            const mx=r2((x1+x2)/2),my=r2((y1+y2)/2);
+            const sx=v=>(v+10)*16+20, sy=v=>180-(v+8)*14;
+            return{id,tag:'Coordinate',tagClass:'tag-coordinate',diff:'Easy',
+                text:`Find the x-coordinate of the midpoint between P(${x1}, ${y1}) and Q(${x2}, ${y2}).`,
+                svg:`<svg width="280" height="200" viewBox="0 0 280 200">${svgDefs}<rect x="15" y="5" width="250" height="190" fill="#fafbfc" rx="6" stroke="#eee" stroke-width="1"/><line x1="20" y1="${sy(0)}" x2="260" y2="${sy(0)}" stroke="#ccc" stroke-width="1"/><line x1="${sx(0)}" y1="10" x2="${sx(0)}" y2="190" stroke="#ccc" stroke-width="1"/><text x="${sx(0)+4}" y="18" font-size="10" fill="#aaa">y</text><text x="255" y="${sy(0)-4}" font-size="10" fill="#aaa">x</text><line x1="${sx(x1)}" y1="${sy(y1)}" x2="${sx(x2)}" y2="${sy(y2)}" stroke="#9b59b6" stroke-width="2" stroke-dasharray="6,4"/><circle cx="${sx(x1)}" cy="${sy(y1)}" r="7" fill="#8e44ad" stroke="#fff" stroke-width="2"/><text x="${sx(x1)-5}" y="${sy(y1)+20}" font-size="11" fill="#8e44ad" font-weight="bold">P(${x1},${y1})</text><circle cx="${sx(x2)}" cy="${sy(y2)}" r="7" fill="#8e44ad" stroke="#fff" stroke-width="2"/><text x="${sx(x2)-5}" y="${sy(y2)-10}" font-size="11" fill="#8e44ad" font-weight="bold">Q(${x2},${y2})</text><circle cx="${sx(mx)}" cy="${sy(my)}" r="6" fill="#e74c3c" stroke="#fff" stroke-width="2"/><text x="${sx(mx)+10}" y="${sy(my)+4}" font-size="12" fill="#e74c3c" font-weight="bold">M = ?</text></svg>`,
+                answer:mx,unit:'',
+                steps:[
+                    {label:"Understand midpoint",explain:"The midpoint is the exact center — equidistant from both endpoints."},
+                    {label:"Recall the formula",explain:"Average the x-coordinates.",math:"Mx = (x₁ + x₂) / 2"},
+                    {label:"Substitute and solve",explain:"Add the two x-values and divide by 2.",math:`Mx = (${x1} + ${x2}) / 2 = ${x1+x2} / 2 = ${mx}`}
+                ]};
+        },
+        // ═══ #5 — Slope ═══
+        function(id){
+            const x1=R(1,4),y1=R(1,4),x2=x1+R(2,6),y2=y1+R(2,8);
+            const dy=y2-y1,dx=x2-x1,ans=r2(dy/dx);
+            const sx=v=>30+v*20, sy=v=>180-v*14;
+            return{id,tag:'Coordinate',tagClass:'tag-coordinate',diff:'Easy',
+                text:`Find the slope of the line through (${x1}, ${y1}) and (${x2}, ${y2}). Round to nearest hundredth.`,
+                svg:`<svg width="280" height="200" viewBox="0 0 280 200">${svgDefs}<rect x="15" y="5" width="250" height="190" fill="#fafbfc" rx="6" stroke="#eee" stroke-width="1"/><line x1="30" y1="${sy(0)}" x2="260" y2="${sy(0)}" stroke="#ccc" stroke-width="1"/><line x1="30" y1="10" x2="30" y2="190" stroke="#ccc" stroke-width="1"/><line x1="${sx(x1)}" y1="${sy(y1)}" x2="${sx(x2)}" y2="${sy(y2)}" stroke="#2980b9" stroke-width="3"/><line x1="${sx(x1)}" y1="${sy(y1)}" x2="${sx(x2)}" y2="${sy(y1)}" stroke="#27ae60" stroke-width="1.5" stroke-dasharray="5,3"/><line x1="${sx(x2)}" y1="${sy(y1)}" x2="${sx(x2)}" y2="${sy(y2)}" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="5,3"/><text x="${(sx(x1)+sx(x2))/2}" y="${sy(y1)+16}" font-size="11" fill="#27ae60" font-weight="bold" text-anchor="middle">run = ${dx}</text><text x="${sx(x2)+8}" y="${(sy(y1)+sy(y2))/2+4}" font-size="11" fill="#e74c3c" font-weight="bold">rise = ${dy}</text><circle cx="${sx(x1)}" cy="${sy(y1)}" r="6" fill="#2c3e50" stroke="#fff" stroke-width="2"/><circle cx="${sx(x2)}" cy="${sy(y2)}" r="6" fill="#2c3e50" stroke="#fff" stroke-width="2"/><text x="${sx(x1)-5}" y="${sy(y1)+20}" font-size="11" fill="#2c3e50" font-weight="bold">(${x1},${y1})</text><text x="${sx(x2)-5}" y="${sy(y2)-10}" font-size="11" fill="#2c3e50" font-weight="bold">(${x2},${y2})</text></svg>`,
+                answer:ans,unit:'',
+                steps:[
+                    {label:"Understand slope",explain:"Slope measures steepness — <b>rise over run</b>."},
+                    {label:"Recall the formula",explain:"Subtract y-values (rise) and divide by x-difference (run).",math:"m = (y₂ − y₁) / (x₂ − x₁)"},
+                    {label:"Calculate",explain:"Find rise and run.",math:`Rise = ${y2} − ${y1} = ${dy}  |  Run = ${x2} − ${x1} = ${dx}`},
+                    {label:"Divide",explain:"Rise ÷ Run.",math:`m = ${dy} / ${dx} = ${ans}`}
+                ]};
+        },
+        // ═══ #6 — Reflection ═══
+        function(id){
+            const px=R(2,7),py=R(2,7);const ry=-py;
+            const sx=v=>140+v*12, sy=v=>90-v*12;
+            return{id,tag:'Transformation',tagClass:'tag-transform',diff:'Easy',
+                text:`Point P(${px}, ${py}) is reflected over the x-axis. What is the y-coordinate of P'?`,
+                svg:`<svg width="280" height="200" viewBox="0 0 280 200">${svgDefs}<rect x="15" y="5" width="250" height="190" fill="#fafbfc" rx="6" stroke="#eee" stroke-width="1"/><line x1="20" y1="100" x2="260" y2="100" stroke="#e74c3c" stroke-width="2.5"/><line x1="140" y1="10" x2="140" y2="190" stroke="#ccc" stroke-width="1"/><text x="245" y="95" font-size="10" fill="#e74c3c" font-weight="bold">x-axis (mirror)</text><circle cx="${sx(px)}" cy="${sy(py)}" r="7" fill="#3498db" stroke="#fff" stroke-width="2"/><text x="${sx(px)+10}" y="${sy(py)-2}" font-size="12" fill="#3498db" font-weight="bold">P(${px}, ${py})</text><line x1="${sx(px)}" y1="${sy(py)}" x2="${sx(px)}" y2="${sy(ry)}" stroke="#95a5a6" stroke-width="1.5" stroke-dasharray="4,3"/><circle cx="${sx(px)}" cy="${sy(ry)}" r="7" fill="#e74c3c" stroke="#fff" stroke-width="2"/><text x="${sx(px)+10}" y="${sy(ry)+15}" font-size="12" fill="#e74c3c" font-weight="bold">P'(?, ?)</text><text x="145" y="18" font-size="10" fill="#aaa">y</text></svg>`,
+                answer:ry,unit:'',
+                steps:[
+                    {label:"Understand reflection",explain:"Reflecting over the <b>x-axis</b> flips the point to the opposite side of the horizontal line. Like a mirror on the x-axis."},
+                    {label:"Recall the rule",explain:"x stays the same, y becomes its <b>negative</b>.",math:"(x, y) → (x, −y)"},
+                    {label:"Apply",explain:`P(${px}, ${py}) → P'(${px}, ${-py}).`,math:`y-coordinate of P' = ${ry}`}
+                ]};
+        },
+        // ═══ #7 — Trapezoid Area ═══
+        function(id){
+            const a=R(5,10),b=R(12,20),h=R(6,14);const ans=r2(0.5*(a+b)*h);
+            const w=220,ht=140;
+            const aW=a*8,bW=b*8;const oL=(bW-aW)/2;
+            const x1=40,y1=25,x2=x1+oL,y2=y1,x3=x2+aW,x4=x1+bW;
+            return{id,tag:'Area',tagClass:'tag-area',diff:'Easy',
+                text:`Find the area of a trapezoid with parallel sides ${a} and ${b}, and height ${h}.`,
+                svg:`<svg width="280" height="170" viewBox="0 0 280 170">${svgDefs}<polygon points="${x2},${y1} ${x3},${y1} ${x4},${y1+100} ${x1},${y1+100}" fill="url(#gGreen)" stroke="#27ae60" stroke-width="2.5" stroke-linejoin="round"/>${dimLine(x2,y1-8,x3,y1-8,'a = '+a,'#2c3e50',0)}${dimLine(x1,y1+100+15,x4,y1+100+15,'b = '+b,'#2c3e50',0)}<line x1="${x2}" y1="${y1}" x2="${x2}" y2="${y1+100}" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,3"/>${arrow(x2-12,y1+20,x2-12,y1+80,'#e74c3c')}<text x="${x2-28}" y="${y1+55}" font-size="12" fill="#e74c3c" font-weight="bold">h=${h}</text></svg>`,
+                answer:ans,unit:' sq units',
+                steps:[
+                    {label:"Identify the shape",explain:"A trapezoid has one pair of parallel sides (bases). Top a = "+a+", bottom b = "+b+", height h = "+h+"."},
+                    {label:"Recall the formula",explain:"Average the two bases, then multiply by height.",math:"A = ½ × (a + b) × h"},
+                    {label:"Add bases",explain:"Sum the parallel sides.",math:`a + b = ${a} + ${b} = ${a+b}`},
+                    {label:"Compute",explain:"Half the sum, times height.",math:`A = ½ × ${a+b} × ${h} = ${ans}`}
+                ]};
+        },
+        // ═══ #8 — Rhombus Area ═══
+        function(id){
+            const d1=R(6,16)*2,d2=R(6,16)*2;const ans=r2(0.5*d1*d2);
+            const hw=Math.min(d2*3,100),hh=Math.min(d1*3,80);
+            return{id,tag:'Area',tagClass:'tag-area',diff:'Easy',
+                text:`A rhombus has diagonals of length ${d1} and ${d2}. Find its area.`,
+                svg:`<svg width="280" height="180" viewBox="0 0 280 180">${svgDefs}<polygon points="140,${90-hh} ${140+hw},90 140,${90+hh} ${140-hw},90" fill="url(#gGreen)" stroke="#1abc9c" stroke-width="2.5" stroke-linejoin="round"/><line x1="140" y1="${90-hh}" x2="140" y2="${90+hh}" stroke="#3498db" stroke-width="2" stroke-dasharray="5,3"/><line x1="${140-hw}" y1="90" x2="${140+hw}" y2="90" stroke="#3498db" stroke-width="2" stroke-dasharray="5,3"/><rect x="136" y="86" width="8" height="8" fill="none" stroke="#3498db" stroke-width="1.5" transform="rotate(0 140 90)"/><text x="148" y="${90-hh/2}" font-size="13" fill="#3498db" font-weight="bold">d₁=${d1}</text><text x="${140+hw/2-10}" y="82" font-size="13" fill="#3498db" font-weight="bold">d₂=${d2}</text></svg>`,
+                answer:ans,unit:' sq units',
+                steps:[
+                    {label:"Identify shape and given info",explain:"A rhombus has 4 equal sides. Its diagonals cross at right angles. d₁ = "+d1+", d₂ = "+d2+"."},
+                    {label:"Recall the formula",explain:"The shortcut using diagonals:",math:"A = ½ × d₁ × d₂"},
+                    {label:"Compute",explain:"Multiply and halve.",math:`A = ½ × ${d1} × ${d2} = ${ans}`}
+                ]};
+        },
+        // ═══ #9 — Similar Triangles ═══
+        function(id){
+            const scale=R(2,5),b1=R(3,6),s1=R(4,8),b2=b1*scale,ans=s1*scale;
+            return{id,tag:'Similarity',tagClass:'tag-similarity',diff:'Easy',
+                text:`Two similar triangles: small has base ${b1} and side ${s1}; large has base ${b2}. Find corresponding side x.`,
+                svg:`<svg width="320" height="170" viewBox="0 0 320 170">${svgDefs}<polygon points="20,145 ${20+b1*10},145 ${20+b1*10},${145-s1*10}" fill="url(#gGreen)" stroke="#1abc9c" stroke-width="2.5" stroke-linejoin="round"/><rect x="${20+b1*10-9}" y="${145-9}" width="9" height="9" fill="none" stroke="#1abc9c" stroke-width="1.5"/><text x="${20+b1*5}" y="162" font-size="12" fill="#2c3e50" font-weight="bold" text-anchor="middle">${b1}</text><text x="${25+b1*10}" y="${145-s1*5+5}" font-size="12" fill="#2c3e50" font-weight="bold">${s1}</text><text x="${30+b1*10+15}" y="100" font-size="22" fill="#bbb">~</text><polygon points="${90+b1*10},145 ${90+b1*10+b2*5},145 ${90+b1*10+b2*5},${145-ans*5}" fill="url(#gOrange)" stroke="#f39c12" stroke-width="2.5" stroke-linejoin="round"/><rect x="${90+b1*10+b2*5-9}" y="${145-9}" width="9" height="9" fill="none" stroke="#f39c12" stroke-width="1.5"/><text x="${90+b1*10+b2*2.5}" y="162" font-size="12" fill="#2c3e50" font-weight="bold" text-anchor="middle">${b2}</text><rect x="${92+b1*10+b2*5}" y="${145-ans*2.5-8}" width="38" height="20" rx="4" fill="#e74c3c" opacity="0.15"/><text x="${111+b1*10+b2*5}" y="${145-ans*2.5+6}" font-size="14" fill="#e74c3c" font-weight="bold" text-anchor="middle">x = ?</text></svg>`,
+                answer:ans,unit:'',
+                steps:[
+                    {label:"Understand similarity",explain:"Similar triangles have the same shape — all corresponding sides share the same ratio."},
+                    {label:"Find the scale factor",explain:"Compare the known corresponding sides (bases).",math:`Scale = ${b2} ÷ ${b1} = ${scale}`},
+                    {label:"Apply",explain:"Multiply the small triangle's side by the scale factor.",math:`x = ${s1} × ${scale} = ${ans}`}
+                ]};
+        },
+        // ═══ #10 — Pythagorean Theorem ═══
+        function(id){
+            const a=R(3,12),b=R(4,15);const c=r2(Math.sqrt(a*a+b*b));
+            const scale = Math.min(130/a, 110/b);
+            const bW = a * scale, bH = b * scale;
+            const cx = r2(140 - bW/2), cy = 160;
+            return{id,tag:'Pythagorean',tagClass:'tag-pythag',diff:'Easy',
+                text:`A right triangle has legs of length ${a} and ${b}. Find the hypotenuse. Round to nearest hundredth.`,
+                svg:`<svg width="280" height="190" viewBox="0 0 280 190">${svgDefs}<polygon points="${cx},${cy} ${cx+bW},${cy} ${cx+bW},${cy-bH}" fill="url(#gPurple)" stroke="#6c3483" stroke-width="2.5" stroke-linejoin="round"/><rect x="${cx+bW-12}" y="${cy-12}" width="12" height="12" fill="none" stroke="#6c3483" stroke-width="1.5"/>${dimLine(cx,cy+15,cx+bW,cy+15,'a = '+a,'#2c3e50',0)}${dimLine(cx+bW+15,cy,cx+bW+15,cy-bH,'b = '+b,'#2c3e50',0)}<line x1="${cx}" y1="${cy}" x2="${cx+bW}" y2="${cy-bH}" stroke="#e74c3c" stroke-width="3"/><text x="${cx+bW/2}" y="${cy-bH/2-10}" font-size="15" fill="#e74c3c" font-weight="bold" text-anchor="middle" transform="rotate(${r2(-Math.atan2(bH,bW)*180/Math.PI)} ${cx+bW/2} ${cy-bH/2})">c = ?</text></svg>`,
+                answer:c,unit:'',
+                steps:[
+                    {label:"Identify the triangle",explain:"Right triangle with legs a = "+a+" and b = "+b+". You need the hypotenuse c."},
+                    {label:"Recall the Pythagorean Theorem",explain:"For any right triangle:",math:"a² + b² = c²"},
+                    {label:"Square each leg",explain:"Compute a² and b².",math:`${a}² = ${a*a}  |  ${b}² = ${b*b}`},
+                    {label:"Add and root",explain:"Sum the squares, then take the square root.",math:`c = √(${a*a} + ${b*b}) = √${a*a+b*b} = ${c}`}
+                ]};
+        },
+        // ═══ #11 — Each Interior Angle (Regular) ═══
+        function(id){
+            const n=R(5,10);const sum=(n-2)*180;const ans=r2(sum/n);
+            const names={5:'Pentagon',6:'Hexagon',7:'Heptagon',8:'Octagon',9:'Nonagon',10:'Decagon'};
+            let pts='';
+            for(let i=0;i<n;i++){const a=(2*Math.PI*i/n)-Math.PI/2;pts+=`${r2(140+70*Math.cos(a))},${r2(95+70*Math.sin(a))} `;}
+            const vx=140,vy=25;
+            return{id,tag:'Angles',tagClass:'tag-angles',diff:'Medium',
+                text:`A regular ${names[n]} has ${n} equal sides. Find each interior angle.`,
+                svg:`<svg width="280" height="200" viewBox="0 0 280 200">${svgDefs}<polygon points="${pts}" fill="url(#gOrange)" stroke="#e67e22" stroke-width="2.5" stroke-linejoin="round"/><path d="${arcPath(vx,vy,20,270-ans/2,270+ans/2)}" fill="rgba(231,76,60,0.2)" stroke="#e74c3c" stroke-width="2"/><text x="${vx}" y="${vy+38}" font-size="14" fill="#e74c3c" font-weight="bold" text-anchor="middle">?°</text></svg>`,
+                answer:ans,unit:'°',
+                steps:[
+                    {label:"Find total angle sum",explain:"Use the polygon formula first.",math:`Sum = (${n} − 2) × 180° = ${sum}°`},
+                    {label:"Divide equally",explain:"A regular polygon has all equal angles.",math:`Each = ${sum}° ÷ ${n} = ${ans}°`}
+                ]};
+        },
+        // ═══ #12 — Trig — sin ═══
+        function(id){
+            const hyp=R(10,30);const opp=r2(hyp*0.5);
+            return{id,tag:'Trigonometry',tagClass:'tag-trig',diff:'Medium',
+                text:`A right triangle has a 30° angle and hypotenuse ${hyp}. Find the side opposite the 30° angle.`,
+                svg:`<svg width="280" height="180" viewBox="0 0 280 180">${svgDefs}<polygon points="40,155 220,155 220,45" fill="url(#gPurple)" stroke="#8e44ad" stroke-width="2.5" stroke-linejoin="round"/><rect x="208" y="143" width="12" height="12" fill="none" stroke="#8e44ad" stroke-width="1.5"/><path d="${arcPath(40,155,30,0,31)}" fill="rgba(142,68,173,0.2)" stroke="#8e44ad" stroke-width="2"/><text x="78" y="148" font-size="14" fill="#8e44ad" font-weight="bold">30°</text><text x="115" y="92" font-size="14" fill="#2c3e50" font-weight="bold" transform="rotate(-31 115 92)">hyp = ${hyp}</text><text x="232" y="105" font-size="15" fill="#e74c3c" font-weight="bold">opp</text><text x="232" y="122" font-size="15" fill="#e74c3c" font-weight="bold">x = ?</text></svg>`,
+                answer:opp,unit:'',
+                steps:[
+                    {label:"Identify what you know",explain:"Right triangle, 30° angle, hypotenuse = "+hyp+"."},
+                    {label:"Choose the trig ratio",explain:"You have Hypotenuse and need Opposite → <b>SOH</b>: sin = O/H.",math:"sin(30°) = x / "+hyp},
+                    {label:"Use sin(30°) = 0.5",explain:"This is a standard memorized value.",math:"0.5 = x / "+hyp},
+                    {label:"Solve for x",explain:"Multiply both sides by "+hyp+".",math:"x = 0.5 × "+hyp+" = "+opp}
+                ]};
+        },
+        // ═══ #13 — Trig — tan ═══
+        function(id){
+            const adj=R(5,15);const opp=adj;
+            return{id,tag:'Trigonometry',tagClass:'tag-trig',diff:'Medium',
+                text:`A right triangle has a 45° angle with adjacent side = ${adj}. Use tangent to find the opposite side.`,
+                svg:`<svg width="280" height="180" viewBox="0 0 280 180">${svgDefs}<polygon points="50,155 170,155 170,35" fill="url(#gPurple)" stroke="#8e44ad" stroke-width="2.5" stroke-linejoin="round"/><rect x="158" y="143" width="12" height="12" fill="none" stroke="#8e44ad" stroke-width="1.5"/><path d="${arcPath(50,155,30,0,45)}" fill="rgba(142,68,173,0.2)" stroke="#8e44ad" stroke-width="2"/><text x="92" y="145" font-size="14" fill="#8e44ad" font-weight="bold">45°</text>${dimLine(50,155+15,170,155+15,'adj = '+adj,'#2c3e50',0)}<text x="180" y="90" font-size="15" fill="#e74c3c" font-weight="bold">opp</text><text x="180" y="108" font-size="15" fill="#e74c3c" font-weight="bold">x = ?</text></svg>`,
+                answer:opp,unit:'',
+                steps:[
+                    {label:"Identify given info",explain:"Right triangle, 45° angle, adjacent side = "+adj+"."},
+                    {label:"Choose trig ratio",explain:"Have Adjacent, need Opposite → <b>TOA</b>: tan = O/A.",math:"tan(45°) = x / "+adj},
+                    {label:"Use tan(45°) = 1",explain:"tan(45°) = 1 means opposite = adjacent in a 45° right triangle.",math:"1 = x / "+adj},
+                    {label:"Solve",explain:"Multiply both sides by "+adj+".",math:"x = 1 × "+adj+" = "+opp}
+                ]};
+        },
+        // ═══ #14 — 45-45-90 ═══
+        function(id){
+            const s=R(4,15);const hyp=r2(s*1.414);
+            return{id,tag:'Special Triangle',tagClass:'tag-special',diff:'Medium',
+                text:`A 45-45-90 triangle has legs of length ${s}. Find the hypotenuse. (√2 ≈ 1.414)`,
+                svg:`<svg width="260" height="190" viewBox="0 0 260 190">${svgDefs}<polygon points="45,165 175,165 175,35" fill="url(#gOrange)" stroke="#d35400" stroke-width="2.5" stroke-linejoin="round"/><rect x="163" y="153" width="12" height="12" fill="none" stroke="#d35400" stroke-width="1.5"/><path d="${arcPath(45,165,25,0,45)}" fill="rgba(211,84,0,0.2)" stroke="#d35400" stroke-width="2"/><text x="82" y="156" font-size="12" fill="#d35400" font-weight="bold">45°</text><path d="${arcPath(175,35,25,225,270)}" fill="rgba(211,84,0,0.2)" stroke="#d35400" stroke-width="2"/><text x="152" y="68" font-size="12" fill="#d35400" font-weight="bold">45°</text>${dimLine(45,165+15,175,165+15,s,'#2c3e50',0)}${dimLine(175+15,165,175+15,35,s,'#2c3e50',0)}<line x1="45" y1="165" x2="175" y2="35" stroke="#e74c3c" stroke-width="3"/><text x="110" y="90" font-size="16" fill="#e74c3c" font-weight="bold" text-anchor="middle" transform="rotate(-45 110 100)">x = ?</text></svg>`,
+                answer:hyp,unit:'',
+                steps:[
+                    {label:"Recognize the special triangle",explain:"45-45-90: two equal legs, one right angle. Has a shortcut."},
+                    {label:"Recall the rule",explain:"Hypotenuse = Leg × √2.",math:"Hypotenuse = Leg × √2"},
+                    {label:"Compute",explain:"Multiply leg by 1.414.",math:`x = ${s} × 1.414 = ${hyp}`}
+                ]};
+        },
+        // ═══ #15 — 30-60-90 ═══
+        function(id){
+            const x=R(3,10);const longLeg=r2(x*1.732);const hyp2=x*2;
+            return{id,tag:'Special Triangle',tagClass:'tag-special',diff:'Medium',
+                text:`A 30-60-90 triangle has short leg = ${x}. Find the long leg. (√3 ≈ 1.732)`,
+                svg:`<svg width="280" height="190" viewBox="0 0 280 190">${svgDefs}<polygon points="90,165 170,165 170,27" fill="url(#gOrange)" stroke="#d35400" stroke-width="2.5" stroke-linejoin="round"/><rect x="158" y="153" width="12" height="12" fill="none" stroke="#d35400" stroke-width="1.5"/><path d="${arcPath(90,165,25,0,60)}" fill="rgba(211,84,0,0.2)" stroke="#d35400" stroke-width="2"/><text x="122" y="155" font-size="12" fill="#d35400" font-weight="bold">60°</text><path d="${arcPath(170,27,30,240,270)}" fill="rgba(211,84,0,0.2)" stroke="#d35400" stroke-width="2"/><text x="145" y="70" font-size="12" fill="#d35400" font-weight="bold">30°</text>${dimLine(90,165+15,170,165+15,'short = '+x,'#888',0)}<text x="180" y="96" font-size="15" fill="#e74c3c" font-weight="bold">x = ?</text><text x="180" y="112" font-size="11" fill="#888">(long leg)</text></svg>`,
+                answer:longLeg,unit:'',
+                steps:[
+                    {label:"Identify the 30-60-90 triangle",explain:"Sides are in ratio <b>x : x√3 : 2x</b> where x is the shortest side (opposite 30°)."},
+                    {label:"Identify the sides",explain:"Short leg (opp 30°) = "+x+". Long leg (opp 60°) = x√3. Hypotenuse = 2x."},
+                    {label:"Compute the long leg",explain:"Multiply short leg by √3 ≈ 1.732.",math:`Long leg = ${x} × 1.732 = ${longLeg}`}
+                ]};
+        },
+        // ═══ #16 — Distance Formula ═══
+        function(id){
+            const dx=R(3,8),dy=R(3,8),x1=R(0,3),y1=R(0,3),x2=x1+dx,y2=y1+dy;
+            const ans=r2(Math.sqrt(dx*dx+dy*dy));
+            const sx=v=>40+v*18, sy=v=>170-v*13;
+            return{id,tag:'Distance',tagClass:'tag-distance',diff:'Medium',
+                text:`Find the distance between A(${x1}, ${y1}) and B(${x2}, ${y2}). Round to nearest hundredth.`,
+                svg:`<svg width="280" height="200" viewBox="0 0 280 200">${svgDefs}<rect x="15" y="5" width="250" height="190" fill="#fafbfc" rx="6" stroke="#eee" stroke-width="1"/><line x1="30" y1="${sy(0)}" x2="260" y2="${sy(0)}" stroke="#ccc" stroke-width="1"/><line x1="30" y1="10" x2="30" y2="190" stroke="#ccc" stroke-width="1"/><rect x="${sx(x1)}" y="${sy(y2)}" width="${sx(x2)-sx(x1)}" height="${sy(y1)-sy(y2)}" fill="rgba(52,152,219,0.08)" stroke="#3498db" stroke-width="1" stroke-dasharray="5,3"/><line x1="${sx(x1)}" y1="${sy(y1)}" x2="${sx(x2)}" y2="${sy(y2)}" stroke="#2c3e50" stroke-width="3"/><text x="${(sx(x1)+sx(x2))/2}" y="${sy(y1)+16}" font-size="11" fill="#27ae60" font-weight="bold" text-anchor="middle">Δx = ${dx}</text><text x="${sx(x2)+8}" y="${(sy(y1)+sy(y2))/2+4}" font-size="11" fill="#9b59b6" font-weight="bold">Δy = ${dy}</text><circle cx="${sx(x1)}" cy="${sy(y1)}" r="7" fill="#e74c3c" stroke="#fff" stroke-width="2"/><text x="${sx(x1)-8}" y="${sy(y1)+18}" font-size="11" fill="#e74c3c" font-weight="bold">A(${x1},${y1})</text><circle cx="${sx(x2)}" cy="${sy(y2)}" r="7" fill="#27ae60" stroke="#fff" stroke-width="2"/><text x="${sx(x2)+8}" y="${sy(y2)-6}" font-size="11" fill="#27ae60" font-weight="bold">B(${x2},${y2})</text><text x="${(sx(x1)+sx(x2))/2-8}" y="${(sy(y1)+sy(y2))/2-8}" font-size="13" fill="#2c3e50" font-weight="bold">d = ?</text></svg>`,
+                answer:ans,unit:' units',
+                steps:[
+                    {label:"Read the coordinates",explain:`A = (${x1}, ${y1}), B = (${x2}, ${y2}).`},
+                    {label:"Recall the formula",explain:"Derived from the Pythagorean Theorem on a coordinate plane.",math:"d = √((x₂−x₁)² + (y₂−y₁)²)"},
+                    {label:"Find differences",explain:"Subtract coordinates.",math:`Δx = ${dx}  |  Δy = ${dy}`},
+                    {label:"Square, add, root",explain:"Complete the calculation.",math:`d = √(${dx*dx} + ${dy*dy}) = √${dx*dx+dy*dy} = ${ans}`}
+                ]};
+        },
+        // ═══ #17 — Sector Area ═══
+        function(id){
+            const r=R(5,14);const angles=[60,90,120];const theta=angles[R(0,2)];
+            const frac=r2(theta/360);const ans=r2(frac*3.14*r*r);
+            const rad=theta*Math.PI/180;
+            const ex=r2(140+70*Math.cos(-rad)),ey=r2(100-70*Math.sin(rad));
+            return{id,tag:'Sector Area',tagClass:'tag-arc',diff:'Medium',
+                text:`Find the area of the ${theta}° sector with radius ${r}. (π ≈ 3.14)`,
+                svg:`<svg width="280" height="200" viewBox="0 0 280 200">${svgDefs}<circle cx="140" cy="100" r="70" fill="none" stroke="#ddd" stroke-width="1.5" stroke-dasharray="4,3"/><path d="M140 100 L210 100 A70 70 0 ${theta>180?1:0} 0 ${ex} ${ey} Z" fill="url(#gYellow)" stroke="#f39c12" stroke-width="2.5"/><path d="${arcPath(140,100,25,0,theta)}" fill="none" stroke="#e67e22" stroke-width="2.5"/><text x="${140+35*Math.cos(-rad/2)}" y="${100-35*Math.sin(rad/2)}" font-size="14" fill="#d35400" font-weight="bold" text-anchor="middle">${theta}°</text><line x1="140" y1="100" x2="210" y2="100" stroke="#2c3e50" stroke-width="2"/><text x="178" y="93" font-size="12" fill="#2c3e50" font-weight="bold">r = ${r}</text></svg>`,
+                answer:ans,unit:' sq units',
+                steps:[
+                    {label:"Understand sectors",explain:"A sector is a 'pizza slice' — a fraction of the full circle."},
+                    {label:"Find the fraction",explain:"What portion of 360°?",math:`Fraction = ${theta}/360 = ${frac}`},
+                    {label:"Full circle area",explain:"πr².",math:`Full = 3.14 × ${r}² = ${r2(3.14*r*r)}`},
+                    {label:"Take the fraction",explain:"Multiply full area by the fraction.",math:`Sector = ${frac} × ${r2(3.14*r*r)} = ${ans}`}
+                ]};
+        },
+        // ═══ #18 — Arc Length ═══
+        function(id){
+            const r=R(5,14);const angles=[60,90,120,180];const theta=angles[R(0,3)];
+            const frac=r2(theta/360);const fullC=r2(2*3.14*r);const ans=r2(frac*fullC);
+            const rad=theta*Math.PI/180;
+            const ex=r2(140+65*Math.cos(-rad)),ey=r2(100-65*Math.sin(rad));
+            return{id,tag:'Arc Length',tagClass:'tag-arc',diff:'Medium',
+                text:`Find the length of a ${theta}° arc on a circle with radius ${r}. (π ≈ 3.14)`,
+                svg:`<svg width="280" height="200" viewBox="0 0 280 200">${svgDefs}<circle cx="140" cy="100" r="65" fill="none" stroke="#ddd" stroke-width="1.5"/><path d="M205 100 A65 65 0 ${theta>180?1:0} 0 ${ex} ${ey}" fill="none" stroke="#e74c3c" stroke-width="5" stroke-linecap="round"/><line x1="140" y1="100" x2="205" y2="100" stroke="#2c3e50" stroke-width="2"/><line x1="140" y1="100" x2="${ex}" y2="${ey}" stroke="#2c3e50" stroke-width="1.5" stroke-dasharray="4,3"/><path d="${arcPath(140,100,22,0,theta)}" fill="none" stroke="#e67e22" stroke-width="2"/><text x="${140+32*Math.cos(-rad/2)}" y="${100-32*Math.sin(rad/2)}" font-size="13" fill="#d35400" font-weight="bold" text-anchor="middle">${theta}°</text><text x="175" y="93" font-size="12" fill="#2c3e50" font-weight="bold">r=${r}</text><circle cx="140" cy="100" r="3" fill="#2c3e50"/></svg>`,
+                answer:ans,unit:' units',
+                steps:[
+                    {label:"Understand arc length",explain:"An arc is a curved piece of circumference — a fraction of the total."},
+                    {label:"Find the fraction",explain:"Portion of 360°.",math:`Fraction = ${theta}/360 = ${frac}`},
+                    {label:"Full circumference",explain:"C = 2πr.",math:`C = 2 × 3.14 × ${r} = ${fullC}`},
+                    {label:"Take the fraction",explain:"Multiply circumference by the fraction.",math:`Arc = ${frac} × ${fullC} = ${ans}`}
+                ]};
+        },
+        // ═══ #19 — Rotation ═══
+        function(id){
+            const px=R(2,7),py=R(2,7);const ax=py,ay=-px;
+            const sx=v=>140+v*10, sy=v=>100-v*10;
+            return{id,tag:'Transformation',tagClass:'tag-transform',diff:'Medium',
+                text:`Point P(${px}, ${py}) is rotated 90° clockwise about the origin. What is the x-coordinate of P'?`,
+                svg:`<svg width="280" height="210" viewBox="0 0 280 210">${svgDefs}<rect x="15" y="5" width="250" height="200" fill="#fafbfc" rx="6" stroke="#eee" stroke-width="1"/><line x1="20" y1="100" x2="260" y2="100" stroke="#ccc" stroke-width="1"/><line x1="140" y1="10" x2="140" y2="200" stroke="#ccc" stroke-width="1"/><text x="255" y="95" font-size="10" fill="#aaa">x</text><text x="145" y="18" font-size="10" fill="#aaa">y</text><circle cx="140" cy="100" r="3" fill="#333"/><circle cx="${sx(px)}" cy="${sy(py)}" r="7" fill="#3498db" stroke="#fff" stroke-width="2"/><text x="${sx(px)+10}" y="${sy(py)-5}" font-size="12" fill="#3498db" font-weight="bold">P(${px},${py})</text><path d="M${sx(px)} ${sy(py)} A${Math.max(px,py)*10} ${Math.max(px,py)*10} 0 0 1 ${sx(ax)} ${sy(ay)}" fill="none" stroke="#e67e22" stroke-width="2" stroke-dasharray="5,3"/><text x="${sx(Math.max(px,py))+5}" y="105" font-size="11" fill="#e67e22">90° CW</text><circle cx="${sx(ax)}" cy="${sy(ay)}" r="7" fill="#e74c3c" stroke="#fff" stroke-width="2"/><text x="${sx(ax)+10}" y="${sy(ay)+15}" font-size="12" fill="#e74c3c" font-weight="bold">P'(?, ?)</text></svg>`,
+                answer:ax,unit:'',
+                steps:[
+                    {label:"Understand rotation",explain:"90° clockwise = quarter-turn in the direction clock hands move."},
+                    {label:"Recall the rule",explain:"Swap x and y, then negate the new y.",math:"(x, y) → (y, −x)"},
+                    {label:"Apply",explain:`P(${px}, ${py}) → P'(${py}, ${-px}).`,math:`x-coordinate of P' = ${ax}`}
+                ]};
+        },
+        // ═══ #20 — Dilation ═══
+        function(id){
+            const px=R(2,5),py=R(2,5),k=R(2,4);const ans=px*k;
+            const sx=v=>140+v*10, sy=v=>120-v*10;
+            return{id,tag:'Transformation',tagClass:'tag-transform',diff:'Medium',
+                text:`Point P(${px}, ${py}) is dilated by scale factor k = ${k} from the origin. What is the x-coordinate of P'?`,
+                svg:`<svg width="280" height="210" viewBox="0 0 280 210">${svgDefs}<rect x="15" y="5" width="250" height="200" fill="#fafbfc" rx="6" stroke="#eee" stroke-width="1"/><line x1="20" y1="120" x2="260" y2="120" stroke="#ccc" stroke-width="1"/><line x1="140" y1="10" x2="140" y2="200" stroke="#ccc" stroke-width="1"/><circle cx="140" cy="120" r="3" fill="#333"/><text x="130" y="135" font-size="10" fill="#333">O</text><line x1="140" y1="120" x2="${sx(px*k)}" y2="${sy(py*k)}" stroke="#95a5a6" stroke-width="1.5" stroke-dasharray="4,3"/><circle cx="${sx(px)}" cy="${sy(py)}" r="7" fill="#3498db" stroke="#fff" stroke-width="2"/><text x="${sx(px)+10}" y="${sy(py)-5}" font-size="12" fill="#3498db" font-weight="bold">P(${px},${py})</text><circle cx="${sx(px*k)}" cy="${sy(py*k)}" r="7" fill="#e74c3c" stroke="#fff" stroke-width="2"/><text x="${sx(px*k)+10}" y="${sy(py*k)-5}" font-size="12" fill="#e74c3c" font-weight="bold">P'(?, ?)</text><text x="25" y="195" font-size="13" fill="#555" font-weight="bold">k = ${k}</text></svg>`,
+                answer:ans,unit:'',
+                steps:[
+                    {label:"Understand dilation",explain:"A dilation from the origin scales every coordinate by factor <b>k</b>. If k > 1, the point moves farther away."},
+                    {label:"Recall the rule",explain:"Multiply both coordinates by k.",math:"(x, y) → (kx, ky)"},
+                    {label:"Apply",explain:`P(${px}, ${py}) with k = ${k}.`,math:`P' = (${k}×${px}, ${k}×${py}) = (${px*k}, ${py*k})`},
+                    {label:"Answer",explain:"The x-coordinate of P' is "+ans+".",math:`x-coordinate = ${ans}`}
+                ]};
+        },
+        // ═══ #21 — Composite Figure ═══
+        function(id){
+            const w=R(6,12),h=R(8,16);const rr=w/2;const rectA=w*h;const semiA=r2(0.5*3.14*rr*rr);const ans=r2(rectA+semiA);
+            const rW=w*8,rH=h*6;
+            return{id,tag:'Composite',tagClass:'tag-composite',diff:'Hard',
+                text:`Find the total area: a rectangle (${w} × ${h}) with a semicircle on one end (diameter = ${w}). (π ≈ 3.14)`,
+                svg:`<svg width="280" height="200" viewBox="0 0 280 200">${svgDefs}<rect x="50" y="${100-rH/2}" width="${rW}" height="${rH}" fill="url(#gOrange)" stroke="#f39c12" stroke-width="2.5"/><path d="M${50+rW} ${100-rH/2} A${rH/2} ${rH/2} 0 0 1 ${50+rW} ${100+rH/2}" fill="url(#gOrange)" stroke="#f39c12" stroke-width="2.5"/><line x1="${50+rW}" y1="${100-rH/2}" x2="${50+rW}" y2="${100+rH/2}" stroke="#f39c12" stroke-width="1" stroke-dasharray="3,3"/>${dimLine(50,100+rH/2+18,50+rW,100+rH/2+18,w,'#2c3e50',0)}${dimLine(50-18,100-rH/2,50-18,100+rH/2,h,'#2c3e50',0)}<text x="${50+rW+rH/2*0.5}" y="${100+4}" font-size="11" fill="#e74c3c" font-weight="bold">r=${rr}</text></svg>`,
+                answer:ans,unit:' sq units',
+                steps:[
+                    {label:"Break into parts",explain:"Composite figure = rectangle + semicircle."},
+                    {label:"Rectangle area",explain:"Width × Height.",math:`Rect = ${w} × ${h} = ${rectA}`},
+                    {label:"Semicircle area",explain:"Half a circle. Diameter = "+w+", so radius = "+rr+".",math:`Semi = ½ × 3.14 × ${rr}² = ${semiA}`},
+                    {label:"Add together",explain:"No overlap — just add.",math:`Total = ${rectA} + ${semiA} = ${ans}`}
+                ]};
+        },
+        // ═══ #22 — Annulus ═══
+        function(id){
+            const Ro=R(8,15),ri=R(3,Ro-2);const ans=r2(3.14*(Ro*Ro-ri*ri));
+            const rO=65,rI=r2(ri/Ro*65);
+            return{id,tag:'Composite',tagClass:'tag-composite',diff:'Hard',
+                text:`Find the area of the shaded ring (annulus): outer radius ${Ro}, inner radius ${ri}. (π ≈ 3.14)`,
+                svg:`<svg width="280" height="200" viewBox="0 0 280 200">${svgDefs}<circle cx="140" cy="100" r="${rO}" fill="url(#gYellow)" stroke="#f39c12" stroke-width="2.5"/><circle cx="140" cy="100" r="${rI}" fill="#fdfdfd" stroke="#e74c3c" stroke-width="2"/><line x1="140" y1="100" x2="${140+rO}" y2="100" stroke="#2c3e50" stroke-width="2"/><text x="${140+rO/2}" y="92" font-size="12" fill="#2c3e50" font-weight="bold" text-anchor="middle">R = ${Ro}</text><line x1="140" y1="100" x2="140" y2="${100-rI}" stroke="#e74c3c" stroke-width="2" stroke-dasharray="4,3"/><text x="148" y="${100-rI/2}" font-size="11" fill="#e74c3c" font-weight="bold">r = ${ri}</text><circle cx="140" cy="100" r="3" fill="#2c3e50"/></svg>`,
+                answer:ans,unit:' sq units',
+                steps:[
+                    {label:"Understand the annulus",explain:"A ring between two concentric circles (same center, different radii)."},
+                    {label:"Strategy",explain:"Big circle area minus small circle area.",math:"A = π(R² − r²)"},
+                    {label:"Compute R² − r²",explain:"Square each radius and subtract.",math:`${Ro}² − ${ri}² = ${Ro*Ro} − ${ri*ri} = ${Ro*Ro-ri*ri}`},
+                    {label:"Multiply by π",explain:"Apply π ≈ 3.14.",math:`A = 3.14 × ${Ro*Ro-ri*ri} = ${ans}`}
+                ]};
+        },
+        // ═══ #23 — Triangle Area from Coords ═══
+        function(id){
+            const x1=0,y1=0,x2=R(4,10),y2=0,x3=R(1,6),y3=R(3,8);
+            const ans=r2(Math.abs(x1*(y2-y3)+x2*(y3-y1)+x3*(y1-y2))/2);
+            const sx=v=>40+v*18, sy=v=>170-v*16;
+            return{id,tag:'Coordinate',tagClass:'tag-coordinate',diff:'Hard',
+                text:`Find the area of the triangle with vertices A(${x1},${y1}), B(${x2},${y2}), C(${x3},${y3}).`,
+                svg:`<svg width="280" height="200" viewBox="0 0 280 200">${svgDefs}<rect x="15" y="5" width="250" height="190" fill="#fafbfc" rx="6" stroke="#eee" stroke-width="1"/><line x1="30" y1="${sy(0)}" x2="260" y2="${sy(0)}" stroke="#ccc" stroke-width="1"/><line x1="30" y1="10" x2="30" y2="190" stroke="#ccc" stroke-width="1"/><polygon points="${sx(x1)},${sy(y1)} ${sx(x2)},${sy(y2)} ${sx(x3)},${sy(y3)}" fill="url(#gGreen)" stroke="#1abc9c" stroke-width="2.5" stroke-linejoin="round" opacity="0.8"/><circle cx="${sx(x1)}" cy="${sy(y1)}" r="6" fill="#e74c3c" stroke="#fff" stroke-width="2"/><text x="${sx(x1)-5}" y="${sy(y1)+18}" font-size="11" fill="#e74c3c" font-weight="bold">A(${x1},${y1})</text><circle cx="${sx(x2)}" cy="${sy(y2)}" r="6" fill="#27ae60" stroke="#fff" stroke-width="2"/><text x="${sx(x2)-5}" y="${sy(y2)+18}" font-size="11" fill="#27ae60" font-weight="bold">B(${x2},${y2})</text><circle cx="${sx(x3)}" cy="${sy(y3)}" r="6" fill="#2980b9" stroke="#fff" stroke-width="2"/><text x="${sx(x3)+8}" y="${sy(y3)-5}" font-size="11" fill="#2980b9" font-weight="bold">C(${x3},${y3})</text></svg>`,
+                answer:ans,unit:' sq units',
+                steps:[
+                    {label:"Identify the method",explain:"With coordinates, use the <b>Shoelace Formula</b>."},
+                    {label:"Recall the formula",explain:"Plug in coordinates in order.",math:"A = ½|x₁(y₂−y₃) + x₂(y₃−y₁) + x₃(y₁−y₂)|"},
+                    {label:"Substitute",explain:`A(${x1},${y1}), B(${x2},${y2}), C(${x3},${y3}).`,math:`= ½|${x1}(${y2}−${y3}) + ${x2}(${y3}−${y1}) + ${x3}(${y1}−${y2})|`},
+                    {label:"Compute",explain:"Evaluate each term and take absolute value.",math:`= ½|${x1*(y2-y3)} + ${x2*(y3-y1)} + ${x3*(y1-y2)}| = ½ × ${Math.abs(x1*(y2-y3)+x2*(y3-y1)+x3*(y1-y2))} = ${ans}`}
+                ]};
+        },
+        // ═══ #24 — Cylinder Volume ═══
+        function(id){
+            const r=R(3,9),h=R(6,16);const baseA=r2(3.14*r*r);const ans=r2(baseA*h);
+            return{id,tag:'Volume',tagClass:'tag-volume',diff:'Hard',
+                text:`Find the volume of a cylinder: radius ${r}, height ${h}. (π ≈ 3.14)`,
+                svg:`<svg width="240" height="220" viewBox="0 0 240 220">${svgDefs}<ellipse cx="120" cy="45" rx="55" ry="18" fill="url(#gBlue)" stroke="#2980b9" stroke-width="2.5"/><path d="M65 45 L65 165" stroke="#2980b9" stroke-width="2.5"/><path d="M175 45 L175 165" stroke="#2980b9" stroke-width="2.5"/><ellipse cx="120" cy="165" rx="55" ry="18" fill="none" stroke="#2980b9" stroke-width="2.5"/><path d="M65 165 A55 18 0 0 0 175 165" fill="url(#gBlue)" stroke="#2980b9" stroke-width="2.5" opacity="0.5"/><line x1="120" y1="45" x2="175" y2="45" stroke="#e74c3c" stroke-width="2" stroke-dasharray="4,3"/><text x="142" y="38" font-size="13" fill="#e74c3c" font-weight="bold">r = ${r}</text>${arrow(185,45,185,165,'#2c3e50')}<text x="192" y="110" font-size="13" fill="#2c3e50" font-weight="bold">h = ${h}</text><circle cx="120" cy="45" r="3" fill="#e74c3c"/></svg>`,
+                answer:ans,unit:' cu units',
+                steps:[
+                    {label:"Identify",explain:"Cylinder: circular ends, r = "+r+", h = "+h+"."},
+                    {label:"Formula",explain:"V = Base Area × Height = πr²h.",math:"V = π × r² × h"},
+                    {label:"Base area",explain:"πr².",math:`Base = 3.14 × ${r}² = ${baseA}`},
+                    {label:"Multiply by height",explain:"Stack the base h units.",math:`V = ${baseA} × ${h} = ${ans}`}
+                ]};
+        },
+        // ═══ #25 — Cylinder Surface Area ═══
+        function(id){
+            const r=R(3,8),h=R(8,18);const bases=r2(2*3.14*r*r);const lat=r2(2*3.14*r*h);const ans=r2(bases+lat);
+            return{id,tag:'Surface Area',tagClass:'tag-surface',diff:'Hard',
+                text:`Find the total surface area of a cylinder: radius ${r}, height ${h}. (π ≈ 3.14)`,
+                svg:`<svg width="240" height="220" viewBox="0 0 240 220">${svgDefs}<ellipse cx="120" cy="45" rx="55" ry="18" fill="url(#gGreen)" stroke="#27ae60" stroke-width="2.5"/><rect x="65" y="45" width="110" height="120" fill="url(#gGreen)" opacity="0.3" stroke="none"/><path d="M65 45 L65 165" stroke="#27ae60" stroke-width="2.5"/><path d="M175 45 L175 165" stroke="#27ae60" stroke-width="2.5"/><ellipse cx="120" cy="165" rx="55" ry="18" fill="none" stroke="#27ae60" stroke-width="2.5"/><path d="M65 165 A55 18 0 0 0 175 165" fill="url(#gGreen)" stroke="#27ae60" stroke-width="2.5" opacity="0.5"/><line x1="120" y1="45" x2="175" y2="45" stroke="#e74c3c" stroke-width="2" stroke-dasharray="4,3"/><text x="142" y="38" font-size="12" fill="#e74c3c" font-weight="bold">r = ${r}</text><text x="185" y="110" font-size="12" fill="#2c3e50" font-weight="bold">h = ${h}</text><circle cx="120" cy="45" r="3" fill="#e74c3c"/></svg>`,
+                answer:ans,unit:' sq units',
+                steps:[
+                    {label:"Visualize surfaces",explain:"3 surfaces: top circle, bottom circle, curved side (unrolls to a rectangle)."},
+                    {label:"Two bases",explain:"Each is a circle, there are two.",math:`Bases = 2 × 3.14 × ${r}² = ${bases}`},
+                    {label:"Lateral surface",explain:"Unrolled rectangle: width = 2πr, height = h.",math:`Lateral = 2 × 3.14 × ${r} × ${h} = ${lat}`},
+                    {label:"Total",explain:"Add all surfaces.",math:`SA = ${bases} + ${lat} = ${ans}`}
+                ]};
+        },
+        // ═══ #26 — Cone Volume ═══
+        function(id){
+            const r=R(3,8),h=R(7,18);const ans=r2((1/3)*3.14*r*r*h);
+            return{id,tag:'Volume',tagClass:'tag-volume',diff:'Hard',
+                text:`Find the volume of a cone: radius ${r}, height ${h}. (π ≈ 3.14)`,
+                svg:`<svg width="240" height="220" viewBox="0 0 240 220">${svgDefs}<ellipse cx="120" cy="185" rx="60" ry="18" fill="url(#gBlue)" stroke="#2c3e50" stroke-width="2" opacity="0.6"/><polygon points="120,30 60,185 180,185" fill="url(#gBlue)" stroke="#2c3e50" stroke-width="2.5" opacity="0.7"/><line x1="120" y1="185" x2="120" y2="30" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,3"/><circle cx="120" cy="30" r="4" fill="#e74c3c"/><text x="128" y="115" font-size="14" fill="#e74c3c" font-weight="bold">h = ${h}</text><line x1="120" y1="185" x2="180" y2="185" stroke="#2c3e50" stroke-width="1.5" stroke-dasharray="3,3"/><text x="145" y="200" font-size="12" fill="#2c3e50" font-weight="bold">r = ${r}</text></svg>`,
+                answer:ans,unit:' cu units',
+                steps:[
+                    {label:"Identify",explain:"Cone: circular base tapering to a point. r = "+r+", h = "+h+"."},
+                    {label:"Formula",explain:"A cone is ⅓ of a cylinder.",math:"V = ⅓ × π × r² × h"},
+                    {label:"Base area",explain:"πr².",math:`Base = 3.14 × ${r}² = ${r2(3.14*r*r)}`},
+                    {label:"Compute",explain:"Multiply by height, then divide by 3.",math:`V = ${r2(3.14*r*r)} × ${h} ÷ 3 = ${ans}`}
+                ]};
+        },
+        // ═══ #27 — Pyramid Volume ═══
+        function(id){
+            const base=R(5,12),h=R(8,18);const bA=base*base;const ans=r2(bA*h/3);
+            return{id,tag:'Volume',tagClass:'tag-volume',diff:'Hard',
+                text:`A square pyramid: base edge ${base}, height ${h}. Find volume.`,
+                svg:`<svg width="240" height="220" viewBox="0 0 240 220">${svgDefs}<polygon points="120,25 55,145 120,175 185,145" fill="url(#gOrange)" stroke="#d35400" stroke-width="2.5" stroke-linejoin="round"/><line x1="55" y1="145" x2="120" y2="175" stroke="#d35400" stroke-width="2.5"/><line x1="185" y1="145" x2="120" y2="175" stroke="#d35400" stroke-width="2.5"/><line x1="55" y1="145" x2="120" y2="115" stroke="#d35400" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/><line x1="185" y1="145" x2="120" y2="115" stroke="#d35400" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/><line x1="120" y1="175" x2="120" y2="115" stroke="#d35400" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/><line x1="120" y1="145" x2="120" y2="25" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,3"/><circle cx="120" cy="25" r="4" fill="#d35400"/><text x="128" y="95" font-size="14" fill="#e74c3c" font-weight="bold">h = ${h}</text><text x="80" y="195" font-size="12" fill="#2c3e50" font-weight="bold">base = ${base}</text></svg>`,
+                answer:ans,unit:' cu units',
+                steps:[
+                    {label:"Identify",explain:"Square pyramid: square base (side = "+base+"), height = "+h+"."},
+                    {label:"Formula",explain:"Like a cone, ⅓ of a prism.",math:"V = ⅓ × Base Area × h"},
+                    {label:"Base area",explain:"Square = side².",math:`Base = ${base}² = ${bA}`},
+                    {label:"Compute",explain:"Multiply and divide by 3.",math:`V = ${bA} × ${h} ÷ 3 = ${ans}`}
+                ]};
+        },
+        // ═══ #28 — Triangular Prism Volume ═══
+        function(id){
+            const b=R(4,10),ht=R(3,8),L=R(8,18);const triA=r2(0.5*b*ht);const ans=r2(triA*L);
+            return{id,tag:'Volume',tagClass:'tag-volume',diff:'Hard',
+                text:`A triangular prism: triangle base ${b}, triangle height ${ht}, prism length ${L}. Find volume.`,
+                svg:`<svg width="280" height="200" viewBox="0 0 280 200">${svgDefs}<polygon points="40,160 100,160 70,80" fill="url(#gBlue)" stroke="#2980b9" stroke-width="2.5" stroke-linejoin="round"/><polygon points="160,140 220,140 190,60" fill="url(#gBlue)" stroke="#2980b9" stroke-width="2.5" stroke-linejoin="round" opacity="0.6"/><line x1="40" y1="160" x2="160" y2="140" stroke="#2980b9" stroke-width="2"/><line x1="100" y1="160" x2="220" y2="140" stroke="#2980b9" stroke-width="2"/><line x1="70" y1="80" x2="190" y2="60" stroke="#2980b9" stroke-width="2"/><polygon points="100,160 220,140 190,60 70,80" fill="url(#gBlue)" stroke="none" opacity="0.15"/><line x1="70" y1="160" x2="70" y2="80" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="4,3"/><text x="48" y="125" font-size="11" fill="#e74c3c" font-weight="bold">h=${ht}</text><text x="55" y="175" font-size="11" fill="#2c3e50" font-weight="bold">b=${b}</text><text x="125" y="168" font-size="11" fill="#2c3e50" font-weight="bold">L=${L}</text></svg>`,
+                answer:ans,unit:' cu units',
+                steps:[
+                    {label:"Identify",explain:"Triangular prism: two triangular faces, three rectangular faces."},
+                    {label:"Formula",explain:"V = Base Area × Length.",math:"V = (½ × b × h) × L"},
+                    {label:"Triangle area",explain:"Cross-section area.",math:`Triangle = ½ × ${b} × ${ht} = ${triA}`},
+                    {label:"Multiply by length",explain:"Extend through the prism.",math:`V = ${triA} × ${L} = ${ans}`}
+                ]};
+        },
+        // ═══ #29 — Sphere Volume ═══
+        function(id){
+            const r=R(3,10);const rC=r*r*r;const ans=r2((4/3)*3.14*rC);
+            return{id,tag:'Volume',tagClass:'tag-volume',diff:'Hard',
+                text:`Find the volume of a sphere with radius ${r}. (π ≈ 3.14)`,
+                svg:`<svg width="240" height="200" viewBox="0 0 240 200">${svgDefs}<circle cx="120" cy="100" r="72" fill="url(#gSphere)" stroke="#2980b9" stroke-width="2.5"/><ellipse cx="120" cy="100" rx="72" ry="20" fill="none" stroke="#2980b9" stroke-width="1.5" stroke-dasharray="5,3"/><ellipse cx="120" cy="100" rx="20" ry="72" fill="none" stroke="#2980b9" stroke-width="1" stroke-dasharray="3,3" opacity="0.3"/><line x1="120" y1="100" x2="192" y2="100" stroke="#e74c3c" stroke-width="2.5"/><circle cx="120" cy="100" r="4" fill="#e74c3c"/><text x="148" y="92" font-size="14" fill="#e74c3c" font-weight="bold">r = ${r}</text></svg>`,
+                answer:ans,unit:' cu units',
+                steps:[
+                    {label:"Identify",explain:"Sphere: perfectly round 3D shape. r = "+r+"."},
+                    {label:"Formula",explain:"Uses r cubed with coefficient 4/3.",math:"V = (4/3) × π × r³"},
+                    {label:"Cube the radius",explain:"r × r × r.",math:`${r}³ = ${rC}`},
+                    {label:"Multiply",explain:"(4/3) × π × r³.",math:`V = 1.3333 × 3.14 × ${rC} = ${ans}`}
+                ]};
+        },
+        // ═══ #30 — Sphere Surface Area ═══
+        function(id){
+            const r=R(3,12);const ans=r2(4*3.14*r*r);
+            return{id,tag:'Surface Area',tagClass:'tag-surface',diff:'Hard',
+                text:`Find the surface area of a sphere with radius ${r}. (π ≈ 3.14)`,
+                svg:`<svg width="240" height="200" viewBox="0 0 240 200">${svgDefs}<circle cx="120" cy="100" r="72" fill="url(#gSphereR)" stroke="#e74c3c" stroke-width="2.5"/><ellipse cx="120" cy="100" rx="72" ry="20" fill="none" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="5,3"/><ellipse cx="120" cy="100" rx="20" ry="72" fill="none" stroke="#e74c3c" stroke-width="1" stroke-dasharray="3,3" opacity="0.3"/><line x1="120" y1="100" x2="192" y2="100" stroke="#2c3e50" stroke-width="2.5"/><circle cx="120" cy="100" r="4" fill="#2c3e50"/><text x="148" y="92" font-size="14" fill="#2c3e50" font-weight="bold">r = ${r}</text></svg>`,
+                answer:ans,unit:' sq units',
+                steps:[
+                    {label:"Identify",explain:"Sphere surface area = total outer skin area."},
+                    {label:"Formula",explain:"Equals 4 times the area of a circle with the same radius.",math:"SA = 4 × π × r²"},
+                    {label:"Square the radius",explain:"r².",math:`${r}² = ${r*r}`},
+                    {label:"Multiply",explain:"4 × π × r².",math:`SA = 4 × 3.14 × ${r*r} = ${ans}`}
+                ]};
+        }
+        ];
+        const sectionLabels=[
+            {before:1, label:"📗 Easy (1–10) — Angles, Coordinates, Basic Area & Pythagorean"},
+            {before:11,label:"📘 Medium (11–20) — Trig, Special Triangles, Circles & Transformations"},
+            {before:21,label:"📕 Hard (21–30) — Composite Figures, 3D Volume & Surface Area"}
+        ];
+        function render(){
+            container.innerHTML='';currentProblems=[];scoreDisplay.style.display='none';
+            showBtn.disabled=false;showBtn.textContent='✅ Check & Save All Answers';
+            for(let t=0;t<templates.length;t++){
+                const num=t+1;
+                const sec=sectionLabels.find(s=>s.before===num);
+                if(sec){const div=document.createElement('div');div.className='section-divider';div.textContent=sec.label;container.appendChild(div);}
+                const p=templates[t](num);currentProblems.push(p);
+                const diffClass=p.diff==='Easy'?'diff-easy':p.diff==='Medium'?'diff-medium':'diff-hard';
+                const card=document.createElement('div');card.className='problem-card';card.id=`card-${num}`;
+                card.innerHTML=`<div class="problem-header"><span class="problem-number">Problem #${num}</span><div class="problem-badges"><span class="difficulty-tag ${diffClass}">${p.diff}</span><span class="problem-tag ${p.tagClass}">${p.tag}</span></div></div><div style="font-size:1.1em;margin-bottom:10px;">${p.text}</div><div class="figure-container">${p.svg}</div><div class="answer-section"><div class="answer-box"><label>Answer:</label><input type="number" step="0.01" class="user-input" id="input-${num}" placeholder="Your answer"><span class="result-icon" id="icon-${num}"></span></div></div><div class="solution-area" id="sol-${num}"><div class="solution-header">📝 Logical Step-by-Step Explanation</div><div class="solution-body">${buildSteps(p.steps)}<div class="final-answer-row"><span class="fa-icon">🎯</span><span class="fa-text">Final Answer: ${p.answer}${p.unit}</span></div></div></div>`;
+                container.appendChild(card);
+            }
+            document.querySelectorAll('.user-input').forEach(inp=>{inp.addEventListener('input',updateProgress);inp.addEventListener('keydown',handleEnterNav);});
+            updateProgress();
+        }
+        function handleEnterNav(e){if(e.key==='Enter'){e.preventDefault();const inputs=Array.from(document.querySelectorAll('.user-input'));const idx=inputs.indexOf(e.target);if(idx<inputs.length-1)inputs[idx+1].focus();else e.target.blur();}}
+        function check(){
+            let correct=0;
+            currentProblems.forEach((p,i)=>{
+                const idx=i+1,input=document.getElementById(`input-${idx}`),icon=document.getElementById(`icon-${idx}`);
+                const val=parseFloat(input.value),tolerance=Math.max(0.15,Math.abs(p.answer)*0.015);
+                const isCorrect=!isNaN(val)&&Math.abs(val-p.answer)<tolerance;
+                input.disabled=true;input.classList.add(isCorrect?'correct-input':'incorrect-input');
+                document.getElementById(`card-${idx}`).classList.add(isCorrect?'is-correct':'is-incorrect');
+                document.getElementById(`sol-${idx}`).style.display='block';
+                icon.style.display='inline';icon.textContent=isCorrect?'✅':'❌';if(isCorrect)correct++;
+            });
+            const total=currentProblems.length,pct=Math.round(correct/total*100);
+            const grade=pct>=90?'excellent':pct>=60?'good':'needs-work';
+            const label=pct>=90?'🌟 Excellent!':pct>=70?'👍 Good Work!':pct>=50?'📈 Keep Practicing':'💪 Review & Retry';
+            scoreDisplay.style.display='block';
+            scoreDisplay.innerHTML=`<h2>${label}</h2><div class="score-big ${grade}">${correct} / ${total}</div><div style="font-size:1.1em;color:#666;margin-top:5px;">${pct}% Accuracy</div><div class="score-bar"><span class="score-stat" style="background:#d5f5e3;color:#27ae60;">✅ Correct: ${correct}</span><span class="score-stat" style="background:#fadbd8;color:#e74c3c;">❌ Incorrect: ${total-correct}</span></div>`;
+            scoreDisplay.scrollIntoView({behavior:'smooth',block:'center'});
+            showBtn.textContent=`Score: ${correct} / ${total} (${pct}%)`;showBtn.disabled=true;
+            setTimeout(()=>downloadReport(correct,total,pct),1000);
+        }
+        function downloadReport(correct,total,pct){
+            const clone=document.documentElement.cloneNode(true);
+            const ctrl=clone.querySelector('.controls-container');if(ctrl)ctrl.remove();
+            const pw=clone.querySelector('.progress-wrapper');if(pw)pw.remove();
+            const ft=clone.querySelector('.formula-toggle');if(ft)ft.remove();
+            clone.querySelectorAll('script').forEach(s=>s.remove());
+            const header=document.createElement('div');header.className='report-header';
+            header.innerHTML=`<h2>📐 Geometry Mastery — Complete Edition Report</h2><h3>Score: ${correct} / ${total} (${pct}%)</h3><p>Generated: ${new Date().toLocaleString()}</p>`;
+            clone.querySelector('body').prepend(header);
+            const origInputs=document.querySelectorAll('.user-input');
+            clone.querySelectorAll('.user-input').forEach((ci,idx)=>{
+                const span=document.createElement('span');span.textContent=origInputs[idx]?origInputs[idx].value||'---':'---';
+                span.style.cssText='display:inline-block;padding:5px 15px;border:1px solid #333;border-radius:4px;font-weight:bold;min-width:80px;text-align:center;';
+                if(origInputs[idx]&&origInputs[idx].classList.contains('correct-input')){span.style.background='#eafaf1';span.style.borderColor='#27ae60';span.style.color='#27ae60';}
+                else{span.style.background='#fdedec';span.style.borderColor='#e74c3c';span.style.color='#e74c3c';}
+                ci.parentNode.replaceChild(span,ci);
+            });
+            clone.querySelectorAll('.solution-area').forEach(s=>s.style.display='block');
+            const fc=clone.querySelector('.formula-collapsible');if(fc)fc.classList.remove('collapsed');
+            const sd=clone.querySelector('.score-display');if(sd)sd.style.display='block';
+            const now=new Date();
+            const ts=now.getFullYear().toString().slice(2)+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'_'+String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0');
+            const blob=new Blob(['<!DOCTYPE html>\n'+clone.outerHTML],{type:'text/html'});
+            const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+            a.download=`geometry_mastery_report_${ts}.html`;
+            document.body.appendChild(a);a.click();document.body.removeChild(a);
+        }
+        generateBtn.addEventListener('click',render);
+        showBtn.addEventListener('click',check);
+        render();
+    </script>
+</body>
+</html>
