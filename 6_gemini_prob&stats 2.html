@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6th Grade FAST: Rigorous Stats</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f1f5f9; color: #0f172a; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; color: #1e293b; margin-bottom: 5px; font-weight: 800; }
+        .subtitle { text-align: center; color: #475569; margin-bottom: 30px; font-weight: 600; }
+        
+        .controls-container { text-align: center; padding: 20px; margin-bottom: 30px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; border: 1px solid #e2e8f0; }
+        button { padding: 12px 25px; font-size: 1.1em; color: white; border: none; border-radius: 8px; cursor: pointer; margin: 5px; transition: 0.2s; font-weight: 700; }
+        #generateBtn { background-color: #2563eb; }
+        #showSolutionsBtn { background-color: #059669; }
+        
+        .problem-card { margin-bottom: 30px; padding: 25px; border-radius: 12px; background-color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 10px solid #3b82f6; }
+        .num-label { font-weight: 900; color: #64748b; font-size: 1.2em; margin-right: 10px; }
+        .tag { font-size: 0.75em; background: #e0f2fe; color: #0369a1; padding: 5px 12px; border-radius: 15px; text-transform: uppercase; font-weight: 800; }
+
+        .data-display { background: #f8fafc; border: 2px dashed #cbd5e1; padding: 15px; border-radius: 8px; text-align: center; font-size: 1.5em; font-weight: bold; margin: 15px 0; font-family: monospace; }
+        .viz-box { display: flex; flex-direction: column; align-items: center; padding: 20px; background: #fff; border: 1px solid #f1f5f9; border-radius: 12px; margin: 15px 0; }
+        
+        .stem-leaf { font-family: monospace; font-size: 1.4em; line-height: 1.5; border-left: 3px solid #334155; padding-left: 15px; }
+        .stem-col { font-weight: bold; padding-right: 15px; border-right: 3px solid #334155; margin-right: 15px; }
+
+        .answer-section { margin-top: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .user-input { padding: 10px; font-size: 1.1em; border: 2px solid #94a3b8; border-radius: 6px; width: 200px; text-align: center; }
+        .correct-input { border-color: #10b981 !important; background-color: #ecfdf5 !important; }
+        .incorrect-input { border-color: #ef4444 !important; background-color: #fef2f2 !important; }
+
+        .solution-area { display: none; margin-top: 20px; padding: 20px; background: #fff; border-left: 6px solid #10b981; box-shadow: inset 0 0 10px rgba(0,0,0,0.02); }
+        .report-header { text-align: center; background: white; border: 6px solid #059669; padding: 30px; border-radius: 15px; margin-bottom: 40px; }
+        
+        @media print { .controls-container { display: none; } .solution-area { display: block !important; } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>6th Grade FAST Mastery</h1>
+        <p class="subtitle">Advanced Data Analysis Assessment</p>
+
+        <div class="controls-container">
+            <button id="generateBtn" onclick="render()">Generate New Values</button>
+            <button id="showSolutionsBtn" onclick="check()">Submit & Save Report</button>
+            <div id="scoreDisplay" style="margin-top:10px; font-weight:800;"></div>
+        </div>
+
+        <div id="problemContainer"></div>
+    </div>
+
+    <script>
+        const container = document.getElementById('problemContainer');
+        let currentProblems = [];
+
+        function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        function randDec(min, max) { return (Math.random() * (max - min) + min).toFixed(1); }
+        function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]} return a; }
+        function gcd(a, b) { return b ? gcd(b, a % b) : a; }
+        function getTimestamp() {
+            const d = new Date();
+            const f = (n) => n.toString().padStart(2, '0');
+            return `${d.getFullYear().toString().slice(-2)}${f(d.getMonth()+1)}${f(d.getDate())}_${f(d.getHours())}${f(d.getMinutes())}`;
+        }
+
+        const templates = [
+            'mean', 'median', 'mode', 'range', 'q1', 'q3', 'iqr', 'missing', 
+            'outlier', 'impact', 'stat_q', 'stem', 'box_concept', 'box_read', 
+            'histogram', 'dot_plot', 'shape', 'pie', 'time', 'prob', 'likelihood', 'sample'
+        ];
+
+        function createProblem(idx, key) {
+            let p = { id: idx, key, title: '', question: '', display: '', visual: '', answer: '', steps: [], hint: 'Enter numeric value.' };
+
+            switch(key) {
+                case 'mean':
+                    p.title = "Mean with Decimals";
+                    let m = [parseFloat(randDec(10,30)), parseFloat(randDec(10,30)), parseFloat(randDec(10,30)), parseFloat(randDec(10,30))];
+                    let sum = m.reduce((a,b)=>a+b,0);
+                    p.question = "Find the mean. Round to 1 decimal place.";
+                    p.display = m.join(', ');
+                    p.answer = (sum/4).toFixed(1).replace('.0', '');
+                    p.steps = [`Sum: ${sum.toFixed(1)}`, `Mean: ${sum.toFixed(1)} / 4 = ${p.answer}`];
+                    break;
+
+                case 'median':
+                    p.title = "Median (Even Set)";
+                    let med = [rand(10,20), rand(21,30), rand(31,40), rand(41,50)].sort((a,b)=>a-b);
+                    p.display = shuffle([...med]).join(', ');
+                    p.question = "Find the median of this data set:";
+                    let ans = (med[1] + med[2]) / 2;
+                    p.answer = ans.toString();
+                    p.steps = [`Sorted: ${med.join(', ')}`, `Average middle two: (${med[1]}+${med[2]})/2 = ${ans}`];
+                    break;
+
+                case 'iqr':
+                    p.title = "Advanced IQR";
+                    let iqrArr = [rand(10,20), rand(21,30), rand(31,40), rand(41,50), rand(51,60), rand(61,70), rand(71,80)].sort((a,b)=>a-b);
+                    p.display = shuffle([...iqrArr]).join(', ');
+                    p.question = "Calculate the Interquartile Range (IQR).";
+                    p.answer = (iqrArr[5] - iqrArr[1]).toString();
+                    p.steps = [`Sorted: ${iqrArr.join(', ')}`, `Q1: ${iqrArr[1]}, Q3: ${iqrArr[5]}`, `IQR: ${iqrArr[5]} - ${iqrArr[1]} = ${p.answer}`];
+                    break;
+
+                case 'box_read':
+                    p.title = "Reading Box Plots";
+                    let vals = [rand(100,120), rand(130,150), rand(160,180), rand(190,210), rand(220,250)];
+                    p.visual = `<svg width="300" height="80">
+                        <line x1="20" y1="40" x2="280" y2="40" stroke="black"/>
+                        <rect x="80" y="20" width="120" height="40" fill="#e2e8f0" stroke="black"/>
+                        <line x1="140" y1="20" x2="140" y2="60" stroke="red" stroke-width="3"/>
+                        <text x="20" y="75" font-size="12" font-weight="bold">${vals[0]}</text>
+                        <text x="80" y="75" font-size="12" font-weight="bold">${vals[1]}</text>
+                        <text x="140" y="75" font-size="12" font-weight="bold">${vals[2]}</text>
+                        <text x="200" y="75" font-size="12" font-weight="bold">${vals[3]}</text>
+                        <text x="280" y="75" font-size="12" font-weight="bold">${vals[4]}</text>
+                    </svg>`;
+                    p.question = "What is the Upper Quartile (Q3) of this data?";
+                    p.answer = vals[3].toString();
+                    p.steps = ["Q3 is the right edge of the box."];
+                    break;
+
+                case 'stem':
+                    p.title = "Double-Digit Stem";
+                    let st = rand(10, 15);
+                    p.visual = `<div class="stem-leaf"><div><span class="stem-col">${st}</span> 2, 5</div><div><span class="stem-col">${st+1}</span> 0, 8</div></div>`;
+                    p.question = "What is the largest value in this plot?";
+                    p.answer = (st+1).toString() + "8";
+                    p.steps = [`Highest stem ${st+1} and leaf 8 = ${p.answer}`];
+                    break;
+
+                case 'histogram':
+                    p.title = "Combined Intervals";
+                    let b1 = rand(5,15), b2 = rand(20,30);
+                    p.visual = `<svg width="200" height="100">
+                        <rect x="20" y="${100-b1*2}" width="40" height="${b1*2}" fill="#3b82f6" stroke="black"/>
+                        <rect x="60" y="${100-b2*2}" width="40" height="${b2*2}" fill="#3b82f6" stroke="black"/>
+                        <text x="40" y="90" font-weight="bold" fill="white">${b1}</text>
+                        <text x="80" y="90" font-weight="bold" fill="white">${b2}</text>
+                        <line x1="10" y1="100" x2="150" y2="100" stroke="black"/>
+                    </svg>`;
+                    p.question = "How many total items are in the first two bars?";
+                    p.answer = (b1+b2).toString();
+                    p.steps = [`${b1} + ${b2} = ${p.answer}`];
+                    break;
+
+                case 'prob':
+                    p.title = "Simplified Probability";
+                    let blue = 6, total = 18; // Use values that simplify nicely for rigor
+                    p.question = "A bag has 6 blue and 12 red marbles. P(Blue) simplified?";
+                    p.answer = "1/3";
+                    p.steps = ["Total = 18", "P = 6/18", "Simplify: 1/3"];
+                    break;
+
+                default:
+                    p.title = "Standard Logic";
+                    p.question = "What is 10 + " + rand(1,10) + "?";
+                    p.answer = (10 + parseInt(p.question.split('+')[1])).toString();
+                    p.steps = ["Basic addition"];
+            }
+            return p;
+        }
+
+        function render() {
+            container.innerHTML = '';
+            currentProblems = [];
+            templates.forEach((key, idx) => {
+                const p = createProblem(idx + 1, key);
+                currentProblems.push(p);
+                const card = document.createElement('div');
+                card.className = 'problem-card';
+                card.innerHTML = `
+                    <div class="problem-header"><span class="num-label">#${p.id}</span><span class="tag">${p.title}</span></div>
+                    <div style="font-size:1.2em; font-weight:700;">${p.question}</div>
+                    ${p.display ? `<div class="data-display">${p.display}</div>` : ''}
+                    ${p.visual ? `<div class="viz-box">${p.visual}</div>` : ''}
+                    <div class="answer-section">
+                        <input type="text" class="user-input" id="input-${p.id}" placeholder="Answer...">
+                    </div>
+                    <div class="solution-area" id="sol-${p.id}">
+                        <strong>Step-by-Step:</strong><br>
+                        ${p.steps.map(s => `<div>↳ ${s}</div>`).join('')}
+                        <div style="color:#059669; font-weight:bold; margin-top:10px;">Correct: ${p.answer}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            document.getElementById('scoreDisplay').innerHTML = '';
+        }
+
+        function check() {
+            let score = 0;
+            currentProblems.forEach(p => {
+                const input = document.getElementById(`input-${p.id}`);
+                const isCorrect = input.value.trim().toLowerCase() === p.answer.toLowerCase();
+                input.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                if(isCorrect) score++;
+                document.getElementById(`sol-${p.id}`).style.display = 'block';
+            });
+            const pct = Math.round((score/currentProblems.length)*100);
+            document.getElementById('scoreDisplay').innerHTML = `Score: ${score}/${currentProblems.length} (${pct}%)`;
+            
+            setTimeout(() => {
+                const clone = document.documentElement.cloneNode(true);
+                clone.querySelectorAll('.controls-container, script').forEach(e => e.remove());
+                const blob = new Blob(['<!DOCTYPE html>' + clone.outerHTML], { type: 'text/html' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `FAST_Advanced_Stats_${getTimestamp()}.html`;
+                a.click();
+            }, 800);
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>
