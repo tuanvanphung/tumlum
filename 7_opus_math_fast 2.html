@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High-Rigor FAST Mastery: Grade 7</title>
+    <style>
+        :root{--primary:#0f172a;--accent:#2563eb;--success:#059669;--danger:#dc2626;--bg:#f8fafc}
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:var(--bg);margin:0;padding:20px;color:var(--primary)}
+        .container{max-width:1100px;margin:0 auto}
+        .header{text-align:center;background:#fff;padding:40px;border-radius:20px;border-bottom:6px solid var(--accent);box-shadow:0 10px 15px -3px rgba(0,0,0,.1);margin-bottom:30px}
+        .nav-tools{position:sticky;top:10px;z-index:1000;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);padding:20px;border-radius:15px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:15px;box-shadow:0 4px 12px rgba(0,0,0,.1);border:1px solid #e2e8f0;margin-bottom:40px}
+        button{padding:14px 28px;border:none;border-radius:10px;font-weight:800;cursor:pointer;transition:.3s;color:#fff;text-transform:uppercase;letter-spacing:1px;font-size:.9em}
+        button:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.2)}
+        button:active{transform:translateY(0)}
+        #genBtn{background:var(--accent)}#subBtn{background:var(--success)}#timerBtn{background:#7c3aed}
+        .timer-display{font-weight:900;font-size:1.4em;font-family:'Courier New',monospace;color:var(--primary);min-width:80px;text-align:center}
+        .timer-display.warning{color:#f59e0b}.timer-display.critical{color:var(--danger);animation:pulse 1s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+        .category-header{background:var(--primary);color:#fff;padding:15px 25px;border-radius:10px;margin-top:50px;font-weight:900;letter-spacing:2px;box-shadow:0 4px 6px rgba(0,0,0,.1);text-transform:uppercase}
+        .card{background:#fff;margin:25px 0;padding:35px;border-radius:15px;border-left:10px solid #cbd5e1;box-shadow:0 4px 6px rgba(0,0,0,.05);transition:border-color .3s}
+        .card.card-correct{border-left-color:var(--success)}.card.card-wrong{border-left-color:var(--danger)}
+        .q-meta{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:20px;gap:10px}
+        .q-num{font-weight:900;color:var(--accent);font-size:1.4em}
+        .q-tag{background:#eff6ff;color:#1e40af;padding:6px 12px;border-radius:6px;font-size:.8em;font-weight:800;border:1px solid #bfdbfe}
+        .viz-box{display:flex;justify-content:center;align-items:center;background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;margin:25px 0;padding:20px}
+        .viz-box svg{max-width:100%;height:auto}
+        .ans-container{margin-top:25px;display:flex;flex-wrap:wrap;align-items:center;gap:15px;background:#f8fafc;padding:20px;border-radius:10px;border:1px solid #e2e8f0}
+        .ans-container label{font-weight:800;color:var(--accent);font-size:1em}
+        input[type="text"]{padding:12px;font-size:1.2em;border:3px solid #cbd5e1;border-radius:8px;width:250px;max-width:100%;font-weight:700;color:var(--primary);outline:none;transition:border-color .3s}
+        input[type="text"]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+        .solution{margin-top:25px;border-radius:12px;overflow:hidden}
+        .solution-correct{background:#f0fdf4;border-left:6px solid var(--success)}
+        .solution-wrong{background:#fef2f2;border-left:6px solid var(--danger)}
+        .solution-header{padding:18px 25px;font-weight:900;font-size:1.1em;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:10px}
+        .solution-correct .solution-header{background:#dcfce7;color:#166534}
+        .solution-wrong .solution-header{background:#fee2e2;color:#991b1b}
+        .solution-body{padding:25px}
+        .your-answer-box{padding:12px 18px;border-radius:8px;margin-bottom:20px;font-weight:700;font-size:1.05em;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+        .your-answer-correct{background:#dcfce7;color:#166534;border:2px solid #86efac}
+        .your-answer-wrong{background:#fee2e2;color:#991b1b;border:2px solid #fca5a5}
+        .step-walkthrough{counter-reset:step-counter}
+        .step-item{counter-increment:step-counter;padding:16px 20px;margin:10px 0;border-radius:10px;background:#fff;border:1px solid #e2e8f0;position:relative;padding-left:60px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+        .step-item::before{content:"Step " counter(step-counter);position:absolute;left:12px;top:16px;font-weight:900;font-size:.7em;text-transform:uppercase;color:#fff;background:var(--accent);padding:3px 6px;border-radius:5px;white-space:nowrap}
+        .step-item .step-title{font-weight:800;color:var(--primary);margin-bottom:6px;font-size:1.05em}
+        .step-item .step-detail{color:#475569;line-height:1.6}
+        .step-item .step-math{font-family:'Courier New',monospace;background:#f1f5f9;padding:8px 14px;border-radius:6px;margin-top:8px;font-weight:700;font-size:1.05em;color:var(--primary);display:inline-block;border:1px solid #e2e8f0;white-space:pre-wrap}
+        .key-answer{font-weight:900;font-size:1.3em;margin-top:20px;padding:15px 20px;border-radius:10px;display:flex;align-items:center;gap:10px}
+        .solution-correct .key-answer{background:#dcfce7;color:#166534;border-top:2px dashed #86efac}
+        .solution-wrong .key-answer{background:#fef3c7;color:#92400e;border-top:2px dashed #fcd34d}
+        .common-mistakes{margin-top:18px;padding:15px 20px;background:#fffbeb;border-radius:10px;border:1px solid #fde68a}
+        .common-mistakes .cm-title{font-weight:800;color:#92400e;margin-bottom:8px;font-size:.95em;text-transform:uppercase;letter-spacing:.5px}
+        .common-mistakes .cm-item{color:#78350f;padding:4px 0;line-height:1.5}
+        .correct-ans{border-color:var(--success)!important;background:#f0fdf4!important}
+        .wrong-ans{border-color:var(--danger)!important;background:#fef2f2!important}
+        .report-box{text-align:center;padding:60px 30px;background:#fff;border:12px solid var(--success);border-radius:30px;margin:60px 0;box-shadow:0 25px 50px -12px rgba(0,0,0,.25)}
+        .cat-breakdown{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin:30px 0}
+        .cat-score-card{background:#f8fafc;border-radius:12px;padding:20px;border:2px solid #e2e8f0;text-align:center}
+        .cat-score-card h3{margin:0 0 10px;font-size:.95em;color:#475569;text-transform:uppercase;letter-spacing:1px}
+        .cat-score-card .score-big{font-size:2.2em;font-weight:900}
+        .cat-score-card .score-bar{height:8px;background:#e2e8f0;border-radius:4px;margin-top:10px;overflow:hidden}
+        .cat-score-card .score-fill{height:100%;border-radius:4px;transition:width .5s}
+        @media(max-width:600px){body{padding:10px}.header{padding:20px}.card{padding:20px}.nav-tools{padding:15px;gap:10px}button{padding:10px 16px;font-size:.8em}input[type="text"]{width:100%}.step-item{padding-left:16px;padding-top:44px}.step-item::before{top:10px;left:12px}}
+        @media print{.nav-tools{display:none}.solution{display:block!important}.card{break-inside:avoid}}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Florida FAST Mastery: Grade 7</h1>
+        <p>42-Item Assessment &mdash; All 32 B.E.S.T. Benchmarks &bull; Fully Randomized &bull; Shuffled Order</p>
+    </div>
+    <div class="nav-tools" role="toolbar" aria-label="Test Controls">
+        <button id="genBtn" onclick="initTest()">Generate New 42 Questions</button>
+        <button id="subBtn" onclick="gradeTest()">Submit &amp; Download Report</button>
+        <button id="timerBtn" onclick="toggleTimer()">Timer: OFF</button>
+        <div class="timer-display" id="timerDisplay" aria-live="polite">--:--</div>
+        <div id="liveScore" style="font-weight:900;font-size:1.4em;" aria-live="polite"></div>
+    </div>
+    <div id="examRoot"></div>
+</div>
+<script>
+const root=document.getElementById('examRoot');
+let questions=[];
+let timerInterval=null,timerSeconds=0,timerRunning=false;
+const TIMER_DURATION=120*60,TOTAL_ITEMS=42;
+const r=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const rDec=(a,b,p=1)=>parseFloat((Math.random()*(b-a)+a).toFixed(p));
+const gcd=(a,b)=>b?gcd(b,a%b):Math.abs(a);
+const simplify=(n,d)=>{if(!d)return'undefined';if(!n)return'0';const s=(n<0)!==(d<0)?-1:1;n=Math.abs(n);d=Math.abs(d);const c=gcd(n,d);return(d/c===1)?`${s*(n/c)}`:`${s*(n/c)}/${d/c}`;};
+const rNZ=(a,b)=>{let v=0;while(!v)v=r(a,b);return v;};
+const pick=arr=>arr[r(0,arr.length-1)];
+function getStamp(){const d=new Date();return[d.getFullYear(),(d.getMonth()+1+'').padStart(2,'0'),(d.getDate()+'').padStart(2,'0'),'_',(d.getHours()+'').padStart(2,'0'),(d.getMinutes()+'').padStart(2,'0'),(d.getSeconds()+'').padStart(2,'0')].join('');}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=r(0,i);[a[i],a[j]]=[a[j],a[i]];}return a;}
+function toggleTimer(){
+    const btn=document.getElementById('timerBtn'),disp=document.getElementById('timerDisplay');
+    if(!timerRunning){timerRunning=true;timerSeconds=TIMER_DURATION;btn.textContent='Timer: ON';btn.style.background='#dc2626';updateTimerDisplay();
+        timerInterval=setInterval(()=>{timerSeconds--;updateTimerDisplay();if(timerSeconds<=0){clearInterval(timerInterval);timerRunning=false;btn.textContent='Timer: OFF';btn.style.background='#7c3aed';disp.textContent="TIME'S UP";disp.className='timer-display critical';gradeTest();}},1000);
+    }else{clearInterval(timerInterval);timerRunning=false;btn.textContent='Timer: OFF';btn.style.background='#7c3aed';disp.textContent='--:--';disp.className='timer-display';}
+}
+function updateTimerDisplay(){const disp=document.getElementById('timerDisplay'),m=Math.floor(timerSeconds/60),s=timerSeconds%60;disp.textContent=`${(m+'').padStart(2,'0')}:${(s+'').padStart(2,'0')}`;disp.className=timerSeconds<=300?'timer-display critical':timerSeconds<=900?'timer-display warning':'timer-display';}
+function normalizeAnswer(raw){let s=raw.trim().toLowerCase().replace(/\s+/g,' ');if(/^-?\d+\.0+$/.test(s))s=s.replace(/\.0+$/,'');return s;}
+function fracToDecimal(s){const p=s.split('/');if(p.length===2){const n=parseFloat(p[0]),d=parseFloat(p[1]);if(!isNaN(n)&&!isNaN(d)&&d)return n/d;}return NaN;}
+function mixedToDecimal(s){const m=s.match(/^(-?\d+)\s+(\d+)\/(\d+)$/);if(m){const w=parseInt(m[1]),n=parseInt(m[2]),d=parseInt(m[3]);if(d)return w+(w<0?-1:1)*(n/d);}return NaN;}
+function answersMatch(uR,cR){
+    const u=normalizeAnswer(uR),c=normalizeAnswer(cR);
+    if(u===c)return true;
+    if(!isNaN(parseFloat(u))&&!isNaN(parseFloat(c))&&Math.abs(parseFloat(u)-parseFloat(c))<0.005)return true;
+    let uV=fracToDecimal(u),cV=fracToDecimal(c);if(isNaN(uV))uV=mixedToDecimal(u);if(isNaN(cV))cV=mixedToDecimal(c);if(isNaN(uV))uV=parseFloat(u);if(isNaN(cV))cV=parseFloat(c);
+    if(!isNaN(uV)&&!isNaN(cV)&&Math.abs(uV-cV)<0.005)return true;
+    const ni=s=>s.replace(/\s*(<=|>=|<|>|=)\s*/g,'$1');if(ni(u)===ni(c))return true;
+    return false;
+}
+const templates=[
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'Laws of Exponents: Quotient Rule',key:'exp_quot',bm:'MA.7.NSO.1.1'},
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'Laws of Exponents: Power to Power',key:'exp_power',bm:'MA.7.NSO.1.1'},
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'Exponents: Negative Powers',key:'exp_neg',bm:'MA.7.NSO.1.1'},
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'Repeating Decimals to Fractions',key:'repeat_2',bm:'MA.7.NSO.1.2'},
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'Complex Order of Operations',key:'complex_pemdas',bm:'MA.7.NSO.2.1'},
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'Absolute Value Expressions',key:'abs_expr',bm:'MA.7.NSO.2.1'},
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'Rational Operations (Mixed Numbers)',key:'rat_mixed',bm:'MA.7.NSO.2.2'},
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'Multiplying Negative Decimals',key:'neg_dec_mul',bm:'MA.7.NSO.2.2'},
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'Dividing Fractions by Decimals',key:'frac_dec_div',bm:'MA.7.NSO.2.2'},
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'Rational Numbers in Real-World',key:'rat_rw',bm:'MA.7.NSO.2.3'},
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'Equivalent Linear Expressions',key:'equiv_expr',bm:'MA.7.AR.1.1/1.2'},
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'2-Step Inequality: Sign Flip',key:'ineq_flip',bm:'MA.7.AR.2.1'},
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'Writing Inequalities from Context',key:'ineq_context',bm:'MA.7.AR.2.1'},
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'2-Step Eq: Rational Coeff',key:'eq_rat_coeff',bm:'MA.7.AR.2.2'},
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'Equations: Negative Distribution',key:'eq_neg_dist',bm:'MA.7.AR.2.2'},
+    {cat:'Number Sense & Operations / Algebraic Reasoning',title:'Equations: Combining Like Terms',key:'eq_var_one',bm:'MA.7.AR.2.2'},
+    {cat:'Proportional Reasoning & Relationships',title:'Multi-Step Percent: Discount + Tax',key:'disc_tax',bm:'MA.7.AR.3.1'},
+    {cat:'Proportional Reasoning & Relationships',title:'Percent Error',key:'perc_error',bm:'MA.7.AR.3.1'},
+    {cat:'Proportional Reasoning & Relationships',title:'Markup and Wholesale',key:'markup_comm',bm:'MA.7.AR.3.1'},
+    {cat:'Proportional Reasoning & Relationships',title:'Simple Interest (Months)',key:'interest_months',bm:'MA.7.AR.3.1'},
+    {cat:'Proportional Reasoning & Relationships',title:'Unit Conversions Across Systems',key:'unit_convert',bm:'MA.7.AR.3.3'},
+    {cat:'Proportional Reasoning & Relationships',title:'Proportional Relationships',key:'prop_rel',bm:'MA.7.AR.4.1'},
+    {cat:'Proportional Reasoning & Relationships',title:'Constant of Proportionality',key:'cop_dec',bm:'MA.7.AR.4.2'},
+    {cat:'Proportional Reasoning & Relationships',title:'Proportional Graphs',key:'graph_logic',bm:'MA.7.AR.4.3'},
+    {cat:'Proportional Reasoning & Relationships',title:'Translate Proportional Representations',key:'prop_translate',bm:'MA.7.AR.4.4'},
+    {cat:'Proportional Reasoning & Relationships',title:'Complex Unit Rates',key:'complex_unit',bm:'MA.7.AR.4.5'},
+    {cat:'Proportional Reasoning & Relationships',title:'Scale Drawings: Area Change',key:'scale_area',bm:'MA.7.AR.4.5/GR.1.5'},
+    {cat:'Geometric Reasoning',title:'Area of Trapezoids/Parallelograms/Rhombi',key:'area_trap',bm:'MA.7.GR.1.1'},
+    {cat:'Geometric Reasoning',title:'Area of Composite Figures',key:'area_composite',bm:'MA.7.GR.1.2'},
+    {cat:'Geometric Reasoning',title:'Circumference of Circles',key:'circ_pi',bm:'MA.7.GR.1.3'},
+    {cat:'Geometric Reasoning',title:'Area of Circles',key:'area_circ',bm:'MA.7.GR.1.4'},
+    {cat:'Geometric Reasoning',title:'Radius from Circumference',key:'circ_back',bm:'MA.7.GR.1.3'},
+    {cat:'Geometric Reasoning',title:'Surface Area of Cylinders',key:'sa_cylinder',bm:'MA.7.GR.2.1/2.2'},
+    {cat:'Geometric Reasoning',title:'Volume of Cylinders',key:'vol_cylinder',bm:'MA.7.GR.2.3'},
+    {cat:'Data Analysis & Probability',title:'Mean Absolute Deviation',key:'mad_dec',bm:'MA.7.DP.1.1'},
+    {cat:'Data Analysis & Probability',title:'Comparing Two Data Sets',key:'compare_data',bm:'MA.7.DP.1.2'},
+    {cat:'Data Analysis & Probability',title:'Interquartile Range (IQR)',key:'box_iqr',bm:'MA.7.DP.1.3'},
+    {cat:'Data Analysis & Probability',title:'Inference from Sample',key:'infer',bm:'MA.7.DP.1.4'},
+    {cat:'Data Analysis & Probability',title:'Biased vs Random Sampling',key:'bias_logic',bm:'MA.7.DP.1.5'},
+    {cat:'Data Analysis & Probability',title:'Sample Space Counting',key:'sample_perm',bm:'MA.7.DP.2.1'},
+    {cat:'Data Analysis & Probability',title:'Theoretical Probability',key:'theo_prob',bm:'MA.7.DP.2.2'},
+    {cat:'Data Analysis & Probability',title:'Compound Probability',key:'theo_comp',bm:'MA.7.DP.2.3'},
+    {cat:'Data Analysis & Probability',title:'Experimental vs Theoretical Probability',key:'exp_large',bm:'MA.7.DP.2.4'}
+];
+function buildQuestion(t){
+let p={...t,q:'',a:'',v:'',s:[],ds:[],cm:[],h:'Enter your answer.'};
+switch(t.key){
+case 'exp_quot':{
+    let bases=['y','m','n','a','b','k'];
+    let base=pick(bases),p1=r(8,20),p2=r(2,p1-2);
+    p.q=`Simplify: ${base}<sup>${p1}</sup> / ${base}<sup>${p2}</sup>`;
+    p.a=`${base}^${p1-p2}`;p.h="Like y^n";
+    p.s=[`${base}^(${p1}−${p2}) = ${base}^${p1-p2}`];
+    p.ds=[{title:'Quotient rule',detail:'Same base: subtract exponents.',math:`${base}^(${p1}−${p2}) = ${base}^${p1-p2}`}];
+    p.cm=['Adding instead of subtracting','Subtracting in wrong order'];
+    break;
+}
+case 'exp_power':{
+    let bases=['x','a','m','p','w'];
+    let base=pick(bases),b2=r(2,9),e2=r(2,5);
+    p.q=`Simplify: (${base}<sup>${b2}</sup>)<sup>${e2}</sup>`;
+    p.a=`${base}^${b2*e2}`;p.h="Like x^n";
+    p.s=[`${base}^(${b2}×${e2}) = ${base}^${b2*e2}`];
+    p.ds=[{title:'Power rule: multiply exponents',detail:'',math:`(${base}^${b2})^${e2} = ${base}^${b2*e2}`}];
+    p.cm=['Adding exponents instead of multiplying'];
+    break;
+}
+case 'exp_neg':{
+    let bp=r(2,10),ex=r(2,4),pw=Math.pow(bp,ex);
+    p.q=`Evaluate: ${bp}<sup>−${ex}</sup>`;
+    p.a=`1/${pw}`;p.h="Fraction like 1/n";
+    p.s=[`1/${bp}^${ex} = 1/${pw}`];
+    p.ds=[{title:'Negative exponent = reciprocal',detail:`${bp}^${ex} = ${pw}`,math:`1/${pw}`}];
+    p.cm=['Making answer negative instead of a fraction'];
+    break;
+}
+case 'repeat_2':{
+    let rep=r(10,95);while(rep%11===0||rep%10===0)rep=r(10,95);
+    let g2=gcd(rep,99);
+    p.q=`Convert 0.${(rep+'').padStart(2,'0')}${(rep+'').padStart(2,'0')}... (repeating) to a fraction.`;
+    p.a=simplify(rep,99);p.h="Simplified fraction";
+    p.s=[`99x = ${rep} → ${rep}/99 = ${p.a}`];
+    p.ds=[{title:'Let x = decimal',detail:'Multiply by 100 (2 repeating digits), subtract, solve.',math:`99x = ${rep} → x = ${p.a}`}];
+    p.cm=['Multiplying by 10 instead of 100','Forgetting to simplify'];
+    break;
+}
+case 'complex_pemdas':{
+    // Many variants: (a)^n ± b(c), |a| + b^n, etc.
+    let variant=r(1,4);
+    if(variant===1){
+        let base=rNZ(-6,-2),exp_=r(2,3),m1=r(2,8),m2=r(2,8);
+        let pw=Math.pow(base,exp_),prod=m1*m2,res=pw-prod;
+        let eL=exp_===2?'²':'³';
+        p.q=`Evaluate: (${base})${eL} − ${m1}(${m2})`;p.a=res.toString();
+        p.s=[`(${base})${eL}=${pw}, ${m1}×${m2}=${prod}, ${pw}−${prod}=${res}`];
+        p.ds=[{title:'Exponent first',detail:`(${base})${eL}=${pw}`},{title:'Multiply',detail:`${m1}×${m2}=${prod}`},{title:'Subtract',detail:'',math:`${pw}−${prod}=${res}`}];
+    }else if(variant===2){
+        let a=rNZ(-9,-1),b=r(2,6),exp_=r(2,3);
+        let pw=Math.pow(b,exp_),res=Math.abs(a)+pw;
+        p.q=`Evaluate: |${a}| + ${b}${exp_===2?'²':'³'}`;p.a=res.toString();
+        p.s=[`|${a}|=${Math.abs(a)}, ${b}${exp_===2?'²':'³'}=${pw}, ${Math.abs(a)}+${pw}=${res}`];
+        p.ds=[{title:'Absolute value',detail:`|${a}|=${Math.abs(a)}`},{title:'Exponent',detail:`${b}^${exp_}=${pw}`},{title:'Add',detail:'',math:`${Math.abs(a)}+${pw}=${res}`}];
+    }else if(variant===3){
+        let a=r(2,6),b=r(2,5),c=rNZ(-8,-2);
+        let res=a*a+b*c;
+        p.q=`Evaluate: ${a}² + ${b}(${c})`;p.a=res.toString();
+        p.s=[`${a}²=${a*a}, ${b}×${c}=${b*c}, ${a*a}+${b*c}=${res}`];
+        p.ds=[{title:'Exponent',detail:`${a}²=${a*a}`},{title:'Multiply',detail:`${b}(${c})=${b*c}`},{title:'Add',detail:'',math:`${a*a}+(${b*c})=${res}`}];
+    }else{
+        let a=rNZ(-5,-2),b=r(3,7),c=r(2,4);
+        let res=a*b-Math.pow(c,2);
+        p.q=`Evaluate: (${a})(${b}) − ${c}²`;p.a=res.toString();
+        p.s=[`(${a})(${b})=${a*b}, ${c}²=${c*c}, ${a*b}−${c*c}=${res}`];
+        p.ds=[{title:'Multiply',detail:`(${a})(${b})=${a*b}`},{title:'Exponent',detail:`${c}²=${c*c}`},{title:'Subtract',detail:'',math:`${a*b}−${c*c}=${res}`}];
+    }
+    p.h="Integer value";
+    p.cm=['Wrong order of operations','Sign errors with negative bases'];
+    break;
+}
+case 'abs_expr':{
+    let variant=r(1,3);
+    if(variant===1){
+        let a=rNZ(-25,-3),b=rNZ(-20,-2),res=Math.abs(a)-Math.abs(b);
+        p.q=`Evaluate: |${a}| − |${b}|`;p.a=res.toString();
+        p.s=[`${Math.abs(a)}−${Math.abs(b)}=${res}`];
+        p.ds=[{title:'Each absolute value',detail:'',math:`|${a}|=${Math.abs(a)}, |${b}|=${Math.abs(b)}`},{title:'Subtract',detail:'',math:`${res}`}];
+    }else if(variant===2){
+        let a=rNZ(-15,-1),b=r(2,10),res=Math.abs(a)+b;
+        p.q=`Evaluate: |${a}| + ${b}`;p.a=res.toString();
+        p.s=[`${Math.abs(a)}+${b}=${res}`];
+        p.ds=[{title:'Absolute value',detail:`|${a}|=${Math.abs(a)}`},{title:'Add',detail:'',math:`${Math.abs(a)}+${b}=${res}`}];
+    }else{
+        let a=rNZ(-20,-5),b=rNZ(-15,-3),res=Math.abs(a+b);
+        p.q=`Evaluate: |${a} + ${b}|`;p.a=res.toString();
+        p.s=[`${a}+${b}=${a+b}, |${a+b}|=${res}`];
+        p.ds=[{title:'Add inside first',detail:'',math:`${a}+(${b})=${a+b}`},{title:'Absolute value',detail:'',math:`|${a+b}|=${res}`}];
+    }
+    p.h="Integer value";
+    p.cm=['Applying absolute value at wrong step','Thinking result must be positive always'];
+    break;
+}
+case 'rat_mixed':{
+    let denoms=[3,4,5,6,8];
+    let d1=pick(denoms),w1=rNZ(-6,-1),n1=r(1,d1-1),w2=r(1,7),n2=r(1,d1-1);
+    let imp1=w1*d1-n1,imp2=w2*d1+n2,sN=imp1+imp2,sD=d1;
+    let g_=gcd(Math.abs(sN),sD),sn_=sN/g_,sd_=sD/g_;
+    let wh=Math.trunc(sn_/sd_),rm=Math.abs(sn_%sd_);
+    if(rm===0)p.a=wh.toString();else if(wh===0)p.a=simplify(sn_,sd_);else p.a=`${wh} ${rm}/${sd_}`;
+    p.q=`Evaluate: ${w1} ${n1}/${d1} + ${w2} ${n2}/${d1}`;
+    p.h="Mixed number or fraction";
+    p.s=[`${imp1}/${d1} + ${imp2}/${d1} = ${sN}/${sD} = ${p.a}`];
+    p.ds=[{title:'Convert to improper',detail:'',math:`${imp1}/${d1} + ${imp2}/${d1}`},{title:'Add numerators',detail:'',math:`${sN}/${sD}`},{title:'Simplify',detail:'',math:`${p.a}`}];
+    p.cm=['Converting negative mixed numbers wrong','Sign errors'];
+    break;
+}
+case 'neg_dec_mul':{
+    let nd1=rDec(-5.5,-0.5),nd2=rDec(0.5,6.0),prod=(nd1*nd2).toFixed(2);
+    p.q=`Multiply: (${nd1}) × (${nd2})`;p.a=prod;p.h="Decimal value";
+    p.s=[`(−)×(+)=(−), result = ${prod}`];
+    p.ds=[{title:'Sign: (−)×(+)=(−)',detail:''},{title:'Multiply absolute values',detail:'',math:`${Math.abs(nd1)}×${nd2}=${Math.abs(parseFloat(prod))}`},{title:'Apply sign',detail:'',math:prod}];
+    p.cm=['Getting positive answer','Decimal placement errors'];
+    break;
+}
+case 'frac_dec_div':{
+    let fn=r(1,7),fd=pick([2,3,4,5,6,8,9,10]);
+    while(fn>=fd)fn=r(1,fd-1);
+    let decimals=[0.25,0.5,-0.25,-0.5,0.2,-0.2,0.125,-0.125,0.75,-0.75];
+    let dec=pick(decimals),dA=Math.abs(dec),dN,dD;
+    if(dA===0.25){dN=1;dD=4;}else if(dA===0.5){dN=1;dD=2;}else if(dA===0.2){dN=1;dD=5;}else if(dA===0.125){dN=1;dD=8;}else if(dA===0.75){dN=3;dD=4;}else{dN=Math.round(dA*1000);dD=1000;}
+    let rN=fn*dD,rD=fd*dN;if(dec<0)rN=-rN;
+    p.a=simplify(rN,rD);
+    p.q=`Divide: (${fn}/${fd}) ÷ (${dec})`;p.h="Simplified fraction or integer";
+    p.s=[`KCF → ${p.a}`];
+    p.ds=[{title:'Convert decimal',detail:'',math:`${dec} = ${dec<0?'−':''}${dN}/${dD}`},{title:'Keep-Change-Flip',detail:'',math:`(${fn}/${fd}) × (${dec<0?'−':''}${dD}/${dN})`},{title:'Simplify',detail:'',math:`${p.a}`}];
+    p.cm=['Not converting decimal first','Forgetting to flip','Sign errors'];
+    break;
+}
+case 'rat_rw':{
+    // Multi-operation real-world rational number problem — many variants
+    let variant=r(1,4);
+    if(variant===1){
+        let depth=r(50,400),rise=r(10,depth-10);
+        let final_=-depth+rise;
+        p.q=`A diver is at −${depth} feet and ascends ${rise} feet. What is the new depth?`;
+        p.a=final_.toString();
+        p.s=[`−${depth}+${rise}=${final_}`];
+        p.ds=[{title:'Start + change',detail:'',math:`−${depth}+${rise}=${final_}`},{title:'Interpret',detail:`${final_} feet (still below sea level).`}];
+    }else if(variant===2){
+        let start=rDec(10.0,50.0),drop=rDec(2.0,8.0),times=r(2,4);
+        let final_=parseFloat((start-drop*times).toFixed(1));
+        p.q=`Temperature starts at ${start}°F and drops ${drop}° each hour for ${times} hours. Final temperature?`;
+        p.a=final_.toString();
+        p.s=[`${start}−${drop}×${times}=${start}−${(drop*times).toFixed(1)}=${final_}`];
+        p.ds=[{title:'Total drop',detail:'',math:`${drop}×${times}=${(drop*times).toFixed(1)}`},{title:'Subtract',detail:'',math:`${start}−${(drop*times).toFixed(1)}=${final_}`}];
+    }else if(variant===3){
+        let bal=r(100,500),w1=r(20,80),w2=r(30,90),dep=r(50,200);
+        let final_=bal-w1-w2+dep;
+        p.q=`Bank balance: $${bal}. Withdrawals: $${w1} and $${w2}. Deposit: $${dep}. New balance?`;
+        p.a=final_.toString();
+        p.s=[`${bal}−${w1}−${w2}+${dep}=${final_}`];
+        p.ds=[{title:'Subtract withdrawals',detail:'',math:`${bal}−${w1}−${w2}=${bal-w1-w2}`},{title:'Add deposit',detail:'',math:`${bal-w1-w2}+${dep}=${final_}`}];
+    }else{
+        let elev=r(100,500);
+        p.q=`A submarine at −${elev} ft ascends ${elev} ft. Final elevation?`;
+        p.a="0";
+        p.s=[`−${elev}+${elev}=0 (additive inverse)`];
+        p.ds=[{title:'Additive inverse',detail:'A number + its opposite = 0.',math:`−${elev}+${elev}=0`}];
+    }
+    p.h="Numeric value";
+    p.cm=['Wrong operation','Sign errors with negative numbers'];
+    break;
+}
+case 'equiv_expr':{
+    let variant=r(1,3);
+    if(variant===1){
+        let a=r(2,9),b=r(1,8),c=r(1,7),d=r(1,9);
+        p.q=`Simplify: (${a}x + ${b}) + (${c}x + ${d})`;
+        p.a=`${a+c}x + ${b+d}`;
+        p.s=[`${a+c}x + ${b+d}`];
+        p.ds=[{title:'Combine x-terms',detail:'',math:`${a}x+${c}x=${a+c}x`},{title:'Combine constants',detail:'',math:`${b}+${d}=${b+d}`}];
+    }else if(variant===2){
+        let a=r(3,10),b=r(1,8),c=r(1,a-1),d=r(1,7);
+        p.q=`Simplify: (${a}x − ${b}) − (${c}x + ${d})`;
+        p.a=`${a-c}x - ${b+d}`;
+        p.s=[`${a-c}x − ${b+d}`];
+        p.ds=[{title:'Distribute negative',detail:`−(${c}x+${d}) = −${c}x−${d}`},{title:'Combine x-terms',detail:'',math:`${a}x−${c}x=${a-c}x`},{title:'Combine constants',detail:'',math:`−${b}−${d}=−${b+d}`}];
+    }else{
+        let a=r(2,7),b=r(1,6),c=r(2,5),d=r(1,8);
+        p.q=`Simplify: ${a}x + ${b} + ${c}x − ${d}`;
+        let constRes=b-d;
+        p.a=constRes>=0?`${a+c}x + ${constRes}`:`${a+c}x - ${Math.abs(constRes)}`;
+        p.s=[`${a+c}x ${constRes>=0?'+ '+constRes:'- '+Math.abs(constRes)}`];
+        p.ds=[{title:'Combine x-terms',detail:'',math:`${a}x+${c}x=${a+c}x`},{title:'Combine constants',detail:'',math:`${b}−${d}=${constRes}`}];
+    }
+    p.h="Expression like ax + b or ax - b";
+    p.cm=['Combining x-terms with constants','Sign errors when distributing negative'];
+    break;
+}
+case 'ineq_flip':{
+    let cf=rNZ(-9,-2),solX=rNZ(-8,8),val=r(5,30);
+    let target=cf*solX+val,boundary=(target-val)/cf,sub=target-val;
+    let symbol=pick(['<','>']);
+    let flipped=symbol==='<'?'>':'<';
+    p.q=`Solve: ${cf}x + ${val} ${symbol} ${target}`;
+    p.a=`x ${flipped} ${boundary}`;p.h="Like x > n or x < n";
+    p.s=[`Subtract ${val}: ${cf}x ${symbol} ${sub}`,`Divide by ${cf}, FLIP: x ${flipped} ${boundary}`];
+    p.ds=[{title:'Subtract constant',detail:'',math:`${cf}x ${symbol} ${sub}`},{title:'Divide by negative — FLIP',detail:'',math:`x ${flipped} ${boundary}`}];
+    p.cm=['Forgetting to flip when dividing by negative'];
+    break;
+}
+case 'ineq_context':{
+    let items=pick(['t-shirts','books','packs of pencils','movie tickets','bags of chips']);
+    let ic=r(3,12),fc=r(8,35),budget=r(40,150);
+    let fixedItem=pick(['a jacket','a backpack','a hat','a poster','lunch']);
+    p.q=`You have $${budget}. You buy ${fixedItem} for $${fc} and ${items} for $${ic} each. Inequality for max ${items} (x)?`;
+    p.a=`${ic}x + ${fc} <= ${budget}`;p.h="Like ax + b <= c";
+    p.s=[`${ic}x + ${fc} ≤ ${budget}`];
+    p.ds=[{title:'Variable cost',detail:`$${ic} per item × x items.`},{title:'Fixed cost',detail:`$${fc} for ${fixedItem}.`},{title:'Total ≤ budget',detail:''}];
+    p.cm=['Using < instead of <=','Forgetting fixed cost'];
+    break;
+}
+case 'eq_rat_coeff':{
+    let fracs=[[1,2],[1,3],[2,3],[1,4],[3,4],[1,5],[2,5],[3,5]];
+    let [fn,fd]=pick(fracs);
+    let cx=fd*r(2,6); // ensure clean answer
+    let offset=r(3,15);
+    let res=parseFloat((fn/fd*cx-offset).toFixed(2));
+    p.q=`Solve: (${fn}/${fd})x − ${offset} = ${res}`;
+    p.a=cx.toString();p.h="Numeric value";
+    p.s=[`Add ${offset}, multiply by ${fd}/${fn}: x = ${cx}`];
+    p.ds=[{title:'Add constant',detail:'',math:`(${fn}/${fd})x = ${res+offset}`},{title:'Multiply by reciprocal ${fd}/${fn}',detail:'',math:`x = ${res+offset} × ${fd}/${fn} = ${cx}`}];
+    p.cm=['Multiplying by fraction instead of reciprocal'];
+    break;
+}
+case 'eq_neg_dist':{
+    let out=rNZ(-8,-2),inn=r(1,10),nx;
+    do{nx=r(-10,10);}while(nx===0||nx===inn);
+    let rhs=out*(nx-inn);
+    p.q=`Solve: ${out}(x − ${inn}) = ${rhs}`;
+    p.a=nx.toString();p.h="Numeric value";
+    p.s=[`Divide by ${out}: x−${inn}=${nx-inn}, x=${nx}`];
+    p.ds=[{title:'Divide both sides by '+out,detail:'',math:`x−${inn}=${nx-inn}`},{title:'Add '+inn,detail:'',math:`x=${nx}`}];
+    p.cm=['Distributing negative incorrectly','Sign errors'];
+    break;
+}
+case 'eq_var_one':{
+    let eqx=r(1,12),c1=rDec(1.5,8.0),c2=rDec(0.5,c1-0.5);
+    let comb=parseFloat((c1-c2).toFixed(1)),con=r(1,15);
+    let rhs_=parseFloat((comb*eqx+con).toFixed(1));
+    p.q=`Solve: ${c1}x − ${c2}x + ${con} = ${rhs_}`;
+    p.a=eqx.toString();p.h="Numeric value";
+    p.s=[`${comb}x + ${con} = ${rhs_} → x = ${eqx}`];
+    p.ds=[{title:'Combine like terms',detail:'',math:`${c1}x−${c2}x = ${comb}x`},{title:'Subtract '+con,detail:'',math:`${comb}x = ${parseFloat((rhs_-con).toFixed(1))}`},{title:'Divide',detail:'',math:`x = ${eqx}`}];
+    p.cm=['Adding coefficients instead of subtracting'];
+    break;
+}
+case 'disc_tax':{
+    let orig=r(25,200),disc=r(5,40),tax=r(4,10);
+    let sale=orig*(1-disc/100),final_=sale*(1+tax/100);
+    p.q=`A $${orig} item is discounted ${disc}%. Then ${tax}% tax. Final price?`;
+    p.a=final_.toFixed(2);p.h="Dollar amount like 00.00";
+    p.s=[`Sale: $${sale.toFixed(2)}, +Tax: $${p.a}`];
+    p.ds=[{title:'Discount',detail:'',math:`$${orig}×${(1-disc/100).toFixed(2)}=$${sale.toFixed(2)}`},{title:'Tax on sale price',detail:'',math:`$${sale.toFixed(2)}×${(1+tax/100).toFixed(2)}=$${final_.toFixed(2)}`}];
+    p.cm=['Applying tax to original price'];
+    break;
+}
+case 'perc_error':{
+    let act=r(20,200),est=act+rNZ(-15,15);while(est===act)est=act+rNZ(-15,15);
+    let diff=Math.abs(act-est),pe=parseFloat(((diff/act)*100).toFixed(1));
+    p.q=`Estimated: ${est}. Actual: ${act}. Percent error?`;
+    p.a=pe.toString();p.h="Round to 1 decimal place";
+    p.s=[`|${act}−${est}|/${act}×100 = ${pe}%`];
+    p.ds=[{title:'Formula',detail:'PE = |Actual−Est|/|Actual| × 100',math:`${diff}/${act}×100 = ${pe}%`}];
+    p.cm=['Dividing by estimated instead of actual'];
+    break;
+}
+case 'markup_comm':{
+    let ws=r(15,150),mu=r(10,80);
+    let mAmt=ws*mu/100,sell=ws+mAmt;
+    p.q=`Store buys item for $${ws}, marks up ${mu}%. Selling price?`;
+    p.a=sell.toFixed(2);p.h="Dollar amount like 00.00";
+    p.s=[`$${ws}+$${mAmt.toFixed(2)}=$${sell.toFixed(2)}`];
+    p.ds=[{title:'Markup amount',detail:'',math:`$${ws}×${mu/100}=$${mAmt.toFixed(2)}`},{title:'Add',detail:'',math:`$${ws}+$${mAmt.toFixed(2)}=$${sell.toFixed(2)}`}];
+    p.cm=['Subtracting instead of adding'];
+    break;
+}
+case 'interest_months':{
+    let P=r(200,2000),R=r(2,9),M=r(3,36);
+    let yrs=M/12,interest=P*(R/100)*yrs;
+    p.q=`Simple interest on $${P} at ${R}% for ${M} months? (I=Prt)`;
+    p.a=interest.toFixed(2);p.h="Dollar amount like 00.00";
+    p.s=[`t=${yrs.toFixed(4)} yrs, I=$${p.a}`];
+    p.ds=[{title:'Convert months',detail:'',math:`${M}÷12=${yrs.toFixed(4)}`},{title:'I=Prt',detail:'',math:`${P}×${R/100}×${yrs.toFixed(4)}=$${interest.toFixed(2)}`}];
+    p.cm=['Using months directly','Forgetting percent-to-decimal'];
+    break;
+}
+case 'unit_convert':{
+    let conversions=[
+        {from:'miles',to:'kilometers',factor:1.61},{from:'kilometers',to:'miles',factor:0.62},
+        {from:'gallons',to:'liters',factor:3.785},{from:'liters',to:'gallons',factor:0.264},
+        {from:'kilograms',to:'pounds',factor:2.204},{from:'pounds',to:'kilograms',factor:0.454},
+        {from:'feet',to:'meters',factor:0.305},{from:'meters',to:'feet',factor:3.28},
+        {from:'inches',to:'centimeters',factor:2.54},{from:'cups',to:'liters',factor:0.24},
+        {from:'ounces',to:'grams',factor:28.35}
+    ];
+    let c=pick(conversions),qv=rDec(1.5,25.0);
+    let result=parseFloat((qv*c.factor).toFixed(2));
+    p.q=`Convert ${qv} ${c.from} to ${c.to}. (Use reference sheet)`;
+    p.a=result.toString();p.h="Round to 2 decimal places";
+    p.s=[`${qv}×${c.factor}=${result} ${c.to}`];
+    p.ds=[{title:'Find conversion factor',detail:`1 ${c.from.replace(/s$/,'')} ≈ ${c.factor} ${c.to}`},{title:'Multiply',detail:'',math:`${qv}×${c.factor}=${result}`}];
+    p.cm=['Using wrong factor','Dividing instead of multiplying'];
+    break;
+}
+case 'prop_rel':{
+    let k=rDec(0.5,12.0);
+    let bVal=r(0,1)?0:rNZ(-8,8);
+    let eq=bVal===0?`y = ${k}x`:bVal>0?`y = ${k}x + ${bVal}`:`y = ${k}x − ${Math.abs(bVal)}`;
+    let ans=bVal===0?'yes':'no';
+    let reason=bVal===0?'Passes through origin with constant rate.':`Has constant term (${bVal>0?'+'+bVal:bVal}), does not pass through (0,0).`;
+    p.q=`Does ${eq} represent a proportional relationship?`;
+    p.a=ans;p.h="yes or no";
+    p.s=[reason];
+    p.ds=[{title:'Definition',detail:'Proportional = y = kx only.'},{title:'Check',detail:reason}];
+    p.cm=['Thinking any equation with x is proportional'];
+    break;
+}
+case 'cop_dec':{
+    let k=rDec(0.5,9.5),x=r(2,10),y=parseFloat((k*x).toFixed(1));
+    p.q=`y is proportional to x. y = ${y} when x = ${x}. Find k.`;
+    p.a=k.toString();p.h="Numeric value";
+    p.s=[`k = ${y}/${x} = ${k}`];
+    p.ds=[{title:'k = y/x',detail:'',math:`${y}÷${x}=${k}`}];
+    p.cm=['Multiplying instead of dividing'];
+    break;
+}
+case 'graph_logic':{
+    let gk=r(2,12),gx=r(2,6),gy=gk*gx;
+    let ptCx=10+(gx/7)*60,ptCy=90-(gy/80)*70;
+    p.v=`<svg width="250" height="200" viewBox="0 0 100 100" role="img"><line x1="10" y1="90" x2="90" y2="90" stroke="#000" stroke-width="2"/><line x1="10" y1="10" x2="10" y2="90" stroke="#000" stroke-width="2"/><line x1="10" y1="90" x2="80" y2="20" stroke="#2563eb" stroke-width="2"/><circle cx="${ptCx}" cy="${ptCy}" r="3" fill="#dc2626"/><text x="${ptCx+4}" y="${ptCy-3}" font-size="7" font-weight="bold">(${gx}, ${gy})</text><text x="80" y="98" font-size="6">x</text><text x="2" y="15" font-size="6">y</text></svg>`;
+    p.q='Unit rate from the proportional graph?';
+    p.a=gk.toString();p.h="Numeric value";
+    p.s=[`y/x = ${gy}/${gx} = ${gk}`];
+    p.ds=[{title:'Read point',detail:`(${gx},${gy})`},{title:'y/x',detail:'',math:`${gy}/${gx}=${gk}`}];
+    p.cm=['Dividing x by y'];
+    break;
+}
+case 'prop_translate':{
+    let k=r(2,15),startX=r(1,5),xVals=[startX,startX+r(1,3),startX+r(4,6),startX+r(7,10)];
+    let yVals=xVals.map(x=>x*k);
+    p.q=`Table: x = [${xVals.join(', ')}], y = [${yVals.join(', ')}]. Write the equation.`;
+    p.a=`y = ${k}x`;p.h="Equation like y = kx";
+    p.s=[`k = ${yVals[0]}/${xVals[0]} = ${k} → y = ${k}x`];
+    p.ds=[{title:'Find k',detail:'',math:`${yVals[1]}/${xVals[1]}=${k}`},{title:'Equation',detail:'',math:`y = ${k}x`}];
+    p.cm=['Writing y = x + k instead of y = kx'];
+    break;
+}
+case 'complex_unit':{
+    let n1=r(1,7),d1=r(2,9),n2=r(1,5),d2=r(2,8);
+    while(n1>=d1)n1=r(1,d1-1);while(n2>=d2)n2=r(1,d2-1);
+    let pN=n1*d2,pD=d1*n2;
+    p.q=`A runner covers ${n1}/${d1} mile in ${n2}/${d2} hour. Unit rate (mph)?`;
+    p.a=simplify(pN,pD);p.h="Simplified fraction";
+    p.s=[`(${n1}/${d1})÷(${n2}/${d2})=${pN}/${pD}=${p.a}`];
+    p.ds=[{title:'Divide distance by time',detail:'KCF.',math:`(${n1}/${d1})×(${d2}/${n2})=${pN}/${pD}=${p.a}`}];
+    p.cm=['Multiplying instead of dividing'];
+    break;
+}
+case 'scale_area':{
+    let f=r(2,10);
+    p.q=`A shape's dimensions are multiplied by scale factor ${f}. New area is how many times larger?`;
+    p.a=(f*f).toString();p.h="Numeric value";
+    p.s=[`Area scales by factor²: ${f}²=${f*f}`];
+    p.ds=[{title:'Area = factor²',detail:'Both dimensions scale.',math:`${f}²=${f*f}`}];
+    p.cm=['Using factor directly instead of squaring'];
+    break;
+}
+case 'area_trap':{
+    let shapes=[
+        ()=>{let b1=r(4,20),b2=r(3,18),h=r(2,15);let a_=(b1+b2)*h/2;return{q:`Area of trapezoid: b₁=${b1}, b₂=${b2}, h=${h}.`,a:a_.toString(),s:[`½(${b1}+${b2})(${h})=${a_}`],ds:[{title:'Add bases',detail:'',math:`${b1}+${b2}=${b1+b2}`},{title:'× height',detail:'',math:`${b1+b2}×${h}=${(b1+b2)*h}`},{title:'÷ 2',detail:'',math:`${a_}`}],cm:['Forgetting ÷2','Using only one base'],svg:`<svg width="200" height="120" viewBox="0 0 200 120" role="img"><polygon points="40,20 160,20 180,90 20,90" fill="#e2e8f0" stroke="#000" stroke-width="2"/><text x="100" y="15" text-anchor="middle" font-size="11" font-weight="bold">b₁=${b1}</text><text x="100" y="108" text-anchor="middle" font-size="11" font-weight="bold">b₂=${b2}</text><line x1="40" y1="20" x2="40" y2="90" stroke="#dc2626" stroke-dasharray="4" stroke-width="2"/><text x="28" y="60" font-size="10" fill="#dc2626" font-weight="bold">h=${h}</text></svg>`};},
+        ()=>{let b=r(3,20),h=r(2,15);let a_=b*h;return{q:`Area of parallelogram: b=${b}, h=${h}.`,a:a_.toString(),s:[`A=${b}×${h}=${a_}`],ds:[{title:'A = b × h',detail:'Use HEIGHT, not slant side.',math:`${b}×${h}=${a_}`}],cm:['Using slant side instead of height'],svg:`<svg width="200" height="100" viewBox="0 0 200 100" role="img"><polygon points="40,15 170,15 150,85 20,85" fill="#e2e8f0" stroke="#000" stroke-width="2"/><text x="95" y="98" text-anchor="middle" font-size="11" font-weight="bold">b=${b}</text><line x1="40" y1="15" x2="40" y2="85" stroke="#dc2626" stroke-dasharray="4" stroke-width="2"/><text x="28" y="55" font-size="10" fill="#dc2626" font-weight="bold">h=${h}</text></svg>`};},
+        ()=>{let d1_=r(4,16),d2_=r(4,16);while((d1_*d2_)%2!==0){d2_=r(4,16);}let a_=d1_*d2_/2;return{q:`Area of rhombus: d₁=${d1_}, d₂=${d2_}.`,a:a_.toString(),s:[`A=½(${d1_})(${d2_})=${a_}`],ds:[{title:'Rhombus area = ½ × d₁ × d₂',detail:'',math:`½×${d1_}×${d2_}=${a_}`}],cm:['Forgetting ÷2','Using side length instead of diagonals'],svg:`<svg width="160" height="160" viewBox="0 0 160 160" role="img"><polygon points="80,10 150,80 80,150 10,80" fill="#e2e8f0" stroke="#000" stroke-width="2"/><line x1="80" y1="10" x2="80" y2="150" stroke="#dc2626" stroke-dasharray="4" stroke-width="2"/><line x1="10" y1="80" x2="150" y2="80" stroke="#2563eb" stroke-dasharray="4" stroke-width="2"/><text x="85" y="85" font-size="10" fill="#dc2626" font-weight="bold">d₁=${d1_}</text><text x="60" y="75" font-size="10" fill="#2563eb" font-weight="bold">d₂=${d2_}</text></svg>`};}
+    ];
+    let sh=pick(shapes)();
+    p.q=sh.q;p.a=sh.a;p.s=sh.s;p.ds=sh.ds;p.cm=sh.cm;p.v=sh.svg;p.h="Numeric value";
+    break;
+}
+case 'area_composite':{
+    let variant=r(1,3);
+    if(variant===1){
+        let rW=r(4,15),rH=r(3,12),tH=r(2,8);
+        let total=rW*rH+rW*tH/2;
+        p.q=`Rectangle (${rW}×${rH}) with triangle on top (base=${rW}, h=${tH}). Total area?`;
+        p.a=total.toString();
+        p.s=[`Rect:${rW*rH}, Tri:${rW*tH/2}, Total:${total}`];
+        p.ds=[{title:'Rectangle',detail:'',math:`${rW}×${rH}=${rW*rH}`},{title:'Triangle',detail:'',math:`½×${rW}×${tH}=${rW*tH/2}`},{title:'Add',detail:'',math:`${total}`}];
+    }else if(variant===2){
+        let w1=r(4,10),h1=r(3,8),w2=r(3,8),h2=r(3,8);
+        let total=w1*h1+w2*h2;
+        p.q=`L-shaped figure: rectangle (${w1}×${h1}) joined with rectangle (${w2}×${h2}). Total area?`;
+        p.a=total.toString();
+        p.s=[`${w1*h1}+${w2*h2}=${total}`];
+        p.ds=[{title:'Rectangle 1',detail:'',math:`${w1}×${h1}=${w1*h1}`},{title:'Rectangle 2',detail:'',math:`${w2}×${h2}=${w2*h2}`},{title:'Add',detail:'',math:`${total}`}];
+    }else{
+        let bigR=r(8,15),bigH=r(6,12),cutW=r(2,bigR-2),cutH=r(2,bigH-2);
+        let total=bigR*bigH-cutW*cutH;
+        p.q=`Rectangle (${bigR}×${bigH}) with rectangular notch (${cutW}×${cutH}) removed. Remaining area?`;
+        p.a=total.toString();
+        p.s=[`${bigR*bigH}−${cutW*cutH}=${total}`];
+        p.ds=[{title:'Full rectangle',detail:'',math:`${bigR}×${bigH}=${bigR*bigH}`},{title:'Subtract notch',detail:'',math:`${cutW}×${cutH}=${cutW*cutH}`},{title:'Result',detail:'',math:`${bigR*bigH}−${cutW*cutH}=${total}`}];
+    }
+    p.h="Numeric value";
+    p.cm=['Forgetting ½ for triangle','Only calculating one piece'];
+    break;
+}
+case 'circ_pi':{
+    let useR=r(0,1);
+    if(useR){let rad=r(3,30);p.q=`Exact circumference of circle with radius ${rad}? (In terms of π)`;p.a=`${2*rad}pi`;p.s=[`C=2πr=2π(${rad})=${2*rad}π`];p.ds=[{title:'C = 2πr',detail:'',math:`2×${rad}=${2*rad} → ${2*rad}π`}];}
+    else{let diam=r(3,30);p.q=`Exact circumference of circle with diameter ${diam}? (In terms of π)`;p.a=`${diam}pi`;p.s=[`C=πd=${diam}π`];p.ds=[{title:'C = πd',detail:'',math:`${diam}π`}];}
+    p.h="Like 10pi";
+    p.cm=['Multiplying by 3.14 (question asks exact)','Confusing with area'];
+    break;
+}
+case 'area_circ':{
+    let rad=r(3,18),area=parseFloat((3.14*rad*rad).toFixed(2));
+    p.v=`<svg width="150" height="150" viewBox="0 0 100 100" role="img"><circle cx="50" cy="50" r="40" fill="#e2e8f0" stroke="#0f172a" stroke-width="2"/><line x1="50" y1="50" x2="90" y2="50" stroke="#dc2626" stroke-width="2"/><circle cx="50" cy="50" r="3" fill="#000"/><text x="70" y="45" font-size="8" font-weight="bold">${rad}</text></svg>`;
+    p.q=`Area of circle with radius ${rad}? (Use 3.14)`;
+    p.a=area.toString();p.h="Numeric value";
+    p.s=[`3.14×${rad}²=${area}`];
+    p.ds=[{title:'A = πr²',detail:'',math:`3.14×${rad*rad}=${area}`}];
+    p.cm=['Using diameter','Using circumference formula'];
+    break;
+}
+case 'circ_back':{
+    let rad=r(3,20),circ=parseFloat((2*3.14*rad).toFixed(2));
+    p.q=`Circumference is ${circ}. Radius? (Use 3.14)`;
+    p.a=rad.toString();p.h="Numeric value";
+    p.s=[`r=${circ}÷6.28=${rad}`];
+    p.ds=[{title:'C=2πr',detail:'',math:`${circ}=6.28r`},{title:'Solve',detail:'',math:`r=${rad}`}];
+    p.cm=['Dividing by π instead of 2π'];
+    break;
+}
+case 'sa_cylinder':{
+    let cr=r(2,12),ch=r(3,18);
+    let topBot=parseFloat((2*3.14*cr*cr).toFixed(2)),lateral=parseFloat((2*3.14*cr*ch).toFixed(2));
+    let sa=parseFloat((topBot+lateral).toFixed(2));
+    p.v=`<svg width="150" height="170" viewBox="0 0 100 120" role="img"><ellipse cx="50" cy="25" rx="30" ry="10" fill="none" stroke="#000" stroke-width="2"/><ellipse cx="50" cy="90" rx="30" ry="10" fill="#e2e8f0" stroke="#000" stroke-width="2"/><line x1="20" y1="25" x2="20" y2="90" stroke="#000" stroke-width="2"/><line x1="80" y1="25" x2="80" y2="90" stroke="#000" stroke-width="2"/><line x1="50" y1="90" x2="80" y2="90" stroke="#dc2626" stroke-width="2"/><text x="65" y="102" font-size="7" fill="#dc2626" font-weight="bold">r=${cr}</text><text x="84" y="60" font-size="7" font-weight="bold">h=${ch}</text></svg>`;
+    p.q=`Surface area of cylinder (r=${cr}, h=${ch})? (Use 3.14)`;
+    p.a=sa.toFixed(2);p.h="Round to 2 decimals";
+    p.s=[`Bases:${topBot}, Lateral:${lateral}, SA:${sa}`];
+    p.ds=[{title:'2πr²',detail:'',math:`${topBot}`},{title:'2πrh',detail:'',math:`${lateral}`},{title:'Add',detail:'',math:`${sa}`}];
+    p.cm=['Forgetting circular bases','Confusing with volume'];
+    break;
+}
+case 'vol_cylinder':{
+    let cr=r(2,12),ch=r(3,18);
+    let vol=parseFloat((3.14*cr*cr*ch).toFixed(2));
+    p.v=`<svg width="150" height="170" viewBox="0 0 100 120" role="img"><ellipse cx="50" cy="25" rx="30" ry="10" fill="none" stroke="#000" stroke-width="2"/><ellipse cx="50" cy="90" rx="30" ry="10" fill="#e2e8f0" stroke="#000" stroke-width="2"/><line x1="20" y1="25" x2="20" y2="90" stroke="#000" stroke-width="2"/><line x1="80" y1="25" x2="80" y2="90" stroke="#000" stroke-width="2"/><line x1="50" y1="90" x2="80" y2="90" stroke="#dc2626" stroke-width="2"/><text x="65" y="102" font-size="7" fill="#dc2626" font-weight="bold">r=${cr}</text><text x="84" y="60" font-size="7" font-weight="bold">h=${ch}</text></svg>`;
+    p.q=`Volume of cylinder (r=${cr}, h=${ch})? (Use 3.14)`;
+    p.a=vol.toFixed(2);p.h="Round to 2 decimals";
+    p.s=[`V=3.14×${cr}²×${ch}=${vol}`];
+    p.ds=[{title:'V=πr²h',detail:'',math:`3.14×${cr*cr}×${ch}=${vol}`}];
+    p.cm=['Using diameter','Forgetting to square r'];
+    break;
+}
+case 'mad_dec':{
+    let n=pick([4,5,6]);
+    let vals=[];for(let i=0;i<n;i++)vals.push(rDec(1.0,20.0));
+    let aM=parseFloat((vals.reduce((a,b)=>a+b,0)/n).toFixed(2));
+    let dists=vals.map(v=>parseFloat(Math.abs(v-aM).toFixed(2)));
+    let mad=parseFloat((dists.reduce((a,b)=>a+b,0)/n).toFixed(2));
+    p.q=`MAD for: ${vals.join(', ')} (Mean=${aM})`;
+    p.a=parseFloat(mad.toFixed(2)).toString();p.h="Round to nearest hundredth";
+    p.s=[`Distances: ${dists.join(', ')}`,`MAD=${p.a}`];
+    p.ds=[{title:'Find each |value−mean|',detail:'',math:vals.map(v=>`|${v}−${aM}|=${Math.abs(v-aM).toFixed(2)}`).join('\n')},{title:'Average distances',detail:'',math:`Sum÷${n}=${p.a}`}];
+    p.cm=['Forgetting absolute value','Wrong count'];
+    break;
+}
+case 'compare_data':{
+    let names=[['Class A','Class B'],['Team 1','Team 2'],['Group X','Group Y'],['Period 1','Period 3'],['School A','School B']];
+    let [n1,n2]=pick(names);
+    let m1=r(40,98),m2=r(40,98);while(m1===m2)m2=r(40,98);
+    let mad1=rDec(1.0,10.0),mad2=rDec(1.0,10.0);while(parseFloat(mad1)===parseFloat(mad2))mad2=rDec(1.0,10.0);
+    let higher=m1>m2?n1:n2,moreCon=parseFloat(mad1)<parseFloat(mad2)?n1:n2;
+    p.q=`${n1}: mean=${m1}, MAD=${mad1}. ${n2}: mean=${m2}, MAD=${mad2}. Which scored higher on average? Which is more consistent?`;
+    p.a=`${higher}, ${moreCon}`;p.h="Two names separated by comma";
+    p.s=[`Higher mean: ${higher}`,`Lower MAD: ${moreCon}`];
+    p.ds=[{title:'Compare means',detail:`${m1} vs ${m2}`,math:`${higher} is higher.`},{title:'Compare MADs',detail:'Lower MAD = more consistent.',math:`${moreCon}`}];
+    p.cm=['Thinking higher MAD = more consistent','Only answering one part'];
+    break;
+}
+case 'box_iqr':{
+    let bQ1=r(10,60),bQ3=bQ1+r(8,40),bMin=bQ1-r(3,15),bMax=bQ3+r(3,15),bMed=r(bQ1+1,bQ3-1);
+    let rng=bMax-bMin,sc=x=>10+((x-bMin)/rng)*80,iqr=bQ3-bQ1;
+    p.v=`<svg width="300" height="80" viewBox="0 0 100 40" role="img"><line x1="${sc(bMin).toFixed(1)}" y1="20" x2="${sc(bMax).toFixed(1)}" y2="20" stroke="#000" stroke-width="1.5"/><line x1="${sc(bMin).toFixed(1)}" y1="14" x2="${sc(bMin).toFixed(1)}" y2="26" stroke="#000" stroke-width="1.5"/><line x1="${sc(bMax).toFixed(1)}" y1="14" x2="${sc(bMax).toFixed(1)}" y2="26" stroke="#000" stroke-width="1.5"/><rect x="${sc(bQ1).toFixed(1)}" y="10" width="${(sc(bQ3)-sc(bQ1)).toFixed(1)}" height="20" fill="#cbd5e1" stroke="#000" stroke-width="1.5"/><line x1="${sc(bMed).toFixed(1)}" y1="10" x2="${sc(bMed).toFixed(1)}" y2="30" stroke="#dc2626" stroke-width="2"/><text x="${sc(bMin).toFixed(1)}" y="38" text-anchor="middle" font-size="5">${bMin}</text><text x="${sc(bQ1).toFixed(1)}" y="38" text-anchor="middle" font-size="5" font-weight="bold">Q1=${bQ1}</text><text x="${sc(bMed).toFixed(1)}" y="7" text-anchor="middle" font-size="5" fill="#dc2626">Med=${bMed}</text><text x="${sc(bQ3).toFixed(1)}" y="38" text-anchor="middle" font-size="5" font-weight="bold">Q3=${bQ3}</text><text x="${sc(bMax).toFixed(1)}" y="38" text-anchor="middle" font-size="5">${bMax}</text></svg>`;
+    p.q='Find the IQR from the box plot.';
+    p.a=iqr.toString();p.h="Numeric value";
+    p.s=[`Q3−Q1=${bQ3}−${bQ1}=${iqr}`];
+    p.ds=[{title:'IQR = Q3 − Q1',detail:'',math:`${bQ3}−${bQ1}=${iqr}`}];
+    p.cm=['Using max−min (that is Range)'];
+    break;
+}
+case 'infer':{
+    let sF=r(3,30),sT=r(30,120),pop=r(200,5000);
+    let pred=Math.round((sF/sT)*pop);
+    p.q=`Sample: ${sF} out of ${sT} prefer reading. Predict for ${pop} students.`;
+    p.a=pred.toString();p.h="Whole number";
+    p.s=[`(${sF}/${sT})×${pop}=${pred}`];
+    p.ds=[{title:'Proportion',detail:'',math:`${sF}/${sT}=${(sF/sT).toFixed(4)}`},{title:'Scale up',detail:'',math:`×${pop}≈${pred}`}];
+    p.cm=['Dividing instead of multiplying'];
+    break;
+}
+case 'bias_logic':{
+    let scenarios=[
+        {text:'Surveying people exiting a sci-fi movie about favorite genre',ans:'biased'},
+        {text:'Asking every 5th person entering a mall about shopping habits',ans:'random'},
+        {text:'Surveying only honor roll students about school difficulty',ans:'biased'},
+        {text:'Asking people at a gym about exercise frequency',ans:'biased'},
+        {text:'Drawing names from a hat with all students',ans:'random'},
+        {text:'Surveying vegetarians about favorite restaurant type',ans:'biased'},
+        {text:'Using a random number generator to select students for a survey',ans:'random'},
+        {text:'Asking only students who ride the bus about transportation preferences',ans:'biased'},
+        {text:'Surveying people at a dog park about pet ownership',ans:'biased'},
+        {text:'Selecting every 10th name from an alphabetical class roster',ans:'random'},
+        {text:'Asking only teachers about school lunch quality',ans:'biased'},
+        {text:'Putting all student IDs in a computer and randomly selecting 50',ans:'random'}
+    ];
+    let sc=pick(scenarios);
+    p.q=`${sc.text}. Biased or random?`;
+    p.a=sc.ans;p.h="biased or random";
+    p.s=[sc.ans==='biased'?'Sample favors a specific group.':'Every member has equal chance.'];
+    p.ds=[{title:'Test',detail:'Does everyone have an equal chance of being selected?'},{title:'Answer',detail:sc.ans}];
+    p.cm=['Confusing large sample with random sample'];
+    break;
+}
+case 'sample_perm':{
+    let numCats=pick([2,3,4]);
+    let catNames_=[['colors','sizes','styles','fabrics'],['mains','sides','drinks','desserts'],['shirts','pants','shoes','hats']];
+    let nameSet=pick(catNames_);
+    let counts=[],labels=[];
+    for(let i=0;i<numCats;i++){counts.push(r(2,7));labels.push(nameSet[i]);}
+    let tot=counts.reduce((a,b)=>a*b,1);
+    p.q=`${counts.map((c,i)=>`${c} ${labels[i]}`).join(', ')}. Total combinations?`;
+    p.a=tot.toString();p.h="Whole number";
+    p.s=[`${counts.join('×')}=${tot}`];
+    p.ds=[{title:'Counting Principle',detail:'Multiply options per category.',math:`${counts.join('×')}=${tot}`}];
+    p.cm=['Adding instead of multiplying'];
+    break;
+}
+case 'theo_prob':{
+    // Direct P(event) calculation — many contexts
+    let variant=r(1,4);
+    if(variant===1){
+        let total=pick([6,8,10,12,20]),favorable=r(1,total-1);
+        let item=pick(['marbles','cards','tiles','chips']);
+        let color=pick(['red','blue','green','yellow','white']);
+        p.q=`A bag has ${total} ${item}. ${favorable} are ${color}. P(drawing a ${color} ${item.slice(0,-1)})?`;
+        p.a=simplify(favorable,total);
+        p.s=[`${favorable}/${total}=${p.a}`];
+        p.ds=[{title:'P = favorable/total',detail:'',math:`${favorable}/${total}=${p.a}`}];
+    }else if(variant===2){
+        let sides=pick([4,6,8,10,12,20]),target=r(1,sides);
+        p.q=`Roll a fair ${sides}-sided die. P(rolling a ${target})?`;
+        p.a=simplify(1,sides);
+        p.s=[`1/${sides}=${p.a}`];
+        p.ds=[{title:'One outcome out of '+sides,detail:'',math:`1/${sides}=${p.a}`}];
+    }else if(variant===3){
+        let sides=pick([6,8,10,12]);
+        let evens=Math.floor(sides/2);
+        p.q=`Roll a fair ${sides}-sided die (numbered 1-${sides}). P(even number)?`;
+        p.a=simplify(evens,sides);
+        p.s=[`${evens}/${sides}=${p.a}`];
+        p.ds=[{title:'Count even numbers 1-'+sides,detail:`${evens} even numbers.`,math:`${evens}/${sides}=${p.a}`}];
+    }else{
+        let total=r(10,30),fav=r(2,total-2);
+        p.q=`A spinner has ${total} equal sections. ${fav} are shaded. P(landing on shaded)?`;
+        p.a=simplify(fav,total);
+        p.s=[`${fav}/${total}=${p.a}`];
+        p.ds=[{title:'P = shaded/total',detail:'',math:`${fav}/${total}=${p.a}`}];
+    }
+    p.h="Simplified fraction";
+    p.cm=['Flipping the fraction','Not simplifying'];
+    break;
+}
+case 'theo_comp':{
+    let sec=r(3,8),side=pick(['Heads','Tails']),tgt=r(1,sec),den=2*sec;
+    p.v=`<svg width="120" height="120" viewBox="0 0 100 100" role="img"><circle cx="50" cy="50" r="40" fill="none" stroke="#000" stroke-width="2"/>${Array.from({length:sec},(_,i)=>{let a=(2*Math.PI*i)/sec,x=50+40*Math.cos(a),y=50+40*Math.sin(a);return`<line x1="50" y1="50" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#000" stroke-width="1.5"/>`;}).join('')}<text x="50" y="98" text-anchor="middle" font-size="7" font-weight="bold">${sec} sections</text></svg>`;
+    p.q=`Coin flip + ${sec}-section spinner. P(${side} AND Section ${tgt})?`;
+    p.a=simplify(1,den);p.h="Simplified fraction";
+    p.s=[`(1/2)×(1/${sec})=${p.a}`];
+    p.ds=[{title:'Independent events: multiply',detail:'',math:`1/2 × 1/${sec} = 1/${den} = ${p.a}`}];
+    p.cm=['Adding instead of multiplying'];
+    break;
+}
+case 'exp_large':{
+    let tot=r(50,1000),fav=r(Math.floor(tot*0.2),Math.floor(tot*0.8));
+    let event=pick(['Heads','red','even','winning']);
+    p.q=`${tot} trials, ${event} occurred ${fav} times. Experimental probability?`;
+    p.a=simplify(fav,tot);p.h="Simplified fraction";
+    p.s=[`${fav}/${tot}=${p.a}`];
+    p.ds=[{title:'Experimental P = occurrences/trials',detail:'',math:`${fav}/${tot}=${p.a}`}];
+    p.cm=['Fraction flipped','Not simplifying'];
+    break;
+}
+}return p;}
+const catNamesList=['Number Sense & Operations / Algebraic Reasoning','Proportional Reasoning & Relationships','Geometric Reasoning','Data Analysis & Probability'];
+let catMap={};
+function resetCatMap(){catMap={};catNamesList.forEach(c=>catMap[c]={total:0,correct:0});}
+function buildSolutionHTML(p,ok,ua){
+    const icon=ok?'✅':'❌',st=ok?'CORRECT':'INCORRECT — Step-by-step below';
+    const cls=ok?'solution-correct':'solution-wrong',aCls=ok?'your-answer-correct':'your-answer-wrong';
+    let h=`<div class="solution ${cls}"><div class="solution-header">${icon} ${st}</div><div class="solution-body">`;
+    h+=`<div class="your-answer-box ${aCls}"><span>Your Answer: <strong>${ua||'(blank)'}</strong></span>`;
+    if(!ok)h+=`<span style="margin-left:auto">Correct: <strong>${p.a}</strong></span>`;
+    h+=`</div>`;
+    if(ok){h+=`<div style="color:#166534;font-weight:600">Quick Summary:</div>`;p.s.forEach(s=>{h+=`<div style="padding:4px 0">↳ ${s}</div>`;});}
+    else{h+=`<div style="font-weight:800;color:#991b1b;margin-bottom:15px;text-transform:uppercase;letter-spacing:1px">Step-by-Step Walkthrough</div><div class="step-walkthrough">`;
+        p.ds.forEach(step=>{h+=`<div class="step-item"><div class="step-title">${step.title}</div><div class="step-detail">${step.detail}</div>${step.math?`<div class="step-math">${step.math}</div>`:''}</div>`;});
+        h+=`</div>`;
+        if(p.cm&&p.cm.length){h+=`<div class="common-mistakes"><div class="cm-title">⚠️ Common Mistakes</div>`;p.cm.forEach(m=>{h+=`<div class="cm-item">• ${m}</div>`;});h+=`</div>`;}
+    }
+    h+=`<div class="key-answer">🔑 Answer: ${p.a}</div></div></div>`;return h;
+}
+function initTest(){
+    root.innerHTML='';questions=[];resetCatMap();
+    if(timerRunning){clearInterval(timerInterval);timerRunning=false;document.getElementById('timerBtn').textContent='Timer: OFF';document.getElementById('timerBtn').style.background='#7c3aed';document.getElementById('timerDisplay').textContent='--:--';document.getElementById('timerDisplay').className='timer-display';}
+    let allBuilt=templates.map(t=>buildQuestion(t));
+    let grouped={};catNamesList.forEach(c=>grouped[c]=[]);
+    allBuilt.forEach(q=>{if(grouped[q.cat])grouped[q.cat].push(q);});
+    catNamesList.forEach(c=>shuffle(grouped[c]));
+    let shuffledCats=shuffle([...catNamesList]);
+    let itemNum=1;
+    shuffledCats.forEach(cat=>{
+        if(!grouped[cat].length)return;
+        const hdr=document.createElement('div');hdr.className='category-header';hdr.setAttribute('role','heading');hdr.setAttribute('aria-level','2');hdr.innerText=cat;root.appendChild(hdr);
+        grouped[cat].forEach(p=>{
+            p.displayNum=itemNum++;catMap[p.cat].total++;questions.push(p);
+            const card=document.createElement('div');card.className='card';card.id=`card-${p.displayNum}`;card.setAttribute('role','region');
+            card.innerHTML=`<div class="q-meta"><span class="q-num">Item #${p.displayNum}</span><span class="q-tag">${p.title}</span><span style="font-size:.7em;color:#94a3b8;font-weight:600">${p.bm||''}</span></div><div style="font-size:1.3em;font-weight:700">${p.q}</div>${p.v?`<div class="viz-box">${p.v}</div>`:''}<div class="ans-container"><label for="ans-${p.displayNum}">Answer:</label><input type="text" id="ans-${p.displayNum}" placeholder="Your Answer..."><span style="color:#64748b;font-style:italic;font-weight:600">${p.h}</span></div><div id="sol-container-${p.displayNum}"></div>`;
+            root.appendChild(card);
+        });
+    });
+    document.getElementById('liveScore').innerText='';
+}
+function gradeTest(){
+    let score=0;catNamesList.forEach(c=>catMap[c].correct=0);
+    questions.forEach(p=>{
+        const input=document.getElementById(`ans-${p.displayNum}`),card=document.getElementById(`card-${p.displayNum}`),solC=document.getElementById(`sol-container-${p.displayNum}`);
+        const ua=input.value.trim(),ok=answersMatch(ua,p.a);
+        input.classList.remove('correct-ans','wrong-ans');input.classList.add(ok?'correct-ans':'wrong-ans');
+        card.classList.remove('card-correct','card-wrong');card.classList.add(ok?'card-correct':'card-wrong');
+        if(ok){score++;catMap[p.cat].correct++;}
+        solC.innerHTML=buildSolutionHTML(p,ok,ua);
+    });
+    const pct=Math.round((score/TOTAL_ITEMS)*100);
+    document.getElementById('liveScore').innerText=`TOTAL: ${score}/${TOTAL_ITEMS} (${pct}%)`;
+    if(timerRunning){clearInterval(timerInterval);timerRunning=false;document.getElementById('timerBtn').textContent='Timer: OFF';document.getElementById('timerBtn').style.background='#7c3aed';}
+    window.scrollTo({top:0,behavior:'smooth'});
+    let catHTML='<div class="cat-breakdown">';
+    catNamesList.forEach(cat=>{const c=catMap[cat],cp=c.total>0?Math.round((c.correct/c.total)*100):0;let color=cp>=70?'#059669':cp>=50?'#f59e0b':'#dc2626';catHTML+=`<div class="cat-score-card"><h3>${cat}</h3><div class="score-big" style="color:${color}">${c.correct}/${c.total}</div><div style="font-weight:700;color:#64748b">${cp}%</div><div class="score-bar"><div class="score-fill" style="width:${cp}%;background:${color}"></div></div></div>`;});
+    catHTML+='</div>';
+    setTimeout(()=>{
+        const clone=document.documentElement.cloneNode(true);clone.querySelectorAll('.nav-tools,script').forEach(e=>e.remove());
+        const header=document.createElement('div');header.className='report-box';
+        header.innerHTML=`<h1 style="margin:0 0 10px">FAST 7th Grade Report</h1><h2 style="margin:0 0 20px">Overall: ${pct}%</h2><p style="font-size:1.2em;font-weight:700">Correct: ${score}/${TOTAL_ITEMS}</p>${catHTML}<p style="color:#64748b;margin-top:20px">${new Date().toLocaleString()}</p>`;
+        clone.querySelector('.container').prepend(header);
+        const blob=new Blob(['<!DOCTYPE html>'+clone.outerHTML],{type:'text/html'});
+        const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`FAST_Grade7_${getStamp()}.html`;a.click();URL.revokeObjectURL(a.href);
+    },1000);
+}
+window.onload=initTest;
+</script>
+</body>
+</html>
