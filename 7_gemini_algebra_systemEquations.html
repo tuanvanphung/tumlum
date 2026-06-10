@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebra Mastery: Systems of Equations</title>
+    
+    <!-- MathJax Configuration and Script -->
+    <script>
+      MathJax = {
+        tex: { inlineMath: [['\\(', '\\)']] },
+        chtml: { scale: 1.1 } 
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f0f2f5; color: #333; }
+        h1 { text-align: center; color: #1a2a6c; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        
+        .controls-container { text-align: center; padding: 20px; margin-bottom: 30px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        button { padding: 12px 28px; font-size: 1.05em; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 5px 10px; transition: 0.2s; }
+        #generateBtn { background-color: #3498db; }
+        #showSolutionsBtn { background-color: #27ae60; }
+        #showSolutionsBtn:disabled { background-color: #7f8c8d; opacity: 1; cursor: default; }
+        .problem-count { font-size: 1.05em; color: #444; margin-top: 8px; font-weight: 500; }
+        
+        .problem-list { list-style-type: none; padding-left: 0; max-width: 850px; margin: 0 auto; }
+        .problem-card { margin-bottom: 30px; padding: 25px; border-radius: 12px; background-color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 8px solid #34495e; }
+        
+        .problem-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .problem-number { font-weight: bold; font-size: 1.3em; color: #95a5a6; }
+        .problem-expression { font-size: 1.5em; color: #2c3e50; min-width: 250px; }
+        .problem-tag { font-size: 0.7em; background: #ecf0f1; color: #7f8c8d; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+        
+        .answer-box { display: flex; flex-direction: column; background: #fdfdfd; padding: 15px; border: 1px solid #eee; border-radius: 8px; align-items: center; }
+        
+        /* Multi-input Grid Styling */
+        .multi-input-row { display: flex; gap: 15px; justify-content: center; align-items: center; margin: 6px 0; }
+        .multi-input-row label { font-size: 1.2em; font-family: 'Times New Roman', Times, serif; font-style: italic; font-weight: bold; }
+        .multi-input-row input { width: 60px; padding: 8px; font-size: 1.1em; border: 2px solid #ced4da; border-radius: 6px; text-align: center; font-family: monospace; }
+        .pt-label { font-weight: bold; color: #7f8c8d; background: #ecf0f1; padding: 2px 8px; border-radius: 4px; font-size: 0.9em; margin-right: 5px; }
+
+        .input-hint { font-size: 0.85em; color: #e67e22; margin-top: 12px; font-weight: bold; }
+        
+        .solution-area { display: none; margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; }
+        .algebra-line { display: block; background: #fff; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin: 8px 0; color: #2c3e50; font-size: 0.95em;}
+        
+        .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; }
+        .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
+        .report-header { text-align: center; background: white; border: 3px solid #27ae60; padding: 20px; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        .section-divider { text-align: center; color: #c0392b; margin: 50px 0 30px 0; border-bottom: 3px solid #c0392b; padding-bottom: 10px; }
+        .section-divider h2 { margin: 0; font-size: 1.8em; }
+        .section-divider p { margin: 5px 0 0 0; color: #555; }
+
+        @media print { .controls-container { display: none; } .solution-area { display: block !important; } }
+    </style>
+</head>
+<body>
+    <h1>Algebra: Systems of Equations</h1>
+    <p class="subtitle">Progressive Difficulty Challenge Test</p>
+    
+    <div class="controls-container">
+        <button id="generateBtn">Generate New Problem Set</button>
+        <button id="showSolutionsBtn">Submit & Generate Report</button>
+        <div class="problem-count" id="problemCount"></div>
+    </div>
+    
+    <div id="problemContainer" class="problem-list"></div>
+
+    <script>
+        const TOTAL_PROBLEMS = 10;
+        const container = document.getElementById('problemContainer');
+        const generateBtn = document.getElementById('generateBtn');
+        const showBtn = document.getElementById('showSolutionsBtn');
+        const problemCountEl = document.getElementById('problemCount');
+        let currentProblems = [];
+
+        function getRnd(min, max, exclude=[]) {
+            let val;
+            do { val = Math.floor(Math.random() * (max - min + 1)) + min; } while(exclude.includes(val));
+            return val;
+        }
+
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function term(coeff, v, first) {
+            if (coeff === 0) return "";
+            let absC = Math.abs(coeff);
+            let cStr = absC === 1 ? "" : absC;
+            if (first) return coeff < 0 ? `-${cStr}${v}` : `${cStr}${v}`;
+            return coeff < 0 ? `- ${cStr}${v}` : `+ ${cStr}${v}`;
+        }
+        
+        function constant(c, first=false) {
+            if (c === 0) return "";
+            if (first) return `${c}`;
+            return c < 0 ? `- ${Math.abs(c)}` : `+ ${c}`;
+        }
+
+        function generateProblem(id, type) {
+            let prob = { id, type, expression: "", steps: [], expected: [], hint: "" };
+            
+            switch(type) {
+                case 'hard_elim': {
+                    let x = getRnd(-6, 6); let y = getRnd(-6, 6);
+                    let a1 = getRnd(2, 5); let b1 = getRnd(-5, 5, [0, 1, -1]);
+                    let a2 = getRnd(2, 5, [a1]); let b2 = getRnd(-5, 5, [0, 1, -1, b1]);
+                    while (a1 * b2 === a2 * b1) b2 = getRnd(-5, 5, [0, 1, -1]);
+                    let c1 = a1*x + b1*y; let c2 = a2*x + b2*y;
+                    
+                    prob.expression = `\\begin{cases} ${term(a1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\ ${term(a2, 'x', true)} ${term(b2, 'y', false)} = ${c2} \\end{cases}`;
+                    prob.expected = [{ x: x.toString(), y: y.toString() }];
+                    prob.hint = "Solve for x and y.";
+                    prob.steps.push({m: "Step 1: Multiply both equations to align coefficients.", l: `\\text{e.g., Multiply Top by } ${a2} \\text{ and Bottom by } ${a1}.`});
+                    prob.steps.push({m: "Step 2: Eliminate a variable and solve.", l: `\\text{Solve resulting equation to find one variable.}`});
+                    prob.steps.push({m: "Step 3: Substitute back.", l: `x = ${x}, \\quad y = ${y}`});
+                    break;
+                }
+                case 'scrambled': {
+                    let x = getRnd(-5, 5); let y = getRnd(-5, 5);
+                    let a1 = getRnd(2, 6); let b1 = getRnd(2, 6); let c1 = a1*x + b1*y;
+                    let eq1 = `${term(a1, 'x', true)} = ${c1} ${term(-b1, 'y', false)}`; 
+                    let a2 = getRnd(-5, -2); let b2 = getRnd(2, 6); let c2 = b2*y - a2*x;
+                    let eq2 = `${term(b2, 'y', true)} = ${term(a2, 'x', true)} ${constant(c2, false)}`; 
+                    
+                    prob.expression = `\\begin{cases} ${eq1} \\\\ ${eq2} \\end{cases}`;
+                    prob.expected = [{ x: x.toString(), y: y.toString() }];
+                    prob.hint = "Solve for x and y.";
+                    prob.steps.push({m: "Step 1: Rearrange both into standard form (Ax + By = C).", l: `\\begin{cases} ${term(a1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\ ${term(-a2, 'x', true)} ${term(b2, 'y', false)} = ${c2} \\end{cases}`});
+                    prob.steps.push({m: "Step 2: Solve using elimination or substitution.", l: `x = ${x}, \\quad y = ${y}`});
+                    break;
+                }
+                case 'fractional': {
+                    let x = getRnd(-4, 4, [0]) * 2; let y = getRnd(-3, 3, [0]) * 3; 
+                    let d1 = 2; let d2 = 3; let c1 = (x/d1) + (y/d2);
+                    let a2 = getRnd(2, 4); let b2 = getRnd(-4, -1); let c2 = a2*x + b2*y;
+                    
+                    prob.expression = `\\begin{cases} \\frac{x}{${d1}} + \\frac{y}{${d2}} = ${c1} \\\\ ${term(a2, 'x', true)} ${term(b2, 'y', false)} = ${c2} \\end{cases}`;
+                    prob.expected = [{ x: x.toString(), y: y.toString() }];
+                    prob.hint = "Solve for x and y.";
+                    prob.steps.push({m: `Step 1: Multiply the top equation by the LCD (${d1 * d2}) to clear fractions.`, l: `3x + 2y = ${c1 * 6}`});
+                    prob.steps.push({m: "Step 2: Solve the new system.", l: `x = ${x}, \\quad y = ${y}`});
+                    break;
+                }
+                case 'three_var': {
+                    let x = getRnd(-3, 3); let y = getRnd(-3, 3); let z = getRnd(-3, 3);
+                    let c1 = x + y + z;
+                    let a2 = getRnd(2, 4); let b2 = getRnd(-3, -1); let c_2 = getRnd(1, 3);
+                    let d2 = a2*x + b2*y + c_2*z;
+                    let a3 = getRnd(-2, 2, [0]); let b3 = getRnd(2, 4); let c_3 = getRnd(-4, -2);
+                    let d3 = a3*x + b3*y + c_3*z;
+                    
+                    prob.expression = `\\begin{cases} x + y + z = ${c1} \\\\ ${term(a2, 'x', true)} ${term(b2, 'y', false)} ${term(c_2, 'z', false)} = ${d2} \\\\ ${term(a3, 'x', true)} ${term(b3, 'y', false)} ${term(c_3, 'z', false)} = ${d3} \\end{cases}`;
+                    prob.expected = [{ x: x.toString(), y: y.toString(), z: z.toString() }];
+                    prob.hint = "Solve for all three variables.";
+                    prob.steps.push({m: "Step 1: Isolate a variable in Eq 1 and substitute into Eq 2 & 3 (OR use elimination on pairs).", l: `\\text{Reduces to a 2-variable system.}`});
+                    prob.steps.push({m: "Step 2: Solve the 2x2 system, then substitute back up the chain.", l: `x = ${x}, \\quad y = ${y}, \\quad z = ${z}`});
+                    break;
+                }
+                case 'lin_quad': {
+                    let x1 = getRnd(-3, 1); let x2 = getRnd(x1+1, 4);
+                    let m = getRnd(-2, 3, [0]); let k = getRnd(-3, 3);
+                    let y1 = m*x1 + k; let y2 = m*x2 + k;
+                    let b = m - (x1 + x2); let c = k + (x1 * x2);
+                    
+                    let eq1 = `y = x^2 ${term(b, 'x', false)} ${constant(c, false)}`;
+                    let eq2 = `y = ${term(m, 'x', true)} ${constant(k, false)}`;
+                    
+                    prob.expression = `\\begin{cases} ${eq1} \\\\ ${eq2} \\end{cases}`;
+                    prob.expected = [{ x: x1.toString(), y: y1.toString() }, { x: x2.toString(), y: y2.toString() }];
+                    prob.hint = "Find both intersection points.";
+                    prob.steps.push({m: "Step 1: Set equations equal to each other.", l: `x^2 ${term(b, 'x', false)} ${constant(c, false)} = ${term(m, 'x', true)} ${constant(k, false)}`});
+                    prob.steps.push({m: "Step 2: Rearrange to standard quadratic form \\(ax^2+bx+c=0\\) and solve for x.", l: `x_1 = ${x1}, \\quad x_2 = ${x2}`});
+                    prob.steps.push({m: "Step 3: Plug both x-values into the linear equation to find their y-values.", l: `(${x1}, ${y1}) \\quad \\text{and} \\quad (${x2}, ${y2})`});
+                    break;
+                }
+            }
+            return prob;
+        }
+
+        const typeLabels = {
+            hard_elim: 'Hard Elimination', scrambled: 'Scrambled Terms', 
+            fractional: 'Fractional Coefficients', three_var: '3-Variables (x,y,z)', lin_quad: 'Linear-Quadratic'
+        };
+
+        function render() {
+            container.innerHTML = ''; currentProblems = [];
+            showBtn.disabled = false; showBtn.style.backgroundColor = '#27ae60'; showBtn.textContent = "Submit & Generate Report";
+            
+            let topTier = ['scrambled', 'scrambled', 'hard_elim', 'hard_elim', 'fractional'];
+            let bottomTier = ['lin_quad', 'lin_quad', 'lin_quad', 'three_var', 'three_var'];
+            
+            topTier = shuffle(topTier);
+            bottomTier = shuffle(bottomTier);
+            let types = topTier.concat(bottomTier);
+            
+            problemCountEl.innerHTML = `<strong>Questions 1-5:</strong> Challenging Systems <br> <strong>Questions 6-10:</strong> Expert Level (Quadratics & 3-Variables)`;
+            
+            for (let i = 1; i <= TOTAL_PROBLEMS; i++) {
+                if(i === 6) {
+                    const divider = document.createElement('div');
+                    divider.className = 'section-divider';
+                    divider.innerHTML = `<h2>Expert Level</h2><p>Linear-Quadratics and 3-Variable Systems</p>`;
+                    container.appendChild(divider);
+                }
+
+                const p = generateProblem(i, types[i - 1]);
+                currentProblems.push(p);
+                
+                // Build unique input HTML based on problem type
+                let inputHTML = '';
+                if (p.type === 'three_var') {
+                    inputHTML = `
+                        <div class="multi-input-row">
+                            <label>x = </label><input type="text" class="user-input" id="input-${i}-x">
+                            <label>&nbsp;&nbsp;y = </label><input type="text" class="user-input" id="input-${i}-y">
+                            <label>&nbsp;&nbsp;z = </label><input type="text" class="user-input" id="input-${i}-z">
+                        </div>`;
+                } else if (p.type === 'lin_quad') {
+                    inputHTML = `
+                        <div class="multi-input-row">
+                            <span class="pt-label">Pt 1</span>
+                            <label>x = </label><input type="text" class="user-input" id="input-${i}-1-x">
+                            <label>&nbsp; y = </label><input type="text" class="user-input" id="input-${i}-1-y">
+                        </div>
+                        <div class="multi-input-row">
+                            <span class="pt-label">Pt 2</span>
+                            <label>x = </label><input type="text" class="user-input" id="input-${i}-2-x">
+                            <label>&nbsp; y = </label><input type="text" class="user-input" id="input-${i}-2-y">
+                        </div>`;
+                } else {
+                    inputHTML = `
+                        <div class="multi-input-row">
+                            <label>x = </label><input type="text" class="user-input" id="input-${i}-x">
+                            <label>&nbsp;&nbsp;y = </label><input type="text" class="user-input" id="input-${i}-y">
+                        </div>`;
+                }
+
+                const div = document.createElement('div');
+                div.className = 'problem-card';
+                div.innerHTML = `
+                    <div class="problem-header">
+                        <span class="problem-number">#${i}</span>
+                        <div class="problem-expression">\\( ${p.expression} \\)</div>
+                        <span class="problem-tag" style="background-color: ${i >= 6 ? '#c0392b' : '#ecf0f1'}; color: ${i >= 6 ? 'white' : '#7f8c8d'};">${typeLabels[p.type]}</span>
+                    </div>
+                    <div class="answer-box">
+                        ${inputHTML}
+                        <div class="input-hint">${p.hint}</div>
+                    </div>
+                    <div class="solution-area" id="sol-${i}">
+                        <strong>Solution Guide:</strong>
+                        ${p.steps.map(s => `<div class="step-row">${s.m}<span class="algebra-line">\\( ${s.l} \\)</span></div>`).join('')}
+                    </div>`;
+                container.appendChild(div);
+            }
+
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([container]).catch((err) => console.log(err.message));
+            }
+        }
+
+        function getTimestamp() {
+            const now = new Date();
+            const yymmdd = String(now.getFullYear()).slice(-2) + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+            const hhmi = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+            return `${yymmdd}_${hhmi}`;
+        }
+
+        function check() {
+            let score = 0;
+            const clean = str => (str || '').toLowerCase().replace(/\s+/g, '');
+
+            currentProblems.forEach(p => {
+                let isCorrect = false;
+                let inputElements = [];
+
+                if (p.type === 'three_var') {
+                    const ix = document.getElementById(`input-${p.id}-x`);
+                    const iy = document.getElementById(`input-${p.id}-y`);
+                    const iz = document.getElementById(`input-${p.id}-z`);
+                    inputElements.push(ix, iy, iz);
+                    
+                    if (clean(ix.value) === p.expected[0].x && 
+                        clean(iy.value) === p.expected[0].y && 
+                        clean(iz.value) === p.expected[0].z) {
+                        isCorrect = true;
+                    }
+                } else if (p.type === 'lin_quad') {
+                    const i1x = document.getElementById(`input-${p.id}-1-x`);
+                    const i1y = document.getElementById(`input-${p.id}-1-y`);
+                    const i2x = document.getElementById(`input-${p.id}-2-x`);
+                    const i2y = document.getElementById(`input-${p.id}-2-y`);
+                    inputElements.push(i1x, i1y, i2x, i2y);
+                    
+                    let u1x = clean(i1x.value), u1y = clean(i1y.value);
+                    let u2x = clean(i2x.value), u2y = clean(i2y.value);
+                    let e1x = p.expected[0].x, e1y = p.expected[0].y;
+                    let e2x = p.expected[1].x, e2y = p.expected[1].y;
+
+                    // Allow students to enter the two points in whichever order they like
+                    let matchNormal = (u1x === e1x && u1y === e1y && u2x === e2x && u2y === e2y);
+                    let matchSwapped = (u1x === e2x && u1y === e2y && u2x === e1x && u2y === e1y);
+                    
+                    if (matchNormal || matchSwapped) {
+                        isCorrect = true;
+                    }
+                } else {
+                    const ix = document.getElementById(`input-${p.id}-x`);
+                    const iy = document.getElementById(`input-${p.id}-y`);
+                    inputElements.push(ix, iy);
+                    
+                    if (clean(ix.value) === p.expected[0].x && 
+                        clean(iy.value) === p.expected[0].y) {
+                        isCorrect = true;
+                    }
+                }
+
+                // Apply colors to all inputs associated with this problem
+                inputElements.forEach(el => {
+                    el.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                });
+                
+                document.getElementById(`sol-${p.id}`).style.display = 'block';
+                if (isCorrect) score++;
+            });
+            
+            const timeStr = new Date().toLocaleString();
+            const pct = Math.round((score / TOTAL_PROBLEMS) * 100);
+            
+            showBtn.disabled = true;
+            showBtn.innerHTML = `Score: ${score}/${TOTAL_PROBLEMS} (${pct}%)<br><small>${timeStr}</small>`;
+            
+            MathJax.typesetPromise().then(() => {
+                const clone = document.documentElement.cloneNode(true);
+                clone.querySelectorAll('script, .controls-container').forEach(el => el.remove());
+                const body = clone.querySelector('body');
+                const header = document.createElement('div');
+                header.className = 'report-header';
+                header.innerHTML = `<h1>Systems of Equations Report</h1><h2>Score: ${score} / ${TOTAL_PROBLEMS} (${pct}%)</h2><p>Date: ${timeStr}</p>`;
+                body.insertBefore(header, body.firstChild);
+                
+                // Convert all discrete text boxes into clean little spans for the printed report
+                const inputs = clone.querySelectorAll('.user-input');
+                document.querySelectorAll('.user-input').forEach((original, idx) => {
+                    const span = document.createElement('span');
+                    span.textContent = original.value || "—";
+                    span.className = original.className + " static-answer";
+                    span.style.padding = "4px 8px";
+                    span.style.border = "2px solid #ccc";
+                    span.style.borderRadius = "4px";
+                    span.style.backgroundColor = "#fff";
+                    span.style.display = "inline-block";
+                    span.style.minWidth = "35px";
+                    span.style.textAlign = "center";
+                    span.style.fontFamily = "monospace";
+                    inputs[idx].parentNode.replaceChild(span, inputs[idx]);
+                });
+                clone.querySelectorAll('.solution-area').forEach(s => s.style.display = 'block');
+                
+                const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `Systems_Report_${getTimestamp()}.html`;
+                a.click();
+            });
+        }
+
+        generateBtn.addEventListener('click', render);
+        showBtn.addEventListener('click', check);
+        
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
