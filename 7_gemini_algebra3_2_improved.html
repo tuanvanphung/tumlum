@@ -34,11 +34,16 @@
         .problem-expression { font-size: 1.5em; color: #2c3e50; }
         .problem-tag { font-size: 0.7em; background: #ecf0f1; color: #7f8c8d; padding: 2px 10px; border-radius: 20px; vertical-align: middle; }
         
-        .answer-box { display: flex; flex-direction: column; background: #fdfdfd; padding: 15px; border: 1px solid #eee; border-radius: 8px; }
-        .user-input { padding: 10px; font-size: 1.2em; border: 2px solid #ced4da; border-radius: 6px; width: 220px; margin-left: 10px; text-align: center; }
-        .input-hint { font-size: 0.85em; color: #888; margin-top: 5px; margin-left: 30px; }
+        .answer-box { display: flex; flex-direction: column; background: #fdfdfd; padding: 15px; border: 1px solid #eee; border-radius: 8px; align-items: center; }
         
-        .solution-area { display: none; margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; }
+        /* Multi-input Grid Styling */
+        .multi-input-row { display: flex; gap: 15px; justify-content: center; align-items: center; margin: 6px 0; }
+        .multi-input-row label { font-size: 1.2em; font-weight: bold; }
+        .multi-input-row input { width: 80px; padding: 10px; font-size: 1.2em; border: 2px solid #ced4da; border-radius: 6px; text-align: center; }
+        
+        .input-hint { font-size: 0.85em; color: #888; margin-top: 8px; text-align: center;}
+        
+        .solution-area { display: none; margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; text-align: center; }
         .algebra-line { display: block; background: #fff; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin: 8px 0; color: #2c3e50; }
         
         .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; }
@@ -70,7 +75,6 @@
 
         function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
         
-        // Shuffle array in place (Fisher-Yates)
         function shuffle(arr) {
             for (let i = arr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -79,7 +83,6 @@
             return arr;
         }
 
-        // Build a balanced type list
         function buildTypeList(count) {
             const types = ['radical', 'absolute', 'quadratic', 'rational', 'two_step_sqrt', 'abs_quad'];
             let list = [];
@@ -98,78 +101,65 @@
             let prob = { id, type, lhs: "", rhs: "", steps: [], correctAnswers: [], hint: "" };
             switch(type) {
                 case 'radical': {
-                    let a = getRandom(2, 30);
-                    let b = getRandom(2, 12);
+                    let a = getRandom(2, 30); let b = getRandom(2, 12);
                     let ans = (b * b) + a;
-                    prob.lhs = `\\sqrt{x - ${a}}`;
-                    prob.rhs = `${b}`;
+                    prob.lhs = `\\sqrt{x - ${a}}`; prob.rhs = `${b}`;
                     prob.correctAnswers = [ans.toString()];
+                    prob.hint = "Enter the numeric answer.";
                     prob.steps.push({m: "Square both sides to remove the radical:", l: `\\( x - ${a} = ${b}^2 = ${b*b} \\)`});
                     prob.steps.push({m: `Add ${a} to both sides:`, l: `\\( x = ${b * b} + ${a} = ${ans} \\)`});
                     break;
                 }
                 case 'absolute': {
-                    let a = getRandom(3, 30);
-                    let b = getRandom(3, 20);
-                    let ans1 = b - a;
-                    let ans2 = -b - a;
-                    prob.lhs = `|x + ${a}|`;
-                    prob.rhs = `${b}`;
+                    let a = getRandom(3, 30); let b = getRandom(3, 20);
+                    let ans1 = b - a; let ans2 = -b - a;
+                    prob.lhs = `|x + ${a}|`; prob.rhs = `${b}`;
                     prob.correctAnswers = [ans1.toString(), ans2.toString()];
-                    prob.hint = "Enter two numbers separated by a comma.";
+                    prob.hint = "Enter both solutions (order does not matter).";
                     prob.steps.push({m: "Split into two linear equations:", l: `\\( x + ${a} = ${b} \\quad \\text{OR} \\quad x + ${a} = -${b} \\)`});
                     prob.steps.push({m: `Subtract ${a} from both:`, l: `\\( x = ${ans1}, \\quad x = ${ans2} \\)`});
                     break;
                 }
                 case 'quadratic': {
-                    let a = getRandom(2, 7);
-                    let x = getRandom(2, 9);
+                    let a = getRandom(2, 7); let x = getRandom(2, 9);
                     let b = a * (x * x);
-                    prob.lhs = `${a}x^2`;
-                    prob.rhs = `${b}`;
+                    prob.lhs = `${a}x^2`; prob.rhs = `${b}`;
                     prob.correctAnswers = [x.toString(), (-x).toString()];
-                    prob.hint = "Enter two numbers (positive and negative).";
+                    prob.hint = "Enter both solutions (positive and negative).";
                     prob.steps.push({m: `Divide both sides by ${a}:`, l: `\\( x^2 = ${b / a} \\)`});
                     prob.steps.push({m: "Take the square root (±):", l: `\\( x = \\pm\\sqrt{${b / a}} \\)`});
                     prob.steps.push({m: "Result:", l: `\\( x = ${x}, \\quad x = -${x} \\)`});
                     break;
                 }
                 case 'rational': {
-                    let x = getRandom(2, 12);
-                    let b = getRandom(2, 9);
+                    let x = getRandom(2, 12); let b = getRandom(2, 9);
                     let a = x * b;
-                    prob.lhs = `\\frac{${a}}{x}`;
-                    prob.rhs = `${b}`;
+                    prob.lhs = `\\frac{${a}}{x}`; prob.rhs = `${b}`;
                     prob.correctAnswers = [x.toString()];
+                    prob.hint = "Enter the numeric answer.";
                     prob.steps.push({m: "Multiply both sides by \\( x \\):", l: `\\( ${a} = ${b}x \\)`});
                     prob.steps.push({m: `Divide by ${b}:`, l: `\\( x = ${x} \\)`});
                     break;
                 }
                 case 'two_step_sqrt': {
-                    let a = getRandom(1, 15);
-                    let rootVal = getRandom(2, 8);
-                    let b = a + rootVal;
-                    let ans = rootVal * rootVal;
-                    prob.lhs = `\\sqrt{x} + ${a}`;
-                    prob.rhs = `${b}`;
+                    let a = getRandom(1, 15); let rootVal = getRandom(2, 8);
+                    let b = a + rootVal; let ans = rootVal * rootVal;
+                    prob.lhs = `\\sqrt{x} + ${a}`; prob.rhs = `${b}`;
                     prob.correctAnswers = [ans.toString()];
+                    prob.hint = "Enter the numeric answer.";
                     prob.steps.push({m: `Isolate the radical by subtracting ${a}:`, l: `\\( \\sqrt{x} = ${rootVal} \\)`});
                     prob.steps.push({m: "Square both sides:", l: `\\( x = ${rootVal}^2 = ${ans} \\)`});
                     break;
                 }
                 case 'abs_quad': {
-                    let xVal = getRandom(3, 9);
-                    let perfectSq = xVal * xVal;       
-                    let c = getRandom(1, perfectSq - 1);
-                    let d = perfectSq - c;
+                    let xVal = getRandom(3, 9); let perfectSq = xVal * xVal;       
+                    let c = getRandom(1, perfectSq - 1); let d = perfectSq - c;
                     
-                    // Ensure c - d < 0 so the second case has no real solution
                     if (c - d >= 0) { c = getRandom(1, Math.floor(perfectSq / 2) - 1); d = perfectSq - c; }
                     
-                    prob.lhs = `|x^2 - ${c}|`;
-                    prob.rhs = `${d}`;
+                    prob.lhs = `|x^2 - ${c}|`; prob.rhs = `${d}`;
                     prob.correctAnswers = [xVal.toString(), (-xVal).toString()];
-                    prob.hint = "Solve for x. (Hint: One case may have no real solution).";
+                    prob.hint = "Enter both real solutions. (Hint: One absolute value case has no real solution).";
                     prob.steps.push({m: "Split into two cases:", l: `\\( x^2 - ${c} = ${d} \\quad \\text{OR} \\quad x^2 - ${c} = -${d} \\)`});
                     prob.steps.push({m: "Solve Case 1:", l: `\\( x^2 = ${c + d} \\implies x = ${xVal}, \\quad x = -${xVal} \\)`});
                     prob.steps.push({m: "Solve Case 2:", l: `\\( x^2 = ${c - d} \\implies \\text{No real solution} \\)`});
@@ -203,6 +193,25 @@
             for (let i = 1; i <= TOTAL_PROBLEMS; i++) {
                 const p = generateProblem(i, typeList[i - 1]);
                 currentProblems.push(p);
+                
+                // Dynamically build input boxes based on the number of answers needed
+                let inputHTML = '';
+                if (p.correctAnswers.length === 1) {
+                    inputHTML = `
+                        <div class="multi-input-row">
+                            <label>\\( x = \\)</label>
+                            <input type="text" class="user-input" id="input-${i}-0" placeholder="?">
+                        </div>`;
+                } else {
+                    inputHTML = `
+                        <div class="multi-input-row">
+                            <label>\\( x_1 = \\)</label>
+                            <input type="text" class="user-input" id="input-${i}-0" placeholder="?">
+                            <label style="margin-left: 15px;">\\( x_2 = \\)</label>
+                            <input type="text" class="user-input" id="input-${i}-1" placeholder="?">
+                        </div>`;
+                }
+
                 const div = document.createElement('div');
                 div.className = 'problem-card';
                 div.innerHTML = `
@@ -212,18 +221,19 @@
                         <span class="problem-tag">${typeLabels[p.type]}</span>
                     </div>
                     <div class="answer-box">
-                        <div style="display:flex; align-items:center;"><label>\\( x = \\)</label><input type="text" class="user-input" id="input-${i}" placeholder="?"></div>
-                        <div class="input-hint">${p.hint || "Enter the numeric answer."}</div>
+                        ${inputHTML}
+                        <div class="input-hint">${p.hint}</div>
                     </div>
                     <div class="solution-area" id="sol-${i}">
+                        <!-- 
                         <strong>Step-by-Step Solution:</strong>
-                        ${p.steps.map(s => `<div class="step-row">${s.m}<span class="algebra-line">${s.l}</span></div>`).join('')}
-                        <div style="color:#2980b9; font-weight:bold; margin-top:10px;">Final Answer(s): \\( x = ${p.correctAnswers.join(', ')} \\)</div>
+                        ${p.steps.map(s => `<div class="step-row">${s.m}<span class="algebra-line">${s.l}</span></div>`).join('')} 
+                        -->
+                        <div style="color:#27ae60; font-size:1.2em; font-weight:bold;">Correct Answer(s): \\( x = ${p.correctAnswers.join(', ')} \\)</div>
                     </div>`;
                 container.appendChild(div);
             }
 
-            // Tell MathJax to re-render the newly injected math symbols
             if (typeof MathJax !== 'undefined') {
                 MathJax.typesetPromise([container]).catch((err) => console.log(err.message));
             }
@@ -232,47 +242,72 @@
         function check() {
             let score = 0;
             currentProblems.forEach(p => {
-                const input = document.getElementById(`input-${p.id}`);
-                const userVal = input.value.replace(/\s+/g, '');
-                let userArr = userVal.split(',').map(s => s.trim()).filter(s => s !== "");
+                let isCorrect = false;
+                let inputElements = [];
+                let userVals = [];
+
+                // Grab all generated input boxes for this specific problem
+                for (let j = 0; j < p.correctAnswers.length; j++) {
+                    let el = document.getElementById(`input-${p.id}-${j}`);
+                    inputElements.push(el);
+                    userVals.push(el.value.replace(/\s+/g, ''));
+                }
+
+                // Sort both arrays so order doesn't matter (e.g. x1=5, x2=-5 is same as x1=-5, x2=5)
+                let sortedUser = [...userVals].sort();
+                let sortedCorrect = [...p.correctAnswers].sort();
                 
-                let isCorrect = (userArr.length === p.correctAnswers.length) && 
-                                 userArr.every(val => p.correctAnswers.includes(val));
-                input.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                isCorrect = (sortedUser.length === sortedCorrect.length) && 
+                            sortedUser.every((val, index) => val === sortedCorrect[index]);
+
+                // Apply correct/incorrect colors to all input boxes for this problem
+                inputElements.forEach(el => {
+                    el.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                });
+                
                 document.getElementById(`sol-${p.id}`).style.display = 'block';
                 if (isCorrect) score++;
             });
+            
             const timeStr = new Date().toLocaleString();
             const pct = Math.round((score / TOTAL_PROBLEMS) * 100);
             
             showBtn.disabled = true;
             showBtn.innerHTML = `Score: ${score}/${TOTAL_PROBLEMS} (${pct}%)<br><small>${timeStr}</small>`;
             
-            // Auto-download report 
-            const clone = document.documentElement.cloneNode(true);
-            clone.querySelectorAll('script, .controls-container').forEach(el => el.remove());
-            const body = clone.querySelector('body');
-            const header = document.createElement('div');
-            header.className = 'report-header';
-            header.innerHTML = `<h1>Algebra Mastery Report</h1><h2>Score: ${score} / ${TOTAL_PROBLEMS} (${pct}%)</h2><p>Date: ${timeStr}</p>`;
-            body.insertBefore(header, body.firstChild);
-            
-            const inputs = clone.querySelectorAll('.user-input');
-            document.querySelectorAll('.user-input').forEach((original, idx) => {
-                const span = document.createElement('span');
-                span.textContent = original.value || "Empty";
-                span.className = original.className + " static-answer";
-                span.style.padding = "5px 15px";
-                span.style.border = "1px solid #ccc";
-                inputs[idx].parentNode.replaceChild(span, inputs[idx]);
+            MathJax.typesetPromise().then(() => {
+                const clone = document.documentElement.cloneNode(true);
+                clone.querySelectorAll('script, .controls-container').forEach(el => el.remove());
+                const body = clone.querySelector('body');
+                const header = document.createElement('div');
+                header.className = 'report-header';
+                header.innerHTML = `<h1>Algebra Mastery Report</h1><h2>Score: ${score} / ${TOTAL_PROBLEMS} (${pct}%)</h2><p>Date: ${timeStr}</p>`;
+                body.insertBefore(header, body.firstChild);
+                
+                // Convert inputs to static spans for the download
+                const inputs = clone.querySelectorAll('.user-input');
+                document.querySelectorAll('.user-input').forEach((original, idx) => {
+                    const span = document.createElement('span');
+                    span.textContent = original.value || "—";
+                    span.className = original.className + " static-answer";
+                    span.style.padding = "4px 15px";
+                    span.style.border = "2px solid #ccc";
+                    span.style.borderRadius = "4px";
+                    span.style.backgroundColor = "#fff";
+                    span.style.display = "inline-block";
+                    span.style.minWidth = "40px";
+                    span.style.textAlign = "center";
+                    inputs[idx].parentNode.replaceChild(span, inputs[idx]);
+                });
+                
+                clone.querySelectorAll('.solution-area').forEach(s => s.style.display = 'block');
+                
+                const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `Algebra_Mastery_Report_${getTimestamp()}.html`;
+                a.click();
             });
-            clone.querySelectorAll('.solution-area').forEach(s => s.style.display = 'block');
-            
-            const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `Algebra_Mastery_Report_${getTimestamp()}.html`;
-            a.click();
         }
 
         generateBtn.addEventListener('click', render);
