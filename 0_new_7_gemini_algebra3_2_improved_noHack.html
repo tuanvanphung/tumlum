@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebra Mastery: Linear, Radical & Rational Equations</title>
+    
+    <!-- MathJax Configuration and Script -->
+    <script>
+      window.MathJax = {
+        tex: { inlineMath: [['\\(', '\\)']] },
+        chtml: { scale: 1.1 } // Makes the math slightly larger for readability
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f0f2f5; color: #333; }
+        h1 { text-align: center; color: #1a2a6c; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        
+        .controls-container { text-align: center; padding: 20px; margin-bottom: 30px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        button { padding: 12px 28px; font-size: 1.05em; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 5px 10px; transition: 0.2s; }
+        #generateBtn { background-color: #3498db; }
+        #generateBtn:hover { background-color: #2980b9; }
+        #showSolutionsBtn { background-color: #27ae60; }
+        #showSolutionsBtn:hover:not(:disabled) { background-color: #219653; }
+        #showSolutionsBtn:disabled { background-color: #7f8c8d; opacity: 1; cursor: default; }
+        .problem-count { font-size: 0.95em; color: #555; margin-top: 8px; }
+        
+        .problem-list { list-style-type: none; padding-left: 0; max-width: 850px; margin: 0 auto; }
+        .problem-card { margin-bottom: 30px; padding: 25px; border-radius: 12px; background-color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 8px solid #ddd; }
+        
+        .problem-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+        .problem-number { font-weight: bold; font-size: 1.3em; color: #95a5a6; }
+        .problem-expression { font-size: 1.5em; color: #2c3e50; }
+        .problem-tag { font-size: 0.7em; background: #ecf0f1; color: #7f8c8d; padding: 2px 10px; border-radius: 20px; vertical-align: middle; }
+        
+        .answer-box { display: flex; flex-direction: column; background: #fdfdfd; padding: 15px; border: 1px solid #eee; border-radius: 8px; align-items: center; }
+        
+        /* Multi-input Grid Styling */
+        .multi-input-row { display: flex; gap: 15px; justify-content: center; align-items: center; margin: 6px 0; }
+        .multi-input-row label { font-size: 1.2em; font-weight: bold; }
+        .multi-input-row input { width: 80px; padding: 10px; font-size: 1.2em; border: 2px solid #ced4da; border-radius: 6px; text-align: center; outline: none; transition: border-color 0.2s; }
+        .multi-input-row input:focus { border-color: #3498db; }
+        
+        .input-hint { font-size: 0.85em; color: #888; margin-top: 8px; text-align: center;}
+        
+        .solution-area { display: none; margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; text-align: center; }
+        .algebra-line { display: block; background: #fff; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin: 8px 0; color: #2c3e50; }
+        
+        .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; }
+        .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
+        .report-header { text-align: center; background: white; border: 3px solid #27ae60; padding: 20px; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        @media print { .controls-container { display: none; } .solution-area { display: block !important; } }
+    </style>
+</head>
+<body>
+    <!-- Fixed double-slash notation error in the HTML heading [2] -->
+    <h1>Algebra: Solving for \( x \)</h1>
+    <p class="subtitle">Radicals, Linear absolute values, Distributive Properties, and Rational Fractions.</p>
+    
+    <div class="controls-container">
+        <button id="generateBtn">Generate New Problem Set</button>
+        <button id="showSolutionsBtn">Submit & Generate Report</button>
+        <div class="problem-count" id="problemCount"></div>
+    </div>
+    
+    <div id="problemContainer" class="problem-list"></div>
+
+    <script>
+    (() => {
+        // Exactly 8 templates, 1 problem generated per template with zero duplicates [2]
+        const TOTAL_PROBLEMS = 8;
+        const container = document.getElementById('problemContainer');
+        const generateBtn = document.getElementById('generateBtn');
+        const showBtn = document.getElementById('showSolutionsBtn');
+        const problemCountEl = document.getElementById('problemCount');
+        let currentProblems = [];
+
+        const SECRET_SALT = "SolveForX_SecuredKey_39482";
+
+        let savedHistory = JSON.parse(localStorage.getItem('solveForXHistory')) || [];
+        let usedExpressions = new Set(savedHistory);
+
+        function generateWatermark(score, total, timestamp) {
+            const raw = `${score}|${total}|${timestamp}|${SECRET_SALT}`;
+            let hash1 = 5381;
+            let hash2 = 12345;
+            for (let i = 0; i < raw.length; i++) {
+                const char = raw.charCodeAt(i);
+                hash1 = ((hash1 << 5) + hash1) ^ char;
+                hash2 = ((hash2 << 7) + hash2) ^ char;
+            }
+            const p1 = (hash1 >>> 0).toString(16).padStart(8, '0');
+            const p2 = (hash2 >>> 0).toString(16).padStart(8, '0');
+            const p3 = (hash1 ^ hash2 >>> 0).toString(16).padStart(8, '0');
+            return `${p1}-${p2}-${p3}`.toUpperCase();
+        }
+
+        function typesetMath(callback) {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([container])
+                    .then(() => { if (callback) callback(); })
+                    .catch((err) => console.log(err.message));
+            } else {
+                setTimeout(() => typesetMath(callback), 100);
+            }
+        }
+
+        function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function term(coeff, v, first) {
+            if (coeff === 0) return "";
+            let absC = Math.abs(coeff);
+            let cStr = absC === 1 ? "" : absC;
+            if (first) return coeff < 0 ? `-${cStr}${v}` : `${cStr}${v}`;
+            return coeff < 0 ? `- ${cStr}${v}` : `+ ${cStr}${v}`;
+        }
+        
+        function constant(c, first=false) {
+            if (c === 0) return "";
+            if (first) return `${c}`;
+            return c < 0 ? `- ${Math.abs(c)}` : `+ ${c}`;
+        }
+
+        // Shuffled 8 non-quadratic templates (zero quadratic exponents or factors) [2]
+        function buildTypeList() {
+            return shuffle(['radical', 'absolute', 'rational_linear', 'rational', 'two_step_sqrt', 'variables_both', 'distributive', 'ambiguity']);
+        }
+
+        function generateProblem(id, type) {
+            let prob = { id, type, lhs: "", rhs: "", hint: "" };
+            let correctAnswers = [];
+            let steps = [];
+
+            const clean = str => (str || '').replace(/\s+/g, '');
+            const buildStepsHTML = () => {
+                let stepsHTML = steps.map(s => `<div class="step-row">${s.m}<span class="algebra-line">${s.l}</span></div>`).join('');
+                return `
+                    <strong>Step-by-Step Solution:</strong>
+                    ${stepsHTML}
+                    <div style="color:#27ae60; font-size:1.2em; font-weight:bold; margin-top:10px;">Correct Answer(s): \\( x = ${correctAnswers.join(', ')} \\)</div>
+                `;
+            };
+
+            switch(type) {
+                case 'radical': {
+                    let x = getRandom(1, 6);               
+                    let b = getRandom(2, 3);                
+                    let k = getRandom(2, 4);                
+                    let c = (k * k) - (b * x);              
+                    
+                    let a = getRandom(2, 3);                
+                    let d = getRandom(1, 5);               
+                    let e = (a * k) + d;                    
+
+                    prob.lhs = `${a}\\sqrt{${term(b, 'x', true)} ${constant(c, false)}} ${constant(d, false)}`; 
+                    prob.rhs = `${e}`;
+                    correctAnswers = [x.toString()];
+                    prob.hint = "Isolate the radical, square both sides, then solve for x.";
+
+                    steps.push({m: `Subtract ${d} from both sides:`, l: `\\( ${a}\\sqrt{${b}x ${constant(c, false)}} = ${e - d} \\)`});
+                    steps.push({m: `Divide both sides by ${a}:`, l: `\\( \\sqrt{${b}x ${constant(c, false)}} = ${k} \\)`});
+                    steps.push({m: "Square both sides to remove the radical:", l: `\\( ${b}x ${constant(c, false)} = ${k}^2 = ${k*k} \\)`});
+                    steps.push({m: `Isolate the x term:`, l: `\\( ${b}x = ${k*k - c} \\)`});
+                    steps.push({m: `Divide to find the final answer:`, l: `\\( x = ${x} \\)`});
+                    break;
+                }
+                case 'absolute': {
+                    let b = getRandom(2, 3);
+                    let x1 = getRandom(1, 5);
+                    let x2 = getRandom(-5, -1);
+                    if ((x1 - x2) % 2 !== 0) x2 -= 1; 
+
+                    let k = (b * (x1 - x2)) / 2;
+                    let c = -(b * (x1 + x2)) / 2;
+
+                    let a = getRandom(2, 3);
+                    let d = getRandom(1, 5);
+                    let e = (a * k) + d;
+
+                    prob.lhs = `${a}|${term(b, 'x', true)} ${constant(c, false)}| ${constant(d, false)}`; 
+                    prob.rhs = `${e}`;
+                    correctAnswers = [x1.toString(), x2.toString()];
+                    prob.hint = "Isolate the absolute value, split into positive/negative cases, and solve both.";
+
+                    steps.push({m: `Subtract ${d} from both sides:`, l: `\\( ${a}|${b}x ${constant(c, false)}| = ${e - d} \\)`});
+                    steps.push({m: `Divide both sides by ${a}:`, l: `\\( |${b}x ${constant(c, false)}| = ${k} \\)`});
+                    steps.push({m: "Split into two separate linear equations:", l: `\\( ${b}x ${constant(c, false)} = ${k} \\quad \\text{OR} \\quad ${b}x ${constant(c, false)} = -${k} \\)`});
+                    steps.push({m: "Solve both equations:", l: `\\( x = ${x1}, \\quad x = ${x2} \\)`});
+                    break;
+                }
+                case 'rational_linear': {
+                    // Fractional Multi-Step (Replaced Quadratic Squared Binomial) [2]
+                    let x = getRandom(-4, 4);
+                    let a = getRandom(2, 3);
+                    let c = getRandom(2, 4); 
+                    let k = getRandom(-3, 3); 
+                    while (k === 0) k = getRandom(-3, 3);
+
+                    let b = (k * c) - (a * x);
+                    let d = getRandom(1, 5);
+                    let e = k + d;
+
+                    prob.lhs = `\\frac{${term(a, 'x', true)} ${constant(b, false)}}{${c}} ${constant(d, false)}`;
+                    prob.rhs = `${e}`;
+                    correctAnswers = [x.toString()];
+                    prob.hint = "Subtract the outside constant first, multiply by the denominator, then solve for x.";
+
+                    steps.push({m: `Subtract ${d} from both sides:`, l: `\\( \\frac{${a}x ${constant(b, false)}}{${c}} = ${e - d} \\)`});
+                    steps.push({m: `Multiply both sides by the denominator ${c}:`, l: `\\( ${a}x ${constant(b, false)} = ${e - d} \\cdot ${c} = ${(e - d) * c} \\)`});
+                    steps.push({m: "Isolate the x term:", l: `\\( ${a}x = ${(e - d) * c - b} \\)`});
+                    steps.push({m: "Solve for x:", l: `\\( x = ${x} \\)`});
+                    break;
+                }
+                case 'rational': {
+                    let x = getRandom(1, 5);
+                    let b = getRandom(2, 3);
+                    let c = getRandom(-4, 4);
+                    let k = (b * x) + c;
+                    while (k === 0) { 
+                        c = getRandom(-4, 4);
+                        k = (b * x) + c;
+                    }
+                    
+                    let multiplier = getRandom(2, 3);
+                    let a = multiplier * k; 
+                    let d = getRandom(1, 4);
+                    let e = multiplier + d;
+
+                    prob.lhs = `\\frac{${a}}{${term(b, 'x', true)} ${constant(c, false)}} ${constant(d, false)}`; 
+                    prob.rhs = `${e}`;
+                    correctAnswers = [x.toString()];
+                    prob.hint = "Isolate the rational term, multiply both sides by the denominator, then solve.";
+
+                    steps.push({m: `Subtract ${d} from both sides:`, l: `\\( \\frac{${a}}{${b}x ${constant(c, false)}} = ${e - d} \\)`});
+                    steps.push({m: "Multiply both sides by the denominator:", l: `\\( ${a} = ${e - d}(${b}x ${constant(c, false)}) \\)`});
+                    steps.push({m: "Distribute and solve:", l: `\\( x = ${x} \\)`});
+                    break;
+                }
+                case 'two_step_sqrt': {
+                    let a = getRandom(1, 5); 
+                    let rootVal = getRandom(2, 4);
+                    let b = a + rootVal; 
+                    let ans = rootVal * rootVal;
+                    prob.lhs = `\\sqrt{x} + ${a}`; prob.rhs = `${b}`;
+                    correctAnswers = [ans.toString()];
+                    prob.hint = "Enter the numeric answer.";
+                    steps.push({m: `Isolate the radical by subtracting ${a}:`, l: `\\( \\sqrt{x} = ${rootVal} \\)`});
+                    steps.push({m: "Square both sides:", l: `\\( x = ${rootVal}^2 = ${ans} \\)`});
+                    break;
+                }
+                case 'variables_both': {
+                    // Variables on Both Sides (Replaced Quadratic abs_quad) [2]
+                    let x = getRandom(-4, 4); 
+                    let a = getRandom(2, 3);
+                    let b = getRandom(2, 3);
+                    let c = getRandom(-3, 3);
+                    while (c === 0) c = getRandom(-3, 3);
+                    
+                    let d = getRandom(-4, 4);
+                    while (d === 0 || d === (a * b)) d = getRandom(-4, 4);
+
+                    let e = a * (b * x + c) - d * x;
+
+                    prob.lhs = `${a}(${term(b, 'x', true)} ${constant(c, false)})`;
+                    prob.rhs = `${term(d, 'x', true)} ${constant(e, false)}`;
+                    correctAnswers = [x.toString()];
+                    prob.hint = "Distribute the left side first, then get all x terms on one side and constants on the other.";
+
+                    steps.push({m: "Distribute on the left side first:", l: `\\( ${a * b}x ${constant(a * c, false)} = ${term(d, 'x', true)} ${constant(e, false)} \\)`});
+                    steps.push({m: `Subtract ${term(d, 'x', true)} from both sides:`, l: `\\( ${a * b - d}x ${constant(a * c, false)} = ${e} \\)`});
+                    steps.push({m: `Isolate the variable term by moving constants:`, l: `\\( ${a * b - d}x = ${e - a * c} \\)`});
+                    steps.push({m: "Solve for x:", l: `\\( x = ${x} \\)`});
+                    break;
+                }
+                case 'distributive': {
+                    let x = getRandom(-4, 4); 
+                    let a = getRandom(2, 3);
+                    let b = getRandom(2, 3);
+                    let c = getRandom(-3, 3);
+                    while (c === 0) c = getRandom(-3, 3); 
+                    
+                    let d = getRandom(-4, 4);
+                    while (d === 0 || (a * b + d) === 0) {
+                        d = getRandom(-4, 4);
+                    }
+                    
+                    let e = a * (b * x + c) + d * x;
+
+                    prob.lhs = `${a}(${term(b, 'x', true)} ${constant(c, false)}) ${term(d, 'x', false)}`;
+                    prob.rhs = `${e}`;
+                    correctAnswers = [x.toString()];
+                    prob.hint = "Distribute, combine like terms, and isolate x.";
+
+                    steps.push({m: "Distribute the coefficient across parentheses:", l: `\\( ${a * b}x ${constant(a * c, false)} ${term(d, 'x', false)} = ${e} \\)`});
+                    steps.push({m: "Combine the like terms (the x terms):", l: `\\( ${a * b + d}x ${constant(a * c, false)} = ${e} \\)`});
+                    steps.push({m: `Isolate the x term by undoing constant:`, l: `\\( ${a * b + d}x = ${e - a * c} \\)`});
+                    steps.push({m: "Divide to solve for x:", l: `\\( x = ${x} \\)`});
+                    break;
+                }
+                case 'ambiguity': {
+                    let x = getRandom(-3, 3);
+                    let k = getRandom(2, 4); 
+                    let b = getRandom(2, 3);
+                    let a = k * b;
+                    let c = getRandom(2, 3);
+                    let d = getRandom(-3, 3);
+                    while (d === 0) d = getRandom(-3, 3);
+
+                    let e = k * (c * x + d);
+
+                    prob.lhs = `${a} \\div ${b} \\cdot (${term(c, 'x', true)} ${constant(d, false)})`;
+                    prob.rhs = `${e}`;
+                    correctAnswers = [x.toString()];
+                    prob.hint = "Follow PEMDAS: multiplication and division have equal priority (solve left-to-right).";
+
+                    steps.push({m: "Solve division first, working strictly left-to-right:", l: `\\( ${a} \\div ${b} = ${k} \\)`});
+                    steps.push({m: "Rewrite the simplified expression:", l: `\\( ${k} \\cdot (${c}x ${constant(d, false)}) = ${e} \\)`});
+                    steps.push({m: "Divide both sides by the multiplier:", l: `\\( ${c}x ${constant(d, false)} = ${e / k} \\)`});
+                    steps.push({m: "Isolate the x term:", l: `\\( ${c}x = ${e / k - d} \\)`});
+                    steps.push({m: "Divide to find the final answer:", l: `\\( x = ${x} \\)`});
+                    break;
+                }
+            }
+
+            prob.inputCount = correctAnswers.length;
+
+            prob.checkAnswers = (userInputs) => {
+                let sortedUser = userInputs.map(clean).sort();
+                let sortedCorrect = correctAnswers.map(clean).sort();
+                return (sortedUser.length === sortedCorrect.length) && 
+                       sortedUser.every((val, index) => val === sortedCorrect[index]);
+            };
+
+            prob.revealSteps = () => buildStepsHTML();
+            return prob;
+        }
+
+        const typeLabels = {
+            radical: 'Advanced Radical', absolute: 'Advanced Absolute Value', rational_linear: 'Fractional Multi-Step',
+            rational: 'Advanced Rational', two_step_sqrt: 'Two-Step Radical', variables_both: 'Variables on Both Sides',
+            distributive: 'Distributive Property', ambiguity: 'Left-to-Right Priority'
+        };
+
+        function render() {
+            container.innerHTML = ''; currentProblems = [];
+            showBtn.disabled = false; showBtn.style.backgroundColor = '#27ae60'; showBtn.textContent = "Submit & Generate Report";
+            
+            const typeList = buildTypeList();
+            problemCountEl.textContent = `${TOTAL_PROBLEMS} unique problems — one from each template.`;
+            
+            for (let i = 1; i <= TOTAL_PROBLEMS; i++) {
+                let p;
+                let attempts = 0;
+                
+                do {
+                    p = generateProblem(i, typeList[i - 1]);
+                    attempts++;
+                } while (usedExpressions.has(p.lhs + p.rhs) && attempts < 50);
+
+                if (attempts >= 50) {
+                    usedExpressions.clear();
+                }
+
+                usedExpressions.add(p.lhs + p.rhs);
+                currentProblems.push(p);
+                
+                let inputHTML = '';
+                if (p.inputCount === 1) {
+                    inputHTML = `
+                        <div class="multi-input-row">
+                            <label>\\( x = \\)</label>
+                            <input type="text" class="user-input" id="input-${i}-0" placeholder="?">
+                        </div>`;
+                } else {
+                    inputHTML = `
+                        <div class="multi-input-row">
+                            <label>\\( x_1 = \\)</label>
+                            <input type="text" class="user-input" id="input-${i}-0" placeholder="?">
+                            <label style="margin-left: 15px;">\\( x_2 = \\)</label>
+                            <input type="text" class="user-input" id="input-${i}-1" placeholder="?">
+                        </div>`;
+                }
+
+                const div = document.createElement('div');
+                div.className = 'problem-card';
+                div.innerHTML = `
+                    <div class="problem-header">
+                        <span class="problem-number">#${i}</span>
+                        <div class="problem-expression">\\( ${p.lhs} = ${p.rhs} \\)</div>
+                        <span class="problem-tag">${typeLabels[p.type]}</span>
+                    </div>
+                    <div class="answer-box">
+                        ${inputHTML}
+                        <div class="input-hint">${p.hint}</div>
+                    </div>
+                    <div class="solution-area" id="sol-${i}"></div>`;
+                container.appendChild(div);
+            }
+
+            localStorage.setItem('solveForXHistory', JSON.stringify(Array.from(usedExpressions)));
+            typesetMath();
+        }
+
+        function check() {
+            let score = 0;
+            currentProblems.forEach(p => {
+                let inputElements = [];
+                let userVals = [];
+
+                for (let j = 0; j < p.inputCount; j++) {
+                    let el = document.getElementById(`input-${p.id}-${j}`);
+                    inputElements.push(el);
+                    userVals.push(el.value);
+                }
+
+                let isCorrect = p.checkAnswers(userVals);
+
+                inputElements.forEach(el => {
+                    el.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                });
+                
+                const solDiv = document.getElementById(`sol-${p.id}`);
+                solDiv.innerHTML = p.revealSteps();
+                solDiv.style.display = 'block';
+                
+                if (isCorrect) score++;
+            });
+            
+            const timeStr = new Date().toLocaleString();
+            const pct = Math.round((score / TOTAL_PROBLEMS) * 100);
+            
+            showBtn.disabled = true;
+            showBtn.innerHTML = `Score: ${score}/${TOTAL_PROBLEMS} (${pct}%)<br><small>${timeStr}</small>`;
+            
+            typesetMath(() => {
+                const clone = document.documentElement.cloneNode(true);
+                clone.querySelectorAll('script, .controls-container').forEach(el => el.remove());
+                const body = clone.querySelector('body');
+                
+                const watermark = generateWatermark(score, TOTAL_PROBLEMS, timeStr);
+
+                const header = document.createElement('div');
+                header.className = 'report-header';
+                header.innerHTML = `
+                    <h1>Algebra Mastery Report</h1>
+                    <div style="margin: 12px 0;" id="report-status">
+                        <span style="color: #7f8c8d; font-weight: bold; border: 2px solid #ccc; padding: 4px 8px; border-radius: 4px; background: #fafafa;">Verification Pending...</span>
+                    </div>
+                    <h2>Score: <span id="report-score">${score}</span> / <span id="report-total">${TOTAL_PROBLEMS}</span> (${pct}%)</h2>
+                    <p>Date: <span id="report-time">${timeStr}</span></p>
+                    <div id="report-token" data-token="${watermark}" style="font-family: monospace; font-size: 0.85em; color: #7f8c8d; margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 10px;">
+                        Security Token: ${watermark}
+                    </div>
+                `;
+                body.insertBefore(header, body.firstChild);
+                
+                const inputs = clone.querySelectorAll('.user-input');
+                document.querySelectorAll('.user-input').forEach((original, idx) => {
+                    const span = document.createElement('span');
+                    span.textContent = original.value || "—";
+                    span.className = original.className + " static-answer";
+                    span.style.padding = "4px 15px";
+                    span.style.border = "2px solid #ccc";
+                    span.style.borderRadius = "4px";
+                    span.style.backgroundColor = "#fff";
+                    span.style.display = "inline-block";
+                    span.style.minWidth = "40px";
+                    span.style.textAlign = "center";
+                    inputs[idx].parentNode.replaceChild(span, inputs[idx]);
+                });
+                
+                const verifyScript = document.createElement('script');
+                verifyScript.textContent = `
+                    (() => {
+                        const SECRET_SALT = "SolveForX_SecuredKey_39482";
+
+                        function generateWatermark(score, total, timestamp) {
+                            const raw = score + "|" + total + "|" + timestamp + "|" + SECRET_SALT;
+                            let hash1 = 5381; let hash2 = 12345;
+                            for (let i = 0; i < raw.length; i++) {
+                                const char = raw.charCodeAt(i);
+                                hash1 = ((hash1 << 5) + hash1) ^ char;
+                                hash2 = ((hash2 << 7) + hash2) ^ char;
+                            }
+                            const p1 = (hash1 >>> 0).toString(16).padStart(8, '0');
+                            const p2 = (hash2 >>> 0).toString(16).padStart(8, '0');
+                            const p3 = (hash1 ^ hash2 >>> 0).toString(16).padStart(8, '0');
+                            return (p1 + "-" + p2 + "-" + p3).toUpperCase();
+                        }
+
+                        document.addEventListener('DOMContentLoaded', () => {
+                            const scoreEl = document.getElementById('report-score');
+                            const totalEl = document.getElementById('report-total');
+                            const timeEl = document.getElementById('report-time');
+                            const tokenEl = document.getElementById('report-token');
+                            const statusEl = document.getElementById('report-status');
+
+                            if (!scoreEl || !totalEl || !timeEl || !tokenEl || !statusEl) return;
+
+                            const score = scoreEl.textContent.trim();
+                            const total = totalEl.textContent.trim();
+                            const time = timeEl.textContent.trim();
+                            const embeddedToken = tokenEl.getAttribute('data-token');
+
+                            const calculatedToken = generateWatermark(score, total, time);
+
+                            if (calculatedToken === embeddedToken) {
+                                statusEl.innerHTML = "<span style='color: #27ae60; font-weight: bold; border: 2px solid #27ae60; padding: 5px 10px; border-radius: 4px; background: #e8f8f5;'>&nbsp;&#x2705; Verified Authentic Report</span>";
+                            } else {
+                                statusEl.innerHTML = "<span style='color: #c0392b; font-weight: bold; border: 2px solid #c0392b; padding: 5px 10px; border-radius: 4px; background: #fadbd8;'>&nbsp;&#x274C; Tampered/Invalid Report</span>";
+                                scoreEl.style.textDecoration = "line-through";
+                                scoreEl.style.color = "#c0392b";
+                                scoreEl.style.fontWeight = "bold";
+                            }
+                        });
+                    })();
+                `;
+                body.appendChild(verifyScript);
+
+                clone.querySelectorAll('.solution-area').forEach(s => s.style.display = 'block');
+
+                const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `Algebra_Mastery_Report_${getTimestamp()}.html`;
+                a.click();
+            });
+        }
+
+        generateBtn.addEventListener('click', render);
+        showBtn.addEventListener('click', check);
+        
+        render();
+    })(); // End of IIFE
+    </script>
+</body>
+</html>
