@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Algebra Mastery: Linear, Radical & Rational Equations</title>
+    <title>Algebra Mastery: Squares, Roots & Absolute Values</title>
     
     <!-- MathJax Configuration and Script -->
     <script>
@@ -57,9 +57,9 @@
     </style>
 </head>
 <body>
-    <!-- Fixed double-slash notation error in the HTML heading [2] -->
+    <!-- Fixed double-slash notation error in HTML heading [2] -->
     <h1>Algebra: Solving for \( x \)</h1>
-    <p class="subtitle">Radicals, Linear absolute values, Distributive Properties, and Rational Fractions.</p>
+    <p class="subtitle">Radicals, Linear Absolute Values, Distributive Properties, and Rational Fractions.</p>
     
     <div class="controls-container">
         <button id="generateBtn">Generate New Problem Set</button>
@@ -71,7 +71,6 @@
 
     <script>
     (() => {
-        // Exactly 8 templates, 1 problem generated per template with zero duplicates [2]
         const TOTAL_PROBLEMS = 8;
         const container = document.getElementById('problemContainer');
         const generateBtn = document.getElementById('generateBtn');
@@ -133,7 +132,15 @@
             return c < 0 ? `- ${Math.abs(c)}` : `+ ${c}`;
         }
 
-        // Shuffled 8 non-quadratic templates (zero quadratic exponents or factors) [2]
+        // Formats mathematical fractions securely [2]
+        function formatFraction(num, den) {
+            if (num === 0) return "0";
+            let sign = (num < 0) ^ (den < 0) ? "-" : "";
+            let absNum = Math.abs(num);
+            let absDen = Math.abs(den);
+            return `${sign}\\frac{${absNum}}{${absDen}}`;
+        }
+
         function buildTypeList() {
             return shuffle(['radical', 'absolute', 'rational_linear', 'rational', 'two_step_sqrt', 'variables_both', 'distributive', 'ambiguity']);
         }
@@ -155,161 +162,198 @@
 
             switch(type) {
                 case 'radical': {
+                    // Fractional inputs designed to resolve cleanly [2]
                     let x = getRandom(1, 6);               
                     let b = getRandom(2, 3);                
                     let k = getRandom(2, 4);                
                     let c = (k * k) - (b * x);              
                     
-                    let a = getRandom(2, 3);                
-                    let d = getRandom(1, 5);               
-                    let e = (a * k) + d;                    
+                    let q = getRandom(2, 3);
+                    let p = getRandom(1, q - 1);
+                    let d_num = p;
+                    let d_den = q;
+                    let e_num = q * k + p;
+                    let e_den = q;
 
-                    prob.lhs = `${a}\\sqrt{${term(b, 'x', true)} ${constant(c, false)}} ${constant(d, false)}`; 
-                    prob.rhs = `${e}`;
+                    prob.lhs = `\\sqrt{${term(b, 'x', true)} ${constant(c, false)}} + ${formatFraction(d_num, d_den)}`; 
+                    prob.rhs = `${formatFraction(e_num, e_den)}`;
                     correctAnswers = [x.toString()];
-                    prob.hint = "Isolate the radical, square both sides, then solve for x.";
+                    prob.hint = "Subtract the outside fraction first (keep common denominators), square both sides, then solve for x.";
 
-                    steps.push({m: `Subtract ${d} from both sides:`, l: `\\( ${a}\\sqrt{${b}x ${constant(c, false)}} = ${e - d} \\)`});
-                    steps.push({m: `Divide both sides by ${a}:`, l: `\\( \\sqrt{${b}x ${constant(c, false)}} = ${k} \\)`});
+                    steps.push({m: `Subtract ${formatFraction(d_num, d_den)} from both sides:`, l: `\\( \\sqrt{${b}x ${constant(c, false)}} = ${formatFraction(e_num, e_den)} - ${formatFraction(d_num, d_den)} = ${formatFraction(e_num - d_num, q)} = ${k} \\)`});
                     steps.push({m: "Square both sides to remove the radical:", l: `\\( ${b}x ${constant(c, false)} = ${k}^2 = ${k*k} \\)`});
                     steps.push({m: `Isolate the x term:`, l: `\\( ${b}x = ${k*k - c} \\)`});
                     steps.push({m: `Divide to find the final answer:`, l: `\\( x = ${x} \\)`});
                     break;
                 }
                 case 'absolute': {
+                    // Absolute Value with common denominator fraction shifts [2]
                     let b = getRandom(2, 3);
-                    let x1 = getRandom(1, 5);
-                    let x2 = getRandom(-5, -1);
+                    let x1 = getRandom(1, 4);
+                    let x2 = getRandom(-4, -1);
                     if ((x1 - x2) % 2 !== 0) x2 -= 1; 
 
                     let k = (b * (x1 - x2)) / 2;
                     let c = -(b * (x1 + x2)) / 2;
 
-                    let a = getRandom(2, 3);
-                    let d = getRandom(1, 5);
-                    let e = (a * k) + d;
+                    let q = getRandom(2, 3);
+                    let p = getRandom(1, q - 1);
+                    let d_num = p;
+                    let d_den = q;
+                    let e_num = q * k + p;
+                    let e_den = q;
 
-                    prob.lhs = `${a}|${term(b, 'x', true)} ${constant(c, false)}| ${constant(d, false)}`; 
-                    prob.rhs = `${e}`;
+                    prob.lhs = `|${term(b, 'x', true)} ${constant(c, false)}| + ${formatFraction(d_num, d_den)}`; 
+                    prob.rhs = `${formatFraction(e_num, e_den)}`;
                     correctAnswers = [x1.toString(), x2.toString()];
-                    prob.hint = "Isolate the absolute value, split into positive/negative cases, and solve both.";
+                    prob.hint = "Subtract the outside fraction first, then split the absolute value into positive and negative cases.";
 
-                    steps.push({m: `Subtract ${d} from both sides:`, l: `\\( ${a}|${b}x ${constant(c, false)}| = ${e - d} \\)`});
-                    steps.push({m: `Divide both sides by ${a}:`, l: `\\( |${b}x ${constant(c, false)}| = ${k} \\)`});
+                    steps.push({m: `Subtract ${formatFraction(d_num, d_den)} from both sides:`, l: `\\( |${b}x ${constant(c, false)}| = ${formatFraction(e_num, e_den)} - ${formatFraction(d_num, d_den)} = ${k} \\)`});
                     steps.push({m: "Split into two separate linear equations:", l: `\\( ${b}x ${constant(c, false)} = ${k} \\quad \\text{OR} \\quad ${b}x ${constant(c, false)} = -${k} \\)`});
                     steps.push({m: "Solve both equations:", l: `\\( x = ${x1}, \\quad x = ${x2} \\)`});
                     break;
                 }
                 case 'rational_linear': {
-                    // Fractional Multi-Step (Replaced Quadratic Squared Binomial) [2]
+                    // Fractional multi-step with fraction shifts [2]
                     let x = getRandom(-4, 4);
                     let a = getRandom(2, 3);
-                    let c = getRandom(2, 4); 
+                    let c = getRandom(2, 3); 
                     let k = getRandom(-3, 3); 
                     while (k === 0) k = getRandom(-3, 3);
 
                     let b = (k * c) - (a * x);
-                    let d = getRandom(1, 5);
-                    let e = k + d;
 
-                    prob.lhs = `\\frac{${term(a, 'x', true)} ${constant(b, false)}}{${c}} ${constant(d, false)}`;
-                    prob.rhs = `${e}`;
+                    let q = getRandom(2, 3);
+                    let p = getRandom(1, q - 1);
+                    let d_num = p;
+                    let d_den = q;
+                    let e_num = q * k + p;
+                    let e_den = q;
+
+                    prob.lhs = `\\frac{${term(a, 'x', true)} ${constant(b, false)}}{${c}} + ${formatFraction(d_num, d_den)}`;
+                    prob.rhs = `${formatFraction(e_num, e_den)}`;
                     correctAnswers = [x.toString()];
-                    prob.hint = "Subtract the outside constant first, multiply by the denominator, then solve for x.";
+                    prob.hint = "Subtract the outside fraction first, multiply by the denominator, then solve for x.";
 
-                    steps.push({m: `Subtract ${d} from both sides:`, l: `\\( \\frac{${a}x ${constant(b, false)}}{${c}} = ${e - d} \\)`});
-                    steps.push({m: `Multiply both sides by the denominator ${c}:`, l: `\\( ${a}x ${constant(b, false)} = ${e - d} \\cdot ${c} = ${(e - d) * c} \\)`});
-                    steps.push({m: "Isolate the x term:", l: `\\( ${a}x = ${(e - d) * c - b} \\)`});
+                    steps.push({m: `Subtract ${formatFraction(d_num, d_den)} from both sides:`, l: `\\( \\frac{${a}x ${constant(b, false)}}{${c}} = ${formatFraction(e_num, e_den)} - ${formatFraction(d_num, d_den)} = ${k} \\)`});
+                    steps.push({m: `Multiply both sides by the denominator ${c}:`, l: `\\( ${a}x ${constant(b, false)} = ${k} \\cdot ${c} = ${k * c} \\)`});
+                    steps.push({m: "Isolate the x term:", l: `\\( ${a}x = ${k * c - b} \\)`});
                     steps.push({m: "Solve for x:", l: `\\( x = ${x} \\)`});
                     break;
                 }
                 case 'rational': {
-                    let x = getRandom(1, 5);
+                    // Rational variables containing explicit constant fraction inputs [2]
+                    let x = getRandom(1, 4);
                     let b = getRandom(2, 3);
-                    let c = getRandom(-4, 4);
-                    let k = (b * x) + c;
-                    while (k === 0) { 
-                        c = getRandom(-4, 4);
-                        k = (b * x) + c;
+                    let c = getRandom(-3, 3);
+                    let tempK = (b * x) + c;
+                    while (tempK === 0) { 
+                        c = getRandom(-3, 3);
+                        tempK = (b * x) + c;
                     }
-                    
+
                     let multiplier = getRandom(2, 3);
-                    let a = multiplier * k; 
-                    let d = getRandom(1, 4);
-                    let e = multiplier + d;
+                    let a = multiplier * tempK; 
+                    let k = multiplier;
 
-                    prob.lhs = `\\frac{${a}}{${term(b, 'x', true)} ${constant(c, false)}} ${constant(d, false)}`; 
-                    prob.rhs = `${e}`;
+                    let q = getRandom(2, 3);
+                    let p = getRandom(1, q - 1);
+                    let d_num = p;
+                    let d_den = q;
+                    let e_num = q * k + p;
+                    let e_den = q;
+
+                    prob.lhs = `\\frac{${a}}{${term(b, 'x', true)} ${constant(c, false)}} + ${formatFraction(d_num, d_den)}`; 
+                    prob.rhs = `${formatFraction(e_num, e_den)}`;
                     correctAnswers = [x.toString()];
-                    prob.hint = "Isolate the rational term, multiply both sides by the denominator, then solve.";
+                    prob.hint = "Subtract the outside fraction first, then clear the denominator to solve for x.";
 
-                    steps.push({m: `Subtract ${d} from both sides:`, l: `\\( \\frac{${a}}{${b}x ${constant(c, false)}} = ${e - d} \\)`});
-                    steps.push({m: "Multiply both sides by the denominator:", l: `\\( ${a} = ${e - d}(${b}x ${constant(c, false)}) \\)`});
-                    steps.push({m: "Distribute and solve:", l: `\\( x = ${x} \\)`});
+                    steps.push({m: `Subtract ${formatFraction(d_num, d_den)} from both sides:`, l: `\\( \\frac{${a}}{${b}x ${constant(c, false)}} = ${formatFraction(e_num, e_den)} - ${formatFraction(d_num, d_den)} = ${k} \\)`});
+                    steps.push({m: "Multiply both sides by the denominator:", l: `\\( ${a} = ${k}(${b}x ${constant(c, false)}) \\)`});
+                    steps.push({m: "Distribute and solve:", l: `\\( x = ${x} \\px` });
                     break;
                 }
                 case 'two_step_sqrt': {
-                    let a = getRandom(1, 5); 
+                    // Simple radical paired with fractional bounds [2]
                     let rootVal = getRandom(2, 4);
-                    let b = a + rootVal; 
-                    let ans = rootVal * rootVal;
-                    prob.lhs = `\\sqrt{x} + ${a}`; prob.rhs = `${b}`;
-                    correctAnswers = [ans.toString()];
-                    prob.hint = "Enter the numeric answer.";
-                    steps.push({m: `Isolate the radical by subtracting ${a}:`, l: `\\( \\sqrt{x} = ${rootVal} \\)`});
-                    steps.push({m: "Square both sides:", l: `\\( x = ${rootVal}^2 = ${ans} \\)`});
+                    let q = getRandom(2, 3);
+                    let p = getRandom(1, q - 1);
+                    let d_num = p;
+                    let d_den = q;
+                    let e_num = q * rootVal + p;
+                    let e_den = q;
+
+                    prob.lhs = `\\sqrt{x} + ${formatFraction(d_num, d_den)}`; 
+                    prob.rhs = `${formatFraction(e_num, e_den)}`;
+                    correctAnswers = [(rootVal * rootVal).toString()];
+                    prob.hint = "Subtract the outside fraction first, then square both sides.";
+
+                    steps.push({m: `Subtract ${formatFraction(d_num, d_den)} from both sides:`, l: `\\( \\sqrt{x} = ${formatFraction(e_num, e_den)} - ${formatFraction(d_num, d_den)} = ${rootVal} \\)`});
+                    steps.push({m: "Square both sides:", l: `\\( x = ${rootVal}^2 = ${rootVal * rootVal} \\)`});
                     break;
                 }
                 case 'variables_both': {
-                    // Variables on Both Sides (Replaced Quadratic abs_quad) [2]
-                    let x = getRandom(-4, 4); 
-                    let a = getRandom(2, 3);
-                    let b = getRandom(2, 3);
-                    let c = getRandom(-3, 3);
-                    while (c === 0) c = getRandom(-3, 3);
-                    
-                    let d = getRandom(-4, 4);
-                    while (d === 0 || d === (a * b)) d = getRandom(-4, 4);
+                    // Variables on both sides using fraction coefficient multiplication [2]
+                    let q = getRandom(2, 3);
+                    let x = getRandom(-3, 3);
+                    let b = getRandom(2, 4);
 
-                    let e = a * (b * x + c) - d * x;
+                    let k = getRandom(-3, 3);
+                    while (k === 0) k = getRandom(-3, 3);
 
-                    prob.lhs = `${a}(${term(b, 'x', true)} ${constant(c, false)})`;
+                    let c = q * k - b * x;
+                    let d = getRandom(-2, 2);
+                    while (d === 0 || d * q === b) {
+                        d = getRandom(-2, 2);
+                    }
+
+                    let e = k - d * x;
+
+                    prob.lhs = `${formatFraction(1, q)}(${term(b, 'x', true)} ${constant(c, false)})`;
                     prob.rhs = `${term(d, 'x', true)} ${constant(e, false)}`;
                     correctAnswers = [x.toString()];
-                    prob.hint = "Distribute the left side first, then get all x terms on one side and constants on the other.";
+                    prob.hint = "Multiply both sides by the denominator to clear the fraction first, then solve.";
 
-                    steps.push({m: "Distribute on the left side first:", l: `\\( ${a * b}x ${constant(a * c, false)} = ${term(d, 'x', true)} ${constant(e, false)} \\)`});
-                    steps.push({m: `Subtract ${term(d, 'x', true)} from both sides:`, l: `\\( ${a * b - d}x ${constant(a * c, false)} = ${e} \\)`});
-                    steps.push({m: `Isolate the variable term by moving constants:`, l: `\\( ${a * b - d}x = ${e - a * c} \\)`});
+                    steps.push({m: `Multiply both sides by ${q} to clear the fraction:`, l: `\\( ${b}x ${constant(c, false)} = ${q}(${term(d, 'x', true)} ${constant(e, false)}) = ${term(q * d, 'x', true)} ${constant(q * e, false)} \\)`});
+                    steps.push({m: `Subtract ${term(q * d, 'x', true)} from both sides:`, l: `\\( ${b - q * d}x ${constant(c, false)} = ${q * e} \\)`});
+                    steps.push({m: "Isolate the x term:", l: `\\( ${b - q * d}x = ${q * e - c} \\)`});
                     steps.push({m: "Solve for x:", l: `\\( x = ${x} \\)`});
                     break;
                 }
                 case 'distributive': {
-                    let x = getRandom(-4, 4); 
-                    let a = getRandom(2, 3);
-                    let b = getRandom(2, 3);
-                    let c = getRandom(-3, 3);
-                    while (c === 0) c = getRandom(-3, 3); 
-                    
-                    let d = getRandom(-4, 4);
-                    while (d === 0 || (a * b + d) === 0) {
-                        d = getRandom(-4, 4);
-                    }
-                    
-                    let e = a * (b * x + c) + d * x;
+                    // Distributive property containing an outer fractional constant [2]
+                    let q = getRandom(2, 3);
+                    let x = getRandom(-3, 3);
+                    let b = getRandom(2, 4);
+                    let k = getRandom(-3, 3);
+                    while (k === 0) k = getRandom(-3, 3);
 
-                    prob.lhs = `${a}(${term(b, 'x', true)} ${constant(c, false)}) ${term(d, 'x', false)}`;
+                    let c = q * k - b * x;
+                    while (c === 0) {
+                        k = getRandom(-3, 3);
+                        c = q * k - b * x;
+                    }
+
+                    let d = getRandom(-2, 2);
+                    while (d === 0 || b + q * d === 0) {
+                        d = getRandom(-2, 2);
+                    }
+
+                    let e = k + d * x;
+
+                    prob.lhs = `${formatFraction(1, q)}(${term(b, 'x', true)} ${constant(c, false)}) ${term(d, 'x', false)}`;
                     prob.rhs = `${e}`;
                     correctAnswers = [x.toString()];
-                    prob.hint = "Distribute, combine like terms, and isolate x.";
+                    prob.hint = "Multiply the entire equation by the denominator to clear the fraction, then distribute and solve.";
 
-                    steps.push({m: "Distribute the coefficient across parentheses:", l: `\\( ${a * b}x ${constant(a * c, false)} ${term(d, 'x', false)} = ${e} \\)`});
-                    steps.push({m: "Combine the like terms (the x terms):", l: `\\( ${a * b + d}x ${constant(a * c, false)} = ${e} \\)`});
-                    steps.push({m: `Isolate the x term by undoing constant:`, l: `\\( ${a * b + d}x = ${e - a * c} \\)`});
-                    steps.push({m: "Divide to solve for x:", l: `\\( x = ${x} \\)`});
+                    steps.push({m: `Multiply the entire equation by ${q} to clear the fraction:`, l: `\\( (${b}x ${constant(c, false)}) ${term(q * d, 'x', false)} = ${q * e} \\)`});
+                    steps.push({m: "Combine like terms:", l: `\\( ${b + q * d}x ${constant(c, false)} = ${q * e} \\)`});
+                    steps.push({m: "Isolate the x term:", l: `\\( ${b + q * d}x = ${q * e - c} \\)`});
+                    steps.push({m: "Solve for x:", l: `\\( x = ${x} \\)`});
                     break;
                 }
                 case 'ambiguity': {
+                    // Left-to-Right Priority containing standard fraction elements [2]
                     let x = getRandom(-3, 3);
                     let k = getRandom(2, 4); 
                     let b = getRandom(2, 3);
@@ -318,18 +362,26 @@
                     let d = getRandom(-3, 3);
                     while (d === 0) d = getRandom(-3, 3);
 
-                    let e = k * (c * x + d);
+                    let tempE = k * (c * x + d);
 
-                    prob.lhs = `${a} \\div ${b} \\cdot (${term(c, 'x', true)} ${constant(d, false)})`;
-                    prob.rhs = `${e}`;
+                    let q = getRandom(2, 3);
+                    let p = getRandom(1, q - 1);
+                    let d_num = p;
+                    let d_den = q;
+                    let e_num = q * tempE + p;
+                    let e_den = q;
+
+                    prob.lhs = `${a} \\div ${b} \\cdot (${term(c, 'x', true)} ${constant(d, false)}) + ${formatFraction(d_num, d_den)}`;
+                    prob.rhs = `${formatFraction(e_num, e_den)}`;
                     correctAnswers = [x.toString()];
-                    prob.hint = "Follow PEMDAS: multiplication and division have equal priority (solve left-to-right).";
+                    prob.hint = "Subtract the outside fraction first. Then work strictly left-to-right to resolve the division before multiplying.";
 
-                    steps.push({m: "Solve division first, working strictly left-to-right:", l: `\\( ${a} \\div ${b} = ${k} \\)`});
-                    steps.push({m: "Rewrite the simplified expression:", l: `\\( ${k} \\cdot (${c}x ${constant(d, false)}) = ${e} \\)`});
-                    steps.push({m: "Divide both sides by the multiplier:", l: `\\( ${c}x ${constant(d, false)} = ${e / k} \\)`});
-                    steps.push({m: "Isolate the x term:", l: `\\( ${c}x = ${e / k - d} \\)`});
-                    steps.push({m: "Divide to find the final answer:", l: `\\( x = ${x} \\)`});
+                    steps.push({m: `Subtract ${formatFraction(d_num, d_den)} from both sides:`, l: `\\( ${a} \\div ${b} \\cdot (${c}x ${constant(d, false)}) = ${tempE} \\)`});
+                    steps.push({m: "Solve the division first (strictly left-to-right order of operations):", l: `\\( ${a} \\div ${b} = ${k} \\)`});
+                    steps.push({m: "Rewrite and simplify:", l: `\\( ${k} \\cdot (${c}x ${constant(d, false)}) = ${tempE} \\)`});
+                    steps.push({m: "Divide both sides by the multiplier:", l: `\\( ${c}x ${constant(d, false)} = ${tempE / k} \\)`});
+                    steps.push({m: "Isolate the x term:", l: `\\( ${c}x = ${tempE / k - d} \\)`});
+                    steps.push({m: "Solve for x:", l: `\\( x = ${x} \\)`});
                     break;
                 }
             }
