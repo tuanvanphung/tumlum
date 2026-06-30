@@ -47,6 +47,11 @@
         .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
         .report-header { text-align: center; background: white; border: 3px solid #27ae60; padding: 20px; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         
+        /* Temporary style to hide elements during generation to avoid screen flashing */
+        body.typesetting-mode .solution-area {
+            opacity: 0 !important;
+        }
+
         @media print { .controls-container { display: none; } .solution-area { display: block !important; } }
     </style>
 </head>
@@ -63,6 +68,7 @@
     <div id="problemContainer" class="problem-list"></div>
 
     <script>
+    (() => {
         const container = document.getElementById('problemContainer');
         const generateBtn = document.getElementById('generateBtn');
         const showBtn = document.getElementById('showSolutionsBtn');
@@ -71,6 +77,26 @@
 
         const EPSILON = 0.00001; 
         const MAX_INTERMEDIATE_VALUE = 99999; 
+
+        // Private encryption key and cipher utility
+        const CIPHER_KEY = "OrderOfOps_SecureKey_9812";
+
+        function encrypt(str) {
+            let xor = "";
+            for (let i = 0; i < str.length; i++) {
+                xor += String.fromCharCode(str.charCodeAt(i) ^ CIPHER_KEY.charCodeAt(i % CIPHER_KEY.length));
+            }
+            return btoa(unescape(encodeURIComponent(xor)));
+        }
+
+        function decrypt(str) {
+            let decoded = decodeURIComponent(escape(atob(str)));
+            let xor = "";
+            for (let i = 0; i < decoded.length; i++) {
+                xor += String.fromCharCode(decoded.charCodeAt(i) ^ CIPHER_KEY.charCodeAt(i % CIPHER_KEY.length));
+            }
+            return xor;
+        }
 
         // =============================================================
         // UTILITY & MATH ENGINE
@@ -536,7 +562,10 @@
             
             for (let i = 0; i < problemTemplates.length; i++) {
                 const p = generateProblem(problemTemplates[i]);
-                currentProblems.push({ id: i + 1, expected: p.answer });
+                
+                // Store encrypted version of the correct answer details [2]
+                const encrypted = encrypt(JSON.stringify(p.answer));
+                currentProblems.push({ id: i + 1, encrypted: encrypted });
                 
                 const div = document.createElement('div');
                 div.className = 'problem-card';
@@ -553,9 +582,7 @@
                         </div>
                         <div class="input-hint">Enter your answer as an integer, decimal, or fraction (e.g., -3/4)</div>
                     </div>
-                    <div class="solution-area" id="sol-${i + 1}">
-                        <div style="color:#27ae60; font-size:1.2em; font-weight:bold;">Correct Answer: \\( ${formatNumber(p.answer)} \\)</div>
-                    </div>`;
+                    <div class="solution-area" id="sol-${i + 1}"></div>`; // Render blank
                 container.appendChild(div);
             }
 
@@ -573,10 +600,16 @@
 
         function check() {
             let score = 0;
+            // Set temporary class to prevent visible flashing of answers on screen during typesetting
+            document.body.classList.add('typesetting-mode');
+
             currentProblems.forEach(p => {
                 const input = document.getElementById(`input-${p.id}`);
                 const userNum = parseUserFractionInput(input.value);
-                const correctNum = p.expected.value;
+                
+                // Decrypt correct answer for scoring logic [2]
+                const correctObj = JSON.parse(decrypt(p.encrypted));
+                const correctNum = correctObj.value;
                 
                 let isCorrect = false;
                 if (Number.isNaN(correctNum) && Number.isNaN(userNum)) isCorrect = true;
@@ -587,7 +620,12 @@
                 }
 
                 input.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
-                document.getElementById(`sol-${p.id}`).style.display = 'block';
+                
+                // Temporarily inject the decrypted answer for typesetting/cloning purposes [2]
+                const solDiv = document.getElementById(`sol-${p.id}`);
+                solDiv.innerHTML = `<div style="color:#27ae60; font-size:1.2em; font-weight:bold;">Correct Answer: \\( ${formatNumber(correctObj)} \\)</div>`;
+                solDiv.style.display = 'block';
+
                 if (isCorrect) score++;
             });
             
@@ -598,6 +636,9 @@
             showBtn.innerHTML = `Score: ${score}/${problemTemplates.length} (${pct}%)<br><small>${timeStr}</small>`;
             
             MathJax.typesetPromise().then(() => {
+                // Remove typesetting-mode class before cloning so report rendering is unaffected
+                document.body.classList.remove('typesetting-mode');
+
                 const clone = document.documentElement.cloneNode(true);
                 clone.querySelectorAll('script, .controls-container').forEach(el => el.remove());
                 const body = clone.querySelector('body');
@@ -627,12 +668,20 @@
                 a.href = URL.createObjectURL(blob);
                 a.download = `Order_Of_Ops_Report_${getTimestamp()}.html`;
                 a.click();
+
+                // Completely clear and hide solution areas from the active live screen [2]
+                currentProblems.forEach(p => {
+                    const solDiv = document.getElementById(`sol-${p.id}`);
+                    solDiv.innerHTML = '';
+                    solDiv.style.display = 'none';
+                });
             });
         }
 
         generateBtn.addEventListener('click', render);
         showBtn.addEventListener('click', check);
         render();
+    })();
     </script>
 </body>
 </html>
