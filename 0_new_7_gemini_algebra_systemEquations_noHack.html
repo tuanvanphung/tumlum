@@ -42,6 +42,7 @@
         .multi-input-row label { font-size: 1.2em; font-family: 'Times New Roman', Times, serif; font-style: italic; font-weight: bold; }
         .multi-input-row input { width: 60px; padding: 8px; font-size: 1.1em; border: 2px solid #ced4da; border-radius: 6px; text-align: center; font-family: monospace; outline: none; transition: border-color 0.2s; }
         .multi-input-row input:focus { border-color: #3498db; }
+        .multi-input-row input:disabled { background-color: #e9ecef; color: #495057; cursor: not-allowed; }
         .pt-label { font-weight: bold; color: #7f8c8d; background: #ecf0f1; padding: 2px 8px; border-radius: 4px; font-size: 0.9em; margin-right: 5px; }
 
         .input-hint { font-size: 0.85em; color: #e67e22; margin-top: 12px; font-weight: bold; }
@@ -81,6 +82,9 @@
         const showBtn = document.getElementById('showSolutionsBtn');
         const problemCountEl = document.getElementById('problemCount');
         let currentProblems = [];
+
+        // State lock to prevent duplicate submissions or DOM modifications [2]
+        let isSubmitted = false;
 
         // Secret salt to generate unpredictable hashes. Do not change this unless you update the verifier salt as well.
         const SECRET_SALT = "AlgebraMastery_SecureSalt_98234";
@@ -374,6 +378,7 @@
         };
 
         function render() {
+            isSubmitted = false;
             container.innerHTML = ''; currentProblems = [];
             showBtn.disabled = false; showBtn.style.backgroundColor = '#27ae60'; showBtn.textContent = "Submit & Generate Report";
             
@@ -443,6 +448,10 @@
         }
 
         function check() {
+            // Guard clause to lock inputs and submission on submit [2]
+            if (isSubmitted) return;
+            isSubmitted = true;
+
             let score = 0;
 
             // Set temporary class to prevent visible flashing of answers on screen during typesetting
@@ -478,7 +487,10 @@
                     }
                 }
 
-                inputElements.forEach(el => el.classList.add(isCorrect ? 'correct-input' : 'incorrect-input'));
+                inputElements.forEach(el => {
+                    el.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                    el.disabled = true; // Permanently lock inputs [2]
+                });
                 
                 // Inject the decrypted step-by-step guides [2]
                 const solDiv = document.getElementById(`sol-${p.id}`);
