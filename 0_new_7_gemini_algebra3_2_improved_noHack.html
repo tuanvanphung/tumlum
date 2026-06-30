@@ -53,6 +53,11 @@
         .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
         .report-header { text-align: center; background: white; border: 3px solid #27ae60; padding: 20px; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         
+        /* Temporary style to hide elements during generation to avoid screen flashing */
+        body.typesetting-mode .solution-area {
+            opacity: 0 !important;
+        }
+
         @media print { .controls-container { display: none; } .solution-area { display: block !important; } }
     </style>
 </head>
@@ -81,6 +86,26 @@
 
         let savedHistory = JSON.parse(localStorage.getItem('solveForXHistory')) || [];
         let usedExpressions = new Set(savedHistory);
+
+        // Private encryption key and cipher utility [2]
+        const CIPHER_KEY = "SolveForX_SecuredKey_39482";
+
+        function encrypt(str) {
+            let xor = "";
+            for (let i = 0; i < str.length; i++) {
+                xor += String.fromCharCode(str.charCodeAt(i) ^ CIPHER_KEY.charCodeAt(i % CIPHER_KEY.length));
+            }
+            return btoa(unescape(encodeURIComponent(xor)));
+        }
+
+        function decrypt(str) {
+            let decoded = decodeURIComponent(escape(atob(str)));
+            let xor = "";
+            for (let i = 0; i < decoded.length; i++) {
+                xor += String.fromCharCode(decoded.charCodeAt(i) ^ CIPHER_KEY.charCodeAt(i % CIPHER_KEY.length));
+            }
+            return xor;
+        }
 
         function generateWatermark(score, total, timestamp) {
             const raw = `${score}|${total}|${timestamp}|${SECRET_SALT}`;
@@ -154,7 +179,6 @@
             let prob = { id, type, lhs: "", rhs: "", hint: "" };
             let correctAnswers = [];
 
-            const clean = str => (str || '').replace(/\s+/g, '');
             const buildStepsHTML = () => {
                 return `
                     <div style="color:#27ae60; font-size:1.2em; font-weight:bold; margin-top:10px;">
@@ -345,14 +369,13 @@
 
             prob.inputCount = correctAnswers.length;
 
-            prob.checkAnswers = (userInputs) => {
-                let sortedUser = userInputs.map(clean).sort();
-                let sortedCorrect = correctAnswers.map(clean).sort();
-                return (sortedUser.length === sortedCorrect.length) && 
-                       sortedUser.every((val, index) => val === sortedCorrect[index]);
+            // Encrypt and secure correct answers payload [2]
+            const payload = {
+                answers: correctAnswers,
+                stepsHTML: buildStepsHTML()
             };
+            prob.securedPayload = encrypt(JSON.stringify(payload));
 
-            prob.revealSteps = () => buildStepsHTML();
             return prob;
         }
 
@@ -414,7 +437,7 @@
                         ${inputHTML}
                         <div class="input-hint">${p.hint}</div>
                     </div>
-                    <div class="solution-area" id="sol-${i}"></div>`;
+                    <div class="solution-area" id="sol-${i}"></div>`; // Render blank
                 container.appendChild(div);
             }
 
@@ -424,6 +447,9 @@
 
         function check() {
             let score = 0;
+            // Set temporary class to prevent visible flashing of answers on screen during typesetting
+            document.body.classList.add('typesetting-mode');
+
             currentProblems.forEach(p => {
                 let inputElements = [];
                 let userVals = [];
@@ -434,22 +460,24 @@
                     userVals.push(el.value);
                 }
 
-                let isCorrect = p.checkAnswers(userVals);
+                // Decrypt verification payload [2]
+                const payload = JSON.parse(decrypt(p.securedPayload));
+                const correctAnswers = payload.answers;
+
+                const clean = str => (str || '').replace(/\s+/g, '');
+                let sortedUser = userVals.map(clean).sort();
+                let sortedCorrect = correctAnswers.map(clean).sort();
+                let isCorrect = (sortedUser.length === sortedCorrect.length) && 
+                               sortedUser.every((val, index) => val === sortedCorrect[index]);
 
                 inputElements.forEach(el => {
                     el.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
                 });
                 
+                // Inject solutions temporarily for report generation [2]
                 const solDiv = document.getElementById(`sol-${p.id}`);
-                if (isCorrect) {
-                    // Only populate and display the correct answer if they got it right
-                    solDiv.innerHTML = p.revealSteps();
-                    solDiv.style.display = 'block';
-                } else {
-                    // Do not provide answers for incorrect problems
-                    solDiv.innerHTML = '';
-                    solDiv.style.display = 'none';
-                }
+                solDiv.innerHTML = payload.stepsHTML;
+                solDiv.style.display = 'block';
                 
                 if (isCorrect) score++;
             });
@@ -461,6 +489,9 @@
             showBtn.innerHTML = `Score: ${score}/${TOTAL_PROBLEMS} (${pct}%)<br><small>${timeStr}</small>`;
             
             typesetMath(() => {
+                // Remove typesetting-mode class before cloning so report rendering is unaffected
+                document.body.classList.remove('typesetting-mode');
+
                 const clone = document.documentElement.cloneNode(true);
                 clone.querySelectorAll('script, .controls-container').forEach(el => el.remove());
                 const body = clone.querySelector('body');
@@ -545,13 +576,9 @@
                 `;
                 body.appendChild(verifyScript);
 
-                // Show populated solution areas, remove empty ones
+                // Show all decoded solution areas in report clone
                 clone.querySelectorAll('.solution-area').forEach(s => {
-                    if (s.innerHTML.trim() === '') {
-                        s.remove();
-                    } else {
-                        s.style.display = 'block';
-                    }
+                    s.style.display = 'block';
                 });
 
                 const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
@@ -559,6 +586,13 @@
                 a.href = URL.createObjectURL(blob);
                 a.download = `Algebra_Mastery_Report_${getTimestamp()}.html`;
                 a.click();
+
+                // Clear out and hide the solution guides on the user's active screen
+                currentProblems.forEach(p => {
+                    const solDiv = document.getElementById(`sol-${p.id}`);
+                    solDiv.innerHTML = '';
+                    solDiv.style.display = 'none';
+                });
             });
         }
 
