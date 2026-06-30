@@ -37,7 +37,8 @@
         .answer-box { display: flex; flex-direction: column; background: #fdfdfd; padding: 15px; border: 1px solid #eee; border-radius: 8px; align-items: center; }
         .multi-input-row { display: flex; gap: 15px; justify-content: center; align-items: center; margin: 6px 0; }
         .multi-input-row label { font-size: 1.2em; font-weight: bold; }
-        .multi-input-row input { width: 120px; padding: 10px; font-size: 1.2em; border: 2px solid #ced4da; border-radius: 6px; text-align: center; }
+        .multi-input-row input { width: 120px; padding: 10px; font-size: 1.2em; border: 2px solid #ced4da; border-radius: 6px; text-align: center; outline: none; }
+        .multi-input-row input:disabled { background-color: #e9ecef; color: #495057; cursor: not-allowed; }
         
         .input-hint { font-size: 0.85em; color: #888; margin-top: 8px; text-align: center;}
         
@@ -75,10 +76,13 @@
         const problemCountEl = document.getElementById('problemCount');
         let currentProblems = [];
 
+        // State lock to prevent duplicate submissions or DOM modifications [2]
+        let isSubmitted = false;
+
         const EPSILON = 0.00001; 
         const MAX_INTERMEDIATE_VALUE = 99999; 
 
-        // Private encryption key and cipher utility
+        // Private encryption key and cipher utility [2]
         const CIPHER_KEY = "OrderOfOps_SecureKey_9812";
 
         function encrypt(str) {
@@ -556,6 +560,7 @@
         }
 
         function render() {
+            isSubmitted = false;
             container.innerHTML = ''; currentProblems = [];
             showBtn.disabled = false; showBtn.style.backgroundColor = '#27ae60'; showBtn.textContent = "Submit & Generate Report";
             problemCountEl.textContent = `${problemTemplates.length} distinct order of operations problems.`;
@@ -599,6 +604,10 @@
         }
 
         function check() {
+            // Guard clause to lock inputs and submission on submit [2]
+            if (isSubmitted) return;
+            isSubmitted = true;
+
             let score = 0;
             // Set temporary class to prevent visible flashing of answers on screen during typesetting
             document.body.classList.add('typesetting-mode');
@@ -620,6 +629,7 @@
                 }
 
                 input.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                input.disabled = true; // Permanently lock inputs [2]
                 
                 // Temporarily inject the decrypted answer for typesetting/cloning purposes [2]
                 const solDiv = document.getElementById(`sol-${p.id}`);
