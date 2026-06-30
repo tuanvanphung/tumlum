@@ -88,6 +88,26 @@
         let savedHistory = JSON.parse(localStorage.getItem('algebraMasteryHistory')) || [];
         let usedExpressions = new Set(savedHistory);
 
+        // Private encryption key and cipher utility [2]
+        const CIPHER_KEY = "SystemsOfEq_SecureKey_4829";
+
+        function encrypt(str) {
+            let xor = "";
+            for (let i = 0; i < str.length; i++) {
+                xor += String.fromCharCode(str.charCodeAt(i) ^ CIPHER_KEY.charCodeAt(i % CIPHER_KEY.length));
+            }
+            return btoa(unescape(encodeURIComponent(xor)));
+        }
+
+        function decrypt(str) {
+            let decoded = decodeURIComponent(escape(atob(str)));
+            let xor = "";
+            for (let i = 0; i < decoded.length; i++) {
+                xor += String.fromCharCode(decoded.charCodeAt(i) ^ CIPHER_KEY.charCodeAt(i % CIPHER_KEY.length));
+            }
+            return xor;
+        }
+
         // Verification token hash generator (Deterministic algorithm)
         function generateWatermark(score, total, timestamp) {
             const raw = `${score}|${total}|${timestamp}|${SECRET_SALT}`;
@@ -172,11 +192,11 @@
 
         function generateProblem(id, type) {
             let prob = { id, type, expression: "", hint: "" };
-            let validateFn;
             let stepsArr = [];
             
-            const clean = str => (str || '').toLowerCase().replace(/\s+/g, '');
             const buildStepsHTML = (steps) => `<strong>Solution Guide:</strong>` + steps.map(s => `<div class="step-row">${s.m}<span class="algebra-line">\\( ${s.l} \\)</span></div>`).join('');
+
+            let x, y, z;
 
             switch(type) {
                 case 'hard_elim': {
@@ -185,8 +205,8 @@
                     
                     let kx = getRnd(-2, 2, [0]);
                     let ky = getRnd(-2, 2, [0]);
-                    let x = kx * d1;
-                    let y = ky * d2;
+                    x = kx * d1;
+                    y = ky * d2;
                     
                     let a1 = getRnd(1, 5);
                     while (gcd(a1, d1) !== 1) a1 = getRnd(1, 5);
@@ -206,7 +226,6 @@
                     prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\ ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} = ${c2} \\end{cases}`;
                     prob.hint = "Solve for x and y.";
                     
-                    validateFn = (inputs) => clean(inputs[0]) === x.toString() && clean(inputs[1]) === y.toString();
                     stepsArr.push({m: "Step 1: Multiply both equations by their denominators to clear fractions.", l: `\\begin{cases} ${term(a1, 'x', true)} ${term(b1 * d1, 'y', false)} = ${c1 * d1} \\\\ ${term(a2 * d2, 'x', true)} ${term(b2, 'y', false)} = ${c2 * d2} \\end{cases}`});
                     stepsArr.push({m: "Step 2: Solve the resulting standard system using elimination.", l: `\\text{Eliminate one variable to solve.}`});
                     stepsArr.push({m: "Step 3: Substitute back.", l: `x = ${x}, \\quad y = ${y}`});
@@ -218,8 +237,8 @@
                     
                     let kx = getRnd(-2, 2, [0]);
                     let ky = getRnd(-2, 2, [0]);
-                    let x = kx * d1;
-                    let y = ky * d2;
+                    x = kx * d1;
+                    y = ky * d2;
                     
                     let a1 = getRnd(1, 4);
                     while (gcd(a1, d1) !== 1) a1 = getRnd(1, 4);
@@ -237,7 +256,6 @@
                     prob.expression = `\\begin{cases} ${eq1} \\\\ ${eq2} \\end{cases}`;
                     prob.hint = "Solve for x and y.";
 
-                    validateFn = (inputs) => clean(inputs[0]) === x.toString() && clean(inputs[1]) === y.toString();
                     stepsArr.push({m: "Step 1: Rearrange both into standard form (Ax + By = C).", l: `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\ ${term(-a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} = ${c2} \\end{cases}`});
                     stepsArr.push({m: "Step 2: Clear fractions by multiplying each equation by its denominator.", l: `\\begin{cases} ${term(a1, 'x', true)} ${term(b1 * d1, 'y', false)} = ${c1 * d1} \\\\ ${term(-a2 * d2, 'x', true)} ${term(b2, 'y', false)} = ${c2 * d2} \\end{cases}`});
                     stepsArr.push({m: "Step 3: Solve the system.", l: `x = ${x}, \\quad y = ${y}`});
@@ -246,8 +264,8 @@
                 case 'fractional': {
                     let d1 = getRnd(2, 4);
                     let d2 = getRnd(2, 5, [d1]);
-                    let x = getRnd(-3, 3, [0]) * d1; 
-                    let y = getRnd(-2, 2, [0]) * d2; 
+                    x = getRnd(-3, 3, [0]) * d1; 
+                    y = getRnd(-2, 2, [0]) * d2; 
                     let c1 = (x/d1) + (y/d2);
                     let a2 = getRnd(2, 4); 
                     let b2 = getRnd(-4, -1); 
@@ -256,7 +274,6 @@
                     prob.expression = `\\begin{cases} \\frac{x}{${d1}} + \\frac{y}{${d2}} = ${c1} \\\\ ${term(a2, 'x', true)} ${term(b2, 'y', false)} = ${c2} \\end{cases}`;
                     prob.hint = "Solve for x and y.";
 
-                    validateFn = (inputs) => clean(inputs[0]) === x.toString() && clean(inputs[1]) === y.toString();
                     stepsArr.push({m: `Step 1: Multiply the top equation by the LCD (${d1 * d2}) to clear fractions.`, l: `${term(d2, 'x', true)} ${term(d1, 'y', false)} = ${c1 * d1 * d2}`});
                     stepsArr.push({m: "Step 2: Solve the new system.", l: `x = ${x}, \\quad y = ${y}`});
                     break;
@@ -267,9 +284,9 @@
                     
                     let kx = getRnd(-2, 2, [0]);
                     let ky = getRnd(-2, 2, [0]);
-                    let x = kx * d1;
-                    let y = ky * d2;
-                    let z = getRnd(-3, 3, [0]);
+                    x = kx * d1;
+                    y = ky * d2;
+                    z = getRnd(-3, 3, [0]);
                     
                     let a1 = getRnd(1, 3);
                     while (gcd(a1, d1) !== 1) a1 = getRnd(1, 3);
@@ -289,7 +306,6 @@
                     prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} + y + z = ${c1} \\\\ ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} ${term(c_2, 'z', false)} = ${d2_val} \\\\ ${term(a3, 'x', true)} ${term(b3, 'y', false)} ${term(c_3, 'z', false)} = ${d3} \\end{cases}`;
                     prob.hint = "Solve for all three variables.";
 
-                    validateFn = (inputs) => clean(inputs[0]) === x.toString() && clean(inputs[1]) === y.toString() && clean(inputs[2]) === z.toString();
                     stepsArr.push({m: "Step 1: Multiply equations to clear fractions and rewrite the system with integer coefficients.", l: `\\begin{cases} ${term(a1, 'x', true)} + ${term(d1, 'y', false)} + ${term(d1, 'z', false)} = ${c1 * d1} \\\\ ${term(a2 * d2, 'x', true)} ${term(b2, 'y', false)} ${term(c_2 * d2, 'z', false)} = ${d2_val * d2} \\\\ ${term(a3, 'x', true)} ${term(b3, 'y', false)} ${term(c_3, 'z', false)} = ${d3} \\end{cases}`});
                     stepsArr.push({m: "Step 2: Solve the 3x3 integer system using standard elimination or substitution.", l: `x = ${x}, \\quad y = ${y}, \\quad z = ${z}`});
                     break;
@@ -303,8 +319,8 @@
                     let kx = getRnd(-1, 1, [0]);
                     let ky = getRnd(-1, 1, [0]);
                     
-                    let x = kx * d1 * d2;
-                    let y = ky * g1 * g2;
+                    x = kx * d1 * d2;
+                    y = ky * g1 * g2;
                     
                     let a1 = getRnd(1, 3);
                     while (gcd(a1, d1) !== 1) a1 = getRnd(1, 3);
@@ -329,8 +345,6 @@
                     prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${fracTerm(b1, g1, 'y', false)} = ${c1} \\\\ ${fracTerm(a2, d2, 'x', true)} ${fracTerm(b2, g2, 'y', false)} = ${c2} \\end{cases}`;
                     prob.hint = "Solve for x and y.";
                     
-                    validateFn = (inputs) => clean(inputs[0]) === x.toString() && clean(inputs[1]) === y.toString();
-                    
                     let lcd1 = (d1 * g1) / gcd(d1, g1);
                     let lcd2 = (d2 * g2) / gcd(d2, g2);
                     
@@ -344,8 +358,13 @@
                 }
             }
             
-            prob.checkAnswers = validateFn;
-            prob.revealSteps = () => buildStepsHTML(stepsArr);
+            // Build and encrypt the secured verification payload [2]
+            const payload = {
+                answers: (type === 'three_var') ? [x.toString(), y.toString(), z.toString()] : [x.toString(), y.toString()],
+                stepsHTML: buildStepsHTML(stepsArr)
+            };
+            prob.securedPayload = encrypt(JSON.stringify(payload));
+            
             return prob;
         }
 
@@ -446,12 +465,24 @@
                     userValues.push(ix.value, iy.value);
                 }
 
-                let isCorrect = p.checkAnswers(userValues);
+                // Decrypt secure validation payload for evaluation [2]
+                const payload = JSON.parse(decrypt(p.securedPayload));
+                const answers = payload.answers;
+
+                const clean = str => (str || '').toLowerCase().replace(/\s+/g, '');
+                let isCorrect = true;
+                for (let idx = 0; idx < answers.length; idx++) {
+                    if (clean(userValues[idx]) !== answers[idx]) {
+                        isCorrect = false;
+                        break;
+                    }
+                }
 
                 inputElements.forEach(el => el.classList.add(isCorrect ? 'correct-input' : 'incorrect-input'));
                 
+                // Inject the decrypted step-by-step guides [2]
                 const solDiv = document.getElementById(`sol-${p.id}`);
-                solDiv.innerHTML = p.revealSteps();
+                solDiv.innerHTML = payload.stepsHTML;
                 solDiv.style.display = 'block';
                 
                 if (isCorrect) score++;
