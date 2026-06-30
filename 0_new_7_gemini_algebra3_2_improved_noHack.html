@@ -9,7 +9,7 @@
     <script>
       window.MathJax = {
         tex: { inlineMath: [['\\(', '\\)']] },
-        chtml: { scale: 1.1 } // Makes the math slightly larger for readability
+        chtml: { scale: 1.1 } 
       };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
@@ -43,6 +43,7 @@
         .multi-input-row label { font-size: 1.2em; font-weight: bold; }
         .multi-input-row input { width: 80px; padding: 10px; font-size: 1.2em; border: 2px solid #ced4da; border-radius: 6px; text-align: center; outline: none; transition: border-color 0.2s; }
         .multi-input-row input:focus { border-color: #3498db; }
+        .multi-input-row input:disabled { background-color: #e9ecef; color: #495057; cursor: not-allowed; }
         
         .input-hint { font-size: 0.85em; color: #888; margin-top: 8px; text-align: center;}
         
@@ -81,6 +82,9 @@
         const showBtn = document.getElementById('showSolutionsBtn');
         const problemCountEl = document.getElementById('problemCount');
         let currentProblems = [];
+
+        // State lock to prevent double-submission or DOM tampering [2]
+        let isSubmitted = false;
 
         const SECRET_SALT = "SolveForX_SecuredKey_39482";
 
@@ -386,8 +390,13 @@
         };
 
         function render() {
-            container.innerHTML = ''; currentProblems = [];
-            showBtn.disabled = false; showBtn.style.backgroundColor = '#27ae60'; showBtn.textContent = "Submit & Generate Report";
+            // Reset submission state lock on generate
+            isSubmitted = false;
+            container.innerHTML = ''; 
+            currentProblems = [];
+            showBtn.disabled = false; 
+            showBtn.style.backgroundColor = '#27ae60'; 
+            showBtn.textContent = "Submit & Generate Report";
             
             const typeList = buildTypeList();
             problemCountEl.textContent = `${TOTAL_PROBLEMS} unique problems — one from each template.`;
@@ -437,7 +446,7 @@
                         ${inputHTML}
                         <div class="input-hint">${p.hint}</div>
                     </div>
-                    <div class="solution-area" id="sol-${i}"></div>`; // Render blank
+                    <div class="solution-area" id="sol-${i}"></div>`;
                 container.appendChild(div);
             }
 
@@ -446,6 +455,10 @@
         }
 
         function check() {
+            // Guard clause: prevent multiple submissions even if the submit button is altered in Inspect [2]
+            if (isSubmitted) return;
+            isSubmitted = true;
+
             let score = 0;
             // Set temporary class to prevent visible flashing of answers on screen during typesetting
             document.body.classList.add('typesetting-mode');
@@ -458,6 +471,8 @@
                     let el = document.getElementById(`input-${p.id}-${j}`);
                     inputElements.push(el);
                     userVals.push(el.value);
+                    // Permanently disable editing of input fields after submission [2]
+                    el.disabled = true;
                 }
 
                 // Decrypt verification payload [2]
