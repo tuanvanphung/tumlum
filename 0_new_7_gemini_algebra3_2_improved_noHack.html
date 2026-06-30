@@ -57,7 +57,6 @@
     </style>
 </head>
 <body>
-    <!-- Fixed double-slash notation error in HTML heading [2] -->
     <h1>Algebra: Solving for \( x \)</h1>
     <p class="subtitle">Radicals, Linear Absolute Values, Distributive Properties, and Rational Fractions.</p>
     
@@ -98,6 +97,13 @@
             return `${p1}-${p2}-${p3}`.toUpperCase();
         }
 
+        // Helper to format a file-safe timestamp for the report download
+        function getTimestamp() {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+        }
+
         function typesetMath(callback) {
             if (window.MathJax && window.MathJax.typesetPromise) {
                 window.MathJax.typesetPromise([container])
@@ -132,7 +138,6 @@
             return c < 0 ? `- ${Math.abs(c)}` : `+ ${c}`;
         }
 
-        // Formats mathematical fractions securely [2]
         function formatFraction(num, den) {
             if (num === 0) return "0";
             let sign = (num < 0) ^ (den < 0) ? "-" : "";
@@ -148,21 +153,18 @@
         function generateProblem(id, type) {
             let prob = { id, type, lhs: "", rhs: "", hint: "" };
             let correctAnswers = [];
-            let steps = [];
 
             const clean = str => (str || '').replace(/\s+/g, '');
             const buildStepsHTML = () => {
-                let stepsHTML = steps.map(s => `<div class="step-row">${s.m}<span class="algebra-line">${s.l}</span></div>`).join('');
                 return `
-                    <strong>Step-by-Step Solution:</strong>
-                    ${stepsHTML}
-                    <div style="color:#27ae60; font-size:1.2em; font-weight:bold; margin-top:10px;">Correct Answer(s): \\( x = ${correctAnswers.join(', ')} \\)</div>
+                    <div style="color:#27ae60; font-size:1.2em; font-weight:bold; margin-top:10px;">
+                        Correct Answer(s): \\( x = ${correctAnswers.join(', ')} \\)
+                    </div>
                 `;
             };
 
             switch(type) {
                 case 'radical': {
-                    // Fractional inputs designed to resolve cleanly [2]
                     let x = getRandom(1, 6);               
                     let b = getRandom(2, 3);                
                     let k = getRandom(2, 4);                
@@ -179,15 +181,9 @@
                     prob.rhs = `${formatFraction(e_num, e_den)}`;
                     correctAnswers = [x.toString()];
                     prob.hint = "Subtract the outside fraction first (keep common denominators), square both sides, then solve for x.";
-
-                    steps.push({m: `Subtract ${formatFraction(d_num, d_den)} from both sides:`, l: `\\( \\sqrt{${b}x ${constant(c, false)}} = ${formatFraction(e_num, e_den)} - ${formatFraction(d_num, d_den)} = ${formatFraction(e_num - d_num, q)} = ${k} \\)`});
-                    steps.push({m: "Square both sides to remove the radical:", l: `\\( ${b}x ${constant(c, false)} = ${k}^2 = ${k*k} \\)`});
-                    steps.push({m: `Isolate the x term:`, l: `\\( ${b}x = ${k*k - c} \\)`});
-                    steps.push({m: `Divide to find the final answer:`, l: `\\( x = ${x} \\)`});
                     break;
                 }
                 case 'absolute': {
-                    // Absolute Value with common denominator fraction shifts [2]
                     let b = getRandom(2, 3);
                     let x1 = getRandom(1, 4);
                     let x2 = getRandom(-4, -1);
@@ -207,14 +203,9 @@
                     prob.rhs = `${formatFraction(e_num, e_den)}`;
                     correctAnswers = [x1.toString(), x2.toString()];
                     prob.hint = "Subtract the outside fraction first, then split the absolute value into positive and negative cases.";
-
-                    steps.push({m: `Subtract ${formatFraction(d_num, d_den)} from both sides:`, l: `\\( |${b}x ${constant(c, false)}| = ${formatFraction(e_num, e_den)} - ${formatFraction(d_num, d_den)} = ${k} \\)`});
-                    steps.push({m: "Split into two separate linear equations:", l: `\\( ${b}x ${constant(c, false)} = ${k} \\quad \\text{OR} \\quad ${b}x ${constant(c, false)} = -${k} \\)`});
-                    steps.push({m: "Solve both equations:", l: `\\( x = ${x1}, \\quad x = ${x2} \\)`});
                     break;
                 }
                 case 'rational_linear': {
-                    // Fractional multi-step with fraction shifts [2]
                     let x = getRandom(-4, 4);
                     let a = getRandom(2, 3);
                     let c = getRandom(2, 3); 
@@ -234,15 +225,9 @@
                     prob.rhs = `${formatFraction(e_num, e_den)}`;
                     correctAnswers = [x.toString()];
                     prob.hint = "Subtract the outside fraction first, multiply by the denominator, then solve for x.";
-
-                    steps.push({m: `Subtract ${formatFraction(d_num, d_den)} from both sides:`, l: `\\( \\frac{${a}x ${constant(b, false)}}{${c}} = ${formatFraction(e_num, e_den)} - ${formatFraction(d_num, d_den)} = ${k} \\)`});
-                    steps.push({m: `Multiply both sides by the denominator ${c}:`, l: `\\( ${a}x ${constant(b, false)} = ${k} \\cdot ${c} = ${k * c} \\)`});
-                    steps.push({m: "Isolate the x term:", l: `\\( ${a}x = ${k * c - b} \\)`});
-                    steps.push({m: "Solve for x:", l: `\\( x = ${x} \\)`});
                     break;
                 }
                 case 'rational': {
-                    // Rational variables containing explicit constant fraction inputs [2]
                     let x = getRandom(1, 4);
                     let b = getRandom(2, 3);
                     let c = getRandom(-3, 3);
@@ -267,14 +252,9 @@
                     prob.rhs = `${formatFraction(e_num, e_den)}`;
                     correctAnswers = [x.toString()];
                     prob.hint = "Subtract the outside fraction first, then clear the denominator to solve for x.";
-
-                    steps.push({m: `Subtract ${formatFraction(d_num, d_den)} from both sides:`, l: `\\( \\frac{${a}}{${b}x ${constant(c, false)}} = ${formatFraction(e_num, e_den)} - ${formatFraction(d_num, d_den)} = ${k} \\)`});
-                    steps.push({m: "Multiply both sides by the denominator:", l: `\\( ${a} = ${k}(${b}x ${constant(c, false)}) \\)`});
-                    steps.push({m: "Distribute and solve:", l: `\\( x = ${x} \\px` });
                     break;
                 }
                 case 'two_step_sqrt': {
-                    // Simple radical paired with fractional bounds [2]
                     let rootVal = getRandom(2, 4);
                     let q = getRandom(2, 3);
                     let p = getRandom(1, q - 1);
@@ -287,13 +267,9 @@
                     prob.rhs = `${formatFraction(e_num, e_den)}`;
                     correctAnswers = [(rootVal * rootVal).toString()];
                     prob.hint = "Subtract the outside fraction first, then square both sides.";
-
-                    steps.push({m: `Subtract ${formatFraction(d_num, d_den)} from both sides:`, l: `\\( \\sqrt{x} = ${formatFraction(e_num, e_den)} - ${formatFraction(d_num, d_den)} = ${rootVal} \\)`});
-                    steps.push({m: "Square both sides:", l: `\\( x = ${rootVal}^2 = ${rootVal * rootVal} \\)`});
                     break;
                 }
                 case 'variables_both': {
-                    // Variables on both sides using fraction coefficient multiplication [2]
                     let q = getRandom(2, 3);
                     let x = getRandom(-3, 3);
                     let b = getRandom(2, 4);
@@ -313,15 +289,9 @@
                     prob.rhs = `${term(d, 'x', true)} ${constant(e, false)}`;
                     correctAnswers = [x.toString()];
                     prob.hint = "Multiply both sides by the denominator to clear the fraction first, then solve.";
-
-                    steps.push({m: `Multiply both sides by ${q} to clear the fraction:`, l: `\\( ${b}x ${constant(c, false)} = ${q}(${term(d, 'x', true)} ${constant(e, false)}) = ${term(q * d, 'x', true)} ${constant(q * e, false)} \\)`});
-                    steps.push({m: `Subtract ${term(q * d, 'x', true)} from both sides:`, l: `\\( ${b - q * d}x ${constant(c, false)} = ${q * e} \\)`});
-                    steps.push({m: "Isolate the x term:", l: `\\( ${b - q * d}x = ${q * e - c} \\)`});
-                    steps.push({m: "Solve for x:", l: `\\( x = ${x} \\)`});
                     break;
                 }
                 case 'distributive': {
-                    // Distributive property containing an outer fractional constant [2]
                     let q = getRandom(2, 3);
                     let x = getRandom(-3, 3);
                     let b = getRandom(2, 4);
@@ -345,15 +315,9 @@
                     prob.rhs = `${e}`;
                     correctAnswers = [x.toString()];
                     prob.hint = "Multiply the entire equation by the denominator to clear the fraction, then distribute and solve.";
-
-                    steps.push({m: `Multiply the entire equation by ${q} to clear the fraction:`, l: `\\( (${b}x ${constant(c, false)}) ${term(q * d, 'x', false)} = ${q * e} \\)`});
-                    steps.push({m: "Combine like terms:", l: `\\( ${b + q * d}x ${constant(c, false)} = ${q * e} \\)`});
-                    steps.push({m: "Isolate the x term:", l: `\\( ${b + q * d}x = ${q * e - c} \\)`});
-                    steps.push({m: "Solve for x:", l: `\\( x = ${x} \\)`});
                     break;
                 }
                 case 'ambiguity': {
-                    // Left-to-Right Priority containing standard fraction elements [2]
                     let x = getRandom(-3, 3);
                     let k = getRandom(2, 4); 
                     let b = getRandom(2, 3);
@@ -375,13 +339,6 @@
                     prob.rhs = `${formatFraction(e_num, e_den)}`;
                     correctAnswers = [x.toString()];
                     prob.hint = "Subtract the outside fraction first. Then work strictly left-to-right to resolve the division before multiplying.";
-
-                    steps.push({m: `Subtract ${formatFraction(d_num, d_den)} from both sides:`, l: `\\( ${a} \\div ${b} \\cdot (${c}x ${constant(d, false)}) = ${tempE} \\)`});
-                    steps.push({m: "Solve the division first (strictly left-to-right order of operations):", l: `\\( ${a} \\div ${b} = ${k} \\)`});
-                    steps.push({m: "Rewrite and simplify:", l: `\\( ${k} \\cdot (${c}x ${constant(d, false)}) = ${tempE} \\)`});
-                    steps.push({m: "Divide both sides by the multiplier:", l: `\\( ${c}x ${constant(d, false)} = ${tempE / k} \\)`});
-                    steps.push({m: "Isolate the x term:", l: `\\( ${c}x = ${tempE / k - d} \\)`});
-                    steps.push({m: "Solve for x:", l: `\\( x = ${x} \\)`});
                     break;
                 }
             }
@@ -484,8 +441,15 @@
                 });
                 
                 const solDiv = document.getElementById(`sol-${p.id}`);
-                solDiv.innerHTML = p.revealSteps();
-                solDiv.style.display = 'block';
+                if (isCorrect) {
+                    // Only populate and display the correct answer if they got it right
+                    solDiv.innerHTML = p.revealSteps();
+                    solDiv.style.display = 'block';
+                } else {
+                    // Do not provide answers for incorrect problems
+                    solDiv.innerHTML = '';
+                    solDiv.style.display = 'none';
+                }
                 
                 if (isCorrect) score++;
             });
@@ -581,7 +545,14 @@
                 `;
                 body.appendChild(verifyScript);
 
-                clone.querySelectorAll('.solution-area').forEach(s => s.style.display = 'block');
+                // Show populated solution areas, remove empty ones
+                clone.querySelectorAll('.solution-area').forEach(s => {
+                    if (s.innerHTML.trim() === '') {
+                        s.remove();
+                    } else {
+                        s.style.display = 'block';
+                    }
+                });
 
                 const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
                 const a = document.createElement('a');
