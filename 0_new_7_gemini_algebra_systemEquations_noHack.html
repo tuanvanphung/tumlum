@@ -53,16 +53,17 @@
         .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
         .report-header { text-align: center; background: white; border: 3px solid #27ae60; padding: 20px; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         
-        .section-divider { text-align: center; color: #c0392b; margin: 50px 0 30px 0; border-bottom: 3px solid #c0392b; padding-bottom: 10px; }
-        .section-divider h2 { margin: 0; font-size: 1.8em; }
-        .section-divider p { margin: 5px 0 0 0; color: #555; }
+        /* Temporary style to hide elements during generation to avoid screen flashing */
+        body.typesetting-mode .solution-area {
+            opacity: 0 !important;
+        }
 
         @media print { .controls-container { display: none; } .solution-area { display: block !important; } }
     </style>
 </head>
 <body>
     <h1>Algebra: Systems of Equations</h1>
-    <p class="subtitle">Progressive Difficulty Challenge Test</p>
+    <p class="subtitle">Practice Problems</p>
     
     <div class="controls-container">
         <button id="generateBtn">Generate New Problem Set</button>
@@ -74,7 +75,7 @@
 
     <script>
     (() => {
-        const TOTAL_PROBLEMS = 10;
+        const TOTAL_PROBLEMS = 5;
         const container = document.getElementById('problemContainer');
         const generateBtn = document.getElementById('generateBtn');
         const showBtn = document.getElementById('showSolutionsBtn');
@@ -127,6 +128,10 @@
             return arr;
         }
 
+        function gcd(a, b) {
+            return b ? gcd(b, a % b) : a;
+        }
+
         function term(coeff, v, first) {
             if (coeff === 0) return "";
             let absC = Math.abs(coeff);
@@ -141,6 +146,30 @@
             return c < 0 ? `- ${Math.abs(c)}` : `+ ${c}`;
         }
 
+        function fracTerm(num, den, v, first) {
+            if (num === 0) return "";
+            const g = gcd(Math.abs(num), Math.abs(den));
+            let n = Math.abs(num) / g;
+            let d = Math.abs(den) / g;
+            
+            let sign = (num * den < 0) ? "-" : "+";
+            if (first) {
+                sign = (num * den < 0) ? "-" : "";
+            } else {
+                sign = (num * den < 0) ? "- " : "+ ";
+            }
+            
+            if (d === 1) {
+                if (n === 1) return `${sign}${v}`;
+                return `${sign}${n}${v}`;
+            }
+            
+            if (n === 1) {
+                return `${sign}\\frac{${v}}{${d}}`;
+            }
+            return `${sign}\\frac{${n}${v}}{${d}}`;
+        }
+
         function generateProblem(id, type) {
             let prob = { id, type, expression: "", hint: "" };
             let validateFn;
@@ -151,41 +180,78 @@
 
             switch(type) {
                 case 'hard_elim': {
-                    let x = getRnd(-6, 6); let y = getRnd(-6, 6);
-                    let a1 = getRnd(2, 5); let b1 = getRnd(-5, 5, [0, 1, -1]);
-                    let a2 = getRnd(2, 5, [a1]); let b2 = getRnd(-5, 5, [0, 1, -1, b1]);
-                    while (a1 * b2 === a2 * b1) b2 = getRnd(-5, 5, [0, 1, -1]);
-                    let c1 = a1*x + b1*y; let c2 = a2*x + b2*y;
+                    let d1 = getRnd(2, 5);
+                    let d2 = getRnd(2, 5, [d1]);
                     
-                    prob.expression = `\\begin{cases} ${term(a1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\ ${term(a2, 'x', true)} ${term(b2, 'y', false)} = ${c2} \\end{cases}`;
+                    let kx = getRnd(-2, 2, [0]);
+                    let ky = getRnd(-2, 2, [0]);
+                    let x = kx * d1;
+                    let y = ky * d2;
+                    
+                    let a1 = getRnd(1, 5);
+                    while (gcd(a1, d1) !== 1) a1 = getRnd(1, 5);
+                    let b1 = getRnd(-4, 4, [0]);
+                    
+                    let a2 = getRnd(-4, 4, [0]);
+                    let b2 = getRnd(1, 5);
+                    while (gcd(b2, d2) !== 1) b2 = getRnd(1, 5);
+                    
+                    while ((a1 * b2) === (a2 * b1 * d1 * d2)) {
+                        a2 = getRnd(-4, 4, [0]);
+                    }
+                    
+                    let c1 = a1 * kx + b1 * y;
+                    let c2 = a2 * x + b2 * ky;
+                    
+                    prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\ ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} = ${c2} \\end{cases}`;
                     prob.hint = "Solve for x and y.";
                     
                     validateFn = (inputs) => clean(inputs[0]) === x.toString() && clean(inputs[1]) === y.toString();
-                    stepsArr.push({m: "Step 1: Multiply both equations to align coefficients.", l: `\\text{e.g., Multiply Top by } ${a2} \\text{ and Bottom by } ${a1}.`});
-                    stepsArr.push({m: "Step 2: Eliminate a variable and solve.", l: `\\text{Solve resulting equation to find one variable.}`});
+                    stepsArr.push({m: "Step 1: Multiply both equations by their denominators to clear fractions.", l: `\\begin{cases} ${term(a1, 'x', true)} ${term(b1 * d1, 'y', false)} = ${c1 * d1} \\\\ ${term(a2 * d2, 'x', true)} ${term(b2, 'y', false)} = ${c2 * d2} \\end{cases}`});
+                    stepsArr.push({m: "Step 2: Solve the resulting standard system using elimination.", l: `\\text{Eliminate one variable to solve.}`});
                     stepsArr.push({m: "Step 3: Substitute back.", l: `x = ${x}, \\quad y = ${y}`});
                     break;
                 }
                 case 'scrambled': {
-                    let x = getRnd(-5, 5); let y = getRnd(-5, 5);
-                    let a1 = getRnd(2, 6); let b1 = getRnd(2, 6); let c1 = a1*x + b1*y;
+                    let d1 = getRnd(2, 4);
+                    let d2 = getRnd(2, 4, [d1]);
                     
-                    let eq1 = c1 === 0 ? `${term(a1, 'x', true)} = ${term(-b1, 'y', true)}` : `${term(a1, 'x', true)} = ${c1} ${term(-b1, 'y', false)}`; 
-                    let a2 = getRnd(-5, -2); let b2 = getRnd(2, 6); let c2 = b2*y - a2*x;
-                    let eq2 = `${term(b2, 'y', true)} = ${term(a2, 'x', true)} ${constant(c2, false)}`; 
+                    let kx = getRnd(-2, 2, [0]);
+                    let ky = getRnd(-2, 2, [0]);
+                    let x = kx * d1;
+                    let y = ky * d2;
+                    
+                    let a1 = getRnd(1, 4);
+                    while (gcd(a1, d1) !== 1) a1 = getRnd(1, 4);
+                    let b1 = getRnd(2, 5);
+                    let c1 = a1 * kx + b1 * y;
+                    
+                    let eq1 = c1 === 0 ? `${fracTerm(a1, d1, 'x', true)} = ${term(-b1, 'y', true)}` : `${fracTerm(a1, d1, 'x', true)} = ${c1} ${term(-b1, 'y', false)}`; 
+                    
+                    let a2 = getRnd(-4, -2);
+                    let b2 = getRnd(1, 4);
+                    while (gcd(b2, d2) !== 1) b2 = getRnd(1, 4);
+                    let c2 = b2 * ky - a2 * x;
+                    let eq2 = `${fracTerm(b2, d2, 'y', true)} = ${term(a2, 'x', true)} ${constant(c2, false)}`; 
                     
                     prob.expression = `\\begin{cases} ${eq1} \\\\ ${eq2} \\end{cases}`;
                     prob.hint = "Solve for x and y.";
 
                     validateFn = (inputs) => clean(inputs[0]) === x.toString() && clean(inputs[1]) === y.toString();
-                    stepsArr.push({m: "Step 1: Rearrange both into standard form (Ax + By = C).", l: `\\begin{cases} ${term(a1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\ ${term(-a2, 'x', true)} ${term(b2, 'y', false)} = ${c2} \\end{cases}`});
-                    stepsArr.push({m: "Step 2: Solve using elimination or substitution.", l: `x = ${x}, \\quad y = ${y}`});
+                    stepsArr.push({m: "Step 1: Rearrange both into standard form (Ax + By = C).", l: `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\ ${term(-a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} = ${c2} \\end{cases}`});
+                    stepsArr.push({m: "Step 2: Clear fractions by multiplying each equation by its denominator.", l: `\\begin{cases} ${term(a1, 'x', true)} ${term(b1 * d1, 'y', false)} = ${c1 * d1} \\\\ ${term(-a2 * d2, 'x', true)} ${term(b2, 'y', false)} = ${c2 * d2} \\end{cases}`});
+                    stepsArr.push({m: "Step 3: Solve the system.", l: `x = ${x}, \\quad y = ${y}`});
                     break;
                 }
                 case 'fractional': {
-                    let x = getRnd(-4, 4, [0]) * 2; let y = getRnd(-3, 3, [0]) * 3; 
-                    let d1 = 2; let d2 = 3; let c1 = (x/d1) + (y/d2);
-                    let a2 = getRnd(2, 4); let b2 = getRnd(-4, -1); let c2 = a2*x + b2*y;
+                    let d1 = getRnd(2, 4);
+                    let d2 = getRnd(2, 5, [d1]);
+                    let x = getRnd(-3, 3, [0]) * d1; 
+                    let y = getRnd(-2, 2, [0]) * d2; 
+                    let c1 = (x/d1) + (y/d2);
+                    let a2 = getRnd(2, 4); 
+                    let b2 = getRnd(-4, -1); 
+                    let c2 = a2*x + b2*y;
                     
                     prob.expression = `\\begin{cases} \\frac{x}{${d1}} + \\frac{y}{${d2}} = ${c1} \\\\ ${term(a2, 'x', true)} ${term(b2, 'y', false)} = ${c2} \\end{cases}`;
                     prob.hint = "Solve for x and y.";
@@ -196,42 +262,84 @@
                     break;
                 }
                 case 'three_var': {
-                    let x = getRnd(-3, 3); let y = getRnd(-3, 3); let z = getRnd(-3, 3);
-                    let c1 = x + y + z;
-                    let a2 = getRnd(2, 4); let b2 = getRnd(-3, -1); let c_2 = getRnd(1, 3);
-                    let d2 = a2*x + b2*y + c_2*z;
-                    let a3 = getRnd(-2, 2, [0]); let b3 = getRnd(2, 4); let c_3 = getRnd(-4, -2);
-                    let d3 = a3*x + b3*y + c_3*z;
+                    let d1 = getRnd(2, 4);
+                    let d2 = getRnd(2, 3, [d1]);
                     
-                    prob.expression = `\\begin{cases} x + y + z = ${c1} \\\\ ${term(a2, 'x', true)} ${term(b2, 'y', false)} ${term(c_2, 'z', false)} = ${d2} \\\\ ${term(a3, 'x', true)} ${term(b3, 'y', false)} ${term(c_3, 'z', false)} = ${d3} \\end{cases}`;
+                    let kx = getRnd(-2, 2, [0]);
+                    let ky = getRnd(-2, 2, [0]);
+                    let x = kx * d1;
+                    let y = ky * d2;
+                    let z = getRnd(-3, 3, [0]);
+                    
+                    let a1 = getRnd(1, 3);
+                    while (gcd(a1, d1) !== 1) a1 = getRnd(1, 3);
+                    let c1 = a1 * kx + y + z;
+                    
+                    let a2 = getRnd(2, 4);
+                    let b2 = getRnd(-3, -1);
+                    while (gcd(Math.abs(b2), d2) !== 1) b2 = getRnd(-3, -1);
+                    let c_2 = getRnd(1, 3);
+                    let d2_val = a2 * x + b2 * ky + c_2 * z;
+                    
+                    let a3 = getRnd(-2, 2, [0]);
+                    let b3 = getRnd(2, 4);
+                    let c_3 = getRnd(-4, -2);
+                    let d3 = a3 * x + b3 * y + c_3 * z;
+                    
+                    prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} + y + z = ${c1} \\\\ ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} ${term(c_2, 'z', false)} = ${d2_val} \\\\ ${term(a3, 'x', true)} ${term(b3, 'y', false)} ${term(c_3, 'z', false)} = ${d3} \\end{cases}`;
                     prob.hint = "Solve for all three variables.";
 
                     validateFn = (inputs) => clean(inputs[0]) === x.toString() && clean(inputs[1]) === y.toString() && clean(inputs[2]) === z.toString();
-                    stepsArr.push({m: "Step 1: Isolate a variable in Eq 1 and substitute into Eq 2 & 3 (OR use elimination on pairs).", l: `\\text{Reduces to a 2-variable system.}`});
-                    stepsArr.push({m: "Step 2: Solve the 2x2 system, then substitute back up the chain.", l: `x = ${x}, \\quad y = ${y}, \\quad z = ${z}`});
+                    stepsArr.push({m: "Step 1: Multiply equations to clear fractions and rewrite the system with integer coefficients.", l: `\\begin{cases} ${term(a1, 'x', true)} + ${term(d1, 'y', false)} + ${term(d1, 'z', false)} = ${c1 * d1} \\\\ ${term(a2 * d2, 'x', true)} ${term(b2, 'y', false)} ${term(c_2 * d2, 'z', false)} = ${d2_val * d2} \\\\ ${term(a3, 'x', true)} ${term(b3, 'y', false)} ${term(c_3, 'z', false)} = ${d3} \\end{cases}`});
+                    stepsArr.push({m: "Step 2: Solve the 3x3 integer system using standard elimination or substitution.", l: `x = ${x}, \\quad y = ${y}, \\quad z = ${z}`});
                     break;
                 }
-                case 'lin_quad': {
-                    let x1 = getRnd(-3, 1); let x2 = getRnd(x1+1, 4);
-                    let m = getRnd(-2, 3, [0]); let k = getRnd(-3, 3);
-                    let y1 = m*x1 + k; let y2 = m*x2 + k;
-                    let b = m - (x1 + x2); let c = k + (x1 * x2);
+                case 'heavy_fractional': {
+                    let d1 = getRnd(2, 3);
+                    let d2 = getRnd(2, 3);
+                    let g1 = getRnd(2, 3);
+                    let g2 = getRnd(2, 3);
                     
-                    let eq1 = `y = x^2 ${term(b, 'x', false)} ${constant(c, false)}`;
-                    let eq2 = `y = ${term(m, 'x', true)} ${constant(k, false)}`;
+                    let kx = getRnd(-1, 1, [0]);
+                    let ky = getRnd(-1, 1, [0]);
                     
-                    prob.expression = `\\begin{cases} ${eq1} \\\\ ${eq2} \\end{cases}`;
-                    prob.hint = "Find both intersection points.";
-
-                    validateFn = (inputs) => {
-                        let u1x = clean(inputs[0]), u1y = clean(inputs[1]), u2x = clean(inputs[2]), u2y = clean(inputs[3]);
-                        let match1 = (u1x === x1.toString() && u1y === y1.toString() && u2x === x2.toString() && u2y === y2.toString());
-                        let match2 = (u1x === x2.toString() && u1y === y2.toString() && u2x === x1.toString() && u2y === y1.toString());
-                        return match1 || match2;
-                    };
-                    stepsArr.push({m: "Step 1: Set equations equal to each other.", l: `x^2 ${term(b, 'x', false)} ${constant(c, false)} = ${term(m, 'x', true)} ${constant(k, false)}`});
-                    stepsArr.push({m: "Step 2: Rearrange to standard quadratic form \\(ax^2+bx+c=0\\) and solve for x.", l: `x_1 = ${x1}, \\quad x_2 = ${x2}`});
-                    stepsArr.push({m: "Step 3: Plug both x-values into the linear equation to find their y-values.", l: `(${x1}, ${y1}) \\quad \\text{and} \\quad (${x2}, ${y2})`});
+                    let x = kx * d1 * d2;
+                    let y = ky * g1 * g2;
+                    
+                    let a1 = getRnd(1, 3);
+                    while (gcd(a1, d1) !== 1) a1 = getRnd(1, 3);
+                    
+                    let b1 = getRnd(-3, 3, [0]);
+                    while (gcd(Math.abs(b1), g1) !== 1) b1 = getRnd(-3, 3, [0]);
+                    
+                    let a2 = getRnd(-3, 3, [0]);
+                    while (gcd(Math.abs(a2), d2) !== 1) a2 = getRnd(-3, 3, [0]);
+                    
+                    let b2 = getRnd(1, 3);
+                    while (gcd(b2, g2) !== 1) b2 = getRnd(1, 3);
+                    
+                    while (a1 * b2 * d2 * g1 === a2 * b1 * d1 * g2) {
+                        a2 = getRnd(-3, 3, [0]);
+                        while (gcd(Math.abs(a2), d2) !== 1) a2 = getRnd(-3, 3, [0]);
+                    }
+                    
+                    let c1 = (a1 / d1) * x + (b1 / g1) * y;
+                    let c2 = (a2 / d2) * x + (b2 / g2) * y;
+                    
+                    prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${fracTerm(b1, g1, 'y', false)} = ${c1} \\\\ ${fracTerm(a2, d2, 'x', true)} ${fracTerm(b2, g2, 'y', false)} = ${c2} \\end{cases}`;
+                    prob.hint = "Solve for x and y.";
+                    
+                    validateFn = (inputs) => clean(inputs[0]) === x.toString() && clean(inputs[1]) === y.toString();
+                    
+                    let lcd1 = (d1 * g1) / gcd(d1, g1);
+                    let lcd2 = (d2 * g2) / gcd(d2, g2);
+                    
+                    stepsArr.push({
+                        m: `Step 1: Multiply Eq 1 by its LCD (${lcd1}) and Eq 2 by its LCD (${lcd2}) to clear all fractions.`,
+                        l: `\\begin{cases} ${term((a1 * lcd1) / d1, 'x', true)} ${term((b1 * lcd1) / g1, 'y', false)} = ${c1 * lcd1} \\\\ ${term((a2 * lcd2) / d2, 'x', true)} ${term((b2 * lcd2) / g2, 'y', false)} = ${c2 * lcd2} \\end{cases}`
+                    });
+                    stepsArr.push({m: "Step 2: Solve the resulting system of integer equations.", l: `\\text{Eliminate one variable to find the other.}`});
+                    stepsArr.push({m: "Step 3: Substitute back to get the final answers.", l: `x = ${x}, \\quad y = ${y}`});
                     break;
                 }
             }
@@ -243,30 +351,19 @@
 
         const typeLabels = {
             hard_elim: 'Hard Elimination', scrambled: 'Scrambled Terms', 
-            fractional: 'Fractional Coefficients', three_var: '3-Variables (x,y,z)', lin_quad: 'Linear-Quadratic'
+            fractional: 'Fractional Coefficients', three_var: '3-Variables (x,y,z)', heavy_fractional: 'Heavy Fractional'
         };
 
         function render() {
             container.innerHTML = ''; currentProblems = [];
             showBtn.disabled = false; showBtn.style.backgroundColor = '#27ae60'; showBtn.textContent = "Submit & Generate Report";
             
-            let topTier = ['scrambled', 'scrambled', 'hard_elim', 'hard_elim', 'fractional'];
-            let bottomTier = ['lin_quad', 'lin_quad', 'lin_quad', 'three_var', 'three_var'];
+            let types = ['hard_elim', 'scrambled', 'fractional', 'three_var', 'heavy_fractional'];
+            types = shuffle(types);
             
-            topTier = shuffle(topTier);
-            bottomTier = shuffle(bottomTier);
-            let types = topTier.concat(bottomTier);
-            
-            problemCountEl.innerHTML = `<strong>Questions 1-5:</strong> Challenging Systems <br> <strong>Questions 6-10:</strong> Expert Level (Quadratics & 3-Variables)`;
+            problemCountEl.innerHTML = `<strong>Practice Set:</strong> 5 Algebraic Systems of Equations`;
 
             for (let i = 1; i <= TOTAL_PROBLEMS; i++) {
-                if(i === 6) {
-                    const divider = document.createElement('div');
-                    divider.className = 'section-divider';
-                    divider.innerHTML = `<h2>Expert Level</h2><p>Linear-Quadratics and 3-Variable Systems</p>`;
-                    container.appendChild(divider);
-                }
-
                 let p;
                 let attempts = 0;
                 
@@ -290,18 +387,6 @@
                             <label>&nbsp;&nbsp;y = </label><input type="text" class="user-input" id="input-${i}-y" autocomplete="off">
                             <label>&nbsp;&nbsp;z = </label><input type="text" class="user-input" id="input-${i}-z" autocomplete="off">
                         </div>`;
-                } else if (p.type === 'lin_quad') {
-                    inputHTML = `
-                        <div class="multi-input-row">
-                            <span class="pt-label">Pt 1</span>
-                            <label>x = </label><input type="text" class="user-input" id="input-${i}-1-x" autocomplete="off">
-                            <label>&nbsp; y = </label><input type="text" class="user-input" id="input-${i}-1-y" autocomplete="off">
-                        </div>
-                        <div class="multi-input-row">
-                            <span class="pt-label">Pt 2</span>
-                            <label>x = </label><input type="text" class="user-input" id="input-${i}-2-x" autocomplete="off">
-                            <label>&nbsp; y = </label><input type="text" class="user-input" id="input-${i}-2-y" autocomplete="off">
-                        </div>`;
                 } else {
                     inputHTML = `
                         <div class="multi-input-row">
@@ -316,7 +401,7 @@
                     <div class="problem-header">
                         <span class="problem-number">#${i}</span>
                         <div class="problem-expression">\\( ${p.expression} \\)</div>
-                        <span class="problem-tag" style="background-color: ${i >= 6 ? '#c0392b' : '#ecf0f1'}; color: ${i >= 6 ? 'white' : '#7f8c8d'};">${typeLabels[p.type]}</span>
+                        <span class="problem-tag" style="background-color: #ecf0f1; color: #7f8c8d;">${typeLabels[p.type]}</span>
                     </div>
                     <div class="answer-box">
                         ${inputHTML}
@@ -341,6 +426,9 @@
         function check() {
             let score = 0;
 
+            // Set temporary class to prevent visible flashing of answers on screen during typesetting
+            document.body.classList.add('typesetting-mode');
+
             currentProblems.forEach(p => {
                 let inputElements = [];
                 let userValues = [];
@@ -351,13 +439,6 @@
                     const iz = document.getElementById(`input-${p.id}-z`);
                     inputElements.push(ix, iy, iz);
                     userValues.push(ix.value, iy.value, iz.value);
-                } else if (p.type === 'lin_quad') {
-                    const i1x = document.getElementById(`input-${p.id}-1-x`);
-                    const i1y = document.getElementById(`input-${p.id}-1-y`);
-                    const i2x = document.getElementById(`input-${p.id}-2-x`);
-                    const i2y = document.getElementById(`input-${p.id}-2-y`);
-                    inputElements.push(i1x, i1y, i2x, i2y);
-                    userValues.push(i1x.value, i1y.value, i2x.value, i2y.value);
                 } else {
                     const ix = document.getElementById(`input-${p.id}-x`);
                     const iy = document.getElementById(`input-${p.id}-y`);
@@ -383,6 +464,9 @@
             showBtn.innerHTML = `Score: ${score}/${TOTAL_PROBLEMS} (${pct}%)<br><small>${timeStr}</small>`;
             
             typesetMath(() => {
+                // Remove typesetting-mode class before cloning so report rendering is unaffected
+                document.body.classList.remove('typesetting-mode');
+
                 const clone = document.documentElement.cloneNode(true);
                 clone.querySelectorAll('script, .controls-container').forEach(el => el.remove());
                 
@@ -476,6 +560,13 @@
                 a.href = URL.createObjectURL(blob);
                 a.download = `Systems_Report_${getTimestamp()}.html`;
                 a.click();
+
+                // Clear out and hide the solution guides on the user's active screen
+                currentProblems.forEach(p => {
+                    const solDiv = document.getElementById(`sol-${p.id}`);
+                    solDiv.innerHTML = '';
+                    solDiv.style.display = 'none';
+                });
             });
         }
 
