@@ -83,16 +83,16 @@
         const problemCountEl = document.getElementById('problemCount');
         let currentProblems = [];
 
-        // State lock to prevent duplicate submissions or DOM modifications [2]
+        // State lock to prevent duplicate submissions or DOM modifications
         let isSubmitted = false;
 
-        // Secret salt to generate unpredictable hashes. Do not change this unless you update the verifier salt as well.
+        // Secret salt to generate unpredictable hashes.
         const SECRET_SALT = "AlgebraMastery_SecureSalt_98234";
 
         let savedHistory = JSON.parse(localStorage.getItem('algebraMasteryHistory')) || [];
         let usedExpressions = new Set(savedHistory);
 
-        // Private encryption key and cipher utility [2]
+        // Private encryption key and cipher utility
         const CIPHER_KEY = "SystemsOfEq_SecureKey_4829";
 
         function encrypt(str) {
@@ -112,7 +112,7 @@
             return xor;
         }
 
-        // Verification token hash generator (Deterministic algorithm)
+        // Verification token hash generator
         function generateWatermark(score, total, timestamp) {
             const raw = `${score}|${total}|${timestamp}|${SECRET_SALT}`;
             let hash1 = 5381;
@@ -212,8 +212,8 @@
                     x = kx * d1;
                     y = ky * d2;
                     
-                    let a1 = getRnd(1, 5);
-                    while (gcd(a1, d1) !== 1) a1 = getRnd(1, 5);
+                    // Force a1 = 1 so that after clearing fractions, x has a coefficient of 1 (substitution friendly)
+                    let a1 = 1; 
                     let b1 = getRnd(-4, 4, [0]);
                     
                     let a2 = getRnd(-4, 4, [0]);
@@ -228,10 +228,10 @@
                     let c2 = a2 * x + b2 * ky;
                     
                     prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\ ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} = ${c2} \\end{cases}`;
-                    prob.hint = "Solve for x and y.";
+                    prob.hint = "Clear fractions first, then use substitution.";
                     
                     stepsArr.push({m: "Step 1: Multiply both equations by their denominators to clear fractions.", l: `\\begin{cases} ${term(a1, 'x', true)} ${term(b1 * d1, 'y', false)} = ${c1 * d1} \\\\ ${term(a2 * d2, 'x', true)} ${term(b2, 'y', false)} = ${c2 * d2} \\end{cases}`});
-                    stepsArr.push({m: "Step 2: Solve the resulting standard system using elimination.", l: `\\text{Eliminate one variable to solve.}`});
+                    stepsArr.push({m: "Step 2: Solve the resulting system using substitution (x has a coefficient of 1).", l: `\\text{Isolate x in the first equation and substitute.}`});
                     stepsArr.push({m: "Step 3: Substitute back.", l: `x = ${x}, \\quad y = ${y}`});
                     break;
                 }
@@ -244,8 +244,8 @@
                     x = kx * d1;
                     y = ky * d2;
                     
-                    let a1 = getRnd(1, 4);
-                    while (gcd(a1, d1) !== 1) a1 = getRnd(1, 4);
+                    // Force a1 = 1 so x isolates cleanly
+                    let a1 = 1;
                     let b1 = getRnd(2, 5);
                     let c1 = a1 * kx + b1 * y;
                     
@@ -254,15 +254,22 @@
                     let a2 = getRnd(-4, -2);
                     let b2 = getRnd(1, 4);
                     while (gcd(b2, d2) !== 1) b2 = getRnd(1, 4);
+                    
+                    // Avoid dependency condition
+                    while ((1 * b2) === (-a2 * d2 * b1 * d1)) {
+                        b2 = getRnd(1, 4);
+                        while (gcd(b2, d2) !== 1) b2 = getRnd(1, 4);
+                    }
+
                     let c2 = b2 * ky - a2 * x;
                     let eq2 = `${fracTerm(b2, d2, 'y', true)} = ${term(a2, 'x', true)} ${constant(c2, false)}`; 
                     
                     prob.expression = `\\begin{cases} ${eq1} \\\\ ${eq2} \\end{cases}`;
-                    prob.hint = "Solve for x and y.";
+                    prob.hint = "Rearrange, clear fractions, and substitute.";
 
                     stepsArr.push({m: "Step 1: Rearrange both into standard form (Ax + By = C).", l: `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\ ${term(-a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} = ${c2} \\end{cases}`});
                     stepsArr.push({m: "Step 2: Clear fractions by multiplying each equation by its denominator.", l: `\\begin{cases} ${term(a1, 'x', true)} ${term(b1 * d1, 'y', false)} = ${c1 * d1} \\\\ ${term(-a2 * d2, 'x', true)} ${term(b2, 'y', false)} = ${c2 * d2} \\end{cases}`});
-                    stepsArr.push({m: "Step 3: Solve the system.", l: `x = ${x}, \\quad y = ${y}`});
+                    stepsArr.push({m: "Step 3: Solve using substitution (isolate x in Eq 1).", l: `x = ${x}, \\quad y = ${y}`});
                     break;
                 }
                 case 'fractional': {
@@ -271,15 +278,17 @@
                     x = getRnd(-3, 3, [0]) * d1; 
                     y = getRnd(-2, 2, [0]) * d2; 
                     let c1 = (x/d1) + (y/d2);
-                    let a2 = getRnd(2, 4); 
+                    
+                    // Force a2 = 1 so the second equation has no fractional coefficients during substitution
+                    let a2 = 1; 
                     let b2 = getRnd(-4, -1); 
                     let c2 = a2*x + b2*y;
                     
                     prob.expression = `\\begin{cases} \\frac{x}{${d1}} + \\frac{y}{${d2}} = ${c1} \\\\ ${term(a2, 'x', true)} ${term(b2, 'y', false)} = ${c2} \\end{cases}`;
-                    prob.hint = "Solve for x and y.";
+                    prob.hint = "Clear fractions or isolate x in the second equation.";
 
                     stepsArr.push({m: `Step 1: Multiply the top equation by the LCD (${d1 * d2}) to clear fractions.`, l: `${term(d2, 'x', true)} ${term(d1, 'y', false)} = ${c1 * d1 * d2}`});
-                    stepsArr.push({m: "Step 2: Solve the new system.", l: `x = ${x}, \\quad y = ${y}`});
+                    stepsArr.push({m: "Step 2: Solve the system using substitution (isolate x in the second equation).", l: `x = ${x}, \\quad y = ${y}`});
                     break;
                 }
                 case 'three_var': {
@@ -292,8 +301,8 @@
                     y = ky * d2;
                     z = getRnd(-3, 3, [0]);
                     
-                    let a1 = getRnd(1, 3);
-                    while (gcd(a1, d1) !== 1) a1 = getRnd(1, 3);
+                    // Force a1 = 1 so the first eq clears perfectly for substituting x
+                    let a1 = 1;
                     let c1 = a1 * kx + y + z;
                     
                     let a2 = getRnd(2, 4);
@@ -308,16 +317,18 @@
                     let d3 = a3 * x + b3 * y + c_3 * z;
                     
                     prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} + y + z = ${c1} \\\\ ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} ${term(c_2, 'z', false)} = ${d2_val} \\\\ ${term(a3, 'x', true)} ${term(b3, 'y', false)} ${term(c_3, 'z', false)} = ${d3} \\end{cases}`;
-                    prob.hint = "Solve for all three variables.";
+                    prob.hint = "Clear fractions, then use substitution.";
 
                     stepsArr.push({m: "Step 1: Multiply equations to clear fractions and rewrite the system with integer coefficients.", l: `\\begin{cases} ${term(a1, 'x', true)} + ${term(d1, 'y', false)} + ${term(d1, 'z', false)} = ${c1 * d1} \\\\ ${term(a2 * d2, 'x', true)} ${term(b2, 'y', false)} ${term(c_2 * d2, 'z', false)} = ${d2_val * d2} \\\\ ${term(a3, 'x', true)} ${term(b3, 'y', false)} ${term(c_3, 'z', false)} = ${d3} \\end{cases}`});
-                    stepsArr.push({m: "Step 2: Solve the 3x3 integer system using standard elimination or substitution.", l: `x = ${x}, \\quad y = ${y}, \\quad z = ${z}`});
+                    stepsArr.push({m: "Step 2: Solve the 3x3 system using substitution (x is easy to isolate in Eq 1).", l: `x = ${x}, \\quad y = ${y}, \\quad z = ${z}`});
                     break;
                 }
                 case 'heavy_fractional': {
-                    let d1 = getRnd(2, 3);
+                    // Pre-defined denominator options allowing a mathematically seamless substitution
+                    let d1_options = [4, 6];
+                    let d1 = d1_options[getRnd(0, 1)];
+                    let g1 = d1 / 2;
                     let d2 = getRnd(2, 3);
-                    let g1 = getRnd(2, 3);
                     let g2 = getRnd(2, 3);
                     
                     let kx = getRnd(-1, 1, [0]);
@@ -326,8 +337,8 @@
                     x = kx * d1 * d2;
                     y = ky * g1 * g2;
                     
-                    let a1 = getRnd(1, 3);
-                    while (gcd(a1, d1) !== 1) a1 = getRnd(1, 3);
+                    // Force a1 = 1 so clearing multiplying by the LCD perfectly produces a coefficient of exactly 1
+                    let a1 = 1;
                     
                     let b1 = getRnd(-3, 3, [0]);
                     while (gcd(Math.abs(b1), g1) !== 1) b1 = getRnd(-3, 3, [0]);
@@ -347,22 +358,22 @@
                     let c2 = (a2 / d2) * x + (b2 / g2) * y;
                     
                     prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${fracTerm(b1, g1, 'y', false)} = ${c1} \\\\ ${fracTerm(a2, d2, 'x', true)} ${fracTerm(b2, g2, 'y', false)} = ${c2} \\end{cases}`;
-                    prob.hint = "Solve for x and y.";
+                    prob.hint = "Clear fractions first, then use substitution.";
                     
-                    let lcd1 = (d1 * g1) / gcd(d1, g1);
+                    let lcd1 = d1;
                     let lcd2 = (d2 * g2) / gcd(d2, g2);
                     
                     stepsArr.push({
                         m: `Step 1: Multiply Eq 1 by its LCD (${lcd1}) and Eq 2 by its LCD (${lcd2}) to clear all fractions.`,
                         l: `\\begin{cases} ${term((a1 * lcd1) / d1, 'x', true)} ${term((b1 * lcd1) / g1, 'y', false)} = ${c1 * lcd1} \\\\ ${term((a2 * lcd2) / d2, 'x', true)} ${term((b2 * lcd2) / g2, 'y', false)} = ${c2 * lcd2} \\end{cases}`
                     });
-                    stepsArr.push({m: "Step 2: Solve the resulting system of integer equations.", l: `\\text{Eliminate one variable to find the other.}`});
+                    stepsArr.push({m: "Step 2: Solve the system using substitution (isolate x in Eq 1).", l: `\\text{Substitute x into the other equation.}`});
                     stepsArr.push({m: "Step 3: Substitute back to get the final answers.", l: `x = ${x}, \\quad y = ${y}`});
                     break;
                 }
             }
             
-            // Build and encrypt the secured verification payload [2]
+            // Build and encrypt the secured verification payload
             const payload = {
                 answers: (type === 'three_var') ? [x.toString(), y.toString(), z.toString()] : [x.toString(), y.toString()],
                 stepsHTML: buildStepsHTML(stepsArr)
@@ -373,7 +384,7 @@
         }
 
         const typeLabels = {
-            hard_elim: 'Hard Elimination', scrambled: 'Scrambled Terms', 
+            hard_elim: 'System with Fractions', scrambled: 'Scrambled Terms', 
             fractional: 'Fractional Coefficients', three_var: '3-Variables (x,y,z)', heavy_fractional: 'Heavy Fractional'
         };
 
@@ -448,13 +459,11 @@
         }
 
         function check() {
-            // Guard clause to lock inputs and submission on submit [2]
             if (isSubmitted) return;
             isSubmitted = true;
 
             let score = 0;
 
-            // Set temporary class to prevent visible flashing of answers on screen during typesetting
             document.body.classList.add('typesetting-mode');
 
             currentProblems.forEach(p => {
@@ -474,7 +483,6 @@
                     userValues.push(ix.value, iy.value);
                 }
 
-                // Decrypt secure validation payload for evaluation [2]
                 const payload = JSON.parse(decrypt(p.securedPayload));
                 const answers = payload.answers;
 
@@ -489,10 +497,9 @@
 
                 inputElements.forEach(el => {
                     el.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
-                    el.disabled = true; // Permanently lock inputs [2]
+                    el.disabled = true;
                 });
                 
-                // Inject the decrypted step-by-step guides [2]
                 const solDiv = document.getElementById(`sol-${p.id}`);
                 solDiv.innerHTML = payload.stepsHTML;
                 solDiv.style.display = 'block';
@@ -507,7 +514,6 @@
             showBtn.innerHTML = `Score: ${score}/${TOTAL_PROBLEMS} (${pct}%)<br><small>${timeStr}</small>`;
             
             typesetMath(() => {
-                // Remove typesetting-mode class before cloning so report rendering is unaffected
                 document.body.classList.remove('typesetting-mode');
 
                 const clone = document.documentElement.cloneNode(true);
@@ -515,7 +521,6 @@
                 
                 const body = clone.querySelector('body');
                 
-                // Generate a deterministic hash security token for verification [2]
                 const watermark = generateWatermark(score, TOTAL_PROBLEMS, timeStr);
 
                 const header = document.createElement('div');
@@ -549,7 +554,6 @@
                     inputs[idx].parentNode.replaceChild(span, inputs[idx]);
                 });
                 
-                // Inject the self-checking validation script into the report HTML [2]
                 const verifyScript = document.createElement('script');
                 verifyScript.textContent = `
                     (() => {
@@ -604,7 +608,6 @@
                 a.download = `Systems_Report_${getTimestamp()}.html`;
                 a.click();
 
-                // Clear out and hide the solution guides on the user's active screen
                 currentProblems.forEach(p => {
                     const solDiv = document.getElementById(`sol-${p.id}`);
                     solDiv.innerHTML = '';
