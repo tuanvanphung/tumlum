@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastery Test: Order of Operations</title>
+    
+    <!-- MathJax Configuration and Script -->
+    <script>
+      MathJax = {
+        tex: { inlineMath: [['\\(', '\\)']] },
+        chtml: { scale: 1.1 } 
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f0f2f5; color: #333; }
+        h1 { text-align: center; color: #1a2a6c; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        
+        .controls-container { text-align: center; padding: 20px; margin-bottom: 30px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        button { padding: 12px 28px; font-size: 1.05em; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 5px 10px; transition: 0.2s; }
+        #generateBtn { background-color: #3498db; }
+        #showSolutionsBtn { background-color: #27ae60; }
+        #showSolutionsBtn:disabled { background-color: #7f8c8d; opacity: 1; cursor: default; }
+        .problem-count { font-size: 0.95em; color: #555; margin-top: 8px; font-weight: bold; }
+        
+        .problem-list { list-style-type: none; padding-left: 0; max-width: 850px; margin: 0 auto; }
+        .problem-card { margin-bottom: 30px; padding: 25px; border-radius: 12px; background-color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 8px solid #8e44ad; }
+        
+        .problem-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;}
+        .problem-number { font-weight: bold; font-size: 1.3em; color: #95a5a6; }
+        .problem-expression { font-size: 1.5em; color: #2c3e50; overflow-x: auto; padding: 5px 0;}
+        .problem-tag { font-size: 0.7em; background: #ecf0f1; color: #7f8c8d; padding: 4px 12px; border-radius: 20px; font-weight: bold; white-space: nowrap;}
+        
+        .answer-box { display: flex; flex-direction: column; background: #fdfdfd; padding: 15px; border: 1px solid #eee; border-radius: 8px; align-items: center; }
+        .multi-input-row { display: flex; gap: 15px; justify-content: center; align-items: center; margin: 6px 0; }
+        .multi-input-row label { font-size: 1.2em; font-weight: bold; }
+        .multi-input-row input { width: 120px; padding: 10px; font-size: 1.2em; border: 2px solid #ced4da; border-radius: 6px; text-align: center; outline: none; }
+        .multi-input-row input:disabled { background-color: #e9ecef; color: #495057; cursor: not-allowed; }
+        
+        .input-hint { font-size: 0.85em; color: #888; margin-top: 8px; text-align: center;}
+        
+        .solution-area { display: none; margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; text-align: center; }
+        
+        .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; }
+        .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
+        .report-header { text-align: center; background: white; border: 3px solid #27ae60; padding: 20px; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        /* Temporary style to hide elements during generation to avoid screen flashing */
+        body.typesetting-mode .solution-area {
+            opacity: 0 !important;
+        }
+
+        @media print { .controls-container { display: none; } .solution-area { display: block !important; } }
+    </style>
+</head>
+<body>
+    <h1>Mastery Test: Order of Operations</h1>
+    <p class="subtitle">PEMDAS, Nested Brackets, Complex Fractions, Absolute Values & Exponents</p>
+    
+    <div class="controls-container">
+        <button id="generateBtn">Generate New Problem Set</button>
+        <button id="showSolutionsBtn">Submit & Generate Report</button>
+        <div class="problem-count" id="problemCount"></div>
+    </div>
+    
+    <div id="problemContainer" class="problem-list"></div>
+
+    <script>
+    (() => {
+        const container = document.getElementById('problemContainer');
+        const generateBtn = document.getElementById('generateBtn');
+        const showBtn = document.getElementById('showSolutionsBtn');
+        const problemCountEl = document.getElementById('problemCount');
+        let currentProblems = [];
+
+        // State lock to prevent duplicate submissions or DOM modifications [2]
+        let isSubmitted = false;
+
+        const EPSILON = 0.00001; 
+        const MAX_INTERMEDIATE_VALUE = 99999; 
+
+        // Private encryption key and cipher utility [2]
+        const CIPHER_KEY = "OrderOfOps_SecureKey_9812";
+
+        function encrypt(str) {
+            let xor = "";
+            for (let i = 0; i < str.length; i++) {
+                xor += String.fromCharCode(str.charCodeAt(i) ^ CIPHER_KEY.charCodeAt(i % CIPHER_KEY.length));
+            }
+            return btoa(unescape(encodeURIComponent(xor)));
+        }
+
+        function decrypt(str) {
+            let decoded = decodeURIComponent(escape(atob(str)));
+            let xor = "";
+            for (let i = 0; i < decoded.length; i++) {
+                xor += String.fromCharCode(decoded.charCodeAt(i) ^ CIPHER_KEY.charCodeAt(i % CIPHER_KEY.length));
+            }
+            return xor;
+        }
+
+        // =============================================================
+        // UTILITY & MATH ENGINE
+        // =============================================================
+        function isValueTooLarge(frac) {
+            if (!frac || typeof frac.num === 'undefined' || typeof frac.den === 'undefined') return true;
+            return Math.abs(frac.num) > MAX_INTERMEDIATE_VALUE || Math.abs(frac.den) > MAX_INTERMEDIATE_VALUE;
+        }
+        function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        function getRandomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        function simplifyFraction(num, den) {
+            function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+            if (den === 0) {
+                if (num === 0) return { num: 0, den: 0, isFraction: true, value: NaN, error: "0/0" };
+                return { num: num > 0 ? 1 : -1, den: 0, isFraction: true, value: Infinity * Math.sign(num), error: "Div 0" };
+            }
+            if (den < 0) { num = -num; den = -den; }
+            const common = gcd(Math.abs(num), Math.abs(den));
+            return { 
+                num: num / common, 
+                den: den / common, 
+                isFraction: true, 
+                value: (num / common) / (den / common),
+                isDisplayFraction: true 
+            };
+        }
+
+        function toFraction(numInput) {
+            if (typeof numInput === 'object' && numInput.isFraction) return numInput; 
+            let originalNumInputStr = String(numInput); 
+            let num = Number(numInput);
+            let originalDecimalValue = undefined;
+            if (originalNumInputStr.includes('.') && !originalNumInputStr.includes('e')) {
+                originalDecimalValue = parseFloat(originalNumInputStr); 
+            } else if (typeof numInput === 'number' && numInput % 1 !== 0) {
+                originalDecimalValue = numInput; 
+            }
+            
+            let result;
+            if (Number.isNaN(num)) result = { num: 0, den: 0, isFraction: true, value: NaN, error: "NaN", originalDecimalValue };
+            else if (num === Infinity) result = { num: 1, den: 0, isFraction: true, value: Infinity, originalDecimalValue };
+            else if (num === -Infinity) result = { num: -1, den: 0, isFraction: true, value: -Infinity, originalDecimalValue };
+            else if (num % 1 !== 0) { 
+                if (originalNumInputStr.includes('.')) {
+                    const decimalPlaces = originalNumInputStr.split('.')[1].length;
+                    const denominator = Math.pow(10, decimalPlaces);
+                    const numerator = Math.round(num * denominator); 
+                    result = { ...simplifyFraction(numerator, denominator), originalDecimalValue };
+                } else {
+                    result = { num: Math.round(num), den: 1, isFraction: true, value: Math.round(num), originalDecimalValue };
+                }
+            } else {
+                result = { num: Math.round(num), den: 1, isFraction: true, value: Math.round(num), originalDecimalValue };
+            }
+            
+            result.isDisplayFraction = false;
+            return result;
+        }
+
+        function addFrac(f1, f2) { return simplifyFraction(f1.num * f2.den + f2.num * f1.den, f1.den * f2.den); }
+        function subFrac(f1, f2) { return simplifyFraction(f1.num * f2.den - f2.num * f1.den, f1.den * f2.den); }
+        function mulFrac(f1, f2) { return simplifyFraction(f1.num * f2.num, f1.den * f2.den); }
+        function divFrac(f1, f2) {
+            if (f2.num === 0) return { num: 1, den: 0, isFraction: true, value: Infinity, error: "Div 0" };
+            return simplifyFraction(f1.num * f2.den, f1.den * f2.num);
+        }
+        function powFrac(base, exp) {
+            if (base.num === 0 && exp < 0) return { num: 1, den: 0, isFraction: true, value: Infinity, error: "0^-exp" };
+            if (exp === 0) return toFraction(1);
+            if (exp % 1 !== 0) return toFraction(Math.pow(base.value, exp));
+            let result = toFraction(1);
+            let absExp = Math.abs(exp);
+            for (let i = 0; i < absExp; i++) { 
+                result = mulFrac(result, base); 
+                if (isValueTooLarge(result) && i < absExp - 1) return { ...result, error: `Too large`};
+            }
+            if (exp < 0) result = divFrac(toFraction(1), result);
+            return result;
+        }
+        function absFrac(f) { 
+            return { ...f, num: Math.abs(f.num), value: Math.abs(f.value || 0) }; 
+        }
+
+        // =============================================================
+        // LATEX FORMATTING
+        // =============================================================
+        function formatFractionLaTeX(num, den) {
+            if (den === 1) return `${num}`;
+            if (num < 0) return `-\\frac{${Math.abs(num)}}{${den}}`;
+            return `\\frac{${num}}{${den}}`;
+        }
+        function formatNumber(n, preferDecimalForOriginal = false) {
+            if (!n) return 'Error';
+            if (n.isFraction) {
+                if (preferDecimalForOriginal && n.originalDecimalValue !== undefined) {
+                    const str = n.originalDecimalValue.toString();
+                    if (/^-?\d+\.\d$/.test(str) || /^-?\d+$/.test(str)) {
+                        if (!str.endsWith(".0") && /\.\d$/.test(str)) return str;
+                    }
+                }
+                if (n.den === 1) return n.num.toString();
+                if (Number.isNaN(n.value)) return "\\text{NaN}";
+                if (n.value === Infinity) return "\\infty";
+                if (n.value === -Infinity) return "-\\infty";
+                return formatFractionLaTeX(n.num, n.den);
+            }
+            return n.value !== undefined ? n.value.toString() : 'Error';
+        }
+        function formatBaseForExponent(baseFraction, preferDecimal = false) {
+            if (!baseFraction) return '(Error)';
+            const formatted = formatNumber(baseFraction, preferDecimal);
+            if (baseFraction.num < 0 || (baseFraction.den !== 1 && baseFraction.den !== 0) || formatted.includes('.')) {
+                return `\\left(${formatted}\\right)`;
+            }
+            return formatted;
+        }
+
+        // =============================================================
+        // OPERAND GENERATION
+        // =============================================================
+        function generateOperand(options = {}) {
+            const { min = -9, max = 9, forceFraction = false, nonZero = false, perfectSquare = false, allowDecimal = true, forceInteger = false } = options;
+            if (perfectSquare) {
+                let val = toFraction(Math.pow(getRandomItem([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 2));
+                val.isDisplayFraction = false;
+                return val;
+            }
+            
+            let value; 
+            let typeRoll = forceInteger ? 0 : Math.random();
+            
+            if (forceFraction) {
+                let den = getRandomItem([2, 3, 4, 5]); 
+                let num = getRandomInt(1, den * 2) * (Math.random() < 0.4 ? -1 : 1); 
+                value = simplifyFraction(num, den);
+                value.isDisplayFraction = true;
+            } else if (typeRoll < 0.65) { 
+                value = toFraction(getRandomInt(min, max));
+                value.isDisplayFraction = false;
+            } else if (allowDecimal && typeRoll < 0.90) { 
+                let intPart = getRandomInt(Math.max(min, -7), Math.min(max, 7));
+                let decDigit = getRandomItem([5, 1, 2, 4, 8]);
+                value = toFraction(`${intPart}.${decDigit}`); 
+                value.isDisplayFraction = false;
+            } else { 
+                let den = getRandomItem([2, 3, 4]);
+                let num = getRandomInt(1, den * 1.5) * (Math.random() < 0.4 ? -1 : 1);
+                value = simplifyFraction(num, den);
+                value.isDisplayFraction = true;
+            }
+            
+            if (nonZero && value.num === 0) { 
+                value = toFraction(getRandomItem([-2,-1,1,2]));
+                value.isDisplayFraction = false;
+            }
+            return value;
+        }
+        function generatePowerOperands() {
+            let base, exp;
+            const expType = Math.random();
+            if (expType < 0.35) { exp = getRandomInt(-2, -1); base = generateOperand({min: -5, max: 5, nonZero: true}); }
+            else if (expType < 0.55) { exp = 0; base = generateOperand({min: -7, max: 7}); }
+            else { exp = getRandomInt(2, 3); base = generateOperand({min: -5, max: 5}); }
+            return { base, exp };
+        }
+
+        // =============================================================
+        // PROBLEM TEMPLATES (17 Unique Templates)
+        // =============================================================
+        const problemTemplates = [
+            function t1_basicPEMDAS() {
+                this.tag = 'Basic PEMDAS';
+                const A = generateOperand({min: 1, max: 12, forceInteger: true});
+                const B = generateOperand({min: 2, max: 9, forceInteger: true, nonZero: true});
+                const C = generateOperand({min: 2, max: 9, forceInteger: true, nonZero: true});
+                const E = generateOperand({min: 2, max: 9, forceInteger: true, nonZero: true});
+                const F_mult = generateOperand({min: 1, max: 9, forceInteger: true, nonZero: true});
+                const F = mulFrac(F_mult, E);
+                const op1 = getRandomItem(['+', '-']); const op2 = getRandomItem(['+', '-']);
+                
+                let vBC = this.checkInt(mulFrac(B, C));
+                let vFE = this.checkInt(divFrac(F, E));
+                let v3 = this.checkInt(op1 === '+' ? addFrac(A, vBC) : subFrac(A, vBC));
+                this.finalAnswer = this.checkInt(op2 === '+' ? addFrac(v3, vFE) : subFrac(v3, vFE));
+                this.problemString = `${formatNumber(A)} ${op1} ${formatNumber(B)} \\times ${formatNumber(C)} ${op2} ${formatNumber(F)} \\div ${formatNumber(E)}`;
+                
+                this.rpnTokens = [
+                    { val: A, isOp: false },
+                    { val: B, isOp: false },
+                    { val: C, isOp: false },
+                    { val: '*', isOp: true },
+                    { val: op1, isOp: true },
+                    { val: F, isOp: false },
+                    { val: E, isOp: false },
+                    { val: '/', isOp: true },
+                    { val: op2, isOp: true }
+                ];
+            },
+            function t2_basicParentheses() {
+                this.tag = 'Parentheses Grouping';
+                const A = generateOperand({min: 2, max: 9, forceInteger: true, nonZero: true});
+                const B = generateOperand({min: 1, max: 9, forceInteger: true});
+                const C = generateOperand({min: 1, max: 9, forceInteger: true});
+                const D_div = generateOperand({min: 2, max: 6, forceInteger: true, nonZero: true});
+                const D_num = mulFrac(D_div, generateOperand({min: 1, max: 5, forceInteger: true, nonZero: true}));
+                const E = generateOperand({min: 1, max: 9, forceInteger: true});
+                const op1 = getRandomItem(['+', '-']); const op2 = getRandomItem(['+', '-']);
+                
+                let vp = this.checkInt(op1 === '+' ? addFrac(B, C) : subFrac(B, C));
+                let vm = this.checkInt(mulFrac(A, vp));
+                let vd = this.checkInt(divFrac(D_num, D_div));
+                let v4 = this.checkInt(op2 === '+' ? addFrac(vm, vd) : subFrac(vm, vd));
+                this.finalAnswer = this.checkInt(addFrac(v4, E));
+                this.problemString = `${formatNumber(A)} \\times \\left(${formatNumber(B)} ${op1} ${formatNumber(C)}\\right) ${op2} ${formatNumber(D_num)} \\div ${formatNumber(D_div)} + ${formatNumber(E)}`;
+                
+                this.rpnTokens = [
+                    { val: A, isOp: false },
+                    { val: B, isOp: false },
+                    { val: C, isOp: false },
+                    { val: op1, isOp: true },
+                    { val: '*', isOp: true },
+                    { val: D_num, isOp: false },
+                    { val: D_div, isOp: false },
+                    { val: '/', isOp: true },
+                    { val: op2, isOp: true },
+                    { val: E, isOp: false },
+                    { val: '+', isOp: true }
+                ];
+            },
+            function t3_negExponentNuance() {
+                this.tag = 'Exponent Base Nuance';
+                const A_base = generateOperand({min: 2, max: 5, forceInteger: true, nonZero: true});
+                const exp = getRandomItem([2, 3]);
+                const B = generateOperand({min: -9, max: 9, forceInteger: true});
+                const op1 = getRandomItem(['+', '-']);
+                
+                let v_pow1 = this.checkInt(mulFrac(toFraction(-1), powFrac(A_base, exp)));
+                let v_pow2 = this.checkInt(powFrac(mulFrac(toFraction(-1), A_base), exp));
+                let v3 = this.checkInt(op1 === '+' ? addFrac(v_pow1, v_pow2) : subFrac(v_pow1, v_pow2));
+                this.finalAnswer = this.checkInt(addFrac(v3, B));
+                this.problemString = `-${formatNumber(A_base)}^{${exp}} ${op1} \\left(-${formatNumber(A_base)}\\right)^{${exp}} + ${formatNumber(B)}`;
+                
+                this.rpnTokens = [
+                    { val: A_base, isOp: false },
+                    { val: toFraction(exp), isOp: false },
+                    { val: '^', isOp: true },
+                    { val: 'NEG', isOp: true },
+                    { val: A_base, isOp: false },
+                    { val: 'NEG', isOp: true },
+                    { val: toFraction(exp), isOp: false },
+                    { val: '^', isOp: true },
+                    { val: op1, isOp: true },
+                    { val: B, isOp: false },
+                    { val: '+', isOp: true }
+                ];
+            },
+            function t4_exponentFracDec() {
+                this.tag = 'Fraction/Decimal Exponents';
+                const f_base = simplifyFraction(getRandomInt(1, 4), getRandomItem([2, 3]));
+                f_base.isDisplayFraction = true;
+                const e1 = getRandomItem([2, 3]);
+                const d_base = toFraction(getRandomItem(["0.1", "0.2", "0.5", "1.5"]));
+                const e2 = getRandomItem([2, 3]);
+                const C = generateOperand({min: -5, max: 5, forceInteger: true});
+                const op1 = getRandomItem(['+', '-']); const op2 = getRandomItem(['+', '-']);
+                
+                let v1 = this.checkInt(powFrac(f_base, e1));
+                let v2 = this.checkInt(powFrac(d_base, e2));
+                let v3 = this.checkInt(op1 === '+' ? addFrac(v1, v2) : subFrac(v1, v2));
+                this.finalAnswer = this.checkInt(op2 === '+' ? addFrac(v3, C) : subFrac(v3, C));
+                this.problemString = `\\left(${formatNumber(f_base)}\\right)^{${e1}} ${op1} \\left(${formatNumber(d_base, true)}\\right)^{${e2}} ${op2} ${formatNumber(C)}`;
+                
+                this.rpnTokens = [
+                    { val: f_base, isOp: false },
+                    { val: toFraction(e1), isOp: false },
+                    { val: '^', isOp: true },
+                    { val: d_base, isOp: false },
+                    { val: toFraction(e2), isOp: false },
+                    { val: '^', isOp: true },
+                    { val: op1, isOp: true },
+                    { val: C, isOp: false },
+                    { val: op2, isOp: true }
+                ];
+            },
+            function t5_distribution() {
+                this.tag = 'Implicit Multiplication';
+                const A = generateOperand({min: 2, max: 5, forceInteger: true, nonZero: true});
+                const B = generateOperand({min: 1, max: 5, forceInteger: true});
+                const C = generateOperand({min: 1, max: 5, forceInteger: true});
+                const D = generateOperand({min: 2, max: 5, forceInteger: true, nonZero: true});
+                const E = generateOperand({min: 1, max: 5, forceInteger: true});
+                const F = generateOperand({min: 1, max: 5, forceInteger: true});
+                const G = generateOperand({min: -5, max: 5, forceInteger: true});
+                const o1 = getRandomItem(['+', '-']); const o2 = getRandomItem(['+', '-']);
+                const o3 = getRandomItem(['+', '-']); const o4 = getRandomItem(['+', '-']);
+                
+                let p1 = this.checkInt(o1 === '+' ? addFrac(B, C) : subFrac(B, C));
+                let p2 = this.checkInt(o2 === '+' ? addFrac(E, F) : subFrac(E, F));
+                let d1 = this.checkInt(mulFrac(A, p1));
+                let d2 = this.checkInt(mulFrac(D, p2));
+                let v5 = this.checkInt(o3 === '+' ? addFrac(d1, d2) : subFrac(d1, d2));
+                this.finalAnswer = this.checkInt(o4 === '+' ? addFrac(v5, G) : subFrac(v5, G));
+                this.problemString = `${formatNumber(A)}\\left(${formatNumber(B)} ${o1} ${formatNumber(C)}\\right) ${o3} ${formatNumber(D)}\\left(${formatNumber(E)} ${o2} ${formatNumber(F)}\\right) ${o4} ${formatNumber(G)}`;
+                
+                this.rpnTokens = [
+                    { val: A, isOp: false },
+                    { val: B, isOp: false },
+                    { val: C, isOp: false },
+                    { val: o1, isOp: true },
+                    { val: '*', isOp: true },
+                    { val: D, isOp: false },
+                    { val: E, isOp: false },
+                    { val: F, isOp: false },
+                    { val: o2, isOp: true },
+                    { val: '*', isOp: true },
+                    { val: o3, isOp: true },
+                    { val: G, isOp: false },
+                    { val: o4, isOp: true }
+                ];
+            },
+            function t6_fractionBarGrouping() {
+                this.tag = 'Fraction Bar Grouping';
+                const A = generateOperand({min: 1, max: 9, forceInteger: true});
+                const B = generateOperand({min: 1, max: 9, forceInteger: true});
+                const C = generateOperand({min: 1, max: 5, forceInteger: true});
+                const D = generateOperand({min: 1, max: 5, forceInteger: true});
+                const E = generateOperand({min: -9, max: 9, forceInteger: true});
+                const on = getRandomItem(['+', '-', '*']); const od = getRandomItem(['+', '-']); const of = getRandomItem(['+', '-']);
+                
+                let vn = this.checkInt(on === '+' ? addFrac(A, B) : (on === '-' ? subFrac(A, B) : mulFrac(A, B)));
+                let vd = this.checkInt(od === '+' ? addFrac(C, D) : subFrac(C, D));
+                if(vd.num === 0) vd = toFraction(1); // Anti-crash
+                let vf = this.checkInt(divFrac(vn, vd));
+                this.finalAnswer = this.checkInt(of === '+' ? addFrac(vf, E) : subFrac(vf, E));
+                this.problemString = `\\frac{${formatNumber(A)} ${on === '*' ? '\\times' : on} ${formatNumber(B)}}{${formatNumber(C)} ${od} ${formatNumber(D)}} ${of} ${formatNumber(E)}`;
+                
+                this.rpnTokens = [
+                    { val: A, isOp: false },
+                    { val: B, isOp: false },
+                    { val: on, isOp: true },
+                    { val: C, isOp: false },
+                    { val: D, isOp: false },
+                    { val: od, isOp: true },
+                    { val: '/', isOp: true },
+                    { val: E, isOp: false },
+                    { val: of, isOp: true }
+                ];
+            },
+            function t7_sqrtGrouping() {
+                this.tag = 'Radical Grouping';
+                const target = getRandomItem([9, 16, 25, 36, 49, 64]);
+                const sA = getRandomInt(1, target - 1); const sB = target - sA;
+                const sRes = toFraction(Math.round(Math.sqrt(target)));
+                const sBase = getRandomInt(1, 5); const sSq = sBase * sBase;
+                const C = generateOperand({min: 2, max: 5, forceInteger: true, nonZero: true});
+                const D = generateOperand({min: 1, max: 9, forceInteger: true});
+                const o1 = getRandomItem(['+', '-']); const o2 = getRandomItem(['+', '-']);
+                
+                let vm = this.checkInt(mulFrac(toFraction(sBase), C));
+                let v4 = this.checkInt(o1 === '+' ? addFrac(sRes, vm) : subFrac(sRes, vm));
+                this.finalAnswer = this.checkInt(o2 === '+' ? addFrac(v4, D) : subFrac(v4, D));
+                this.problemString = `\\sqrt{${sA} + ${sB}} ${o1} \\sqrt{${sSq}} \\times ${formatNumber(C)} ${o2} ${formatNumber(D)}`;
+                
+                this.rpnTokens = [
+                    { val: toFraction(sA), isOp: false },
+                    { val: toFraction(sB), isOp: false },
+                    { val: '+', isOp: true },
+                    { val: 'SQRT', isOp: true },
+                    { val: toFraction(sSq), isOp: false },
+                    { val: 'SQRT', isOp: true },
+                    { val: C, isOp: false },
+                    { val: '*', isOp: true },
+                    { val: o1, isOp: true },
+                    { val: D, isOp: false },
+                    { val: o2, isOp: true }
+                ];
+            },
+            function t8_absInternalPEMDAS() {
+                this.tag = 'Absolute Value PEMDAS';
+                const A = generateOperand({min: 1, max: 9, forceInteger: true});
+                const B = generateOperand({min: 2, max: 5, forceInteger: true, nonZero: true});
+                const C = generateOperand({min: 2, max: 5, forceInteger: true, nonZero: true});
+                const o_in = getRandomItem(['+', '-']); const o1 = getRandomItem(['+', '-']); const o2 = getRandomItem(['*', '/']);
+                
+                let D, E;
+                if (o2 === '/') { E = generateOperand({min: 2, max: 5, forceInteger: true, nonZero: true}); D = mulFrac(E, toFraction(getRandomInt(1,4))); } 
+                else { D = generateOperand({min: 1, max: 5, forceInteger: true}); E = generateOperand({min: 2, max: 5, forceInteger: true, nonZero: true}); }
+                
+                let vBC = this.checkInt(mulFrac(B, C));
+                let vIn = this.checkInt(o_in === '+' ? addFrac(A, vBC) : subFrac(A, vBC));
+                let vAbs = this.checkInt(absFrac(vIn));
+                let vDE = this.checkInt(o2 === '*' ? mulFrac(D, E) : divFrac(D, E));
+                this.finalAnswer = this.checkInt(o1 === '+' ? addFrac(vAbs, vDE) : subFrac(vAbs, vDE));
+                this.problemString = `\\left|${formatNumber(A)} ${o_in} ${formatNumber(B)} \\times ${formatNumber(C)}\\right| ${o1} ${formatNumber(D)} ${o2 === '*' ? '\\times' : '\\div'} ${formatNumber(E)}`;
+                
+                this.rpnTokens = [
+                    { val: A, isOp: false },
+                    { val: B, isOp: false },
+                    { val: C, isOp: false },
+                    { val: '*', isOp: true },
+                    { val: o_in, isOp: true },
+                    { val: 'ABS', isOp: true },
+                    { val: D, isOp: false },
+                    { val: E, isOp: false },
+                    { val: o2, isOp: true },
+                    { val: o1, isOp: true }
+                ];
+            },
+            function t9_decimalFocus() {
+                this.tag = 'Decimal Operations';
+                const A = toFraction(getRandomItem(["0.5", "1.5", "0.2", "0.4", "1.2"]));
+                const B = toFraction(getRandomItem(["2.0", "3.0", "4.0", "5.0"]));
+                const D = toFraction(getRandomItem(["0.2", "0.5", "0.25", "2.0"]));
+                const C = mulFrac(toFraction(getRandomInt(1, 4)), D);
+                const E_base = toFraction(getRandomItem(["0.1", "0.2", "0.5", "0.3"]));
+                const E_exp = getRandomItem([2, 3]);
+                const o1 = getRandomItem(['+', '-']); const o2 = getRandomItem(['+', '-']);
+                
+                let vE = this.checkInt(powFrac(E_base, E_exp));
+                let vAB = this.checkInt(mulFrac(A, B));
+                let vCD = this.checkInt(divFrac(C, D));
+                let v4 = this.checkInt(o1 === '+' ? addFrac(vAB, vCD) : subFrac(vAB, vCD));
+                this.finalAnswer = this.checkInt(o2 === '+' ? addFrac(v4, vE) : subFrac(v4, vE));
+                this.problemString = `${formatNumber(A, true)} \\times ${formatNumber(B, true)} ${o1} ${formatNumber(C, true)} \\div ${formatNumber(D, true)} ${o2} \\left(${formatNumber(E_base, true)}\\right)^{${E_exp}}`;
+                
+                this.rpnTokens = [
+                    { val: A, isOp: false },
+                    { val: B, isOp: false },
+                    { val: '*', isOp: true },
+                    { val: C, isOp: false },
+                    { val: D, isOp: false },
+                    { val: '/', isOp: true },
+                    { val: o1, isOp: true },
+                    { val: E_base, isOp: false },
+                    { val: toFraction(E_exp), isOp: false },
+                    { val: '^', isOp: true },
+                    { val: o2, isOp: true }
+                ];
+            },
+            function t10_exponentOrder() {
+                this.tag = 'Stacked Exponents';
+                const A = toFraction(getRandomItem([2, 3]));
+                const B = toFraction(getRandomItem([2, 3]));
+                const C = toFraction(2);
+                const D = generateOperand({min: -5, max: 5, forceInteger: true});
+                const op1 = getRandomItem(['+', '-']);
+                
+                let vBC = this.checkInt(powFrac(B, C.value));
+                let vA_BC = this.checkInt(powFrac(A, vBC.value));
+                this.finalAnswer = this.checkInt(op1 === '+' ? addFrac(vA_BC, D) : subFrac(vA_BC, D));
+                this.problemString = `${formatNumber(A)}^{${formatNumber(B)}^{${formatNumber(C)}}} ${op1} ${formatNumber(D)}`;
+                
+                this.rpnTokens = [
+                    { val: A, isOp: false },
+                    { val: B, isOp: false },
+                    { val: C, isOp: false },
+                    { val: '^', isOp: true },
+                    { val: '^', isOp: true },
+                    { val: D, isOp: false },
+                    { val: op1, isOp: true }
+                ];
+            },
+            function t11_doubleNegatives() {
+                this.tag = 'Double Negatives';
+                const A = generateOperand({min: 1, max: 9, forceInteger: true});
+                const B = generateOperand({min: 1, max: 9, forceInteger: true, nonZero: true});
+                const C = generateOperand({min: 1, max: 9, forceInteger: true, nonZero: true});
+                const D = generateOperand({min: 1, max: 9, forceInteger: true, nonZero: true});
+                const E = generateOperand({min: 1, max: 9, forceInteger: true});
+                
+                let r = this.checkInt(addFrac(A, B));
+                r = this.checkInt(subFrac(r, C));
+                r = this.checkInt(subFrac(r, D));
+                this.finalAnswer = this.checkInt(addFrac(r, E));
+                this.problemString = `${formatNumber(A)} - \\left(-${formatNumber(B)}\\right) + \\left(-${formatNumber(C)}\\right) - \\left(-\\left(-${formatNumber(D)}\\right)\\right) + ${formatNumber(E)}`;
+                
+                this.rpnTokens = [
+                    { val: A, isOp: false },
+                    { val: B, isOp: false },
+                    { val: 'NEG', isOp: true },
+                    { val: '-', isOp: true },
+                    { val: C, isOp: false },
+                    { val: 'NEG', isOp: true },
+                    { val: '+', isOp: true },
+                    { val: D, isOp: false },
+                    { val: 'NEG', isOp: true },
+                    { val: 'NEG', isOp: true },
+                    { val: '-', isOp: true },
+                    { val: E, isOp: false },
+                    { val: '+', isOp: true }
+                ];
+            },
+            function t12_mixedNumbers() {
+                this.tag = 'Mixed Numbers';
+                const w1 = getRandomInt(1, 3); const d1 = getRandomItem([2, 3, 4]); const n1 = getRandomInt(1, d1 - 1);
+                const frac1 = simplifyFraction(n1, d1); const mixed1 = addFrac(toFraction(w1), frac1);
+                mixed1.isDisplayFraction = true;
+                const w2 = getRandomInt(1, 2); const d2 = getRandomItem([2, 3, 5]); const n2 = getRandomInt(1, d2 - 1);
+                const frac2 = simplifyFraction(n2, d2); const mixed2 = addFrac(toFraction(w2), frac2);
+                mixed2.isDisplayFraction = true;
+                const C = generateOperand({min: 2, max: 5, forceInteger: true, nonZero: true});
+                const op1 = getRandomItem(['+', '-']);
+                
+                let vm = this.checkInt(mulFrac(mixed2, C));
+                this.finalAnswer = this.checkInt(op1 === '+' ? addFrac(mixed1, vm) : subFrac(mixed1, vm));
+                this.problemString = `${w1}\\frac{${frac1.num}}{${frac1.den}} ${op1} ${w2}\\frac{${frac2.num}}{${frac2.den}} \\times ${formatNumber(C)}`;
+                
+                this.rpnTokens = [
+                    { val: mixed1, isOp: false },
+                    { val: mixed2, isOp: false },
+                    { val: C, isOp: false },
+                    { val: '*', isOp: true },
+                    { val: op1, isOp: true }
+                ];
+            },
+            function t13_absValFracExp() { 
+                this.tag = 'Abs Value & Exponents';
+                const A_f = generateOperand({forceFraction: true}); const B_i = generateOperand({min: 1, max: 5, nonZero: true}); 
+                const C = generateOperand({min: -4, max: 4}); const D_n = generateOperand({min: -7, max: -1});
+                let {base: E_b, exp: E_e} = generatePowerOperands(); if (E_b.num === 0 && E_e < 0) E_e = 1;
+                
+                let vdiv = this.checkInt(divFrac(A_f, B_i));
+                let vins = this.checkInt(subFrac(vdiv, C));
+                let vabs = this.checkInt(absFrac(vins));
+                let vpow = this.checkInt(powFrac(E_b, E_e));
+                let vpar = this.checkInt(addFrac(D_n, vpow));
+                this.finalAnswer = this.checkInt(mulFrac(vabs, vpar));
+                this.problemString = `\\left|${formatNumber(A_f, true)} \\div ${formatNumber(B_i, true)} - ${formatNumber(C, true)}\\right| \\times \\left(${formatNumber(D_n, true)} + ${formatBaseForExponent(E_b, true)}^{${E_e}}\\right)`;
+                
+                this.rpnTokens = [
+                    { val: A_f, isOp: false },
+                    { val: B_i, isOp: false },
+                    { val: '/', isOp: true },
+                    { val: C, isOp: false },
+                    { val: '-', isOp: true },
+                    { val: 'ABS', isOp: true },
+                    { val: D_n, isOp: false },
+                    { val: E_b, isOp: false },
+                    { val: toFraction(E_e), isOp: false },
+                    { val: '^', isOp: true },
+                    { val: '+', isOp: true },
+                    { val: '*', isOp: true }
+                ];
+            },
+            function t14_complexFraction() { 
+                this.tag = 'Complex Fractions';
+                let {base: A, exp: eA} = generatePowerOperands(); if (A.num === 0 && eA < 0) eA = 1;
+                const B_f = generateOperand({forceFraction: true}); const C_f = generateOperand({forceFraction: true, nonZero: true}); 
+                let {base: D, exp: eD} = generatePowerOperands(); if (D.num === 0 && eD < 0) eD = 1;
+                const E_n = generateOperand({min:-4, max:-1});
+                
+                let vAe = this.checkInt(powFrac(A, eA));
+                let vNum = this.checkInt(addFrac(vAe, B_f));
+                let vDe = this.checkInt(powFrac(D, eD));
+                let vDen = this.checkInt(subFrac(C_f, vDe));
+                if(vDen.num===0) vDen = toFraction(1);
+                let vMain = this.checkInt(divFrac(vNum, vDen));
+                this.finalAnswer = this.checkInt(mulFrac(vMain, E_n));
+                this.problemString = `\\left( \\frac{${formatBaseForExponent(A, true)}^{${eA}} + ${formatNumber(B_f, true)}}{${formatNumber(C_f, true)} - ${formatBaseForExponent(D, true)}^{${eD}}} \\right) \\times ${formatNumber(E_n, true)}`;
+                
+                this.rpnTokens = [
+                    { val: A, isOp: false },
+                    { val: toFraction(eA), isOp: false },
+                    { val: '^', isOp: true },
+                    { val: B_f, isOp: false },
+                    { val: '+', isOp: true },
+                    { val: C_f, isOp: false },
+                    { val: D, isOp: false },
+                    { val: toFraction(eD), isOp: false },
+                    { val: '^', isOp: true },
+                    { val: '-', isOp: true },
+                    { val: '/', isOp: true },
+                    { val: E_n, isOp: false },
+                    { val: '*', isOp: true }
+                ];
+            },
+            function t15_nestedBrackets() { 
+                this.tag = 'Nested Brackets';
+                const a = generateOperand({min: -5, max: 5}); const b = generateOperand({min: -3, max: 3, nonZero: true});
+                const c = generateOperand({min: 1, max: 5}); 
+                let {base: d, exp: ed} = generatePowerOperands(); if (d.num === 0 && ed < 0) ed = 1;
+                const o1 = getRandomItem(['+', '-']); const o2 = getRandomItem(['*', '/']); const o3 = getRandomItem(['+', '-']);
+                
+                let vdp = this.checkInt(powFrac(d, ed));
+                let v2 = this.checkInt(o2 === '*' ? mulFrac(c, vdp) : divFrac(c, vdp));
+                let v3 = this.checkInt(o1 === '+' ? addFrac(b, v2) : subFrac(b, v2));
+                this.finalAnswer = this.checkInt(o3 === '+' ? addFrac(a, v3) : subFrac(a, v3));
+                this.problemString = `\\left\\{ ${formatNumber(a, true)} ${o3} \\left[ ${formatNumber(b, true)} ${o1} \\left( ${formatNumber(c, true)} ${o2 === '/' ? '\\div' : '\\times'} ${formatBaseForExponent(d, true)}^{${ed}} \\right) \\right] \\right\\}`;
+                
+                this.rpnTokens = [
+                    { val: a, isOp: false },
+                    { val: b, isOp: false },
+                    { val: c, isOp: false },
+                    { val: d, isOp: false },
+                    { val: toFraction(ed), isOp: false },
+                    { val: '^', isOp: true },
+                    { val: o2, isOp: true },
+                    { val: o1, isOp: true },
+                    { val: o3, isOp: true }
+                ];
+            },
+            function t16_absValSqrtFraction() {
+                this.tag = 'Abs Val, Roots, & Fractions';
+                const A = generateOperand({min: -3, max: 3, nonZero: true});
+                let {base: B, exp: e1} = generatePowerOperands(); if (B.num === 0 && e1 < 0) e1 = 1;
+                const C_sq = toFraction(Math.pow(getRandomItem([1,2,3,4,5]), 2));
+                const D_f = generateOperand({forceFraction: true}); 
+                const E = generateOperand({min: -3, max: 3}); const F = generateOperand({min: -3, max: 3});
+                let { exp: e2 } = generatePowerOperands();
+                
+                let vBe = this.checkInt(powFrac(B, e1));
+                let vABe = this.checkInt(mulFrac(A, vBe));
+                let vSqrt = this.checkInt(powFrac(C_sq, 0.5));
+                let vNum = this.checkInt(absFrac(subFrac(vABe, vSqrt)));
+                
+                let vEF = this.checkInt(subFrac(E, F));
+                if (vEF.num === 0 && e2 < 0) e2 = 1;
+                let vDenom = this.checkInt(addFrac(D_f, powFrac(vEF, e2)));
+                if(vDenom.num===0) vDenom = toFraction(1);
+                
+                this.finalAnswer = this.checkInt(divFrac(vNum, vDenom));
+                this.problemString = `\\frac{\\left| ${formatNumber(A, true)} \\times ${formatBaseForExponent(B, true)}^{${e1}} - \\sqrt{${C_sq.num}} \\right|}{${formatNumber(D_f, true)} + \\left(${formatNumber(E, true)} - ${formatNumber(F, true)}\\right)^{${e2}}}`;
+                
+                this.rpnTokens = [
+                    { val: A, isOp: false },
+                    { val: B, isOp: false },
+                    { val: toFraction(e1), isOp: false },
+                    { val: '^', isOp: true },
+                    { val: '*', isOp: true },
+                    { val: C_sq, isOp: false },
+                    { val: 'SQRT', isOp: true },
+                    { val: '-', isOp: true },
+                    { val: 'ABS', isOp: true },
+                    { val: D_f, isOp: false },
+                    { val: E, isOp: false },
+                    { val: F, isOp: false },
+                    { val: '-', isOp: true },
+                    { val: toFraction(e2), isOp: false },
+                    { val: '^', isOp: true },
+                    { val: '+', isOp: true },
+                    { val: '/', isOp: true }
+                ];
+            },
+            function t17_deepNesting() {
+                this.tag = 'Ultimate Deep Nesting';
+                const G = generateOperand({min: -5, max: -1}); const H = generateOperand({min: -3, max: 3});
+                const I = generateOperand({forceFraction: true}); const J = generateOperand({min: -5, max: 5}); 
+                const K = generateOperand({min: -5, max: 5}); const en = getRandomInt(-2, -1); 
+                
+                let vDiv = this.checkInt(subFrac(J, absFrac(K)));
+                if(vDiv.num===0) vDiv=toFraction(1);
+                let vBrExp = this.checkInt(powFrac(divFrac(I, vDiv), en));
+                let vBraces = this.checkInt(addFrac(H, vBrExp));
+                this.finalAnswer = this.checkInt(subFrac(G, vBraces));
+                this.problemString = `${formatNumber(G, true)} - \\left\\{ ${formatNumber(H, true)} + \\left[ ${formatNumber(I, true)} \\div \\left( ${formatNumber(J, true)} - \\left| ${formatNumber(K, true)} \\right| \\right) \\right]^{${en}} \\right\\}`;
+                
+                this.rpnTokens = [
+                    { val: G, isOp: false },
+                    { val: H, isOp: false },
+                    { val: I, isOp: false },
+                    { val: J, isOp: false },
+                    { val: K, isOp: false },
+                    { val: 'ABS', isOp: true },
+                    { val: '-', isOp: true },
+                    { val: '/', isOp: true },
+                    { val: toFraction(en), isOp: false },
+                    { val: '^', isOp: true },
+                    { val: '+', isOp: true },
+                    { val: '-', isOp: true }
+                ];
+            }
+        ];
+
+        // =============================================================
+        // PROBLEM GENERATION & UI
+        // =============================================================
+        function parseUserFractionInput(inputStr) {
+            inputStr = String(inputStr).trim().toLowerCase(); 
+            if (inputStr === "infinity" || inputStr === "inf") return Infinity;
+            if (inputStr === "-infinity" || inputStr === "-inf") return -Infinity;
+            if (inputStr === "nan") return NaN;
+            if (inputStr.includes('/')) {
+                const parts = inputStr.split('/');
+                if (parts.length === 2) {
+                    const num = parseFloat(parts[0]), den = parseFloat(parts[1]);
+                    if (!isNaN(num) && !isNaN(den)) {
+                        if (den === 0) return num === 0 ? NaN : (num > 0 ? Infinity : -Infinity);
+                        return num / den;
+                    }
+                }
+            }
+            return parseFloat(inputStr);
+        }
+
+        function generateProblem(templateFn) { 
+            let ctx = { 
+                problemString: '', finalAnswer: undefined, tag: '', rpnTokens: [],
+                checkInt: function(value) {
+                    if (!value || typeof value.num === 'undefined') throw new Error("Malformed math");
+                    if (value.error || isValueTooLarge(value)) throw new Error("Safety limit reached");
+                    return value;
+                }
+            };
+            let attemptLimit = 50; 
+            while (attemptLimit > 0) {
+                try {
+                    templateFn.call(ctx);
+                    if (ctx.finalAnswer && ctx.finalAnswer.value !== undefined) { 
+                        return { problemHTML: ctx.problemString, tag: ctx.tag, answer: ctx.finalAnswer, rpnTokens: ctx.rpnTokens };
+                    }
+                } catch (e) { attemptLimit--; }
+            }
+            // Fallback if random gen gets totally stuck
+            return { 
+                problemHTML: "1 + 1", 
+                tag: "Fallback", 
+                answer: toFraction(2), 
+                rpnTokens: [
+                    { val: toFraction(1), isOp: false }, 
+                    { val: toFraction(1), isOp: false }, 
+                    { val: '+', isOp: true }
+                ] 
+            }; 
+        }
+
+        // =============================================================
+        // RPN ENGINE & EXPLANATION GENERATOR
+        // =============================================================
+        function formatNumberAsDecimalOrInt(n) {
+            if (!n) return 'Error';
+            if (n.isFraction) {
+                if (n.value % 1 === 0) {
+                    return n.value.toString();
+                }
+                return parseFloat(n.value.toFixed(4)).toString();
+            }
+            return n.value !== undefined ? n.value.toString() : 'Error';
+        }
+
+        function formatStackLaTeX(stack) {
+            if (stack.length === 0) return `[ ]`;
+            return `[ ` + stack.map(formatNumberAsDecimalOrInt).join(', ') + ` ]`;
+        }
+
+        function expandTokens(tokens) {
+            let expanded = [];
+            for (let i = 0; i < tokens.length; i++) {
+                let t = tokens[i];
+                if (t.isOp) {
+                    let opVal = t.val;
+                    if (opVal === '\\times') opVal = '*';
+                    if (opVal === '\\div') opVal = '/';
+                    expanded.push({ val: opVal, isOp: true });
+                } else {
+                    let val = t.val;
+                    // Split/expand only if it represents a literal fractional display on-screen with den != 1
+                    if (val.isFraction && val.isDisplayFraction && val.den !== 1) {
+                        expanded.push({ val: toFraction(val.num), isOp: false });
+                        expanded.push({ val: toFraction(val.den), isOp: false });
+                        expanded.push({ val: '/', isOp: true });
+                    } else {
+                        expanded.push(t);
+                    }
+                }
+            }
+            return expanded;
+        }
+
+        function generateRPNTrace(originalTokens) {
+            let tokens = expandTokens(originalTokens);
+            let stack = [];
+            let steps = [];
+            let fullPatternStr = tokens.map(t => {
+                if (t.isOp) return t.val;
+                return formatNumberAsDecimalOrInt(t.val);
+            }).join(' ');
+
+            for (let i = 0; i < tokens.length; i++) {
+                let token = tokens[i];
+                if (!token.isOp) {
+                    stack.push(token.val);
+                    steps.push({
+                        token: formatNumberAsDecimalOrInt(token.val),
+                        action: `Push ${formatNumberAsDecimalOrInt(token.val)}`,
+                        stack: [...stack]
+                    });
+                } else {
+                    let op = token.val;
+                    if (op === 'ABS' || op === 'SQRT' || op === 'NEG') {
+                        if (stack.length < 1) break;
+                        let a = stack.pop();
+                        let res;
+                        let actionText = "";
+                        if (op === 'ABS') {
+                            res = absFrac(a);
+                            actionText = `Apply Absolute Value: |${formatNumberAsDecimalOrInt(a)}| = ${formatNumberAsDecimalOrInt(res)}`;
+                        } else if (op === 'SQRT') {
+                            res = powFrac(a, 0.5);
+                            actionText = `Apply Square Root: sqrt(${formatNumberAsDecimalOrInt(a)}) = ${formatNumberAsDecimalOrInt(res)}`;
+                        } else if (op === 'NEG') {
+                            res = mulFrac(toFraction(-1), a);
+                            actionText = `Negate: -(${formatNumberAsDecimalOrInt(a)}) = ${formatNumberAsDecimalOrInt(res)}`;
+                        }
+                        stack.push(res);
+                        steps.push({
+                            token: op,
+                            action: actionText,
+                            stack: [...stack]
+                        });
+                    } else {
+                        if (stack.length < 2) break;
+                        let b = stack.pop();
+                        let a = stack.pop();
+                        let res;
+                        
+                        if (op === '+') res = addFrac(a, b);
+                        else if (op === '-') res = subFrac(a, b);
+                        else if (op === '*') res = mulFrac(a, b);
+                        else if (op === '/') res = divFrac(a, b);
+                        else if (op === '^') {
+                            res = powFrac(a, b.value);
+                        }
+                        
+                        let actionText = "";
+                        if (op === '^') {
+                            actionText = `Evaluate Exponent: ${formatNumberAsDecimalOrInt(a)}^(${formatNumberAsDecimalOrInt(b)}) = ${formatNumberAsDecimalOrInt(res)}`;
+                        } else {
+                            actionText = `Evaluate: ${formatNumberAsDecimalOrInt(a)} ${op} ${formatNumberAsDecimalOrInt(b)} = ${formatNumberAsDecimalOrInt(res)}`;
+                        }
+                        stack.push(res);
+                        steps.push({
+                            token: op,
+                            action: actionText,
+                            stack: [...stack]
+                        });
+                    }
+                }
+            }
+            return { steps, fullPatternStr };
+        }
+
+        function render() {
+            isSubmitted = false;
+            container.innerHTML = ''; currentProblems = [];
+            showBtn.disabled = false; showBtn.style.backgroundColor = '#27ae60'; showBtn.textContent = "Submit & Generate Report";
+            problemCountEl.textContent = `${problemTemplates.length} distinct order of operations problems.`;
+            
+            for (let i = 0; i < problemTemplates.length; i++) {
+                const p = generateProblem(problemTemplates[i]);
+                
+                const payload = {
+                    answer: p.answer,
+                    rpnTokens: p.rpnTokens
+                };
+                const encrypted = encrypt(JSON.stringify(payload));
+                currentProblems.push({ id: i + 1, encrypted: encrypted });
+                
+                const div = document.createElement('div');
+                div.className = 'problem-card';
+                div.innerHTML = `
+                    <div class="problem-header">
+                        <span class="problem-number">#${i + 1}</span>
+                        <div class="problem-expression">\\( ${p.problemHTML} \\)</div>
+                        <span class="problem-tag">${p.tag}</span>
+                    </div>
+                    <div class="answer-box">
+                        <div class="multi-input-row">
+                            <label>\\( = \\)</label>
+                            <input type="text" class="user-input" id="input-${i + 1}">
+                        </div>
+                        <div class="input-hint">Enter your answer as an integer, decimal, or fraction (e.g., -3/4)</div>
+                    </div>
+                    <div class="solution-area" id="sol-${i + 1}"></div>`;
+                container.appendChild(div);
+            }
+
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([container]).catch((err) => console.log(err.message));
+            }
+        }
+
+        function getTimestamp() {
+            const now = new Date();
+            const yymmdd = String(now.getFullYear()).slice(-2) + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+            const hhmi = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+            return `${yymmdd}_${hhmi}`;
+        }
+
+        function check() {
+            if (isSubmitted) return;
+            isSubmitted = true;
+
+            let score = 0;
+            document.body.classList.add('typesetting-mode');
+
+            currentProblems.forEach(p => {
+                const input = document.getElementById(`input-${p.id}`);
+                const userNum = parseUserFractionInput(input.value);
+                
+                const payload = JSON.parse(decrypt(p.encrypted));
+                const correctObj = payload.answer;
+                const correctNum = correctObj.value;
+                const rpnTokens = payload.rpnTokens;
+                
+                let isCorrect = false;
+                if (Number.isNaN(correctNum) && Number.isNaN(userNum)) isCorrect = true;
+                else if (correctNum === Infinity && userNum === Infinity) isCorrect = true;
+                else if (correctNum === -Infinity && userNum === -Infinity) isCorrect = true;
+                else if (!Number.isNaN(correctNum) && !Number.isNaN(userNum) && isFinite(correctNum) && isFinite(userNum)) {
+                    isCorrect = Math.abs(userNum - correctNum) < EPSILON;
+                }
+
+                input.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                input.disabled = true; 
+                
+                const solDiv = document.getElementById(`sol-${p.id}`);
+                
+                if (isCorrect) {
+                    solDiv.innerHTML = `<div style="color:#27ae60; font-size:1.1em; font-weight:bold;">Correct! Answer: \\( ${formatNumber(correctObj)} \\)</div>`;
+                    score++;
+                } else {
+                    const trace = generateRPNTrace(rpnTokens);
+                    let rowsHtml = '';
+                    trace.steps.forEach(step => {
+                        rowsHtml += `
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 10px; border: 1px solid #ddd; font-family: monospace; font-weight: bold; background-color: #fafafa; text-align: center;">${step.token}</td>
+                                <td style="padding: 10px; border: 1px solid #ddd; text-align: left; font-family: monospace;">${step.action}</td>
+                                <td style="padding: 10px; border: 1px solid #ddd; text-align: left; font-family: monospace;">${formatStackLaTeX(step.stack)}</td>
+                            </tr>
+                        `;
+                    });
+
+                    solDiv.innerHTML = `
+                        <div style="color:#d9534f; font-size:1.15em; font-weight:bold; margin-bottom: 15px;">
+                            Incorrect! Correct Answer: \\( ${formatNumber(correctObj)} \\)
+                        </div>
+                        <div class="solution-explanation" style="text-align: left; margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px; background: #fff; border-radius: 6px; padding: 15px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
+                            <h4 style="color: #2c3e50; margin: 0 0 10px 0; font-size: 1.1em;">Step-by-Step RPN Explanation</h4>
+                            
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; border: 1px solid #ddd;">
+                                <thead>
+                                    <tr style="background-color: #f8f9fa; border-bottom: 2px solid #ddd;">
+                                        <th style="padding: 10px; text-align: center; border: 1px solid #ddd; width: 15%;">Token</th>
+                                        <th style="padding: 10px; text-align: left; border: 1px solid #ddd; width: 50%;">Action</th>
+                                        <th style="padding: 10px; text-align: left; border: 1px solid #ddd; width: 35%;">Stack (Bottom &rarr; Top)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${rowsHtml}
+                                </tbody>
+                            </table>
+                            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ddd; font-size: 0.95em;">
+                                <strong>RPN Postfix Pattern (Full Equation):</strong> 
+                                <code style="background: #f1f2f6; border: 1px solid #ced4da; padding: 4px 10px; border-radius: 4px; font-family: monospace; font-size: 1.1em; display: inline-block; margin-left: 5px;">${trace.fullPatternStr}</code>
+                            </div>
+                        </div>
+                    `;
+                }
+                solDiv.style.display = 'block';
+            });
+            
+            const timeStr = new Date().toLocaleString();
+            const pct = Math.round((score / problemTemplates.length) * 100);
+            
+            showBtn.disabled = true;
+            showBtn.innerHTML = `Score: ${score}/${problemTemplates.length} (${pct}%)<br><small>${timeStr}</small>`;
+            
+            MathJax.typesetPromise().then(() => {
+                document.body.classList.remove('typesetting-mode');
+
+                const clone = document.documentElement.cloneNode(true);
+                clone.querySelectorAll('script, .controls-container').forEach(el => el.remove());
+                const body = clone.querySelector('body');
+                const header = document.createElement('div');
+                header.className = 'report-header';
+                header.innerHTML = `<h1>Order of Operations Report</h1><h2>Score: ${score} / ${problemTemplates.length} (${pct}%)</h2><p>Date: ${timeStr}</p>`;
+                body.insertBefore(header, body.firstChild);
+                
+                const inputs = clone.querySelectorAll('.user-input');
+                document.querySelectorAll('.user-input').forEach((original, idx) => {
+                    const span = document.createElement('span');
+                    span.textContent = original.value || "—";
+                    span.className = original.className + " static-answer";
+                    span.style.padding = "4px 15px";
+                    span.style.border = "2px solid #ccc";
+                    span.style.borderRadius = "4px";
+                    span.style.backgroundColor = "#fff";
+                    span.style.display = "inline-block";
+                    span.style.minWidth = "60px";
+                    span.style.textAlign = "center";
+                    inputs[idx].parentNode.replaceChild(span, inputs[idx]);
+                });
+                clone.querySelectorAll('.solution-area').forEach(s => s.style.display = 'block');
+                
+                const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `Order_Of_Ops_Report_${getTimestamp()}.html`;
+                a.click();
+            });
+        }
+
+        generateBtn.addEventListener('click', render);
+        showBtn.addEventListener('click', check);
+        render();
+    })();
+    </script>
+</body>
+</html>
