@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desmos Algebra Mastery Guide</title>
+    <!-- KaTeX CSS for textbook math fonts -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <!-- KaTeX JS files loaded synchronously -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <style>
+        :root { --primary: #3498db; --dark: #2c3e50; --success: #27ae60; --warning: #e67e22; --bg: #f4f7f9; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: #333; padding: 20px; line-height: 1.6; }
+        .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        h1 { color: var(--dark); border-bottom: 4px solid var(--primary); padding-bottom: 10px; margin-top: 0; }
+        
+        .controls { position: sticky; top: 0; background: rgba(255,255,255,0.95); padding: 15px 0; border-bottom: 1px solid #eee; margin-bottom: 25px; display: flex; gap: 10px; flex-wrap: wrap; z-index: 100; backdrop-filter: blur(5px); }
+        button { cursor: pointer; border: none; border-radius: 6px; padding: 10px 18px; font-weight: bold; transition: 0.2s; font-size: 0.95rem; display: flex; align-items: center; gap: 5px; }
+        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        button:active { transform: translateY(0); }
+        
+        .btn-default { background: var(--dark); color: white; }
+        .btn-random { background: var(--primary); color: white; }
+        .btn-toggle { background: var(--warning); color: white; margin-left: auto; }
+        .btn-print { background: var(--success); color: white; }
+        .btn-show { background: #ecf0f1; color: var(--dark); border: 1px solid #bdc3c7; }
+        
+        .q-card { border: 1px solid #e1e8ed; border-radius: 10px; padding: 20px; margin-bottom: 20px; transition: 0.3s; background: white; }
+        .q-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1); }
+        .q-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .tag { font-size: 0.75rem; background: var(--primary); color: white; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
+        .q-num { font-weight: 800; color: #7f8c8d; font-size: 1.1rem; }
+        
+        .ans-panel { display: none; margin-top: 15px; padding-top: 15px; border-top: 2px dashed #eee; background: #f8fafc; padding: 15px; border-radius: 8px; }
+        .steps-list { margin: 10px 0; padding-left: 20px; }
+        .steps-list li { margin-bottom: 8px; }
+        .final-val { font-size: 1.2em; color: var(--success); font-weight: bold; font-family: monospace; background: #e8f8f5; padding: 2px 8px; border-radius: 4px; }
+        
+        .desmos-cmd { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', monospace; font-weight: bold; color: #334155; border: 1px solid #cbd5e1; }
+        .katex, .katex * { color: #1e40af !important; font-weight: bold !important; }
+
+        /* Print Media Query for Worksheets and Answer Keys */
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border: none; max-width: 100%; padding: 0; }
+            .controls, .btn-show { display: none !important; }
+            .q-card { page-break-inside: avoid; border: 1px solid #ccc; margin-bottom: 15px; }
+            h1 { font-size: 1.5rem; }
+            p { display: none; } /* Hides instructions on print */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Desmos Mastery: The Top 40 Algebra Skills</h1>
+    <p>Perform these tasks in the <a href="https://www.desmos.com/calculator" target="_blank" rel="noopener">Desmos Graphing Calculator</a>. <br>
+    <em>Teacher Tip: Click "Expand All" before printing to generate an Answer Key, or "Collapse All" to print a blank Student Worksheet.</em></p>
+    
+    <div class="controls">
+        <button class="btn-default" onclick="generate(false)">📑 Sequential Order</button>
+        <button class="btn-random" onclick="generate(true)">🔀 Random Order</button>
+        <button class="btn-print" onclick="window.print()">🖨️ Print Pages</button>
+        <button class="btn-toggle" onclick="toggleAll()">👁️ Expand/Collapse All</button>
+    </div>
+
+    <div id="list"></div>
+</div>
+
+<script>
+    const r = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+    const rnz = (min, max) => { let n = 0; while(n === 0) n = r(min, max); return n; };
+    
+    // Helper to format math safely (prevents "+ -5x" and turns it into "- 5x")
+    const fmtSign = (num) => (num < 0 ? `- ${Math.abs(num)}` : `+ ${num}`);
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function triggerMathRender() {
+        if (typeof renderMathInElement === 'function') {
+            renderMathInElement(document.getElementById('list'), {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false}
+                ],
+                throwOnError: false
+            });
+        }
+    }
+
+    function toggleAll() {
+        const panels = document.querySelectorAll('.ans-panel');
+        const buttons = document.querySelectorAll('.btn-show');
+        // Check if the first panel is hidden
+        const isHidden = panels[0].style.display === 'none' || panels[0].style.display === '';
+        
+        panels.forEach(p => p.style.display = isHidden ? 'block' : 'none');
+        buttons.forEach(b => b.textContent = isHidden ? 'Hide Steps' : 'Show Steps & Answer');
+    }
+
+    function generate(shouldShuffle = false) {
+        const listDiv = document.getElementById('list');
+        listDiv.innerHTML = '';
+        
+        const templates = Array.from({ length: 40 }, (_, i) => i + 1);
+
+        if (shouldShuffle) shuffleArray(templates);
+
+        templates.forEach((templateId, index) => {
+            const displayNum = index + 1;
+            let q = "", finalA = "", tag = "", steps = [];
+
+            switch(templateId) {
+                // --- UNIT 1: PRE-ALGEBRA & BASIC COMPUTATION ---
+                case 1: {
+                    let root = r(5, 15), sq = r(2, 8);
+                    tag = "Unit 1: Basic Computation";
+                    q = `Calculate $\\sqrt{${root*root}} + ${sq}^2$ using Desmos as a scientific calculator.`;
+                    finalA = root + sq*sq;
+                    steps = [`Type <code class="desmos-cmd">sqrt(${root*root}) + ${sq}^2</code> directly into expression line 1.`];
+                    break;
+                }
+                case 2: {
+                    let num2 = r(15, 35), div2 = r(3, 6);
+                    tag = "Unit 1: Basic Computation";
+                    q = `Find the remainder when $${num2}$ is divided by $${div2}$ using the modulo function $\\text{mod}(a, b)$.`;
+                    finalA = num2 % div2;
+                    steps = [`Type <code class="desmos-cmd">mod(${num2}, ${div2})</code> in line 1.`, `Read the remainder value in the grey display box.`];
+                    break;
+                }
+                case 3: {
+                    let dec3 = (r(5, 15) + 0.1 * r(1, 9)).toFixed(1);
+                    tag = "Unit 1: Basic Computation";
+                    q = `What is the value of the step function expression $\\lfloor ${dec3} \\rfloor$ (represented in Desmos as $\\text{floor}(x)$)?`;
+                    finalA = Math.floor(dec3);
+                    steps = [`Type <code class="desmos-cmd">floor(${dec3})</code>.`];
+                    break;
+                }
+                case 4: {
+                    let nums4 = [r(1, 5), r(6, 10), r(11, 15)];
+                    tag = "Unit 1: Lists & Sets";
+                    q = `Calculate the sum of the element list $[${nums4.join(', ')}]$ using the $\\text{total}(L)$ command.`;
+                    finalA = nums4.reduce((a,b)=>a+b, 0);
+                    steps = [`Type <code class="desmos-cmd">total([${nums4.join(',')}])</code>.`];
+                    break;
+                }
+                case 5: {
+                    let nums5 = [r(1, 10), r(11, 20), r(21, 30)];
+                    tag = "Unit 1: Statistics";
+                    q = `Find the mean (average) of the statistical dataset $[${nums5.join(', ')}]$.`;
+                    finalA = (nums5.reduce((a,b)=>a+b,0)/3).toFixed(3);
+                    steps = [
+                        `Type <code class="desmos-cmd">L = [${nums5.join(',')}]</code> to define a dataset list.`,
+                        `In the next line, type <code class="desmos-cmd">mean(L)</code>.`
+                    ];
+                    break;
+                }
+                case 6: {
+                    let nums6 = [r(1,10), r(11,20), r(21,30)];
+                    tag = "Unit 1: Statistics";
+                    q = `Find the median of the set $[${nums6.join(', ')}]$.`;
+                    finalA = nums6[1];
+                    steps = [`Type <code class="desmos-cmd">median([${nums6.join(',')}])</code>.`];
+                    break;
+                }
+
+                // --- UNIT 2: LINEAR EQUATIONS & SLOPES ---
+                case 7: {
+                    let m7 = rnz(-5, 5), b7 = rnz(-10, 10);
+                    tag = "Unit 2: Linear Equations";
+                    q = `Find the $x$-intercept (the zero) of the linear equation $y = ${m7}x ${fmtSign(b7)}$.`;
+                    finalA = (-b7/m7).toFixed(3);
+                    steps = [
+                        `Type <code class="desmos-cmd">y = ${m7}x ${fmtSign(b7)}</code> into line 1.`,
+                        `Click the <strong>grey dot</strong> where the line crosses the horizontal $x$-axis.`
+                    ];
+                    break;
+                }
+                case 8: {
+                    let x8 = r(1, 5), y8 = r(1, 5), m8 = r(2, 4);
+                    tag = "Unit 2: Linear Equations";
+                    q = `Graph the point-slope equation $y - ${y8} = ${m8}(x - ${x8})$. What is the $y$-intercept?`;
+                    finalA = y8 - m8 * x8;
+                    steps = [
+                        `Type <code class="desmos-cmd">y - ${y8} = ${m8}(x - ${x8})</code>.`,
+                        `Click the <strong>grey dot</strong> on the vertical $y$-axis.`
+                    ];
+                    break;
+                }
+                case 9: {
+                    let m9 = r(2, 10), b9 = r(1, 10);
+                    tag = "Unit 2: Linear Equations";
+                    q = `Find the slope of a line parallel to $y = ${m9}x - ${b9}$.`;
+                    finalA = m9;
+                    steps = [`Look at the $m$ value of the equation, which dictates the slope. Parallel lines share this exact slope.`];
+                    break;
+                }
+                case 10: {
+                    let m10 = r(2, 5);
+                    tag = "Unit 2: Linear Equations";
+                    q = `What is the slope of a line perpendicular to $y = ${m10}x$?`;
+                    finalA = (-1/m10).toFixed(3);
+                    steps = [`Type <code class="desmos-cmd">y = -1/${m10}x</code>.`, `Observe the negative reciprocal slope.`];
+                    break;
+                }
+                case 11: {
+                    let val11 = r(3, 8);
+                    tag = "Unit 2: Sliders";
+                    q = `Create a slider $a = ${val11}$. Graph the equation $y = ax$. What is the resulting slope?`;
+                    finalA = val11;
+                    steps = [`Type <code class="desmos-cmd">a = ${val11}</code>.`, `Type <code class="desmos-cmd">y = ax</code> in line 2.`];
+                    break;
+                }
+                case 12: {
+                    let mult12 = r(3, 6);
+                    tag = "Unit 2: Power Features";
+                    q = `Graph multiple lines at once using a list: $y = [1, 2, ${mult12}]x$. What is the slope of the steepest line?`;
+                    finalA = mult12;
+                    steps = [
+                        `Type <code class="desmos-cmd">y = [1, 2, ${mult12}]x</code>.`, 
+                        `Desmos will draw 3 lines simultaneously. The steepest has the highest slope.`
+                    ];
+                    break;
+                }
+                
+                // --- UNIT 3: SYSTEMS, SETTINGS, & GEOMETRY ---
+                case 13: {
+                    let y13 = r(200, 500);
+                    tag = "Unit 3: Graph Settings";
+                    q = `Graph $y = ${y13}x$. It looks completely vertical! Use the Graph Settings (Wrench Icon) to change the $y$-axis maximum to ${y13*5}. What is $y$ when $x=2$?`;
+                    finalA = y13 * 2;
+                    steps = [
+                        `Type <code class="desmos-cmd">y = ${y13}x</code>.`,
+                        `Click the <strong>Wrench Icon</strong> in the top right.`,
+                        `Change the $Y$-axis range to $-100 \le y \le ${y13*5}$.`,
+                        `Click the line at $x=2$.`
+                    ];
+                    break;
+                }
+                case 14: {
+                    let x14 = r(5, 15), y14 = r(5, 15);
+                    tag = "Unit 3: Coordinate Geometry";
+                    q = `Find the distance between the origin $(0,0)$ and the coordinate point $(${x14}, ${y14})$.`;
+                    finalA = Math.sqrt(x14*x14 + y14*y14).toFixed(3);
+                    steps = [`Type <code class="desmos-cmd">distance((0,0), (${x14}, ${y14}))</code>.`];
+                    break;
+                }
+                case 15: {
+                    let x15 = r(4, 12), y15 = r(4, 12);
+                    tag = "Unit 3: Coordinate Geometry";
+                    q = `Find the coordinates of the midpoint between $(0,0)$ and $(${x15}, ${y15})$.`;
+                    finalA = `(${x15/2}, ${y15/2})`;
+                    steps = [`Type <code class="desmos-cmd">midpoint((0,0), (${x15}, ${y15}))</code>.`];
+                    break;
+                }
+                case 16: {
+                    let m16a = r(2, 4), b16a = r(1, 5), m16b = r(-4, -2), b16b = r(6, 10);
+                    tag = "Unit 3: Systems of Equations";
+                    q = `Find the $x$-coordinate of the intersection point for the system: $y = ${m16a}x + ${b16a}$ and $y = ${m16b}x + ${b16b}$.`;
+                    finalA = ((b16b-b16a)/(m16a-m16b)).toFixed(3);
+                    steps = [
+                        `Type <code class="desmos-cmd">y = ${m16a}x + ${b16a}</code> in line 1.`,
+                        `Type <code class="desmos-cmd">y = ${m16b}x + ${b16b}</code> in line 2.`,
+                        `Click the <strong>grey intersection point</strong> where they cross.`
+                    ];
+                    break;
+                }
+                case 17: {
+                    let b17 = r(5, 15);
+                    tag = "Unit 3: Systems of Inequalities";
+                    q = `Graph the inequality system: $y < -x + ${b17}$ and $y > x$. What is the $x$-coordinate of the corner of the shaded region?`;
+                    finalA = (b17/2).toFixed(3);
+                    steps = [
+                        `Type <code class="desmos-cmd">y < -x + ${b17}</code> and <code class="desmos-cmd">y > x</code>.`,
+                        `Click the <strong>vertex (corner)</strong> where the shaded boundaries meet.`
+                    ];
+                    break;
+                }
+                case 18: {
+                    let y18 = r(10, 50);
+                    tag = "Unit 3: Regressions";
+                    q = `Given data points $(1, 12)$ and $(2, ${y18})$, what is the slope of the line of best fit $y_1 \\sim mx_1 + b$?`;
+                    finalA = (y18 - 12).toFixed(3);
+                    steps = [
+                        `Click the <strong>+ icon</strong> $\\rightarrow$ <strong>Table</strong>.`,
+                        `Enter data into $x_1$ and $y_1$.`,
+                        `In a new line, type <code class="desmos-cmd">y1 ~ mx1 + b</code>. Look at the parameter $m$.`
+                    ];
+                    break;
+                }
+
+                // --- UNIT 4: QUADRATICS & ABSOLUTE VALUE ---
+                case 19: {
+                    let a19 = r(2, 6);
+                    tag = "Unit 4: Quadratics";
+                    q = `Confirm if $(x + ${a19})^2$ is mathematically equivalent to the expanded polynomial $x^2 + ${2*a19}x + ${a19*a19}$.`;
+                    finalA = "Yes (They overlap perfectly)";
+                    steps = [
+                        `Type <code class="desmos-cmd">y = (x + ${a19})^2</code> on line 1.`,
+                        `Type <code class="desmos-cmd">y = x^2 + ${2*a19}x + ${a19*a19}</code> on line 2.`,
+                        `Toggle the colored circles on the left to confirm they graph the exact same line.`
+                    ];
+                    break;
+                }
+                case 20: {
+                    let h20 = r(-5, 5), k20 = r(-10, 10);
+                    tag = "Unit 4: Quadratics";
+                    q = `Graph the quadratic equation $y = (x ${fmtSign(-h20)})^2 ${fmtSign(k20)}$ in vertex form. What are the coordinates of the vertex?`;
+                    finalA = `(${h20}, ${k20})`;
+                    steps = [
+                        `Type <code class="desmos-cmd">y = (x ${fmtSign(-h20)})^2 ${fmtSign(k20)}</code>.`,
+                        `Click the <strong>grey dot</strong> at the peak/valley.`
+                    ];
+                    break;
+                }
+                case 21: {
+                    let r1 = r(2, 4), r2 = r(5, 7);
+                    let b21 = -(r1 + r2), c21 = r1 * r2;
+                    tag = "Unit 4: Quadratics";
+                    q = `Identify the roots ($x$-intercepts) of $y = x^2 ${fmtSign(b21)}x + ${c21}$.`;
+                    finalA = `${r1} and ${r2}`;
+                    steps = [
+                        `Type <code class="desmos-cmd">y = x^2 ${fmtSign(b21)}x + ${c21}</code>.`,
+                        `Click both grey dots on the horizontal $x$-axis.`
+                    ];
+                    break;
+                }
+                case 22: {
+                    let h22 = r(-10, 10), k22 = r(2, 6);
+                    tag = "Unit 4: Absolute Value";
+                    q = `Where is the vertex of the absolute value function $y = |x ${fmtSign(-h22)}| - ${k22}$ located?`;
+                    finalA = `(${h22}, -${k22})`;
+                    steps = [`Type <code class="desmos-cmd">y = abs(x ${fmtSign(-h22)}) - ${k22}</code>.`, `Click the bottom point.`];
+                    break;
+                }
+                case 23: {
+                    let h23 = r(2, 5), k23 = r(2, 5);
+                    tag = "Unit 4: Absolute Value";
+                    q = `Graph the absolute value inequality $y \\ge |x - ${h23}| + ${k23}$. What coordinate forms the lowest point of the shaded region?`;
+                    finalA = `(${h23}, ${k23})`;
+                    steps = [`Type <code class="desmos-cmd">y >= abs(x - ${h23}) + ${k23}</code>.`, `Click the vertex of the solid boundary line.`];
+                    break;
+                }
+                case 24: {
+                    let y24 = r(4, 16);
+                    tag = "Unit 4: Systems";
+                    q = `Find the positive coordinate where the parabola $y = x^2$ intersects the line $y = ${y24}$.`;
+                    finalA = Math.sqrt(y24).toFixed(3);
+                    steps = [`Graph <code class="desmos-cmd">y = x^2</code> and <code class="desmos-cmd">y = ${y24}</code>.`, `Click the intersection.`];
+                    break;
+                }
+
+                // --- UNIT 5: POLYNOMIALS, RADICALS & RATIONALS ---
+                case 25: {
+                    let a25 = r(2, 4);
+                    tag = "Unit 5: Polynomials";
+                    q = `Find the $y$-coordinate of the local maximum (the peak) of the cubic curve $y = -x^3 + ${a25*a25*3}x$.`;
+                    finalA = (-Math.pow(a25, 3) + 3*a25*a25*a25).toFixed(3);
+                    steps = [`Type <code class="desmos-cmd">y = -x^3 + ${a25*a25*3}x</code>.`, `Click the grey dot at the top of the curve's hill.`];
+                    break;
+                }
+                case 26: {
+                    let y26 = r(2, 6);
+                    tag = "Unit 5: Radicals";
+                    q = `Find the intersection of $y = \\sqrt{x}$ and the horizontal line $y = ${y26}$.`;
+                    finalA = y26 * y26;
+                    steps = [`Graph both <code class="desmos-cmd">y = sqrt(x)</code> and <code class="desmos-cmd">y = ${y26}</code>.`, `Click their intersection.`];
+                    break;
+                }
+                case 27: {
+                    let a27 = r(2, 8);
+                    tag = "Unit 5: Rationals";
+                    q = `Graph the rational function $y = \\frac{1}{x - ${a27}}$. Where is its vertical asymptote located?`;
+                    finalA = `x = ${a27}`;
+                    steps = [
+                        `Type <code class="desmos-cmd">y = 1 / (x - ${a27})</code>.`,
+                        `Type <code class="desmos-cmd">x = ${a27}</code> and make it a dashed line to verify.`
+                    ];
+                    break;
+                }
+                case 28: {
+                    let r28 = r(3, 9);
+                    tag = "Unit 5: Conic Sections";
+                    q = `Graph the circle $x^2 + y^2 = ${r28*r28}$. What is the $x$-intercept on the positive side of the horizontal axis?`;
+                    finalA = r28;
+                    steps = [`Type <code class="desmos-cmd">x^2 + y^2 = ${r28*r28}</code>.`, `Click the right-most point on the circle.`];
+                    break;
+                }
+                case 29: {
+                    let a29 = r(3, 5), b29 = r(6, 8);
+                    tag = "Unit 5: Conic Sections";
+                    q = `Graph the ellipse $\\frac{x^2}{${a29*a29}} + \\frac{y^2}{${b29*b29}} = 1$. What is its positive $y$-intercept?`;
+                    finalA = b29;
+                    steps = [`Type <code class="desmos-cmd">x^2/${a29*a29} + y^2/${b29*b29} = 1</code>.`, `Click the top-most intersection with the $y$-axis.`];
+                    break;
+                }
+
+                // --- UNIT 6: FUNCTIONS, EXPONENTIALS & LOGS ---
+                case 30: {
+                    let c30 = r(2, 8);
+                    tag = "Unit 6: Functions Notation";
+                    q = `Define the function $f(x) = x^2 + ${c30}x$. Find the value of $f(10)$.`;
+                    finalA = (100 + 10*c30);
+                    steps = [`Type <code class="desmos-cmd">f(x) = x^2 + ${c30}x</code>.`, `In line 2, type <code class="desmos-cmd">f(10)</code>.`];
+                    break;
+                }
+                case 31: {
+                    let m31 = r(2, 5), b31 = r(1, 4);
+                    tag = "Unit 6: Tables";
+                    q = `Graph $y = ${m31}x + ${b31}$. Click the <strong>Gear Icon</strong> (Edit List) and choose "Convert to Table". What is the $y$-value when $x = 10$?`;
+                    finalA = m31 * 10 + b31;
+                    steps = [
+                        `Type <code class="desmos-cmd">y = ${m31}x + ${b31}</code>.`,
+                        `Click the Gear Icon ⚙️ at the top of the expression list.`,
+                        `Click the Table icon 🏓 next to the equation.`,
+                        `Type 10 into the $x$ column of the new table.`
+                    ];
+                    break;
+                }
+                case 32: {
+                    let b32 = r(3, 7);
+                    tag = "Unit 6: Domain Restrictions";
+                    q = `Graph a line with simultaneous domain & range restrictions: $y = x \\quad \\{x > 0\\} \\{y < ${b32}\\}$. What is the maximum $x$-value drawn?`;
+                    finalA = b32;
+                    steps = [
+                        `Type <code class="desmos-cmd">y = x {x > 0} {y < ${b32}}</code>.`,
+                        `Desmos applies both braces via 'AND' logic. The line stops at $(${b32}, ${b32})$.`
+                    ];
+                    break;
+                }
+                case 33: {
+                    let p33 = r(2, 6);
+                    tag = "Unit 6: Piecewise Functions";
+                    q = `Graph the piecewise function $f(x) = \\begin{cases} 5 & x < 0 \\\\ ${p33} & x \\ge 0 \\end{cases}$. What is the value of $f(1)$?`;
+                    finalA = p33;
+                    steps = [`Type <code class="desmos-cmd">f(x) = {x < 0: 5, ${p33}}</code>.`, `Type <code class="desmos-cmd">f(1)</code> to evaluate.`];
+                    break;
+                }
+                case 34: {
+                    let c34 = r(1, 5);
+                    tag = "Unit 6: Composite Functions";
+                    q = `Define $f(x) = x + ${c34}$ and $g(x) = 2x$. Evaluate the composite function expression $g(f(3))$.`;
+                    finalA = 2 * (3 + c34);
+                    steps = [
+                        `Define <code class="desmos-cmd">f(x) = x + ${c34}</code>.`,
+                        `Define <code class="desmos-cmd">g(x) = 2x</code>.`,
+                        `Type <code class="desmos-cmd">g(f(3))</code>.`
+                    ];
+                    break;
+                }
+                case 35: {
+                    let a35 = r(2, 5), b35 = r(2, 3);
+                    tag = "Unit 6: Exponentials";
+                    q = `Find the $y$-intercept of the exponential curve: $y = ${a35}(${b35})^x$.`;
+                    finalA = a35;
+                    steps = [`Type <code class="desmos-cmd">y = ${a35}(${b35})^x</code>.`, `Click the dot on the $y$-axis.`];
+                    break;
+                }
+                case 36: {
+                    let base36 = r(2, 5);
+                    tag = "Unit 6: Logarithms";
+                    q = `At what value of $x$ does the exponential curve $y = ${base36}^x$ intersect the line $y = 100$?`;
+                    finalA = (Math.log(100)/Math.log(base36)).toFixed(3);
+                    steps = [`Type <code class="desmos-cmd">y = ${base36}^x</code> and <code class="desmos-cmd">y = 100</code>.`, `Click the intersection.`];
+                    break;
+                }
+                case 37: {
+                    let a37 = r(2, 4), b37 = r(1, 5);
+                    tag = "Unit 6: Inverse Functions";
+                    q = `Define the function $f(x) = ${a37}x + ${b37}$. Graph its inverse implicitly and identify the inverse's $x$-intercept.`;
+                    finalA = (-b37).toFixed(3);
+                    steps = [
+                        `Type <code class="desmos-cmd">f(x) = ${a37}x + ${b37}</code>.`,
+                        `Type <code class="desmos-cmd">x = f(y)</code> to draw the inverse function.`,
+                        `Click the $x$-intercept of the new curve.`
+                    ];
+                    break;
+                }
+
+                // --- UNIT 7: SERIES & SUMS ---
+                case 38: {
+                    let a38 = r(2, 5), b38 = r(1, 4);
+                    tag = "Unit 7: Series & Sums";
+                    q = `Calculate the sum of the finite series: $\\sum_{n=1}^{5} (${a38}n + ${b38})$.`;
+                    finalA = (15 * a38) + (5 * b38);
+                    steps = [
+                        `Type <code class="desmos-cmd">sum</code> to generate a sigma symbol ($\\sum$).`,
+                        `Set bounds from $n=1$ to $5$.`,
+                        `Type <code class="desmos-cmd">${a38}n + ${b38}</code> inside the parentheses.`
+                    ];
+                    break;
+                }
+                case 39: {
+                    let bound = r(3, 8);
+                    tag = "Unit 7: Series & Sums";
+                    q = `Evaluate the product of the first ${bound} integers: $\\prod_{n=1}^{${bound}} n$ (This is factorial!).`;
+                    let fact = 1; for(let i=1; i<=bound; i++) fact *= i;
+                    finalA = fact;
+                    steps = [
+                        `Type <code class="desmos-cmd">prod</code> to generate a Pi symbol ($\\prod$).`,
+                        `Set bounds from $n=1$ to $${bound}$.`,
+                        `Type <code class="desmos-cmd">n</code> inside the parentheses.`
+                    ];
+                    break;
+                }
+                case 40: {
+                    let d = r(2, 5);
+                    tag = "Unit 7: Series & Sums";
+                    q = `Evaluate the sum of a constant series: $\\sum_{k=1}^{10} ${d}$.`;
+                    finalA = 10 * d;
+                    steps = [
+                        `Type <code class="desmos-cmd">sum</code>. Set bounds $k=1$ to $10$.`,
+                        `Type <code class="desmos-cmd">${d}</code>. Observe that it sums ${d} ten times.`
+                    ];
+                    break;
+                }
+            }
+
+            const card = document.createElement('div');
+            card.className = 'q-card';
+            card.innerHTML = `
+                <div class="q-header">
+                    <span class="q-num">Problem #${displayNum}</span>
+                    <span class="tag">${tag}</span>
+                </div>
+                <div class="q-body">${q}</div>
+                <div>
+                    <button class="btn-show" onclick="toggleAns(this)" style="margin-top: 15px;">Show Steps & Answer</button>
+                    <div class="ans-panel">
+                        <strong>Desmos Steps:</strong>
+                        <ul class="steps-list">
+                            ${steps.map(s => `<li>${s}</li>`).join('')}
+                        </ul>
+                        <strong>Final Answer:</strong> <span class="final-val">${finalA}</span>
+                    </div>
+                </div>
+            `;
+            listDiv.appendChild(card);
+        });
+
+        // Trigger LaTeX font rendering
+        triggerMathRender();
+    }
+
+    function toggleAns(btn) {
+        const panel = btn.nextElementSibling;
+        const isVisible = panel.style.display === 'block';
+        panel.style.display = isVisible ? 'none' : 'block';
+        btn.textContent = isVisible ? 'Hide Steps' : 'Show Steps & Answer';
+    }
+
+    // Initialize on load
+    window.onload = function() { generate(false); };
+</script>
+
+</body>
+</html>

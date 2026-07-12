@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exponent Operations Practice Test</title>
+    
+    <!-- Load MathJax for elegant LaTeX mathematical rendering -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary-blue: #1a73e8;
+            --hover-blue: #1557b0;
+            --background-gray: #f8f9fa;
+            --card-border: #dadce0;
+            --correct-green: #137333;
+            --incorrect-red: #c5221f;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-gray);
+            color: #3c4043;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #202124;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #5f6368;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 35px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-generate {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-generate:hover {
+            background-color: var(--hover-blue);
+        }
+
+        .btn-check {
+            background-color: #34a853;
+            color: white;
+        }
+
+        .btn-check:hover {
+            background-color: #2b8c45;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .problem-card {
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .problem-number {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #202124;
+            margin-bottom: 10px;
+        }
+
+        /* Bold blue styling for the textbook-format math equations */
+        .math-display {
+            color: var(--primary-blue);
+            font-weight: bold;
+            font-size: 1.4rem;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        /* MathJax generated output styling overrides to enforce blue color */
+        .math-display mjx-container {
+            color: var(--primary-blue) !important;
+            font-weight: bold !important;
+        }
+
+        .answer-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .answer-input {
+            padding: 8px 12px;
+            font-size: 1rem;
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            width: 120px;
+        }
+
+        .feedback {
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .feedback.correct {
+            color: var(--correct-green);
+        }
+
+        .feedback.incorrect {
+            color: var(--incorrect-red);
+        }
+
+        .solution-block {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f1f3f4;
+            border-left: 4px solid var(--primary-blue);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .solution-title {
+            font-weight: bold;
+            color: #202124;
+            margin-bottom: 10px;
+        }
+
+        .step-list {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .step-item {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Exponent Operations Practice Test</h1>
+    <p class="subtitle">Complete the 10 problems below. Enter your final answers in the input fields, then click "Check Answers" to see the step-by-step solutions.</p>
+
+    <div class="controls">
+        <button class="btn-generate" onclick="generateTest()">Generate New Test</button>
+        <button class="btn-check" onclick="checkAnswers()">Check Answers</button>
+    </div>
+
+    <div id="test-area">
+        <!-- Problems will dynamically populate here -->
+    </div>
+</div>
+
+<script>
+    // Global container for the 10 current problems
+    let currentProblems = [];
+
+    // Helper functions for randomizations
+    function getRandomElement(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Generator function containing the 10 unique problem templates
+    function build10Problems() {
+        let problems = [];
+
+        // 1. Product Rule & Positive Integers
+        let p1_a = getRandomElement([2, 3]);
+        let p1_b = (p1_a === 2) ? getRandomElement([2, 3]) : getRandomElement([1, 2]);
+        let p1_c = (p1_a === 2) ? getRandomElement([1, 2]) : getRandomElement([1, 2]);
+        let p1_d = getRandomInt(2, 5);
+        let p1_e = getRandomInt(2, 6);
+        let p1_p_val = Math.pow(p1_a, p1_b + p1_c);
+        let p1_m_val = p1_d * p1_e;
+        let p1_ans = p1_p_val + p1_m_val;
+        problems.push({
+            id: 1,
+            latex: `\\[ ${p1_a}^{${p1_b}} \\cdot ${p1_a}^{${p1_c}} + ${p1_d} \\cdot ${p1_e} \\]`,
+            steps: [
+                `Apply the product rule to the first term: \\( ${p1_a}^{${p1_b}} \\cdot ${p1_a}^{${p1_c}} = ${p1_a}^{${p1_b} + ${p1_c}} = ${p1_a}^{${p1_b + p1_c}} \\)`,
+                `Evaluate the exponent and the multiplication: \\( ${p1_a}^{${p1_b + p1_c}} = ${p1_p_val} \\) and \\( ${p1_d} \\cdot ${p1_e} = ${p1_m_val} \\)`,
+                `Add the results: \\( ${p1_p_val} + ${p1_m_val} = ${p1_ans} \\)`
+            ],
+            answer: p1_ans
+        });
+
+        // 2. Quotient Rule & Zero Exponents
+        let p2_a = getRandomInt(4, 7);
+        let p2_b = getRandomInt(3, 5);
+        let p2_c = p2_b - getRandomElement([2, 3]);
+        let p2_d = getRandomInt(2, 12);
+        let p2_e = getRandomInt(2, 12);
+        let p2_p_val = Math.pow(p2_a, p2_b - p2_c);
+        let p2_ans = p2_p_val - 1;
+        problems.push({
+            id: 2,
+            latex: `\\[ \\frac{${p2_a}^{${p2_b}}}{${p2_a}^{${p2_c}}} - (${p2_d} \\cdot ${p2_e})^0 \\]`,
+            steps: [
+                `Apply the quotient rule to the fraction: \\( \\frac{${p2_a}^{${p2_b}}}{${p2_a}^{${p2_c}}} = ${p2_a}^{${p2_b} - ${p2_c}} = ${p2_a}^{${p2_b - p2_c}} \\)`,
+                `Evaluate the zero exponent term (any non-zero number raised to the zero power equals 1): \\( (${p2_d * p2_e})^0 = 1 \\)`,
+                `Evaluate the power: \\( ${p2_a}^{${p2_b - p2_c}} = ${p2_p_val} \\)`,
+                `Perform final subtraction: \\( ${p2_p_val} - 1 = ${p2_ans} \\)`
+            ],
+            answer: p2_ans
+        });
+
+        // 3. Power of a Power & Negative Exponents
+        let p3_a = 2;
+        let p3_b = getRandomElement([1, 2]);
+        let p3_c = getRandomElement([2, 3]);
+        let p3_d = getRandomInt(3, 5);
+        let p3_e = getRandomInt(1, 3);
+        let p3_p1 = p3_b * p3_c;
+        let p3_p_val = Math.pow(p3_a, p3_p1);
+        let p3_m_val = p3_d * Math.pow(p3_a, p3_e);
+        let p3_ans = p3_p_val + p3_m_val;
+        problems.push({
+            id: 3,
+            latex: `\\[ (2^{-${p3_b}})^{-${p3_c}} + ${p3_d} \\cdot 2^{${p3_e}} \\]`,
+            steps: [
+                `Apply the power of a power rule: \\( (2^{-${p3_b}})^{-${p3_c}} = 2^{(-${p3_b}) \\cdot (-${p3_c})} = 2^{${p3_p1}} \\)`,
+                `Evaluate the exponent terms: \\( 2^{${p3_p1}} = ${p3_p_val} \\) and \\( 2^{${p3_e}} = ${Math.pow(p3_a, p3_e)} \\)`,
+                `Perform the multiplication: \\( ${p3_d} \\cdot ${Math.pow(p3_a, p3_e)} = ${p3_m_val} \\)`,
+                `Add the terms: \\( ${p3_p_val} + ${p3_m_val} = ${p3_ans} \\)`
+            ],
+            answer: p3_ans
+        });
+
+        // 4. Fractional (Rational) Exponents
+        let p4_b_choices = [{ val: 8, base: 2 }, { val: 27, base: 3 }, { val: 64, base: 4 }];
+        let p4_choice = getRandomElement(p4_b_choices);
+        let p4_b = p4_choice.val;
+        let p4_root = p4_choice.base;
+        let p4_a = getRandomInt(2, 5);
+        let p4_e = getRandomElement([9, 16, 25, 36, 49, 64]);
+        let p4_e_val = Math.sqrt(p4_e);
+        let p4_frac_val = Math.pow(p4_root, 2);
+        let p4_m_val = p4_a * p4_frac_val;
+        let p4_ans = p4_m_val - p4_e_val;
+        problems.push({
+            id: 4,
+            latex: `\\[ ${p4_a} \\cdot ${p4_b}^{2/3} - ${p4_e}^{1/2} \\]`,
+            steps: [
+                `Evaluate the fractional exponent: \\( ${p4_b}^{2/3} = (\\sqrt[3]{${p4_b}})^2 = (${p4_root})^2 = ${p4_frac_val} \\)`,
+                `Evaluate the square root: \\( ${p4_e}^{1/2} = \\sqrt{${p4_e}} = ${p4_e_val} \\)`,
+                `Perform the multiplication: \\( ${p4_a} \\cdot ${p4_frac_val} = ${p4_m_val} \\)`,
+                `Perform final subtraction: \\( ${p4_m_val} - ${p4_e_val} = ${p4_ans} \\)`
+            ],
+            answer: p4_ans
+        });
+
+        // 5. Power of a Product Rule & Negative Exponents
+        let p5_c = getRandomInt(1, 3);
+        let p5_d = p5_c + getRandomInt(1, 2);
+        let p5_diff = p5_d - p5_c;
+        let p5_ans = Math.pow(10, p5_diff);
+        problems.push({
+            id: 5,
+            latex: `\\[ (2 \\cdot 5)^{-${p5_c}} \\cdot 10^{${p5_d}}  \\]`,
+            steps: [
+                `Simplify the product inside the parentheses: \\( 2 \\cdot 5 = 10 \\)`,
+                `Rewrite the expression with the base 10: \\( 10^{-${p5_c}} \\cdot 10^{${p5_d}} \\)`,
+                `Apply the product rule to add exponents: \\( 10^{-${p5_c} + ${p5_d}} = 10^{${p5_diff}} \\)`,
+                `Evaluate the final power: \\( 10^{${p5_diff}} = ${p5_ans} \\)`
+            ],
+            answer: p5_ans
+        });
+
+        // 6. Power of a Quotient Rule
+        let p6_b = getRandomElement([2, 3]);
+        let p6_c = getRandomElement([2, 3]);
+        let p6_d = getRandomInt(1, 5);
+        let p6_term = Math.pow(p6_b, p6_c);
+        let p6_ans = 2 * p6_term - p6_d;
+        problems.push({
+            id: 6,
+            latex: `\\[ \\left(\\frac{1}{${p6_b}}\\right)^{-${p6_c}} + ${p6_b}^{${p6_c}} - ${p6_d} \\]`,
+            steps: [
+                `Rewrite the fraction to remove the negative exponent: \\( \\left(\\frac{1}{${p6_b}}\\right)^{-${p6_c}} = (${p6_b})^{${p6_c}} \\)`,
+                `Rewrite the whole expression: \\( ${p6_b}^{${p6_c}} + ${p6_b}^{${p6_c}} - ${p6_d} \\)`,
+                `Evaluate the exponential terms: \\( ${p6_b}^{${p6_c}} = ${p6_term} \\)`,
+                `Perform addition and subtraction: \\( ${p6_term} + ${p6_term} - ${p6_d} = ${p6_term * 2} - ${p6_d} = ${p6_ans} \\)`
+            ],
+            answer: p6_ans
+        });
+
+        // 7. Irrational Exponents
+        let p7_a = getRandomInt(2, 5);
+        let p7_b = getRandomElement([2, 3]);
+        let p7_c = getRandomInt(2, 5);
+        let p7_d = 2;
+        let p7_e = getRandomElement([2, 3]);
+        let p7_p_val = Math.pow(p7_a, p7_b);
+        let p7_m_val = p7_c * Math.pow(p7_d, p7_e);
+        let p7_ans = p7_p_val - p7_m_val;
+        problems.push({
+            id: 7,
+            latex: `\\[ ( ${p7_a}^{\\sqrt{${p7_b}}} )^{\\sqrt{${p7_b}}} - ${p7_c} \\cdot ${p7_d}^{${p7_e}} \\]`,
+            steps: [
+                `Apply the power of a power rule to the first term: \\( (${p7_a}^{\\sqrt{${p7_b}}})^{\\sqrt{${p7_b}}} = ${p7_a}^{\\sqrt{${p7_b}} \\cdot \\sqrt{${p7_b}}} = ${p7_a}^{${p7_b}} \\)`,
+                `Evaluate the exponential terms: \\( ${p7_a}^{${p7_b}} = ${p7_p_val} \\) and \\( ${p7_d}^{${p7_e}} = ${Math.pow(p7_d, p7_e)} \\)`,
+                `Perform the multiplication: \\( ${p7_c} \\cdot ${Math.pow(p7_d, p7_e)} = ${p7_m_val} \\)`,
+                `Subtract to find the final value: \\( ${p7_p_val} - ${p7_m_val} = ${p7_ans} \\)`
+            ],
+            answer: p7_ans
+        });
+
+        // 8. Combining Like Terms with Negative Bases
+        let p8_b = 2;
+        let p8_c = getRandomElement([3, 4]);
+        let p8_a = getRandomInt(2, 4);
+        let p8_d = getRandomInt(2, 5);
+        let p8_e = getRandomInt(2, 10);
+        let p8_base_val = Math.pow(-p8_b, p8_c);
+        let p8_e_val = p8_e * p8_e;
+        let p8_combined = p8_a + p8_d;
+        let p8_ans = p8_combined * p8_base_val - p8_e_val;
+        problems.push({
+            id: 8,
+            latex: `\\[ ${p8_a} \\cdot (-${p8_b})^{${p8_c}} + ${p8_d} \\cdot (-${p8_b})^{${p8_c}} - ${p8_e}^2 \\]`,
+            steps: [
+                `Combine matching base-exponent terms: \\( (${p8_a} + ${p8_d}) \\cdot (-${p8_b})^{${p8_c}} = ${p8_combined} \\cdot (-${p8_b})^{${p8_c}} \\)`,
+                `Evaluate the exponential terms: \\( (-${p8_b})^{${p8_c}} = ${p8_base_val} \\) and \\( ${p8_e}^2 = ${p8_e_val} \\)`,
+                `Perform the multiplication: \\( ${p8_combined} \\cdot ${p8_base_val} = ${p8_combined * p8_base_val} \\)`,
+                `Perform the final subtraction: \\( ${p8_combined * p8_base_val} - ${p8_e_val} = ${p8_ans} \\)`
+            ],
+            answer: p8_ans
+        });
+
+        // 9. Negative Fractional Exponents
+        let p9_choices = [
+            { a: 8, b: 3, denom: 2 },
+            { a: 16, b: 4, denom: 2 },
+            { a: 27, b: 3, denom: 3 },
+            { a: 64, b: 3, denom: 4 },
+            { a: 81, b: 4, denom: 3 }
+        ];
+        let p9_choice = getRandomElement(p9_choices);
+        let p9_a = p9_choice.a;
+        let p9_b = p9_choice.b;
+        let p9_denom = p9_choice.denom;
+        let p9_c = p9_denom * getRandomInt(2, 5);
+        let p9_d = getRandomInt(2, 50);
+        let p9_e = getRandomInt(2, 4);
+        let p9_m_val = (1 / p9_denom) * p9_c;
+        let p9_ans = p9_m_val + 1;
+        problems.push({
+            id: 9,
+            latex: `\\[ ${p9_a}^{-1/${p9_b}} \\cdot ${p9_c} + (${p9_d}^{${p9_e}})^0  \\]`,
+            steps: [
+                `Simplify the negative fractional exponent: \\( ${p9_a}^{-1/${p9_b}} = \\frac{1}{${p9_a}^{1/${p9_b}}} = \\frac{1}{\\sqrt[${p9_b}]{${p9_a}}} = \\frac{1}{${p9_denom}} \\)`,
+                `Evaluate the term raised to 0: \\( (${p9_d}^{${p9_e}})^0 = 1 \\)`,
+                `Perform multiplication: \\( \\frac{1}{${p9_denom}} \\cdot ${p9_c} = ${p9_m_val} \\)`,
+                `Add the terms: \\( ${p9_m_val} + 1 = ${p9_ans} \\)`
+            ],
+            answer: p9_ans
+        });
+
+        // 10. Multi-Step Exponent Fraction
+        let p10_a = 2, p10_c = 3;
+        let p10_b = getRandomElement([2, 3]);
+        let p10_d = getRandomElement([1, 2]);
+        let p10_e = 2;
+        let p10_f = p10_b * p10_e - getRandomElement([1, 2]);
+        let p10_g = p10_d * p10_e - 1;
+        let p10_h = getRandomInt(1, 5);
+        let p10_base2_pow = (p10_b * p10_e) - p10_f;
+        let p10_base3_pow = (p10_d * p10_e) - p10_g;
+        let p10_frac_val = Math.pow(p10_a, p10_base2_pow) * Math.pow(p10_c, p10_base3_pow);
+        let p10_ans = p10_frac_val - p10_h;
+        problems.push({
+            id: 10,
+            latex: `\\[ \\frac{(${p10_a}^{${p10_b}} \\cdot ${p10_c}^{${p10_d}})^{${p10_e}}}{${p10_a}^{${p10_f}} \\cdot ${p10_c}^{${p10_g}}} - ${p10_h}  \\]`,
+            steps: [
+                `Simplify numerator using power of a product: \\( (${p10_a}^{${p10_b}} \\cdot ${p10_c}^{${p10_d}})^{${p10_e}} = ${p10_a}^{${p10_b * p10_e}} \\cdot ${p10_c}^{${p10_d * p10_e}} \\)`,
+                `Simplify using the quotient rule: \\( \\frac{${p10_a}^{${p10_b * p10_e}} \\cdot ${p10_c}^{${p10_d * p10_e}}}{${p10_a}^{${p10_f}} \\cdot ${p10_c}^{${p10_g}}} = ${p10_a}^{${p10_b * p10_e} - ${p10_f}} \\cdot ${p10_c}^{${p10_d * p10_e} - ${p10_g}} = ${p10_a}^{${p10_base2_pow}} \\cdot ${p10_c}^{${p10_base3_pow}} \\)`,
+                `Evaluate the exponential terms: \\( ${p10_a}^{${p10_base2_pow}} \\cdot ${p10_c}^{${p10_base3_pow}} = ${Math.pow(p10_a, p10_base2_pow)} \\cdot ${Math.pow(p10_c, p10_base3_pow)} = ${p10_frac_val} \\)`,
+                `Subtract: \\( ${p10_frac_val} - ${p10_h} = ${p10_ans} \\)`
+            ],
+            answer: p10_ans
+        });
+
+        return problems;
+    }
+
+    // Function to render the 10 problems onto the HTML page
+    function generateTest() {
+        currentProblems = build10Problems();
+        const testArea = document.getElementById('test-area');
+        testArea.innerHTML = '';
+
+        currentProblems.forEach((problem) => {
+            const card = document.createElement('div');
+            card.className = 'problem-card';
+            card.id = `card-${problem.id}`;
+
+            // Build structural steps HTML
+            let stepsHtml = '';
+            problem.steps.forEach((step) => {
+                stepsHtml += `<li class="step-item">${step}</li>`;
+            });
+
+            card.innerHTML = `
+                <div class="problem-number">Problem ${problem.id}</div>
+                <div class="math-display">${problem.latex}</div>
+                <div class="answer-section">
+                    <label for="input-${problem.id}">Your Answer:</label>
+                    <input type="text" class="answer-input" id="input-${problem.id}" placeholder="e.g. 5">
+                    <span class="feedback" id="feedback-${problem.id}"></span>
+                </div>
+                <div class="solution-block" id="solution-${problem.id}">
+                    <div class="solution-title">Step-by-Step Solution:</div>
+                    <ul class="step-list">${stepsHtml}</ul>
+                </div>
+            `;
+            testArea.appendChild(card);
+        });
+
+        // Trigger MathJax typesetting engine to cleanly format our dynamically updated DOM
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+    }
+
+    // Checking answers, applying correct/incorrect status, and showing step-by-step math blocks
+    function checkAnswers() {
+        if (currentProblems.length === 0) {
+            alert("Please generate a test first!");
+            return;
+        }
+
+        currentProblems.forEach((problem) => {
+            const inputField = document.getElementById(`input-${problem.id}`);
+            const feedbackSpan = document.getElementById(`feedback-${problem.id}`);
+            const solutionDiv = document.getElementById(`solution-${problem.id}`);
+            
+            const studentInput = inputField.value.trim();
+
+            if (studentInput === "") {
+                feedbackSpan.textContent = "⚠️ Unanswered";
+                feedbackSpan.className = "feedback incorrect";
+            } else if (parseFloat(studentInput) === problem.answer) {
+                feedbackSpan.textContent = "✓ Correct!";
+                feedbackSpan.className = "feedback correct";
+            } else {
+                feedbackSpan.textContent = `✗ Incorrect (Correct Answer: ${problem.answer})`;
+                feedbackSpan.className = "feedback incorrect";
+            }
+
+            // Expose the hidden math solutions to the user
+            solutionDiv.style.display = "block";
+        });
+
+        // Retypeset formulas in case any solutions were modified/revealed dynamically
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+    }
+
+    // Auto-generate a test on initial window load
+    window.onload = function() {
+        generateTest();
+    };
+</script>
+
+</body>
+</html>
