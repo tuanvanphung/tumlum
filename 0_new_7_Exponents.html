@@ -52,14 +52,15 @@
         p.subtitle {
             text-align: center;
             color: #5f6368;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            line-height: 1.5;
         }
 
         .controls {
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin-bottom: 35px;
+            margin-bottom: 30px;
         }
 
         button {
@@ -69,7 +70,13 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
+            transition: background-color 0.2s ease, transform 0.1s ease, opacity 0.2s;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
         }
 
         .btn-generate {
@@ -77,7 +84,7 @@
             color: white;
         }
 
-        .btn-generate:hover {
+        .btn-generate:hover:not(:disabled) {
             background-color: var(--hover-blue);
         }
 
@@ -86,12 +93,22 @@
             color: white;
         }
 
-        .btn-check:hover {
+        .btn-check:hover:not(:disabled) {
             background-color: #2b8c45;
         }
 
-        button:active {
+        button:active:not(:disabled) {
             transform: scale(0.98);
+        }
+
+        #score-banner {
+            display: none;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 6px;
         }
 
         .problem-card {
@@ -119,7 +136,6 @@
             text-align: center;
         }
 
-        /* MathJax generated output styling overrides to enforce blue color */
         .math-display mjx-container {
             color: var(--primary-blue) !important;
             font-weight: bold !important;
@@ -130,6 +146,7 @@
             align-items: center;
             gap: 10px;
             margin-top: 15px;
+            flex-wrap: wrap;
         }
 
         .answer-input {
@@ -138,6 +155,13 @@
             border: 1px solid var(--card-border);
             border-radius: 4px;
             width: 120px;
+            transition: background-color 0.2s;
+        }
+
+        .answer-input:disabled {
+            background-color: #f1f3f4;
+            color: #5f6368;
+            border-color: #dadce0;
         }
 
         .feedback {
@@ -153,30 +177,13 @@
             color: var(--incorrect-red);
         }
 
-        .solution-block {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f1f3f4;
-            border-left: 4px solid var(--primary-blue);
-            border-radius: 0 4px 4px 0;
+        #test-area {
+            opacity: 0; /* Hiding initially to prevent MathJax flashing (FOUC) */
         }
 
-        .solution-title {
-            font-weight: bold;
-            color: #202124;
-            margin-bottom: 10px;
-        }
-
-        .step-list {
-            list-style-type: none;
-            padding-left: 0;
-            margin: 0;
-        }
-
-        .step-item {
-            margin-bottom: 8px;
-            line-height: 1.6;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -184,12 +191,15 @@
 
 <div class="container">
     <h1>Exponent Operations Practice Test</h1>
-    <p class="subtitle">Complete the 10 problems below. Enter your final answers in the input fields, then click "Check Answers" to see the step-by-step solutions.</p>
+    <p class="subtitle">Complete the 10 problems below. When you click "Check Answers", you will see your score and correct/incorrect indicators. <br><b>A Test Report with step-by-step solutions will automatically download.</b></p>
 
     <div class="controls">
         <button class="btn-generate" onclick="generateTest()">Generate New Test</button>
-        <button class="btn-check" onclick="checkAnswers()">Check Answers</button>
+        <button class="btn-check" id="btn-check-answers" onclick="checkAnswers()">Check Answers</button>
     </div>
+
+    <!-- Overall Score Banner -->
+    <div id="score-banner" aria-live="polite"></div>
 
     <div id="test-area">
         <!-- Problems will dynamically populate here -->
@@ -434,20 +444,22 @@
 
     // Function to render the 10 problems onto the HTML page
     function generateTest() {
-        currentProblems = build10Problems();
+        // Reset UI Elements
+        document.getElementById('btn-check-answers').disabled = false;
+        
+        const scoreBanner = document.getElementById('score-banner');
+        scoreBanner.style.display = 'none';
+
         const testArea = document.getElementById('test-area');
+        testArea.style.opacity = 0; // Hide initially to prevent FOUC (flash of raw LaTeX)
         testArea.innerHTML = '';
+
+        currentProblems = build10Problems();
 
         currentProblems.forEach((problem) => {
             const card = document.createElement('div');
             card.className = 'problem-card';
             card.id = `card-${problem.id}`;
-
-            // Build structural steps HTML
-            let stepsHtml = '';
-            problem.steps.forEach((step) => {
-                stepsHtml += `<li class="step-item">${step}</li>`;
-            });
 
             card.innerHTML = `
                 <div class="problem-number">Problem ${problem.id}</div>
@@ -455,55 +467,199 @@
                 <div class="answer-section">
                     <label for="input-${problem.id}">Your Answer:</label>
                     <input type="text" class="answer-input" id="input-${problem.id}" placeholder="e.g. 5">
-                    <span class="feedback" id="feedback-${problem.id}"></span>
-                </div>
-                <div class="solution-block" id="solution-${problem.id}">
-                    <div class="solution-title">Step-by-Step Solution:</div>
-                    <ul class="step-list">${stepsHtml}</ul>
+                    <span class="feedback" id="feedback-${problem.id}" aria-live="polite"></span>
                 </div>
             `;
             testArea.appendChild(card);
         });
 
-        // Trigger MathJax typesetting engine to cleanly format our dynamically updated DOM
+        // Add 'Enter' key support to submit the answers
+        currentProblems.forEach((problem) => {
+            const inputField = document.getElementById(`input-${problem.id}`);
+            inputField.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    checkAnswers();
+                }
+            });
+        });
+
+        // Use a Promise to safely format MathJax before showing the UI
         if (window.MathJax) {
-            MathJax.typesetPromise();
+            MathJax.typesetPromise().then(() => {
+                testArea.style.transition = "opacity 0.5s ease";
+                testArea.style.opacity = 1; // Smoothly fade in content
+            });
+        } else {
+            testArea.style.opacity = 1; // Fallback if MathJax fails to load
         }
     }
 
-    // Checking answers, applying correct/incorrect status, and showing step-by-step math blocks
+    // Getting the formatted Date timestamp
+    function getFormattedDate() {
+        const d = new Date();
+        const pad = (n) => n.toString().padStart(2, '0');
+        return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+    }
+
+    // Function to generate the downloadable HTML report text
+    function generateReportHtml(score) {
+        let report = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Exponents Test Report</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
+                displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']]
+            }
+        };
+    </` + `script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></` + `script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; color: #3c4043; padding: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: 0 auto; background: #ffffff; border-radius: 8px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #202124; }
+        .score { text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 30px; color: #1a73e8; }
+        .problem-card { border: 1px solid #dadce0; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+        .correct { color: #137333; font-weight: bold; }
+        .incorrect { color: #c5221f; font-weight: bold; }
+        .math-display { color: #1a73e8; font-weight: bold; font-size: 1.4rem; margin: 15px 0; text-align: center; }
+        .solution-block { margin-top: 15px; padding: 15px; background-color: #f1f3f4; border-left: 4px solid #1a73e8; border-radius: 0 4px 4px 0; }
+        ul { padding-left: 20px; margin: 5px 0 0 0; }
+        li { margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Exponents Test Report</h1>
+        <div class="score">Final Score: ${score} / ${currentProblems.length} (${Math.round((score / currentProblems.length) * 100)}%)</div>
+`;
+
+        currentProblems.forEach(problem => {
+            const inputField = document.getElementById(`input-${problem.id}`);
+            const rawInput = inputField.value.trim().replace(/,/g, '');
+            const studentInput = parseFloat(rawInput);
+            
+            let isCorrect = false;
+            let statusText = "Unanswered / Invalid";
+            let statusClass = "incorrect";
+
+            if (rawInput !== "" && !isNaN(studentInput)) {
+                if (Math.abs(studentInput - problem.answer) < 0.0001) {
+                    isCorrect = true;
+                    statusText = "Correct!";
+                    statusClass = "correct";
+                } else {
+                    statusText = "Incorrect";
+                }
+            }
+
+            let stepsHtml = problem.steps.map(step => `<li>${step}</li>`).join('');
+
+            report += `
+        <div class="problem-card">
+            <h3>Problem ${problem.id}</h3>
+            <div class="math-display">${problem.latex}</div>
+            <p><strong>Your Answer:</strong> ${inputField.value.trim() || '<em>None</em>'} 
+               <span class="${statusClass}">(${statusText})</span></p>
+            <p><strong>Correct Answer:</strong> ${problem.answer}</p>
+            <div class="solution-block">
+                <strong>Step-by-Step Solution:</strong>
+                <ul>${stepsHtml}</ul>
+            </div>
+        </div>
+            `;
+        });
+
+        report += `
+    </div>
+</body>
+</html>`;
+        return report;
+    }
+
+    // Function to trigger the actual HTML download
+    function downloadReportHtml(score) {
+        const htmlContent = generateReportHtml(score);
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `07_Exponents_${getFormattedDate()}.html`;
+        
+        // Append, click, and remove to silently trigger download
+        document.body.appendChild(a);
+        a.click();
+        
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 100);
+    }
+
+    // Checking answers, scoring, and providing minimal visual feedback on page
     function checkAnswers() {
-        if (currentProblems.length === 0) {
-            alert("Please generate a test first!");
-            return;
-        }
+        if (currentProblems.length === 0) return;
+        
+        // Prevent double checking
+        const checkBtn = document.getElementById('btn-check-answers');
+        if (checkBtn.disabled) return; 
+        checkBtn.disabled = true;
+
+        let score = 0;
 
         currentProblems.forEach((problem) => {
             const inputField = document.getElementById(`input-${problem.id}`);
             const feedbackSpan = document.getElementById(`feedback-${problem.id}`);
-            const solutionDiv = document.getElementById(`solution-${problem.id}`);
             
-            const studentInput = inputField.value.trim();
+            // Clean the user input: remove all spaces and commas
+            const rawInput = inputField.value.replace(/,/g, '').trim();
+            const studentInput = parseFloat(rawInput);
 
-            if (studentInput === "") {
-                feedbackSpan.textContent = "⚠️ Unanswered";
+            // Floating point precision safe comparison (epsilon = 0.0001)
+            if (rawInput === "" || isNaN(studentInput)) {
+                feedbackSpan.textContent = "⚠️ Invalid / Empty";
                 feedbackSpan.className = "feedback incorrect";
-            } else if (parseFloat(studentInput) === problem.answer) {
-                feedbackSpan.textContent = "✓ Correct!";
+            } else if (Math.abs(studentInput - problem.answer) < 0.0001) {
+                feedbackSpan.textContent = "✓ Correct";
                 feedbackSpan.className = "feedback correct";
+                score++;
             } else {
-                feedbackSpan.textContent = `✗ Incorrect (Correct Answer: ${problem.answer})`;
+                feedbackSpan.textContent = `✗ Incorrect`;
                 feedbackSpan.className = "feedback incorrect";
             }
 
-            // Expose the hidden math solutions to the user
-            solutionDiv.style.display = "block";
+            // Disable input so the student can't edit it after checking
+            inputField.disabled = true;
         });
 
-        // Retypeset formulas in case any solutions were modified/revealed dynamically
-        if (window.MathJax) {
-            MathJax.typesetPromise();
+        // Format and display the overall score banner
+        const scoreBanner = document.getElementById('score-banner');
+        const percentage = Math.round((score / currentProblems.length) * 100);
+        
+        scoreBanner.textContent = `You scored ${score} out of ${currentProblems.length} (${percentage}%)`;
+        scoreBanner.style.display = "block";
+
+        if (percentage === 100) {
+            scoreBanner.style.backgroundColor = "#e6f4ea";
+            scoreBanner.style.color = "#137333";
+            scoreBanner.style.border = "1px solid #ceead6";
+        } else if (percentage >= 70) {
+            scoreBanner.style.backgroundColor = "#fef7e0";
+            scoreBanner.style.color = "#b06000";
+            scoreBanner.style.border = "1px solid #feefc3";
+        } else {
+            scoreBanner.style.backgroundColor = "#fce8e6";
+            scoreBanner.style.color = "#c5221f";
+            scoreBanner.style.border = "1px solid #fad2cf";
         }
+
+        // 🌟 Trigger the automated HTML report download
+        downloadReportHtml(score);
     }
 
     // Auto-generate a test on initial window load
