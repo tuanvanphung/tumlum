@@ -41,6 +41,10 @@ jobs:
           EXCLUDE_FILES = ['index.html'] 
           EXCLUDE_DIRS = ['.git', '.github', 'node_modules', 'venv', 'env']
           
+          # Playful scholastic emojis to prepend to folders
+          ACADEMIC_EMOJIS = ["🎒", "📐", "📝", "🔬", "📚", "🎨", "🧠", "🧩"]
+
+          # Color palettes used sequentially for section cards (vibrant primary accents)
           COLOR_PALETTES = [
               {"primary": "#3b82f6", "hover": "#1d4ed8", "bg": "#eff6ff"},
               {"primary": "#10b981", "hover": "#047857", "bg": "#ecfdf5"},
@@ -103,6 +107,8 @@ jobs:
               cards_html = ""
               for idx, sec_name in enumerate(sorted_section_keys):
                   palette = COLOR_PALETTES[idx % len(COLOR_PALETTES)]
+                  emoji = ACADEMIC_EMOJIS[idx % len(ACADEMIC_EMOJIS)]
+                  
                   list_items = ""
                   for filename, filepath in sections[sec_name]:
                       friendly_name = to_friendly_name(filename)
@@ -125,8 +131,12 @@ jobs:
                               </a>
                           </li>\n"""
                   
+                  # Render Section Card with active Emoji
                   cards_html += f"""        <details class="section-card" style="--accent-color: {palette['primary']}; --accent-hover: {palette['hover']}; --accent-bg: {palette['bg']};">
-                      <summary class="section-title">{html.escape(sec_name)}</summary>
+                      <summary class="section-title">
+                          <span class="folder-emoji">{emoji}</span>
+                          {html.escape(sec_name)}
+                      </summary>
                       <ul class="file-list">
               {list_items}        </ul>
                   </details>\n"""
@@ -145,23 +155,31 @@ jobs:
                           font-family: 'Syne Mono', monospace, sans-serif;
                           margin: 0;
                           padding: 40px 20px;
-                          background-color: #f8fafc;
+                          background-color: #fafaf9; /* Warm off-white paper base */
+                          /* CSS Graph Paper Grid background */
+                          background-image: 
+                              linear-gradient(#e2e8f0 1px, transparent 1px),
+                              linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+                          background-size: 24px 24px;
                           color: #1e293b;
                       }}
                       .container {{ max-width: 800px; margin: auto; }}
                       header {{ text-align: center; margin-bottom: 40px; }}
                       h1 {{ color: #0f172a; font-size: 2.5rem; margin: 0; font-weight: 800; }}
-                      .grid {{ display: flex; flex-direction: column; gap: 24px; }}
+                      
+                      .grid {{ display: flex; flex-direction: column; gap: 30px; }}
+                      
+                      /* Sketchbook flat 3D cards */
                       .section-card {{
                           background: white;
-                          border-radius: 16px;
-                          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-                          border-top: 6px solid var(--accent-color);
-                          transition: transform 0.2s ease, box-shadow 0.2s ease;
+                          border-radius: 12px;
+                          border: 3px solid #1e293b;
+                          box-shadow: 6px 6px 0px var(--accent-color);
+                          transition: transform 0.15s ease, box-shadow 0.15s ease;
                       }}
                       .section-card:hover {{
-                          transform: translateY(-4px);
-                          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+                          transform: translate(-2px, -2px);
+                          box-shadow: 8px 8px 0px var(--accent-color);
                       }}
                       .section-title {{
                           color: #0f172a;
@@ -177,24 +195,22 @@ jobs:
                           list-style: none;
                       }}
                       .section-title::-webkit-details-marker {{ display: none; }}
-                      .section-title::before {{
-                          content: "";
-                          display: inline-block;
-                          width: 8px;
-                          height: 8px;
-                          border-radius: 50%;
-                          background-color: var(--accent-color);
+                      
+                      .folder-emoji {{
+                          font-size: 1.5rem;
                           flex-shrink: 0;
                       }}
                       .section-title::after {{
                           content: "▼";
                           margin-left: auto;
                           font-size: 0.8rem;
-                          color: #64748b;
+                          color: #1e293b;
                           transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
                           flex-shrink: 0;
                       }}
                       .section-card[open] .section-title::after {{ transform: rotate(180deg); }}
+                      
+                      /* Dashed tear-out divider style */
                       .file-list {{
                           list-style: none;
                           padding: 0 24px 24px 24px;
@@ -202,7 +218,7 @@ jobs:
                           display: flex;
                           flex-direction: column;
                           gap: 10px;
-                          border-top: 1px solid #e2e8f0;
+                          border-top: 3px dashed #cbd5e1;
                           padding-top: 20px;
                       }}
                       .file-item a {{
@@ -213,25 +229,33 @@ jobs:
                           padding: 10px 12px;
                           border-radius: 8px;
                           background-color: #f1f5f9;
-                          border-left: 4px solid #e2e8f0;
+                          border: 2px solid #e2e8f0;
+                          border-left: 5px solid #cbd5e1;
                           display: flex;
                           align-items: center;
                           justify-content: space-between;
-                          transition: background-color 0.2s ease, color 0.2s ease, border-left-color 0.2s ease;
+                          transition: all 0.15s ease;
                       }}
                       .file-item a:hover {{
                           background-color: var(--accent-bg);
                           color: var(--accent-hover);
+                          border-color: #1e293b;
+                          border-left-width: 5px;
                           border-left-color: var(--accent-color);
+                          transform: scale(1.01);
                       }}
+                      
+                      /* Highlighted green math blocks */
                       .file-item.math-item a {{
                           background-color: #ecfdf5;
-                          border-left: 4px solid #10b981;
+                          border-color: #a7f3d0;
+                          border-left: 5px solid #10b981;
                           color: #065f46;
                       }}
                       .file-item.math-item a:hover {{
                           background-color: #d1fae5;
                           color: #047857;
+                          border-color: #1e293b;
                           border-left-color: #059669;
                       }}
                       .file-name {{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%; }}
@@ -248,6 +272,7 @@ jobs:
                           align-items: center;
                           justify-content: center;
                           line-height: 1;
+                          border: 1px solid currentColor;
                       }}
                       .badge-math {{ background-color: #d1fae5; color: #065f46; }}
                       .badge-reading {{ background-color: #e0e7ff; color: #3730a3; }}
