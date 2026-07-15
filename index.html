@@ -39,27 +39,32 @@
             h1:hover { transform: rotate(1deg) scale(1.05); }
             
             .offline-toggle-container { text-align: right; margin-bottom: 20px; }
+            
+            /* Playful Academic Offline Toggle */
             .offline-btn {
                 font-family: 'Geo', sans-serif;
                 font-size: 0.9rem;
                 font-weight: 700;
-                padding: 8px 12px;
+                padding: 8px 16px;
                 border-radius: 4px;
                 text-transform: uppercase;
                 letter-spacing: 0.05em;
                 cursor: pointer;
                 border: 2px solid #1e293b;
-                box-shadow: 2px 2px 0px #1e293b;
-                background-color: white;
-                color: #1e293b;
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
                 transition: all 0.1s ease;
             }
-            .offline-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0px #1e293b; }
-            .offline-btn.active {
-                background-color: #fca5a5; 
+            .offline-btn.online {
+                background-color: #bbf7d0; /* Green highlighter */
+                color: #166534;
+                box-shadow: 2px 2px 0px #1e293b;
+            }
+            .offline-btn.online:hover {
+                transform: translate(-1px, -1px);
+                box-shadow: 3px 3px 0px #1e293b;
+            }
+            .offline-btn.offline {
+                background-color: #fecaca; /* Red highlighter */
+                color: #991b1b;
                 box-shadow: 1px 1px 0px #1e293b;
                 transform: translate(1px, 1px);
             }
@@ -134,7 +139,7 @@
             
             <!-- Offline Button UI -->
             <div class="offline-toggle-container">
-                <button id="offline-btn" class="offline-btn" onclick="toggleOfflineMode()">⚡ Cloud Sync Enabled</button>
+                <button id="offline-btn" class="offline-btn" onclick="toggleOfflineMode()">ONLINE</button>
             </div>
 
             <div class="grid">        <details class="section-card" style="--accent-color: #3b82f6; --accent-hover: #1d4ed8; --accent-bg: #eff6ff;">
@@ -347,11 +352,11 @@
             function updateToggleButtonUI() {
                 const btn = document.getElementById('offline-btn');
                 if (isOfflineMode) {
-                    btn.classList.add('active');
-                    btn.innerHTML = '🛑 Offline-Only Mode';
+                    btn.className = 'offline-btn offline';
+                    btn.innerHTML = '🛑 OFFLINE';
                 } else {
-                    btn.classList.remove('active');
-                    btn.innerHTML = '⚡ Cloud Sync Enabled';
+                    btn.className = 'offline-btn online';
+                    btn.innerHTML = '⚡ ONLINE';
                 }
             }
 

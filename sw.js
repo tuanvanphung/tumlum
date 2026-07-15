@@ -4,7 +4,13 @@ const ASSETS = ["/", "/index.html", "/7_gemini_science20_P2_Chemistry&Physics.ht
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache => {
-            return cache.addAll(ASSETS);
+            return Promise.all(
+                ASSETS.map(url => {
+                    return cache.add(url).catch(err => {
+                        console.warn('Failed to cache during installation:', url, err);
+                    });
+                })
+            );
         })
     );
 });
@@ -13,7 +19,16 @@ self.addEventListener('fetch', event => {
     if (event.request.method !== 'GET') return;
     
     event.respondWith(
-        fetch(event.request).catch(() => {
+        fetch(event.request).then(response => {
+            // Cache files dynamically on the fly to protect against any build inconsistencies
+            if (response.status === 200) {
+                const responseClone = response.clone();
+                caches.open(CACHE_NAME).then(cache => {
+                    cache.put(event.request, responseClone);
+                });
+            }
+            return response;
+        }).catch(() => {
             return caches.match(event.request);
         })
     );
