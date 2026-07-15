@@ -31,15 +31,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate index.html
+      - name: Generate index.html and sw.js
         run: |
           import os
           import html
+          import json
 
           # --- Configuration ---
           INDEX_TITLE = "TRYHARDZ"
-          EXCLUDE_FILES = ['index.html'] 
-          EXCLUDE_DIRS = ['.git', '.github', 'node_modules', 'venv', 'env']
+          EXCLUDE_FILES = ['index.html', 'sw.js'] # Excluded from index parsing
+          EXCLUDE_DIRS = ['.git', '.github', 'node_modules', 'venv', 'env'] # Folders to ignore
           
           # Playful scholastic emojis to prepend to folders
           ACADEMIC_EMOJIS = ["🎒", "📐", "📝", "🔬", "📚", "🎨", "🧠", "🧩"]
@@ -58,8 +59,12 @@ jobs:
           # --- End Configuration ---
 
           exclude_files_lower = [f.lower() for f in EXCLUDE_FILES]
+          
+          # Flat list tracking all filepaths to automatically bundle into the Service Worker cache
+          all_filepaths = ["/", "index.html"]
 
           def to_friendly_name(name_string):
+              """Helper to split camelCase, snake_case, or hyphenated names into friendly capitalized strings."""
               base = os.path.splitext(name_string)[0]
               parts = []
               current_part = ""
@@ -92,6 +97,9 @@ jobs:
                       full_path = os.path.join(rel_path, f) if rel_path != '.' else f
                       url_path = full_path.replace('\\', '/')
                       section_files.append((f, url_path))
+                      
+                      # Save to the master cache list
+                      all_filepaths.append(url_path)
               
               if section_files:
                   section_files.sort(key=lambda x: (not 'math' in x[0].lower(), x[0].lower()))
@@ -131,7 +139,7 @@ jobs:
                               </a>
                           </li>\n"""
                   
-                  # Render Section Card with active Emoji
+                  # Render Section Card
                   cards_html += f"""        <details class="section-card" style="--accent-color: {palette['primary']}; --accent-hover: {palette['hover']}; --accent-bg: {palette['bg']};">
                       <summary class="section-title">
                           <span class="folder-emoji">{emoji}</span>
@@ -156,7 +164,7 @@ jobs:
                           margin: 0;
                           padding: 50px 20px;
                           background-color: #fafaf9;
-                          /* Classic notebook paper: 24px grid + pink left margin exactly 2 squares in */
+                          /* CSS Notebook Paper: 24px grid + pink left margin line */
                           background-image: 
                               linear-gradient(90deg, transparent 46px, #fca5a5 46px, #fca5a5 48px, transparent 48px),
                               linear-gradient(#e2e8f0 1px, transparent 1px),
@@ -167,7 +175,7 @@ jobs:
                       .container {{ max-width: 800px; margin: auto; position: relative; }}
                       
                       /* Doodle Style Header */
-                      header {{ text-align: center; margin-bottom: 50px; }}
+                      header {{ text-align: center; margin-bottom: 30px; }}
                       h1 {{ 
                           color: #0f172a; 
                           font-size: 3.5rem; 
@@ -176,13 +184,46 @@ jobs:
                           display: inline-block;
                           background-color: #fdf08a; /* Yellow highlighter */
                           padding: 5px 25px;
-                          border: 4px solid #1e293b; /* Sharpie marker */
+                          border: 4px solid #1e293b; /* Sharpie marker border */
                           box-shadow: 6px 6px 0px #1e293b;
                           transform: rotate(-2deg);
                           transition: transform 0.2s ease;
                       }}
                       h1:hover {{ transform: rotate(1deg) scale(1.05); }}
                       
+                      /* Offline Mode Button Container */
+                      .offline-toggle-container {{
+                          text-align: right;
+                          margin-bottom: 20px;
+                      }}
+                      .offline-btn {{
+                          font-family: 'Geo', sans-serif;
+                          font-size: 0.9rem;
+                          font-weight: 700;
+                          padding: 8px 12px;
+                          border-radius: 4px;
+                          text-transform: uppercase;
+                          letter-spacing: 0.05em;
+                          cursor: pointer;
+                          border: 2px solid #1e293b;
+                          box-shadow: 2px 2px 0px #1e293b;
+                          background-color: white;
+                          color: #1e293b;
+                          display: inline-flex;
+                          align-items: center;
+                          gap: 8px;
+                          transition: all 0.1s ease;
+                      }}
+                      .offline-btn:hover {{
+                          transform: translate(-1px, -1px);
+                          box-shadow: 3px 3px 0px #1e293b;
+                      }}
+                      .offline-btn.active {{
+                          background-color: #fca5a5; /* Pink warning highlight */
+                          box-shadow: 1px 1px 0px #1e293b;
+                          transform: translate(1px, 1px);
+                      }}
+
                       .grid {{ display: flex; flex-direction: column; gap: 30px; }}
                       
                       /* Sketchbook flat 3D cards */
@@ -290,17 +331,17 @@ jobs:
                           color: #047857;
                           border-color: #1e293b;
                           border-left-color: #059669;
-                          transform: scale(1.02) rotate(1deg); /* Alternate tilt for math */
+                          transform: scale(1.02) rotate(1deg);
                       }}
                       .file-name {{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75%; }}
                       
                       /* Sticker Style Tags */
                       .badge {{
                           font-family: 'Geo', sans-serif;
-                          font-size: 0.9rem;
-                          font-weight: 700;
-                          padding: 4px 10px;
-                          border-radius: 4px;
+                          font-size: 0.85rem;
+                          font-weight: 400;
+                          padding: 2px 8px;
+                          border-radius: 12px;
                           text-transform: uppercase;
                           letter-spacing: 0.05em;
                           display: inline-flex;
@@ -309,7 +350,7 @@ jobs:
                           line-height: 1;
                           border: 2px solid #1e293b;
                           box-shadow: 2px 2px 0px #1e293b;
-                          background-color: white; /* Forces it to look like an overlay sticker */
+                          background-color: white;
                       }}
                       .badge-math {{ color: #059669; transform: rotate(-3deg); }}
                       .badge-reading {{ color: #4f46e5; transform: rotate(3deg); }}
@@ -318,15 +359,80 @@ jobs:
               <body>
                   <div class="container">
                       <header><h1>{html.escape(INDEX_TITLE)}</h1></header>
+                      
+                      <!-- Offline Button UI -->
+                      <div class="offline-toggle-container">
+                          <button id="offline-btn" class="offline-btn" onclick="toggleOfflineMode()">⚡ Cloud Sync Enabled</button>
+                      </div>
+
                       <div class="grid">{cards_html}</div>
                   </div>
+
+                  <script>
+                      // Local State Logic
+                      let isOfflineMode = localStorage.getItem('offlineMode') === 'true';
+                      updateToggleButtonUI();
+
+                      function toggleOfflineMode() {
+                          isOfflineMode = !isOfflineMode;
+                          localStorage.setItem('offlineMode', isOfflineMode.toString());
+                          updateToggleButtonUI();
+                      }
+
+                      function updateToggleButtonUI() {
+                          const btn = document.getElementById('offline-btn');
+                          if (isOfflineMode) {
+                              btn.classList.add('active');
+                              btn.innerHTML = '🛑 Offline-Only Mode';
+                          } else {
+                              btn.classList.remove('active');
+                              btn.innerHTML = '⚡ Cloud Sync Enabled';
+                          }
+                      }
+
+                      // Register the Service Worker (loads offline)
+                      if ('serviceWorker' in navigator) {
+                          navigator.serviceWorker.register('/sw.js')
+                              .then(() => console.log("Service Worker Registered"))
+                              .catch(err => console.log("Service Worker Registration Failed", err));
+                      }
+                  </script>
               </body>
               </html>
               """
 
+          # 1. Write the main index.html
           with open('index.html', 'w', encoding='utf-8') as f:
               f.write(index_content)
           print("index.html generated successfully.")
+
+          # 2. Dynamically write the sw.js with ALL math/reading file paths pre-compiled!
+          sw_content = f"""const CACHE_NAME = 'tryhardz-v1';
+          const ASSETS = {json.dumps(all_filepaths)};
+
+          // Cache core assets on service worker install
+          self.addEventListener('install', event => {{
+              event.waitUntil(
+                  caches.open(CACHE_NAME).then(cache => {{
+                      return cache.addAll(ASSETS);
+                  }})
+              );
+          }});
+
+          // Use a Network-First strategy (falls back to cache when offline)
+          self.addEventListener('fetch', event => {{
+              event.respondWith(
+                  fetch(event.request).catch(() => {{
+                      return caches.match(event.request);
+                  }})
+              );
+          }});
+          """
+
+          with open('sw.js', 'w', encoding='utf-8') as f:
+              f.write(sw_content)
+          print("sw.js successfully generated with all files pre-cached.")
+
         shell: python
 
       - name: Setup Pages
