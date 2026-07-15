@@ -1,35 +1,29 @@
-name: Generate and Deploy Index HTML
+name: Generate Index HTML
 
 on:
   push:
     branches:
-      - main
-    paths:    
+      - main  # Or your default branch
+    paths:    # Only run if HTML files are changed, or this workflow file
       - '**.html'
-      - '!index.html'
+      - '!index.html' # Exclude to prevent infinite loops
       - '.github/workflows/generate-index.yml'
-  workflow_dispatch: 
-
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Allow only one concurrent deployment
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
+  workflow_dispatch: # Allows manual triggering
 
 jobs:
-  build_and_deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build_index:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Important: Allows the action to write to the repository
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
       - name: Generate index.html and sw.js
         run: |
@@ -39,13 +33,10 @@ jobs:
 
           # --- Configuration ---
           INDEX_TITLE = "TRYHARDZ"
-          EXCLUDE_FILES = ['index.html', 'sw.js'] # Excluded from index parsing
-          EXCLUDE_DIRS = ['.git', '.github', 'node_modules', 'venv', 'env'] # Folders to ignore
+          EXCLUDE_FILES = ['index.html', 'sw.js'] 
+          EXCLUDE_DIRS = ['.git', '.github', 'node_modules', 'venv', 'env']
           
-          # Playful scholastic emojis to prepend to folders
           ACADEMIC_EMOJIS = ["🎒", "📐", "📝", "🔬", "📚", "🎨", "🧠", "🧩"]
-
-          # Color palettes used sequentially for section cards (vibrant primary accents)
           COLOR_PALETTES = [
               {"primary": "#3b82f6", "hover": "#1d4ed8", "bg": "#eff6ff"},
               {"primary": "#10b981", "hover": "#047857", "bg": "#ecfdf5"},
@@ -60,8 +51,7 @@ jobs:
 
           exclude_files_lower = [f.lower() for f in EXCLUDE_FILES]
           
-          # Flat list tracking all filepaths to automatically bundle into the Service Worker cache
-          # Explicitly caching the root paths first
+          # Master cache list for offline functionality
           all_filepaths = ["/", "/index.html"]
 
           def to_friendly_name(name_string):
@@ -98,7 +88,7 @@ jobs:
                       url_path = full_path.replace('\\', '/')
                       section_files.append((f, url_path))
                       
-                      # Append absolute path for robust Service Worker caching
+                      # Append path for the Service Worker
                       all_filepaths.append("/" + url_path)
               
               if section_files:
@@ -139,7 +129,6 @@ jobs:
                               </a>
                           </li>\n"""
                   
-                  # Render Section Card
                   cards_html += f"""        <details class="section-card" style="--accent-color: {palette['primary']}; --accent-hover: {palette['hover']}; --accent-bg: {palette['bg']};">
                       <summary class="section-title">
                           <span class="folder-emoji">{emoji}</span>
@@ -149,7 +138,6 @@ jobs:
               {list_items}        </ul>
                   </details>\n"""
 
-              # HTML Content with Escaped Javascript Braces ({{ and }})
               index_content = f"""<!DOCTYPE html>
               <html lang="en">
               <head>
@@ -190,10 +178,7 @@ jobs:
                       }}
                       h1:hover {{ transform: rotate(1deg) scale(1.05); }}
                       
-                      .offline-toggle-container {{
-                          text-align: right;
-                          margin-bottom: 20px;
-                      }}
+                      .offline-toggle-container {{ text-align: right; margin-bottom: 20px; }}
                       .offline-btn {{
                           font-family: 'Geo', sans-serif;
                           font-size: 0.9rem;
@@ -212,10 +197,7 @@ jobs:
                           gap: 8px;
                           transition: all 0.1s ease;
                       }}
-                      .offline-btn:hover {{
-                          transform: translate(-1px, -1px);
-                          box-shadow: 3px 3px 0px #1e293b;
-                      }}
+                      .offline-btn:hover {{ transform: translate(-1px, -1px); box-shadow: 3px 3px 0px #1e293b; }}
                       .offline-btn.active {{
                           background-color: #fca5a5; 
                           box-shadow: 1px 1px 0px #1e293b;
@@ -231,117 +213,56 @@ jobs:
                           box-shadow: 6px 6px 0px var(--accent-color);
                           transition: transform 0.15s ease, box-shadow 0.15s ease;
                       }}
-                      .section-card:hover {{
-                          transform: translate(-2px, -2px);
-                          box-shadow: 8px 8px 0px var(--accent-color);
-                      }}
+                      .section-card:hover {{ transform: translate(-2px, -2px); box-shadow: 8px 8px 0px var(--accent-color); }}
                       .section-title {{
-                          color: #0f172a;
-                          font-size: 1.35rem;
-                          font-weight: 700;
-                          margin: 0;
-                          padding: 20px 24px;
-                          cursor: pointer;
-                          user-select: none;
-                          display: flex;
-                          align-items: center;
-                          gap: 12px;
-                          list-style: none;
+                          color: #0f172a; font-size: 1.35rem; font-weight: 700; margin: 0; padding: 20px 24px;
+                          cursor: pointer; user-select: none; display: flex; align-items: center; gap: 12px; list-style: none;
                       }}
                       .section-title::-webkit-details-marker {{ display: none; }}
                       
-                      .folder-emoji {{
-                          font-size: 1.5rem;
-                          flex-shrink: 0;
-                      }}
+                      .folder-emoji {{ font-size: 1.5rem; flex-shrink: 0; }}
                       
                       .section-title::after {{
-                          content: "+";
-                          margin-left: auto;
-                          font-size: 1.8rem;
-                          font-family: monospace;
-                          font-weight: bold;
-                          color: #1e293b;
-                          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                          flex-shrink: 0;
-                          line-height: 1;
+                          content: "+"; margin-left: auto; font-size: 1.8rem; font-family: monospace;
+                          font-weight: bold; color: #1e293b; transition: transform 0.3s ease; flex-shrink: 0; line-height: 1;
                       }}
                       .section-card[open] .section-title::after {{ transform: rotate(45deg); color: #ef4444; }}
                       
-                      .section-card[open] .file-list {{
-                          animation: slideDown 0.25s ease-out forwards;
-                      }}
+                      .section-card[open] .file-list {{ animation: slideDown 0.25s ease-out forwards; }}
                       @keyframes slideDown {{
                           0% {{ opacity: 0; transform: translateY(-10px); }}
                           100% {{ opacity: 1; transform: translateY(0); }}
                       }}
                       
                       .file-list {{
-                          list-style: none;
-                          padding: 0 24px 24px 24px;
-                          margin: 0;
-                          display: flex;
-                          flex-direction: column;
-                          gap: 12px;
-                          border-top: 3px dashed #cbd5e1;
-                          padding-top: 20px;
+                          list-style: none; padding: 0 24px 24px 24px; margin: 0; display: flex;
+                          flex-direction: column; gap: 12px; border-top: 3px dashed #cbd5e1; padding-top: 20px;
                       }}
                       .file-item a {{
-                          text-decoration: none;
-                          color: #334155;
-                          font-weight: 500;
-                          font-size: 0.95rem;
-                          padding: 10px 14px;
-                          border-radius: 8px;
-                          background-color: #f1f5f9;
-                          border: 2px solid #e2e8f0;
-                          border-left: 6px solid #cbd5e1;
-                          display: flex;
-                          align-items: center;
-                          justify-content: space-between;
-                          transition: all 0.15s ease;
+                          text-decoration: none; color: #334155; font-weight: 500; font-size: 0.95rem;
+                          padding: 10px 14px; border-radius: 8px; background-color: #f1f5f9;
+                          border: 2px solid #e2e8f0; border-left: 6px solid #cbd5e1;
+                          display: flex; align-items: center; justify-content: space-between; transition: all 0.15s ease;
                       }}
                       .file-item a:hover {{
-                          background-color: var(--accent-bg);
-                          color: var(--accent-hover);
-                          border-color: #1e293b;
-                          border-left-color: var(--accent-color);
-                          transform: scale(1.02) rotate(-1deg);
-                          position: relative;
-                          z-index: 10;
+                          background-color: var(--accent-bg); color: var(--accent-hover);
+                          border-color: #1e293b; border-left-color: var(--accent-color);
+                          transform: scale(1.02) rotate(-1deg); position: relative; z-index: 10;
                           box-shadow: 3px 3px 0px rgba(30, 41, 59, 0.15);
                       }}
                       
-                      .file-item.math-item a {{
-                          background-color: #ecfdf5;
-                          border-color: #a7f3d0;
-                          border-left: 6px solid #10b981;
-                          color: #065f46;
-                      }}
+                      .file-item.math-item a {{ background-color: #ecfdf5; border-color: #a7f3d0; border-left: 6px solid #10b981; color: #065f46; }}
                       .file-item.math-item a:hover {{
-                          background-color: #d1fae5;
-                          color: #047857;
-                          border-color: #1e293b;
-                          border-left-color: #059669;
-                          transform: scale(1.02) rotate(1deg);
+                          background-color: #d1fae5; color: #047857; border-color: #1e293b;
+                          border-left-color: #059669; transform: scale(1.02) rotate(1deg);
                       }}
                       .file-name {{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75%; }}
                       
                       .badge {{
-                          font-family: 'Geo', sans-serif;
-                          font-size: 0.85rem;
-                          font-weight: 400;
-                          padding: 2px 8px;
-                          border-radius: 12px;
-                          text-transform: uppercase;
-                          letter-spacing: 0.05em;
-                          display: inline-flex;
-                          align-items: center;
-                          justify-content: center;
-                          line-height: 1;
-                          border: 2px solid #1e293b;
-                          box-shadow: 2px 2px 0px #1e293b;
-                          background-color: white;
+                          font-family: 'Geo', sans-serif; font-size: 0.85rem; font-weight: 400; padding: 2px 8px;
+                          border-radius: 12px; text-transform: uppercase; letter-spacing: 0.05em;
+                          display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+                          border: 2px solid #1e293b; box-shadow: 2px 2px 0px #1e293b; background-color: white;
                       }}
                       .badge-math {{ color: #059669; transform: rotate(-3deg); }}
                       .badge-reading {{ color: #4f46e5; transform: rotate(3deg); }}
@@ -359,7 +280,6 @@ jobs:
                       <div class="grid">{cards_html}</div>
                   </div>
 
-                  <!-- Python requires braces in JS to be double escaped like {{ and }} -->
                   <script>
                       let isOfflineMode = localStorage.getItem('offlineMode') === 'true';
                       updateToggleButtonUI();
@@ -396,11 +316,10 @@ jobs:
               f.write(index_content)
           print("index.html generated successfully.")
 
-          # 2. Dynamically write the sw.js with ALL math/reading file paths pre-compiled!
+          # 2. Write the sw.js cache file
           sw_content = f"""const CACHE_NAME = 'tryhardz-v1';
           const ASSETS = {json.dumps(all_filepaths)};
 
-          // Cache core assets on service worker install
           self.addEventListener('install', event => {{
               event.waitUntil(
                   caches.open(CACHE_NAME).then(cache => {{
@@ -409,9 +328,7 @@ jobs:
               );
           }});
 
-          // Use a Network-First strategy (falls back to cache when offline)
           self.addEventListener('fetch', event => {{
-              // Only intercept GET requests, otherwise ignore (important for security/cloud syncing)
               if (event.request.method !== 'GET') return;
               
               event.respondWith(
@@ -424,18 +341,18 @@ jobs:
 
           with open('sw.js', 'w', encoding='utf-8') as f:
               f.write(sw_content)
-          print("sw.js successfully generated with all files pre-cached.")
-
+          print("sw.js successfully generated.")
         shell: python
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: '.'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      # Commit and push both files physically back to the repository!
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add index.html sw.js
+          if ! git diff --staged --quiet; then
+            git commit -m "Automated: Update index.html and generate sw.js"
+            git push
+          else
+            echo "No changes to commit."
+          fi
