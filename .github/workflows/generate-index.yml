@@ -139,7 +139,7 @@ jobs:
                   <title>{html.escape(INDEX_TITLE)}</title>
                   <style>
                       @import url('https://fonts.googleapis.com/css2?family=Flamenco:wght@300;400&display=swap');
-                      @import url('https://fonts.googleapis.com/css2?family=Sixtyfour&display=swap');
+                      @import url('https://fonts.googleapis.com/css2?family=Geo&display=swap');
                       
                       body {{
                           font-family: 'Flamenco', serif;
@@ -236,14 +236,15 @@ jobs:
                       }}
                       .file-name {{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%; }}
                       
+                      /* Geo typeface styling for tag badges */
                       .badge {{
-                          font-family: 'Sixtyfour', monospace, sans-serif;
-                          font-size: 0.55rem;
+                          font-family: 'Geo', sans-serif;
+                          font-size: 0.85rem;
                           font-weight: 400;
-                          padding: 4px 8px;
-                          border-radius: 4px;
+                          padding: 2px 8px;
+                          border-radius: 12px;
                           text-transform: uppercase;
-                          letter-spacing: 0.025em;
+                          letter-spacing: 0.05em;
                           display: inline-flex;
                           align-items: center;
                           justify-content: center;
