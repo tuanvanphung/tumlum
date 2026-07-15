@@ -138,11 +138,11 @@ jobs:
                   <meta name="viewport" content="width=device-width, initial-scale=1.0">
                   <title>{html.escape(INDEX_TITLE)}</title>
                   <style>
-                      @import url('https://fonts.googleapis.com/css2?family=Megrim&display=swap');
+                      @import url('https://fonts.googleapis.com/css2?family=Syne+Mono&display=swap');
                       @import url('https://fonts.googleapis.com/css2?family=Geo&display=swap');
                       
                       body {{
-                          font-family: 'Megrim', sans-serif;
+                          font-family: 'Syne Mono', monospace, sans-serif;
                           margin: 0;
                           padding: 40px 20px;
                           background-color: #f8fafc;
