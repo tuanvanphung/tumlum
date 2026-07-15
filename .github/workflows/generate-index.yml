@@ -6,7 +6,7 @@ on:
       - main
     paths:    
       - '**.html'
-      - '!index.html'
+      - '!index.html' 
       - '.github/workflows/generate-index.yml'
   workflow_dispatch: 
 
@@ -30,6 +30,7 @@ jobs:
           import os
           import html
           import json
+          import urllib.parse
 
           # --- Configuration ---
           INDEX_TITLE = "TRYHARDZ"
@@ -51,8 +52,8 @@ jobs:
 
           exclude_files_lower = [f.lower() for f in EXCLUDE_FILES]
           
-          # Master cache list for offline functionality
-          all_filepaths = ["/", "/index.html"]
+          # Use relative paths so caching works seamlessly on custom domains
+          all_filepaths = ["./", "./index.html"]
 
           def to_friendly_name(name_string):
               base = os.path.splitext(name_string)[0]
@@ -86,10 +87,13 @@ jobs:
                   if f.endswith('.html') and f.lower() not in exclude_files_lower:
                       full_path = os.path.join(rel_path, f) if rel_path != '.' else f
                       url_path = full_path.replace('\\', '/')
-                      section_files.append((f, url_path))
                       
-                      # Append path with root prefix for reliable Service Worker match
-                      all_filepaths.append("/" + url_path)
+                      # Safely encode the URL (fixes spaces crashing the service worker)
+                      safe_url_path = urllib.parse.quote(url_path)
+                      section_files.append((f, safe_url_path))
+                      
+                      # Append safe path for the Service Worker precache
+                      all_filepaths.append("./" + safe_url_path)
               
               if section_files:
                   section_files.sort(key=lambda x: (not 'math' in x[0].lower(), x[0].lower()))
@@ -108,7 +112,7 @@ jobs:
                   emoji = ACADEMIC_EMOJIS[idx % len(ACADEMIC_EMOJIS)]
                   
                   list_items = ""
-                  for filename, filepath in sections[sec_name]:
+                  for filename, safe_url_path in sections[sec_name]:
                       friendly_name = to_friendly_name(filename)
                       badge_html = ""
                       fn_lower = filename.lower()
@@ -123,7 +127,7 @@ jobs:
                               badge_html = '<span class="badge badge-reading">Reading</span>'
                       
                       list_items += f"""                        <li class="{li_class}">
-                              <a href="{html.escape(filepath)}">
+                              <a href="{safe_url_path}">
                                   <span class="file-name">{html.escape(friendly_name)}</span>
                                   {badge_html}
                               </a>
@@ -178,35 +182,40 @@ jobs:
                       }}
                       h1:hover {{ transform: rotate(1deg) scale(1.05); }}
                       
+                      /* Redesigned Simple Offline/Online Button */
                       .offline-toggle-container {{ text-align: right; margin-bottom: 20px; }}
-                      
-                      /* Playful Academic Offline Toggle */
                       .offline-btn {{
                           font-family: 'Geo', sans-serif;
-                          font-size: 0.9rem;
+                          font-size: 1rem;
                           font-weight: 700;
                           padding: 8px 16px;
-                          border-radius: 4px;
+                          border-radius: 6px;
                           text-transform: uppercase;
-                          letter-spacing: 0.05em;
+                          letter-spacing: 0.1em;
                           cursor: pointer;
-                          border: 2px solid #1e293b;
+                          display: inline-flex;
+                          align-items: center;
+                          justify-content: center;
                           transition: all 0.1s ease;
+                          
+                          /* ONLINE STATE (Green) */
+                          background-color: #10b981;
+                          color: #022c22;
+                          border: 3px solid #064e3b;
+                          box-shadow: 4px 4px 0px #064e3b;
                       }}
-                      .offline-btn.online {{
-                          background-color: #bbf7d0; /* Green highlighter */
-                          color: #166534;
-                          box-shadow: 2px 2px 0px #1e293b;
+                      .offline-btn:hover {{ transform: translate(-2px, -2px); box-shadow: 6px 6px 0px #064e3b; }}
+                      
+                      /* OFFLINE STATE (Red) */
+                      .offline-btn.active {{
+                          background-color: #ef4444; 
+                          color: #450a0a;
+                          border-color: #450a0a;
+                          box-shadow: 2px 2px 0px #450a0a;
+                          transform: translate(2px, 2px);
                       }}
-                      .offline-btn.online:hover {{
-                          transform: translate(-1px, -1px);
-                          box-shadow: 3px 3px 0px #1e293b;
-                      }}
-                      .offline-btn.offline {{
-                          background-color: #fecaca; /* Red highlighter */
-                          color: #991b1b;
-                          box-shadow: 1px 1px 0px #1e293b;
-                          transform: translate(1px, 1px);
+                      .offline-btn.active:hover {{
+                          transform: translate(1px, 1px); box-shadow: 3px 3px 0px #450a0a;
                       }}
 
                       .grid {{ display: flex; flex-direction: column; gap: 30px; }}
@@ -298,16 +307,16 @@ jobs:
                       function updateToggleButtonUI() {{
                           const btn = document.getElementById('offline-btn');
                           if (isOfflineMode) {{
-                              btn.className = 'offline-btn offline';
-                              btn.innerHTML = '🛑 OFFLINE';
+                              btn.classList.add('active');
+                              btn.innerHTML = 'OFFLINE';
                           }} else {{
-                              btn.className = 'offline-btn online';
-                              btn.innerHTML = '⚡ ONLINE';
+                              btn.classList.remove('active');
+                              btn.innerHTML = 'ONLINE';
                           }}
                       }}
 
                       if ('serviceWorker' in navigator) {{
-                          navigator.serviceWorker.register('/sw.js')
+                          navigator.serviceWorker.register('./sw.js')
                               .then(() => console.log("Service Worker Registered"))
                               .catch(err => console.log("Service Worker Registration Failed", err));
                       }}
@@ -321,21 +330,31 @@ jobs:
               f.write(index_content)
           print("index.html generated successfully.")
 
-          # 2. Write the sw.js cache file with robust independent array mapping
-          sw_content = f"""const CACHE_NAME = 'tryhardz-v1';
+          # 2. Write the robust sw.js cache file
+          # We use Promise.allSettled so if one file fails to download, the rest still successfully cache!
+          sw_content = f"""const CACHE_NAME = 'tryhardz-v2';
           const ASSETS = {json.dumps(all_filepaths)};
 
           self.addEventListener('install', event => {{
+              self.skipWaiting();
               event.waitUntil(
                   caches.open(CACHE_NAME).then(cache => {{
-                      return Promise.all(
+                      return Promise.allSettled(
                           ASSETS.map(url => {{
-                              return cache.add(url).catch(err => {{
-                                  console.warn('Failed to cache during installation:', url, err);
-                              }});
+                              return fetch(url).then(response => {{
+                                  if (response.ok) return cache.put(url, response);
+                              }}).catch(err => console.error('Cache error:', url, err));
                           }})
                       );
                   }})
+              );
+          }});
+
+          self.addEventListener('activate', event => {{
+              event.waitUntil(
+                  caches.keys().then(keys => Promise.all(
+                      keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+                  ))
               );
           }});
 
@@ -343,18 +362,16 @@ jobs:
               if (event.request.method !== 'GET') return;
               
               event.respondWith(
-                  fetch(event.request).then(response => {{
-                      // Cache files dynamically on the fly to protect against any build inconsistencies
-                      if (response.status === 200) {{
-                          const responseClone = response.clone();
-                          caches.open(CACHE_NAME).then(cache => {{
-                              cache.put(event.request, responseClone);
-                          }});
-                      }}
-                      return response;
-                  }}).catch(() => {{
-                      return caches.match(event.request);
-                  }})
+                  fetch(event.request)
+                      .then(response => {{
+                          // Dynamically cache successful requests so you never lose files you've opened
+                          const resClone = response.clone();
+                          caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
+                          return response;
+                      }})
+                      .catch(() => {{
+                          return caches.match(event.request);
+                      }})
               );
           }});
           """
@@ -371,7 +388,7 @@ jobs:
           git config --local user.name "GitHub Action"
           git add index.html sw.js
           if ! git diff --staged --quiet; then
-            git commit -m "Automated: Update index.html and generate sw.js"
+            git commit -m "Automated: Update index.html and generate robust sw.js"
             git push
           else
             echo "No changes to commit."
