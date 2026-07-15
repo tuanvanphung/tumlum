@@ -37,7 +37,7 @@ jobs:
           import html
 
           # --- Configuration ---
-          INDEX_TITLE = "School Materials"
+          INDEX_TITLE = "Tryhardz"
           EXCLUDE_FILES = ['index.html'] 
           EXCLUDE_DIRS = ['.git', '.github', 'node_modules', 'venv', 'env']
           
