@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebra Rules Reference (Perfect Masonry Order)</title>
+    
+    <!-- Script to calculate perfect staggered heights after MathJax renders -->
+    <script>
+        function applyMasonryLayout() {
+            const grid = document.querySelector('.rules-grid');
+            if (!grid) return;
+            
+            // If on mobile, use standard stacking
+            if (window.innerWidth < 768) {
+                grid.style.gridAutoRows = '';
+                grid.style.rowGap = '';
+                grid.style.alignItems = '';
+                grid.querySelectorAll('section').forEach(item => item.style.gridRowEnd = '');
+                return;
+            }
+
+            // If on Desktop, set up 1-pixel resolution grid to eliminate empty space
+            grid.style.gridAutoRows = '1px';
+            grid.style.rowGap = '0';
+            grid.style.alignItems = 'start'; 
+            
+            const items = grid.querySelectorAll('section');
+            
+            // Pass 1: Reset all spans so elements snap to their true natural heights
+            items.forEach(item => item.style.gridRowEnd = 'auto');
+            
+            // Pass 2: Measure precise height and set the span to (Height + 24px Gap)
+            items.forEach(item => {
+                const height = item.getBoundingClientRect().height;
+                const span = Math.ceil(height + 24); // 24 ensures a 1.5rem gap between staggered items
+                item.style.gridRowEnd = `span ${span}`;
+            });
+        }
+
+        // Configure MathJax to render equations, THEN trigger the layout fix
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        applyMasonryLayout();
+                        
+                        // Re-run the calculation seamlessly if the user resizes their browser window
+                        let timeout;
+                        window.addEventListener('resize', () => {
+                            clearTimeout(timeout);
+                            timeout = setTimeout(applyMasonryLayout, 100);
+                        });
+                    });
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #0f172a;
+            color: white;
+            padding: 2.5rem 1rem;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        header p {
+            margin: 0.5rem 0 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        nav {
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        nav h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            color: #0f172a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+        }
+
+        nav a {
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Grid Setup */
+        .rules-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .rules-grid {
+                grid-template-columns: 1fr 1fr;
+                column-gap: 1.5rem;
+            }
+            .sec-full-width {
+                grid-column: 1 / -1; /* Exponent section spans both columns at the bottom */
+            }
+        }
+
+        /* Base Section Design */
+        section {
+            background-color: var(--theme-bg);
+            border: 2px solid var(--theme-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            scroll-margin-top: 1rem;
+            box-sizing: border-box;
+            margin: 0; /* Important: removes outer margins for precise JS height calculations */
+        }
+
+        section h2 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            color: var(--theme-header);
+            border-bottom: 2px solid var(--theme-border);
+            padding-bottom: 0.5rem;
+            font-size: 1.4rem;
+        }
+
+        section h3 {
+            color: var(--theme-header);
+            margin-top: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Formula Boxes */
+        .formula-box {
+            background-color: var(--theme-formula-bg);
+            border-left: 4px solid var(--theme-border);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+            overflow-x: auto;
+        }
+
+        /* Descriptive Text */
+        .rule-desc {
+            font-size: 0.9rem;
+            color: #475569;
+            margin-top: 0.25rem;
+            margin-bottom: 1rem;
+            font-style: italic;
+            border-left: 3px solid var(--theme-border);
+            padding-left: 0.75rem;
+        }
+
+        /* Tables & Lists */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid var(--theme-border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--theme-formula-bg);
+            color: var(--theme-header);
+            font-weight: 700;
+        }
+
+        td {
+            vertical-align: middle;
+            line-height: 1.8;
+        }
+
+        ul {
+            padding-left: 1.5rem;
+            margin-bottom: 0;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Dynamic Theme Palette Declarations */
+        .sec-rose { --theme-bg: #fff1f2; --theme-border: #fda4af; --theme-header: #9f1239; --theme-formula-bg: #ffe4e6; }
+        .sec-amber { --theme-bg: #fefbeb; --theme-border: #fde68a; --theme-header: #92400e; --theme-formula-bg: #fef3c7; }
+        .sec-yellow { --theme-bg: #fefce8; --theme-border: #fef08a; --theme-header: #854d0e; --theme-formula-bg: #fef9c3; }
+        .sec-emerald { --theme-bg: #ecfdf5; --theme-border: #a7f3d0; --theme-header: #065f46; --theme-formula-bg: #d1fae5; }
+        .sec-teal { --theme-bg: #f0fdfa; --theme-border: #99f6e4; --theme-header: #115e59; --theme-formula-bg: #ccfbf1; }
+        .sec-sky { --theme-bg: #f0f9ff; --theme-border: #bae6fd; --theme-header: #075985; --theme-formula-bg: #e0f2fe; }
+        .sec-indigo { --theme-bg: #eef2ff; --theme-border: #c7d2fe; --theme-header: #3730a3; --theme-formula-bg: #e0e7ff; }
+        .sec-purple { --theme-bg: #faf5ff; --theme-border: #e9d5ff; --theme-header: #6b21a8; --theme-formula-bg: #f3e8ff; }
+        .sec-pink { --theme-bg: #fdf2f8; --theme-border: #fbcfe8; --theme-header: #9d174d; --theme-formula-bg: #fce7f3; }
+        .sec-fuchsia { --theme-bg: #fdf4ff; --theme-border: #f5d0fe; --theme-header: #86198f; --theme-formula-bg: #fae8ff; }
+        .sec-cyan { --theme-bg: #ecfeff; --theme-border: #a5f3fc; --theme-header: #155e75; --theme-formula-bg: #cffafe; }
+
+        footer {
+            text-align: center;
+            padding: 2.5rem;
+            background-color: #0f172a;
+            color: #94a3b8;
+            margin-top: 3rem;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Algebra &amp; Pre-Algebra Rules Reference</h1>
+        <p>A multi-colored, sequential visual guide with LaTeX mathematical typesetting</p>
+    </header>
+
+    <div class="container">
+        
+        <!-- Table of Contents Navigation -->
+        <nav>
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#order-of-operations">1. Order of Operations</a></li>
+                <li><a href="#properties-of-real-numbers">2. Properties of Real Numbers</a></li>
+                <li><a href="#signed-numbers">3. Rules of Signed Numbers</a></li>
+                <li><a href="#fractions">4. Operations with Fractions</a></li>
+                <li><a href="#properties-of-equality">5. Properties of Equality</a></li>
+                <li><a href="#inequalities">6. Rules for Inequalities</a></li>
+                <li><a href="#absolute-value">7. Absolute Value Rules</a></li>
+                <li><a href="#radicals">8. Rules of Radicals (Roots)</a></li>
+                <li><a href="#graphing-linear">9. Graphing &amp; Linear Equations</a></li>
+                <li><a href="#factoring-polynomials">10. Factoring &amp; Polynomials</a></li>
+                <li><a href="#exponents">11. Rules of Exponents</a></li>
+            </ul>
+        </nav>
+
+        <!-- Grid Container Start (Maintains DOM Order 1, 2, 3...) -->
+        <div class="rules-grid">
+
+            <!-- 1. Order of Operations -->
+            <section id="order-of-operations" class="sec-rose">
+                <h2>1. Order of Operations</h2>
+                <p class="rule-desc">Following this strict mathematical sequence ensures that any given numeric expression evaluates to a single, universally consistent value.</p>
+                <p>Mathematical expressions are evaluated sequentially using the <strong>PEMDAS</strong> (or <strong>GEMS</strong>) hierarchy:</p>
+                <ul>
+                    <li><strong>P</strong>arentheses / <strong>G</strong>rouping Symbols (evaluate nested bounds first)</li>
+                    <li><strong>E</strong>xponents</li>
+                    <li><strong>M</strong>ultiplication &amp; <strong>D</strong>ivision (from left to right)</li>
+                    <li><strong>A</strong>ddition &amp; <strong>S</strong>ubtraction (from left to right)</li>
+                </ul>
+            </section>
+
+            <!-- 2. Properties of Real Numbers -->
+            <section id="properties-of-real-numbers" class="sec-amber">
+                <h2>2. Properties of Real Numbers</h2>
+                
+                <h3>Commutative Property</h3>
+                <p class="rule-desc">This property asserts that the order in which you add or multiply numbers does not alter the final sum or product.</p>
+                <div class="formula-box">
+                    \[ a + b = b + a \]
+                    \[ a \cdot b = b \cdot a \]
+                </div>
+
+                <h3>Associative Property</h3>
+                <p class="rule-desc">This property states that changing the grouping of values during addition or multiplication does not change the result.</p>
+                <div class="formula-box">
+                    \[ (a + b) + c = a + (b + c) \]
+                    \[ (a \cdot b) \cdot c = a \cdot (b \cdot c) \]
+                </div>
+
+                <h3>Distributive Property</h3>
+                <p class="rule-desc">This property allows you to multiply a factor outside a set of parentheses by every individual term contained inside.</p>
+                <div class="formula-box">
+                    \[ a(b + c) = ab + ac \]
+                </div>
+
+                <h3>Identity &amp; Inverse</h3>
+                <p class="rule-desc">Identity properties keep a number's value intact, while inverse properties combine a number with its opposite or reciprocal to return the identity element.</p>
+                <div class="formula-box">
+                    \[ a + 0 = a \quad \text{and} \quad a \cdot 1 = a \]
+                    \[ a + (-a) = 0 \quad \text{and} \quad a \cdot \frac{1}{a} = 1 \]
+                </div>
+            </section>
+
+            <!-- 3. Rules of Signed Numbers -->
+            <section id="signed-numbers" class="sec-yellow">
+                <h2>3. Rules of Signed Numbers</h2>
+                
+                <h3>Addition Rules</h3>
+                <p class="rule-desc">Adding signed values works like movement on a coordinate line, where negative inputs pull leftward and positive inputs pull rightward.</p>
+                <ul>
+                    <li><strong>Same Signs:</strong> Sum absolute values and keep the shared sign.</li>
+                    <li><strong>Different Signs:</strong> Find the difference of absolute values. Apply the sign of the larger absolute value.</li>
+                </ul>
+
+                <h3>Multiplication &amp; Division</h3>
+                <p class="rule-desc">Multiplying or dividing terms with matching signs always yields a positive result, whereas mismatched signs result in a negative value.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Operation</th>
+                            <th>Resulting Sign</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>$\text{Pos} \times \text{Pos}$</td>
+                            <td>$\text{Positive}$</td>
+                            <td>$3 \times 4 = 12$</td>
+                        </tr>
+                        <tr>
+                            <td>$\text{Neg} \times \text{Neg}$</td>
+                            <td>$\text{Positive}$</td>
+                            <td>$-3 \times -4 = 12$</td>
+                        </tr>
+                        <tr>
+                            <td>$\text{Pos} \times \text{Neg}$</td>
+                            <td>$\text{Negative}$</td>
+                            <td>$3 \times -4 = -12$</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 4. Operations with Fractions -->
+            <section id="fractions" class="sec-emerald">
+                <h2>4. Operations with Fractions</h2>
+                
+                <h3>Addition &amp; Subtraction</h3>
+                <p class="rule-desc">Finding a common denominator scales the fractions so that you are combining pieces of equal size.</p>
+                <div class="formula-box">
+                    \[ \frac{a}{c} \pm \frac{b}{c} = \frac{a \pm b}{c} \]
+                </div>
+
+                <h3>Multiplication</h3>
+                <p class="rule-desc">Multiplying fractions simply requires scaling the top parts together and the bottom parts together directly, without needing a common denominator.</p>
+                <div class="formula-box">
+                    \[ \frac{a}{b} \cdot \frac{c}{d} = \frac{a \cdot c}{b \cdot d} \]
+                </div>
+
+                <h3>Division</h3>
+                <p class="rule-desc">Dividing by a fraction is equivalent to scaling by its reciprocal, often memorized as "keeping" the first, "changing" the sign, and "flipping" the second.</p>
+                <div class="formula-box">
+                    \[ \frac{a}{b} \div \frac{c}{d} = \frac{a}{b} \cdot \frac{d}{c} = \frac{ad}{bc} \]
+                </div>
+            </section>
+
+            <!-- 5. Properties of Equality -->
+            <section id="properties-of-equality" class="sec-teal">
+                <h2>5. Properties of Equality</h2>
+                <p class="rule-desc">These fundamental axioms ensure that any operation applied equally to both sides of an equation preserves its mathematical balance.</p>
+                <p>If $a = b$, then the following hold true for any real number $c$:</p>
+                <ul>
+                    <li><strong>Addition:</strong> $a + c = b + c$</li>
+                    <li><strong>Subtraction:</strong> $a - c = b - c$</li>
+                    <li><strong>Multiplication:</strong> $a \cdot c = b \cdot c$</li>
+                    <li><strong>Division:</strong> $\frac{a}{c} = \frac{b}{c} \quad (c \neq 0)$</li>
+                    <li><strong>Reflexive:</strong> $a = a$</li>
+                    <li><strong>Symmetric:</strong> If $a = b$, then $b = a$</li>
+                    <li><strong>Transitive:</strong> If $a = b$ and $b = c$, then $a = c$</li>
+                </ul>
+            </section>
+
+            <!-- 6. Rules for Inequalities -->
+            <section id="inequalities" class="sec-sky">
+                <h2>6. Rules for Inequalities</h2>
+                <p class="rule-desc">Reversing the inequality sign is essential because multiplying or dividing by a negative number mirrors the relative positions of values across zero on a number line, swapping their order.</p>
+                <p>Standard properties of equality apply to inequalities ($<$, $>$, $\le$, $\ge$), with one exception:</p>
+                <div class="formula-box">
+                    <strong>Sign Flip Rule:</strong> When multiplying or dividing both sides of an inequality by a negative number, the direction of the inequality sign must be reversed.
+                </div>
+                <p>Example: Given $-3x < 9$, dividing both sides by $-3$ yields $x > -3$.</p>
+            </section>
+
+            <!-- 7. Absolute Value Rules -->
+            <section id="absolute-value" class="sec-indigo">
+                <h2>7. Absolute Value Rules</h2>
+                <p class="rule-desc">Since absolute value represents physical distance from zero on a coordinate line, its output must always be positive or zero.</p>
+                <p>Absolute value evaluates a real number's non-negative distance from zero:</p>
+                <ul>
+                    <li>$|a| \ge 0$</li>
+                    <li>If $|x| = a$ (where $a \ge 0$), then $x = a$ or $x = -a$</li>
+                    <li>$|a \cdot b| = |a| \cdot |b|$</li>
+                    <li>$\left| \frac{a}{b} \right| = \frac{|a|}{|b|} \quad (b \neq 0)$</li>
+                </ul>
+            </section>
+
+            <!-- 8. Rules of Radicals (Roots) -->
+            <section id="radicals" class="sec-purple">
+                <h2>8. Rules of Radicals (Roots)</h2>
+                <p>These rules hold true for positive real bases:</p>
+                
+                <h3>Product Rule</h3>
+                <p class="rule-desc">The product rule enables you to split a radical of a product into individual factors, or combine separate radicals of the same index into one.</p>
+                <div class="formula-box">
+                    \[ \sqrt[n]{ab} = \sqrt[n]{a} \cdot \sqrt[n]{b} \]
+                </div>
+
+                <h3>Quotient Rule</h3>
+                <p class="rule-desc">The quotient rule allows you to distribute a radical sign to both the numerator and the denominator of a fraction individually.</p>
+                <div class="formula-box">
+                    \[ \sqrt[n]{\frac{a}{b}} = \frac{\sqrt[n]{a}}{\sqrt[n]{b}} \]
+                </div>
+            </section>
+
+            <!-- 9. Graphing & Linear Equations -->
+            <section id="graphing-linear" class="sec-pink">
+                <h2>9. Graphing &amp; Linear Equations</h2>
+                
+                <h3>Slope ($m$) and Forms</h3>
+                <p class="rule-desc">These mathematical models describe straight lines on a coordinate plane by linking variables $x$ and $y$ using a constant rate of change and reference points.</p>
+                <div class="formula-box">
+                    \[ m = \frac{y_2 - y_1}{x_2 - x_1} \]
+                    \[ y = mx + b \quad \text{(Slope-Intercept Form)} \]
+                    \[ y - y_1 = m(x - x_1) \quad \text{(Point-Slope Form)} \]
+                    \[ Ax + By = C \quad \text{(Standard Form)} \]
+                </div>
+                <p><strong>Parallel:</strong> Slopes are identical ($m_1 = m_2$)<br>
+                <strong>Perpendicular:</strong> Slopes are negative reciprocals ($m_1 \cdot m_2 = -1$)</p>
+            </section>
+
+            <!-- 10. Factoring & Polynomials -->
+            <section id="factoring-polynomials" class="sec-fuchsia">
+                <h2>10. Factoring &amp; Polynomials</h2>
+                
+                <h3>Trinomials &amp; Squares</h3>
+                <p class="rule-desc">These special product equations provide shortcuts to expand squared expressions or quickly factor a difference of perfect squares back into simpler binomials.</p>
+                <div class="formula-box">
+                    \[ a^2 - b^2 = (a - b)(a + b) \]
+                    \[ a^2 + 2ab + b^2 = (a + b)^2 \]
+                </div>
+
+                <h3>Quadratic Formula</h3>
+                <p class="rule-desc">The quadratic formula provides the exact mathematical coordinate roots where any second-degree polynomial crosses the x-axis.</p>
+                <p>For any quadratic equation in the form $ax^2 + bx + c = 0$:</p>
+                <div class="formula-box">
+                    \[ x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \]
+                </div>
+            </section>
+
+            <!-- 11. Rules of Exponents (Full Width at Bottom) -->
+            <section id="exponents" class="sec-cyan sec-full-width">
+                <h2>11. Rules of Exponents</h2>
+                <p class="rule-desc">These mathematical laws define how factors scale when multiplied, divided, raised to nested powers, or evaluated with rational and negative values.</p>
+                <p>These properties apply to bases where $a \neq 0$ and $b \neq 0$:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rule Name</th>
+                            <th>Algebraic Formula</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Product Rule</strong></td>
+                            <td>$a^m \cdot a^n = a^{m+n}$</td>
+                            <td>$3^2 \cdot 3^4 = 3^6 = 729$</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Quotient Rule</strong></td>
+                            <td>$\frac{a^m}{a^n} = a^{m-n}$</td>
+                            <td>$\frac{5^7}{5^4} = 5^3 = 125$</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Power of a Power</strong></td>
+                            <td>$(a^m)^n = a^{m \cdot n}$</td>
+                            <td>$(2^3)^4 = 2^{12} = 4{,}096$</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Power of a Product</strong></td>
+                            <td>$(ab)^n = a^n b^n$</td>
+                            <td>$(2x)^3 = 8x^3$</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Power of a Quotient</strong></td>
+                            <td>$\left(\frac{a}{b}\right)^n = \frac{a^n}{b^n}$</td>
+                            <td>$\left(\frac{3}{4}\right)^2 = \frac{9}{16}$</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Zero Exponent</strong></td>
+                            <td>$a^0 = 1$</td>
+                            <td>$15^0 = 1$</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Negative Exponent</strong></td>
+                            <td>$a^{-n} = \frac{1}{a^n}$</td>
+                            <td>$4^{-2} = \frac{1}{16}$</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fractional Exponent</strong></td>
+                            <td>$a^{\frac{m}{n}} = \sqrt[n]{a^m}$</td>
+                            <td>$8^{\frac{2}{3}} = (\sqrt[3]{8})^2 = 4$</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+        </div>
+        <!-- Grid Container End -->
+
+    </div>
+
+    <footer>
+        <p>&copy; Algebra Reference Guide. Typeset professionally with MathJax LaTeX.</p>
+    </footer>
+
+</body>
+</html>
