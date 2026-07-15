@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Problems: Algebraic Thinking Report</title>
+    <style>
+        /* Modern UI Style */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        h1 { text-align: center; color: #1a2a6c; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        
+        .controls-container { 
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 30px;
+            background-color: #fff; 
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 12px 28px;
+            font-size: 1.05em;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px 10px; 
+            transition: transform 0.1s, background-color 0.2s;
+            vertical-align: middle;
+        }
+        button:active { transform: scale(0.98); }
+        #generateBtn { background-color: #3498db; }
+        #showSolutionsBtn { background-color: #27ae60; }
+        #showSolutionsBtn:disabled { opacity: 1; cursor: default; }
+
+        .problem-list {
+            list-style-type: none;
+            padding-left: 0;
+            max-width: 850px;
+            margin: 0 auto;
+        }
+        .problem-card {
+            margin-bottom: 30px;
+            padding: 25px;
+            border-radius: 12px;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 8px solid #ddd;
+        }
+        
+        .problem-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .problem-number { font-weight: bold; font-size: 1.3em; color: #95a5a6; }
+        .problem-text {
+            font-family: 'Georgia', serif; 
+            font-size: 1.2em;
+            color: #2c3e50;
+            line-height: 1.5;
+        }
+        
+        .answer-box {
+            display: flex;
+            flex-direction: column;
+            background: #fdfdfd;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+        .input-row { display: flex; align-items: center; }
+        .user-input {
+            padding: 10px;
+            font-size: 1.2em;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            width: 180px;
+            margin-left: 10px;
+            text-align: center;
+        }
+        
+        /* Feedback States */
+        .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
+        .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; font-weight: bold; }
+        .static-answer { padding: 8px 15px; border-radius: 6px; font-size: 1.2em; border: 1px solid #ccc; display: inline-block; }
+
+        /* Solution Area */
+        .solution-area {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f4faff;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+        }
+        .step-row { margin-bottom: 12px; border-bottom: 1px solid #e1e8ed; padding-bottom: 8px; }
+        .final-result {
+            color: #2980b9;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        /* Report Header Style */
+        .report-header {
+            text-align: center;
+            background-color: #ffffff;
+            border: 3px solid #27ae60;
+            padding: 20px;
+            margin: 0 auto 30px auto;
+            max-width: 850px;
+            border-radius: 12px;
+            color: #2c3e50;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        @media print {
+            .controls-container { display: none; }
+            .solution-area { display: block !important; }
+            body { background: white; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Translating Words to Math</h1>
+    <p class="subtitle">Word Problems & Algebraic Thinking: Scoring and Step-by-Step Solutions.</p>
+
+    <div class="controls-container">
+        <button id="generateBtn">Generate New Test</button>
+        <button id="showSolutionsBtn">Submit & Generate Report</button> 
+    </div>
+
+    <div id="problemContainer" class="problem-list"></div>
+
+    <script>
+        const container = document.getElementById('problemContainer');
+        const generateBtn = document.getElementById('generateBtn');
+        const showBtn = document.getElementById('showSolutionsBtn');
+        let currentProblems = [];
+
+        function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+        function generateProblem(id, type) {
+            let prob = { id, text: "", solutionSteps: "", answer: 0 };
+
+            switch(type) {
+                case 'consecutive':
+                    let start = getRandomInt(10, 30);
+                    let sum = start + (start + 1) + (start + 2);
+                    prob.text = `The sum of three consecutive integers is ${sum}. What is the smallest of these integers?`;
+                    prob.answer = start;
+                    prob.solutionSteps = `
+                        <div class="step-row">Let the integers be x, x+1, and x+2.</div>
+                        <div class="step-row">Set up equation: x + (x+1) + (x+2) = ${sum}</div>
+                        <div class="step-row">Combine terms: 3x + 3 = ${sum}</div>
+                        <div class="step-row">3x = ${sum - 3} -> x = ${start}</div>`;
+                    break;
+
+                case 'geometry':
+                    let width = getRandomInt(5, 12);
+                    let length = width + getRandomInt(2, 6);
+                    let perimeter = 2 * (length + width);
+                    prob.text = `The length of a rectangle is ${length - width} cm more than its width. If the perimeter is ${perimeter} cm, find the width.`;
+                    prob.answer = width;
+                    prob.solutionSteps = `
+                        <div class="step-row">Let W = width, L = W + ${length - width}</div>
+                        <div class="step-row">Perimeter = 2(L + W) = ${perimeter}</div>
+                        <div class="step-row">2(W + ${length - width} + W) = ${perimeter}</div>
+                        <div class="step-row">2(2W + ${length - width}) = ${perimeter} -> 4W + ${2*(length-width)} = ${perimeter}</div>
+                        <div class="step-row">4W = ${perimeter - 2*(length-width)} -> W = ${width}</div>`;
+                    break;
+
+                case 'coins':
+                    let dimes = getRandomInt(5, 15);
+                    let nickels = dimes + getRandomInt(2, 5);
+                    let totalValue = (dimes * 0.10 + nickels * 0.05).toFixed(2);
+                    prob.text = `A collection of nickels and dimes has a total value of $${totalValue}. There are ${nickels - dimes} more nickels than dimes. How many dimes are there?`;
+                    prob.answer = dimes;
+                    prob.solutionSteps = `
+                        <div class="step-row">Let d = dimes, n = d + ${nickels - dimes}</div>
+                        <div class="step-row">Value: 0.10d + 0.05(d + ${nickels - dimes}) = ${totalValue}</div>
+                        <div class="step-row">0.10d + 0.05d + ${(0.05 * (nickels - dimes)).toFixed(2)} = ${totalValue}</div>
+                        <div class="step-row">0.15d = ${(totalValue - 0.05 * (nickels - dimes)).toFixed(2)} -> d = ${dimes}</div>`;
+                    break;
+
+                case 'age':
+                    let younger = getRandomInt(8, 15);
+                    let diff = getRandomInt(3, 10);
+                    let sumAge = younger + (younger + diff);
+                    prob.text = `Maria is ${diff} years older than her brother. The sum of their ages is ${sumAge}. How old is her brother?`;
+                    prob.answer = younger;
+                    prob.solutionSteps = `
+                        <div class="step-row">Let b = brother's age, m = b + ${diff}</div>
+                        <div class="step-row">b + (b + ${diff}) = ${sumAge}</div>
+                        <div class="step-row">2b + ${diff} = ${sumAge}</div>
+                        <div class="step-row">2b = ${sumAge - diff} -> b = ${younger}</div>`;
+                    break;
+
+                case 'backwards':
+                    let num = getRandomInt(5, 15);
+                    let result = (num * 2) + 10;
+                    prob.text = `A number is doubled, and then increased by 10. The final result is ${result}. What was the original number?`;
+                    prob.answer = num;
+                    prob.solutionSteps = `
+                        <div class="step-row">Let x = the number.</div>
+                        <div class="step-row">Equation: 2x + 10 = ${result}</div>
+                        <div class="step-row">Subtract 10: 2x = ${result - 10}</div>
+                        <div class="step-row">Divide by 2: x = ${num}</div>`;
+                    break;
+
+                case 'numbers':
+                    let n2 = getRandomInt(10, 20);
+                    let n1 = n2 * 3;
+                    let sumN = n1 + n2;
+                    prob.text = `The sum of two numbers is ${sumN}. One number is three times as large as the other. Find the smaller number.`;
+                    prob.answer = n2;
+                    prob.solutionSteps = `
+                        <div class="step-row">Let x = smaller number, 3x = larger number.</div>
+                        <div class="step-row">x + 3x = ${sumN}</div>
+                        <div class="step-row">4x = ${sumN}</div>
+                        <div class="step-row">x = ${n2}</div>`;
+                    break;
+            }
+            return prob;
+        }
+
+        function render() {
+            container.innerHTML = '';
+            currentProblems = [];
+            showBtn.disabled = false;
+            showBtn.style.backgroundColor = '#27ae60';
+            showBtn.textContent = "Submit & Generate Report";
+
+            const types = ['consecutive', 'geometry', 'coins', 'age', 'backwards', 'numbers'];
+            types.forEach((type, index) => {
+                const p = generateProblem(index + 1, type);
+                currentProblems.push(p);
+                const div = document.createElement('div');
+                div.className = 'problem-card';
+                div.id = `card-${p.id}`;
+                div.innerHTML = `
+                    <div class="problem-header">
+                        <span class="problem-number">#${p.id}</span>
+                        <div class="problem-text">${p.text}</div>
+                    </div>
+                    <div class="answer-box">
+                        <div class="input-row"><label>Answer: </label><input type="text" class="user-input" id="input-${p.id}" placeholder="?"></div>
+                    </div>
+                    <div class="solution-area" id="sol-${p.id}">
+                        <strong>Step-by-Step Solution:</strong>
+                        <div style="margin-top:10px;">${p.solutionSteps}</div>
+                        <div class="final-result">Correct Answer: ${p.answer}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function check() {
+            let score = 0;
+            currentProblems.forEach(p => {
+                const input = document.getElementById(`input-${p.id}`);
+                const sol = document.getElementById(`sol-${p.id}`);
+                const userVal = parseFloat(input.value.trim());
+
+                const isCorrect = !isNaN(userVal) && Math.abs(userVal - p.answer) < 0.01;
+                input.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                sol.style.display = 'block';
+                if (isCorrect) score++;
+            });
+
+            const timeStr = new Date().toLocaleString();
+            showBtn.disabled = true;
+            showBtn.style.backgroundColor = "#7f8c8d";
+            showBtn.innerHTML = `Score: ${score}/6<br><span style="font-size:0.7em">${timeStr}</span>`;
+
+            // Prepare for download
+            const reportHeader = `
+                <div class="report-header">
+                    <h1>Algebraic Thinking Performance Report</h1>
+                    <h2 style="margin:0; color:#27ae60;">Score: ${score} / 6</h2>
+                    <p>Completed on: ${timeStr}</p>
+                </div>`;
+            
+            setTimeout(() => downloadReport(reportHeader), 600);
+        }
+
+        function downloadReport(headerHtml) {
+            const clone = document.documentElement.cloneNode(true);
+            clone.querySelectorAll('script, .controls-container').forEach(s => s.remove());
+            
+            const body = clone.querySelector('body');
+            const headerDiv = document.createElement('div');
+            headerDiv.innerHTML = headerHtml;
+            body.insertBefore(headerDiv, body.firstChild);
+
+            // Convert inputs to static text
+            const origInputs = document.querySelectorAll('.user-input');
+            const cloneInputs = clone.querySelectorAll('.user-input');
+            cloneInputs.forEach((ci, idx) => {
+                const val = origInputs[idx].value || "None";
+                const isCorrect = origInputs[idx].classList.contains('correct-input');
+                const span = document.createElement('span');
+                span.className = isCorrect ? 'static-answer correct-input' : 'static-answer incorrect-input';
+                span.textContent = val;
+                ci.parentNode.replaceChild(span, ci);
+            });
+
+            clone.querySelectorAll('.solution-area').forEach(s => s.style.display = 'block');
+
+            const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Math_Word_Problem_Report_${new Date().getTime()}.html`;
+            a.click();
+        }
+
+        generateBtn.addEventListener('click', render);
+        showBtn.addEventListener('click', check);
+        render();
+    </script>
+</body>
+</html>

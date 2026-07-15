@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>geometrymasteryall - Comprehensive Set</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f4f7f6; color: #333; }
+        h1 { text-align: center; color: #1a2a6c; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 20px; }
+
+        /* Full Formula Reference Section */
+        .formula-guide {
+            max-width: 1000px;
+            margin: 0 auto 30px auto;
+            background-color: #fff;
+            border: 2px solid #e67e22;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .formula-guide h2 { margin-top: 0; color: #e67e22; font-size: 1.3em; border-bottom: 2px solid #fdf2e9; padding-bottom: 10px; text-align: center; }
+        .formula-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; font-size: 0.88em; }
+        .formula-category { background: #fffaf5; padding: 10px; border-radius: 6px; border-left: 4px solid #e67e22; }
+        .formula-category h3 { margin: 0 0 5px 0; font-size: 1em; color: #2c3e50; }
+
+        .controls-container { text-align: center; padding: 20px; margin-bottom: 30px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        button { padding: 12px 28px; font-size: 1.05em; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 5px; transition: 0.2s; }
+        #generateBtn { background-color: #3498db; }
+        #showSolutionsBtn { background-color: #27ae60; }
+        #showSolutionsBtn:disabled { background-color: #bdc3c7; cursor: default; }
+
+        .problem-list { list-style: none; padding: 0; max-width: 900px; margin: 0 auto; }
+        .problem-card { margin-bottom: 30px; padding: 25px; border-radius: 12px; background: #fff; border-left: 8px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .problem-card.is-correct { border-left-color: #2ecc71; }
+        .problem-card.is-incorrect { border-left-color: #e74c3c; }
+
+        .figure-container { text-align: center; background: #fdfdfd; padding: 20px; border: 1px solid #f0f0f0; border-radius: 8px; margin: 15px 0; }
+        .answer-box { display: flex; align-items: center; background: #f8f9fa; padding: 15px; border-radius: 8px; gap: 10px; }
+        .user-input { padding: 8px; border: 2px solid #ccc; border-radius: 4px; width: 140px; text-align: center; font-size: 1.1em; }
+        
+        .solution-area { display: none; margin-top: 20px; padding: 15px; background: #f9f9f9; border: 1px dashed #3498db; border-radius: 8px; }
+        .math-line { display: block; font-family: 'Courier New', monospace; background: #fff; padding: 5px; border: 1px solid #eee; margin-top: 5px; color: #d35400; }
+        
+        .report-header { text-align: center; background: #e8f6f3; border: 2px solid #27ae60; padding: 20px; margin-bottom: 30px; border-radius: 10px; }
+
+        @media print { .controls-container { display: none; } .solution-area { display: block !important; } }
+    </style>
+</head>
+<body>
+
+    <h1>Geometry Mastery: geometrymasteryall</h1>
+    <p class="subtitle">A full 12-problem comprehensive set. Use the reference guide to solve the diagrams.</p>
+
+    <!-- COMPREHENSIVE FORMULA GUIDE -->
+    <div class="formula-guide">
+        <h2>Mathematical Reference Guide</h2>
+        <div class="formula-grid">
+            <div class="formula-category">
+                <h3>Theorems & Trigonometry</h3>
+                • <b>Pythagoras:</b> a² + b² = c²<br>
+                • <b>Distance:</b> d = √((x₂-x₁)² + (y₂-y₁)²)<br>
+                • <b>Trig:</b> sin(θ)=O/H | cos(θ)=A/H | tan(θ)=O/A<br>
+                • <b>Special 45-45-90:</b> Hypotenuse = Side × √2
+            </div>
+            <div class="formula-category">
+                <h3>2D Measurement</h3>
+                • <b>Triangle Area:</b> ½ × b × h<br>
+                • <b>Trapezoid Area:</b> ½ × (a + b) × h<br>
+                • <b>Rhombus Area:</b> ½ × d₁ × d₂<br>
+                • <b>Polygon Interior Sum:</b> (n - 2) × 180°<br>
+                • <b>Similar Triangles:</b> a₁/a₂ = b₁/b₂
+            </div>
+            <div class="formula-category">
+                <h3>Circles & Sectors</h3>
+                • <b>Circle:</b> A = πr² | C = 2πr (π ≈ 3.14)<br>
+                • <b>Sector Area:</b> (θ/360) × πr²<br>
+                • <b>Arc Length:</b> (θ/360) × 2πr<br>
+                • <b>Exact Calculation:</b> π ≈ 22/7
+            </div>
+            <div class="formula-category">
+                <h3>3D Volume & Surface Area</h3>
+                • <b>Prism/Cylinder Vol:</b> V = Area_Base × h<br>
+                • <b>Pyramid/Cone Vol:</b> V = ⅓ × Area_Base × h<br>
+                • <b>Sphere:</b> V = 4/3πr³ | SA = 4πr²<br>
+                • <b>Cylinder SA:</b> 2πr² + 2πrh
+            </div>
+        </div>
+    </div>
+
+    <div class="controls-container">
+        <button id="generateBtn">Generate Full Problem Set</button>
+        <button id="showSolutionsBtn">Check & Save All Answers</button> 
+    </div>
+
+    <div id="problemContainer" class="problem-list"></div>
+
+    <script>
+        const container = document.getElementById('problemContainer');
+        const generateBtn = document.getElementById('generateBtn');
+        const showBtn = document.getElementById('showSolutionsBtn');
+        let currentProblems = [];
+
+        function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+        const problemPool = [
+            // 1. Trig sin(30)
+            function(id) {
+                const hyp = getRandom(10, 30);
+                const ans = hyp * 0.5;
+                return {
+                    id, text: "Using Trigonometry, solve for side x.",
+                    svg: `<svg width="150" height="100"><polygon points="30,80 120,80 120,30" fill="none" stroke="black" stroke-width="2"/><text x="45" y="75" font-size="12">30°</text><text x="65" y="50" transform="rotate(-28 65 50)">H=${hyp}</text><text x="125" y="55">x=?</text></svg>`,
+                    answer: ans, steps: [{m:"Formula:", l:"sin(30°) = Opposite / Hypotenuse"}, {m:"Solve:", l:`0.5 = x / ${hyp} → x = ${ans}`}]
+                };
+            },
+            // 2. Distance
+            function(id) {
+                const x1 = getRandom(0, 2), y1 = getRandom(0, 2);
+                const x2 = x1 + 3, y2 = y1 + 4;
+                return {
+                    id, text: "Determine the linear distance between coordinate A and coordinate B.",
+                    svg: `<svg width="160" height="100"><line x1="40" y1="80" x2="110" y2="20" stroke="blue" stroke-width="2"/><circle cx="40" cy="80" r="4"/><circle cx="110" cy="20" r="4"/><text x="10" y="95">A(${x1},${y1})</text><text x="100" y="15">B(${x2},${y2})</text></svg>`,
+                    answer: 5, steps: [{m:"Δx = 3, Δy = 4", l:"d = √(3² + 4²)"}, {m:"Result:", l:"√25 = 5"}]
+                };
+            },
+            // 3. Sector
+            function(id) {
+                const r = getRandom(6, 12);
+                const ans = Math.round(0.25 * 3.14 * r * r * 100) / 100;
+                return {
+                    id, text: "Find the area of the 90° shaded sector. (π ≈ 3.14)",
+                    svg: `<svg width="120" height="120"><path d="M60 60 L100 60 A40 40 0 0 0 60 20 Z" fill="#ffd700" stroke="black"/><text x="65" y="55" font-size="10">90°</text><text x="80" y="75">r=${r}</text></svg>`,
+                    answer: ans, steps: [{m:"Formula:", l:`(90/360) * 3.14 * ${r}²`}, {m:"Calculation:", l:ans}]
+                };
+            },
+            // 4. Cone
+            function(id) {
+                const r = 3, h = getRandom(8, 15);
+                const ans = Math.round((1/3) * 3.14 * 9 * h * 100) / 100;
+                return {
+                    id, text: "Determine the volume of the cone. (π ≈ 3.14)",
+                    svg: `<svg width="120" height="120"><ellipse cx="60" cy="100" rx="35" ry="10" fill="none" stroke="black"/><line x1="25" y1="100" x2="60" y2="20" stroke="black"/><line x1="95" y1="100" x2="60" y2="20" stroke="black"/><line x1="60" y1="100" x2="60" y2="20" stroke="red" stroke-dasharray="3"/><text x="65" y="60" fill="red">h=${h}</text><text x="75" y="115">r=3</text></svg>`,
+                    answer: ans, steps: [{m:"Formula:", l:"⅓ * π * r² * h"}, {m:"Calculation:", l:`0.33 * 3.14 * 9 * ${h} = ${ans}`}]
+                };
+            },
+            // 5. Similarity
+            function(id) {
+                const b1 = getRandom(3, 5), b2 = b1 * 3;
+                const s1 = getRandom(4, 6);
+                return {
+                    id, text: "Triangles are similar. Solve for the missing length x.",
+                    svg: `<svg width="180" height="100"><polygon points="10,80 40,80 40,50" fill="none" stroke="black"/><polygon points="70,80 160,80 160,20" fill="none" stroke="black"/><text x="20" y="95">${b1}</text><text x="45" y="70">${s1}</text><text x="110" y="95">${b2}</text><text x="165" y="55">x=?</text></svg>`,
+                    answer: s1 * 3, steps: [{m:"Ratio:", l:`${b1} / ${b2} = ${s1} / x`}, {m:"Solve:", l:`x = ${s1 * 3}`}]
+                };
+            },
+            // 6. 45-45-90
+            function(id) {
+                const s = getRandom(4, 10);
+                const hyp = Math.round(s * 1.414 * 100) / 100;
+                return {
+                    id, text: "Find the hypotenuse x for this special triangle.",
+                    svg: `<svg width="120" height="110"><polygon points="20,90 80,90 80,30" fill="none" stroke="black" stroke-width="2"/><text x="45" y="105">${s}</text><text x="85" y="65">${s}</text><text x="40" y="55" transform="rotate(-45 40 55)">x=?</text></svg>`,
+                    answer: hyp, steps: [{m:"Rule:", l:"Side * √2"}, {m:"Calculation:", l:`${s} * 1.414 = ${hyp}`}]
+                };
+            },
+            // 7. Interior Angles
+            function(id) {
+                const n = getRandom(5, 12);
+                const ans = (n-2)*180;
+                return {
+                    id, text: `Calculate the sum of interior angles for this ${n}-sided polygon.`,
+                    svg: `<svg width="100" height="100"><polygon points="50,10 85,30 85,70 50,90 15,70 15,30" fill="none" stroke="black"/><text x="50" y="55" text-anchor="middle">n=${n}</text></svg>`,
+                    answer: ans, steps: [{m:"Formula:", l:`(${n} - 2) * 180`}, {m:"Result:", l:ans}]
+                };
+            },
+            // 8. Rhombus
+            function(id) {
+                const d1 = 12, d2 = 20;
+                return {
+                    id, text: "Find the area of the rhombus based on the diagonals shown.",
+                    svg: `<svg width="150" height="100"><polygon points="75,10 130,50 75,90 20,50" fill="none" stroke="black"/><line x1="75" y1="10" x2="75" y2="90" stroke="blue" stroke-dasharray="2"/><line x1="20" y1="50" x2="130" y2="50" stroke="blue" stroke-dasharray="2"/><text x="80" y="30">12</text><text x="40" y="45">20</text></svg>`,
+                    answer: 120, steps: [{m:"Formula:", l:"½ * d₁ * d₂"}, {m:"Calculation:", l:"0.5 * 12 * 20 = 120"}]
+                };
+            },
+            // 9. Sphere
+            function(id) {
+                const r = getRandom(4, 9);
+                const ans = Math.round(4 * 3.14 * r * r * 100) / 100;
+                return {
+                    id, text: "Calculate the total Surface Area of the sphere. (π ≈ 3.14)",
+                    svg: `<svg width="100" height="100"><circle cx="50" cy="50" r="40" fill="none" stroke="black"/><ellipse cx="50" cy="50" rx="40" ry="12" fill="none" stroke="black" stroke-dasharray="2"/><line x1="50" y1="50" x2="90" y2="50" stroke="blue"/><text x="65" y="45" fill="blue">r=${r}</text></svg>`,
+                    answer: ans, steps: [{m:"Formula:", l:`4 * 3.14 * ${r}²`}, {m:"Result:", l:ans}]
+                };
+            },
+            // 10. Arc Length
+            function(id) {
+                const r = 7;
+                return {
+                    id, text: "Find the length of the 180° arc. (π ≈ 22/7)",
+                    svg: `<svg width="120" height="80"><path d="M20 50 A40 40 0 0 1 100 50" fill="none" stroke="red" stroke-width="3"/><line x1="20" y1="50" x2="100" y2="50" stroke="black" stroke-dasharray="2"/><text x="60" y="65" text-anchor="middle">r=7</text></svg>`,
+                    answer: 22, steps: [{m:"Formula:", l:"(180/360) * 2 * (22/7) * 7"}, {m:"Calculation:", l:"0.5 * 44 = 22"}]
+                };
+            },
+            // 11. Trapezoid
+            function(id) {
+                const a = getRandom(5, 8), b = getRandom(12, 16), h = 10;
+                const ans = 0.5 * (a + b) * h;
+                return {
+                    id, text: "Solve for the area of the trapezoid.",
+                    svg: `<svg width="150" height="100"><polygon points="40,20 100,20 130,80 10,80" fill="none" stroke="black" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="80" stroke="red" stroke-dasharray="3"/><text x="70" y="15">a=${a}</text><text x="70" y="95">b=${b}</text><text x="45" y="55" fill="red">h=10</text></svg>`,
+                    answer: ans, steps: [{m:"Formula:", l:"½ * (a + b) * h"}, {m:"Calculation:", l:`0.5 * ${a + b} * 10 = ${ans}`}]
+                };
+            },
+            // 12. Cylinder
+            function(id) {
+                const r = 4, h = 10;
+                const ans = Math.round(3.14 * 16 * 10 * 100) / 100;
+                return {
+                    id, text: "Find the volume of the cylinder. (π ≈ 3.14)",
+                    svg: `<svg width="100" height="120"><ellipse cx="50" cy="20" rx="35" ry="10" fill="none" stroke="black"/><path d="M15 20 L15 90 A35 10 0 0 0 85 90 L85 20" fill="none" stroke="black"/><text x="50" y="105" text-anchor="middle">r=4</text><text x="90" y="60">h=10</text></svg>`,
+                    answer: ans, steps: [{m:"Formula:", l:"π * r² * h"}, {m:"Calculation:", l:`3.14 * 16 * 10 = ${ans}`}]
+                };
+            }
+        ];
+
+        function render() {
+            container.innerHTML = ''; currentProblems = [];
+            showBtn.disabled = false; showBtn.textContent = "Check & Save All Answers";
+            
+            problemPool.forEach((template, i) => {
+                const p = template(i + 1);
+                currentProblems.push(p);
+                const card = document.createElement('div');
+                card.className = 'problem-card';
+                card.id = `card-${i+1}`;
+                card.innerHTML = `
+                    <div style="font-weight:bold; color:#7f8c8d; margin-bottom:10px;">Problem #${i+1}</div>
+                    <div style="font-size:1.15em; margin-bottom:10px;">${p.text}</div>
+                    <div class="figure-container">${p.svg}</div>
+                    <div class="answer-box">
+                        <label>Result:</label>
+                        <input type="number" step="0.01" class="user-input" id="input-${i+1}" placeholder="?">
+                    </div>
+                    <div class="solution-area" id="sol-${i+1}">
+                        <strong>Step-by-Step Mathematical Solution:</strong>
+                        ${p.steps.map(s => `<div class="math-line">${s.m} ${s.l}</div>`).join('')}
+                        <div style="margin-top:10px; font-weight:bold; color:#2980b9">Expected Answer: ${p.answer}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function check() {
+            let score = 0;
+            currentProblems.forEach(p => {
+                const input = document.getElementById(`input-${p.id}`);
+                const val = parseFloat(input.value);
+                const isCorrect = !isNaN(val) && Math.abs(val - p.answer) < 0.15;
+                
+                input.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                document.getElementById(`card-${p.id}`).classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
+                document.getElementById(`sol-${p.id}`).style.display = 'block';
+                if (isCorrect) score++;
+            });
+            showBtn.textContent = `Score: ${score} / ${currentProblems.length}`;
+            showBtn.disabled = true;
+            setTimeout(() => downloadReport(score, currentProblems.length), 800);
+        }
+
+        function downloadReport(correct, total) {
+            const clone = document.documentElement.cloneNode(true);
+            clone.querySelector('.controls-container').remove();
+            clone.querySelectorAll('script').forEach(s => s.remove());
+
+            const header = document.createElement('div');
+            header.className = 'report-header';
+            header.innerHTML = `<h2>geometrymasteryall Final Report</h2><h3>Full Set Accuracy: ${correct} / ${total}</h3><p>${new Date().toLocaleString()}</p>`;
+            clone.querySelector('body').prepend(header);
+
+            const origInputs = document.querySelectorAll('.user-input');
+            clone.querySelectorAll('.user-input').forEach((ci, idx) => {
+                const span = document.createElement('span');
+                span.textContent = origInputs[idx].value || "---";
+                span.className = origInputs[idx].className;
+                span.style.display = "inline-block";
+                span.style.padding = "5px 15px";
+                span.style.border = "1px solid #333";
+                ci.parentNode.replaceChild(span, ci);
+            });
+
+            clone.querySelectorAll('.solution-area').forEach(s => s.style.display = 'block');
+            const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `geometry_mastery_all_${Date.now()}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        generateBtn.addEventListener('click', render);
+        showBtn.addEventListener('click', check);
+        render();
+    </script>
+</body>
+</html>
