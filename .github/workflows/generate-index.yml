@@ -139,6 +139,7 @@ jobs:
                   <title>{html.escape(INDEX_TITLE)}</title>
                   <style>
                       @import url('https://fonts.googleapis.com/css2?family=Betania+Patmos+In+GDL:wght@400&display=swap');
+                      @import url('https://fonts.googleapis.com/css2?family=Sixtyfour&display=swap');
                       
                       body {{
                           font-family: 'Betania Patmos In GDL', cursive, sans-serif;
@@ -234,13 +235,20 @@ jobs:
                           border-left-color: #059669;
                       }}
                       .file-name {{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%; }}
+                      
+                      /* Sixtyfour pixel styling for tag badges */
                       .badge {{
-                          font-size: 0.725rem;
-                          font-weight: 700;
-                          padding: 2px 8px;
-                          border-radius: 12px;
+                          font-family: 'Sixtyfour', monospace, sans-serif;
+                          font-size: 0.55rem;
+                          font-weight: 400;
+                          padding: 4px 8px;
+                          border-radius: 4px;
                           text-transform: uppercase;
                           letter-spacing: 0.025em;
+                          display: inline-flex;
+                          align-items: center;
+                          justify-content: center;
+                          line-height: 1;
                       }}
                       .badge-math {{ background-color: #d1fae5; color: #065f46; }}
                       .badge-reading {{ background-color: #e0e7ff; color: #3730a3; }}
