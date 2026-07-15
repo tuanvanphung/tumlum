@@ -138,11 +138,11 @@ jobs:
                   <meta name="viewport" content="width=device-width, initial-scale=1.0">
                   <title>{html.escape(INDEX_TITLE)}</title>
                   <style>
-                      @import url('https://fonts.googleapis.com/css2?family=Flamenco:wght@300;400&display=swap');
+                      @import url('https://fonts.googleapis.com/css2?family=Megrim&display=swap');
                       @import url('https://fonts.googleapis.com/css2?family=Geo&display=swap');
                       
                       body {{
-                          font-family: 'Flamenco', serif;
+                          font-family: 'Megrim', sans-serif;
                           margin: 0;
                           padding: 40px 20px;
                           background-color: #f8fafc;
@@ -236,7 +236,6 @@ jobs:
                       }}
                       .file-name {{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%; }}
                       
-                      /* Geo typeface styling for tag badges */
                       .badge {{
                           font-family: 'Geo', sans-serif;
                           font-size: 0.85rem;
