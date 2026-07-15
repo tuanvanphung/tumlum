@@ -38,35 +38,40 @@
             }
             h1:hover { transform: rotate(1deg) scale(1.05); }
             
+            /* Redesigned Simple Offline/Online Button */
             .offline-toggle-container { text-align: right; margin-bottom: 20px; }
-            
-            /* Playful Academic Offline Toggle */
             .offline-btn {
                 font-family: 'Geo', sans-serif;
-                font-size: 0.9rem;
+                font-size: 1rem;
                 font-weight: 700;
                 padding: 8px 16px;
-                border-radius: 4px;
+                border-radius: 6px;
                 text-transform: uppercase;
-                letter-spacing: 0.05em;
+                letter-spacing: 0.1em;
                 cursor: pointer;
-                border: 2px solid #1e293b;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
                 transition: all 0.1s ease;
+                
+                /* ONLINE STATE (Green) */
+                background-color: #10b981;
+                color: #022c22;
+                border: 3px solid #064e3b;
+                box-shadow: 4px 4px 0px #064e3b;
             }
-            .offline-btn.online {
-                background-color: #bbf7d0; /* Green highlighter */
-                color: #166534;
-                box-shadow: 2px 2px 0px #1e293b;
+            .offline-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px #064e3b; }
+            
+            /* OFFLINE STATE (Red) */
+            .offline-btn.active {
+                background-color: #ef4444; 
+                color: #450a0a;
+                border-color: #450a0a;
+                box-shadow: 2px 2px 0px #450a0a;
+                transform: translate(2px, 2px);
             }
-            .offline-btn.online:hover {
-                transform: translate(-1px, -1px);
-                box-shadow: 3px 3px 0px #1e293b;
-            }
-            .offline-btn.offline {
-                background-color: #fecaca; /* Red highlighter */
-                color: #991b1b;
-                box-shadow: 1px 1px 0px #1e293b;
-                transform: translate(1px, 1px);
+            .offline-btn.active:hover {
+                transform: translate(1px, 1px); box-shadow: 3px 3px 0px #450a0a;
             }
 
             .grid { display: flex; flex-direction: column; gap: 30px; }
@@ -179,13 +184,13 @@
                     </a>
                 </li>
                         <li class="file-item math-item">
-                    <a href="7_MATH_fast 1.html">
+                    <a href="7_MATH_fast%201.html">
                         <span class="file-name">7 Math Fast 1</span>
                         <span class="badge badge-math">Math</span>
                     </a>
                 </li>
                         <li class="file-item math-item">
-                    <a href="7_MATH_fast 2.html">
+                    <a href="7_MATH_fast%202.html">
                         <span class="file-name">7 Math Fast 2</span>
                         <span class="badge badge-math">Math</span>
                     </a>
@@ -209,13 +214,13 @@
                     </a>
                 </li>
                         <li class="file-item">
-                    <a href="7_gemini_science20_P1_PhysicalScience&amp;Biology.html">
+                    <a href="7_gemini_science20_P1_PhysicalScience%26Biology.html">
                         <span class="file-name">7 Gemini Science20 P1 Physical Science&amp; Biology</span>
                         
                     </a>
                 </li>
                         <li class="file-item">
-                    <a href="7_gemini_science20_P2_Chemistry&amp;Physics.html">
+                    <a href="7_gemini_science20_P2_Chemistry%26Physics.html">
                         <span class="file-name">7 Gemini Science20 P2 Chemistry&amp; Physics</span>
                         
                     </a>
@@ -259,7 +264,7 @@
                     </a>
                 </li>
                         <li class="file-item math-item">
-                    <a href="6_MATH/6_MATH_prob&amp;stats 1.html">
+                    <a href="6_MATH/6_MATH_prob%26stats%201.html">
                         <span class="file-name">6 Math Prob&amp;stats 1</span>
                         <span class="badge badge-math">Math</span>
                     </a>
@@ -285,7 +290,7 @@
                     </a>
                 </li>
                         <li class="file-item">
-                    <a href="Calculators/RPN Calculator.html">
+                    <a href="Calculators/RPN%20Calculator.html">
                         <span class="file-name">Rpn calculator</span>
                         
                     </a>
@@ -299,37 +304,37 @@
             </summary>
             <ul class="file-list">
                             <li class="file-item">
-                    <a href="reading/READING_Informational Text 1-10.html">
+                    <a href="reading/READING_Informational%20Text%201-10.html">
                         <span class="file-name">Reading Informational text 1 10</span>
                         <span class="badge badge-reading">Reading</span>
                     </a>
                 </li>
                         <li class="file-item">
-                    <a href="reading/READING_Informational Text 11-20 Science Edition.html">
+                    <a href="reading/READING_Informational%20Text%2011-20%20Science%20Edition.html">
                         <span class="file-name">Reading Informational text 11 20 science edition</span>
                         <span class="badge badge-reading">Reading</span>
                     </a>
                 </li>
                         <li class="file-item">
-                    <a href="reading/READING_Informational Text 21-30 Animal Edition.html">
+                    <a href="reading/READING_Informational%20Text%2021-30%20Animal%20Edition.html">
                         <span class="file-name">Reading Informational text 21 30 animal edition</span>
                         <span class="badge badge-reading">Reading</span>
                     </a>
                 </li>
                         <li class="file-item">
-                    <a href="reading/READING_Literature 1-10.html">
+                    <a href="reading/READING_Literature%201-10.html">
                         <span class="file-name">Reading Literature 1 10</span>
                         <span class="badge badge-reading">Reading</span>
                     </a>
                 </li>
                         <li class="file-item">
-                    <a href="reading/READING_Literature 11-20.html">
+                    <a href="reading/READING_Literature%2011-20.html">
                         <span class="file-name">Reading Literature 11 20</span>
                         <span class="badge badge-reading">Reading</span>
                     </a>
                 </li>
                         <li class="file-item">
-                    <a href="reading/READING_Literature 21-30.html">
+                    <a href="reading/READING_Literature%2021-30.html">
                         <span class="file-name">Reading Literature 21 30</span>
                         <span class="badge badge-reading">Reading</span>
                     </a>
@@ -352,16 +357,16 @@
             function updateToggleButtonUI() {
                 const btn = document.getElementById('offline-btn');
                 if (isOfflineMode) {
-                    btn.className = 'offline-btn offline';
-                    btn.innerHTML = '🛑 OFFLINE';
+                    btn.classList.add('active');
+                    btn.innerHTML = 'OFFLINE';
                 } else {
-                    btn.className = 'offline-btn online';
-                    btn.innerHTML = '⚡ ONLINE';
+                    btn.classList.remove('active');
+                    btn.innerHTML = 'ONLINE';
                 }
             }
 
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('./sw.js')
                     .then(() => console.log("Service Worker Registered"))
                     .catch(err => console.log("Service Worker Registration Failed", err));
             }
