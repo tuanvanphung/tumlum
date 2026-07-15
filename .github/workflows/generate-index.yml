@@ -31,7 +31,7 @@ jobs:
           import html
 
           # --- Configuration ---
-          INDEX_TITLE = "Available Tests and Solutions"
+          INDEX_TITLE = "School Materials"
           EXCLUDE_FILES = ['index.html'] # Files to exclude (case-insensitive)
           EXCLUDE_DIRS = ['.git', '.github', 'node_modules', 'venv', 'env'] # Folders to ignore
           
@@ -77,7 +77,7 @@ jobs:
               
               rel_path = os.path.relpath(root, '.')
               if rel_path == '.':
-                  section_key = "General"
+                  section_key = "PRIORITY"
               else:
                   # Generate breadcrumb heading for nested folders (e.g. math/algebra -> Math - Algebra)
                   path_parts = rel_path.split(os.sep)
@@ -102,10 +102,10 @@ jobs:
               <head><meta charset="UTF-8"><title>{html.escape(INDEX_TITLE)}</title></head>
               <body><h1>No HTML files found.</h1></body></html>"""
           else:
-              # Prioritize General section first, then sort other directories alphabetically
-              sorted_section_keys = sorted([k for k in sections.keys() if k != "General"])
-              if "General" in sections:
-                  sorted_section_keys.insert(0, "General")
+              # Prioritize PRIORITY section first, then sort other directories alphabetically
+              sorted_section_keys = sorted([k for k in sections.keys() if k != "PRIORITY"])
+              if "PRIORITY" in sections:
+                  sorted_section_keys.insert(0, "PRIORITY")
 
               cards_html = ""
               for idx, sec_name in enumerate(sorted_section_keys):
@@ -152,7 +152,7 @@ jobs:
                           color: #1e293b;
                       }}
                       .container {{
-                          max-width: 1200px;
+                          max-width: 800px;
                           margin: auto;
                       }}
                       header {{
@@ -162,16 +162,12 @@ jobs:
                       h1 {{
                           color: #0f172a;
                           font-size: 2.5rem;
-                          margin-bottom: 10px;
+                          margin: 0;
                           font-weight: 800;
                       }}
-                      .subtitle {{
-                          color: #64748b;
-                          font-size: 1.1rem;
-                      }}
                       .grid {{
-                          display: grid;
-                          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                          display: flex;
+                          flex-direction: column;
                           gap: 24px;
                       }}
                       .section-card {{
@@ -261,7 +257,6 @@ jobs:
                   <div class="container">
                       <header>
                           <h1>{html.escape(INDEX_TITLE)}</h1>
-                          <p class="subtitle">A grouped view of available resources</p>
                       </header>
                       <div class="grid">
               {cards_html}        </div>
