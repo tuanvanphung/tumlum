@@ -3,157 +3,145 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>School Materials</title>
+        <title>TRYHARDZ</title>
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Betania+Patmos+In+Guideline&display=swap');
-
+            @import url('https://fonts.googleapis.com/css2?family=Syne+Mono&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Geo&display=swap');
+            
             body {
-                font-family: 'Betania Patmos In Guideline', cursive, sans-serif;
+                font-family: 'Syne Mono', monospace, sans-serif;
                 margin: 0;
-                padding: 40px 20px;
-                background-color: #f8fafc;
+                padding: 50px 20px;
+                background-color: #fafaf9;
+                background-image: 
+                    linear-gradient(90deg, transparent 46px, #fca5a5 46px, #fca5a5 48px, transparent 48px),
+                    linear-gradient(#e2e8f0 1px, transparent 1px),
+                    linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+                background-size: 100% 100%, 24px 24px, 24px 24px;
                 color: #1e293b;
             }
-            .container {
-                max-width: 800px;
-                margin: auto;
-            }
-            header {
-                text-align: center;
-                margin-bottom: 40px;
-            }
-            h1 {
-                color: #0f172a;
-                font-size: 2.5rem;
-                margin: 0;
-                font-weight: 800;
-            }
-            .grid {
-                display: flex;
-                flex-direction: column;
-                gap: 24px;
-            }
-            .section-card {
-                background: white;
-                border-radius: 16px;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-                border-top: 6px solid var(--accent-color);
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
-            }
-            .section-card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-            }
-            .section-title {
-                color: #0f172a;
-                font-size: 1.35rem;
-                font-weight: 700;
-                margin: 0;
-                padding: 20px 24px;
-                cursor: pointer;
-                user-select: none;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                list-style: none; /* Hide standard marker */
-            }
-            .section-title::-webkit-details-marker {
-                display: none; /* Hide standard marker on Webkit */
-            }
-            .section-title::before {
-                content: "";
-                display: inline-block;
-                width: 8px;
-                height: 8px;
-                border-radius: 50%;
-                background-color: var(--accent-color);
-                flex-shrink: 0;
-            }
-            .section-title::after {
-                content: "▼";
-                margin-left: auto;
-                font-size: 0.8rem;
-                color: #64748b;
-                transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                flex-shrink: 0;
-            }
-            .section-card[open] .section-title::after {
-                transform: rotate(180deg);
-            }
-            .file-list {
-                list-style: none;
-                padding: 0 24px 24px 24px;
-                margin: 0;
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-                border-top: 1px solid #e2e8f0;
-                padding-top: 20px;
-            }
-            .file-item a {
-                text-decoration: none;
-                color: #334155;
-                font-weight: 500;
-                font-size: 0.95rem;
-                padding: 10px 12px;
-                border-radius: 8px;
-                background-color: #f1f5f9;
-                border-left: 4px solid #e2e8f0;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                transition: background-color 0.2s ease, color 0.2s ease, border-left-color 0.2s ease;
-            }
-            .file-item a:hover {
-                background-color: var(--accent-bg);
-                color: var(--accent-hover);
-                border-left-color: var(--accent-color);
-            }
+            .container { max-width: 800px; margin: auto; position: relative; }
             
-            /* Math specific dynamic style shifts */
-            .file-item.math-item a {
-                background-color: #ecfdf5;
-                border-left: 4px solid #10b981;
-                color: #065f46;
+            header { text-align: center; margin-bottom: 30px; }
+            h1 { 
+                color: #0f172a; 
+                font-size: 3.5rem; 
+                margin: 0; 
+                font-weight: 800;
+                display: inline-block;
+                background-color: #fdf08a; 
+                padding: 5px 25px;
+                border: 4px solid #1e293b; 
+                box-shadow: 6px 6px 0px #1e293b;
+                transform: rotate(-2deg);
+                transition: transform 0.2s ease;
             }
-            .file-item.math-item a:hover {
-                background-color: #d1fae5;
-                color: #047857;
-                border-left-color: #059669;
+            h1:hover { transform: rotate(1deg) scale(1.05); }
+            
+            .offline-toggle-container { text-align: right; margin-bottom: 20px; }
+            .offline-btn {
+                font-family: 'Geo', sans-serif;
+                font-size: 0.9rem;
+                font-weight: 700;
+                padding: 8px 12px;
+                border-radius: 4px;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                cursor: pointer;
+                border: 2px solid #1e293b;
+                box-shadow: 2px 2px 0px #1e293b;
+                background-color: white;
+                color: #1e293b;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.1s ease;
+            }
+            .offline-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0px #1e293b; }
+            .offline-btn.active {
+                background-color: #fca5a5; 
+                box-shadow: 1px 1px 0px #1e293b;
+                transform: translate(1px, 1px);
             }
 
-            .file-name {
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                max-width: 80%;
-            }
-            .badge {
-                font-size: 0.725rem;
-                font-weight: 700;
-                padding: 2px 8px;
+            .grid { display: flex; flex-direction: column; gap: 30px; }
+            
+            .section-card {
+                background: white;
                 border-radius: 12px;
-                text-transform: uppercase;
-                letter-spacing: 0.025em;
+                border: 3px solid #1e293b;
+                box-shadow: 6px 6px 0px var(--accent-color);
+                transition: transform 0.15s ease, box-shadow 0.15s ease;
             }
-            .badge-math {
-                background-color: #d1fae5;
-                color: #065f46;
+            .section-card:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0px var(--accent-color); }
+            .section-title {
+                color: #0f172a; font-size: 1.35rem; font-weight: 700; margin: 0; padding: 20px 24px;
+                cursor: pointer; user-select: none; display: flex; align-items: center; gap: 12px; list-style: none;
             }
-            .badge-reading {
-                background-color: #e0e7ff;
-                color: #3730a3;
+            .section-title::-webkit-details-marker { display: none; }
+            
+            .folder-emoji { font-size: 1.5rem; flex-shrink: 0; }
+            
+            .section-title::after {
+                content: "+"; margin-left: auto; font-size: 1.8rem; font-family: monospace;
+                font-weight: bold; color: #1e293b; transition: transform 0.3s ease; flex-shrink: 0; line-height: 1;
             }
+            .section-card[open] .section-title::after { transform: rotate(45deg); color: #ef4444; }
+            
+            .section-card[open] .file-list { animation: slideDown 0.25s ease-out forwards; }
+            @keyframes slideDown {
+                0% { opacity: 0; transform: translateY(-10px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+            
+            .file-list {
+                list-style: none; padding: 0 24px 24px 24px; margin: 0; display: flex;
+                flex-direction: column; gap: 12px; border-top: 3px dashed #cbd5e1; padding-top: 20px;
+            }
+            .file-item a {
+                text-decoration: none; color: #334155; font-weight: 500; font-size: 0.95rem;
+                padding: 10px 14px; border-radius: 8px; background-color: #f1f5f9;
+                border: 2px solid #e2e8f0; border-left: 6px solid #cbd5e1;
+                display: flex; align-items: center; justify-content: space-between; transition: all 0.15s ease;
+            }
+            .file-item a:hover {
+                background-color: var(--accent-bg); color: var(--accent-hover);
+                border-color: #1e293b; border-left-color: var(--accent-color);
+                transform: scale(1.02) rotate(-1deg); position: relative; z-index: 10;
+                box-shadow: 3px 3px 0px rgba(30, 41, 59, 0.15);
+            }
+            
+            .file-item.math-item a { background-color: #ecfdf5; border-color: #a7f3d0; border-left: 6px solid #10b981; color: #065f46; }
+            .file-item.math-item a:hover {
+                background-color: #d1fae5; color: #047857; border-color: #1e293b;
+                border-left-color: #059669; transform: scale(1.02) rotate(1deg);
+            }
+            .file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75%; }
+            
+            .badge {
+                font-family: 'Geo', sans-serif; font-size: 0.85rem; font-weight: 400; padding: 2px 8px;
+                border-radius: 12px; text-transform: uppercase; letter-spacing: 0.05em;
+                display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+                border: 2px solid #1e293b; box-shadow: 2px 2px 0px #1e293b; background-color: white;
+            }
+            .badge-math { color: #059669; transform: rotate(-3deg); }
+            .badge-reading { color: #4f46e5; transform: rotate(3deg); }
         </style>
     </head>
     <body>
         <div class="container">
-            <header>
-                <h1>School Materials</h1>
-            </header>
-            <div class="grid">
-            <details class="section-card" style="--accent-color: #3b82f6; --accent-hover: #1d4ed8; --accent-bg: #eff6ff;">
-            <summary class="section-title">PRIORITY</summary>
+            <header><h1>TRYHARDZ</h1></header>
+            
+            <!-- Offline Button UI -->
+            <div class="offline-toggle-container">
+                <button id="offline-btn" class="offline-btn" onclick="toggleOfflineMode()">⚡ Cloud Sync Enabled</button>
+            </div>
+
+            <div class="grid">        <details class="section-card" style="--accent-color: #3b82f6; --accent-hover: #1d4ed8; --accent-bg: #eff6ff;">
+            <summary class="section-title">
+                <span class="folder-emoji">🎒</span>
+                PRIORITY
+            </summary>
             <ul class="file-list">
                             <li class="file-item math-item">
                     <a href="0_new_7_MATH_Exponents.html">
@@ -230,7 +218,10 @@
         </ul>
         </details>
         <details class="section-card" style="--accent-color: #10b981; --accent-hover: #047857; --accent-bg: #ecfdf5;">
-            <summary class="section-title">6 Math</summary>
+            <summary class="section-title">
+                <span class="folder-emoji">📐</span>
+                6 Math
+            </summary>
             <ul class="file-list">
                             <li class="file-item math-item">
                     <a href="6_MATH/6_MATH_1_EASY_OrderOfOperations_GEN5.html">
@@ -277,7 +268,10 @@
         </ul>
         </details>
         <details class="section-card" style="--accent-color: #8b5cf6; --accent-hover: #6d28d9; --accent-bg: #f5f3ff;">
-            <summary class="section-title">Calculators</summary>
+            <summary class="section-title">
+                <span class="folder-emoji">📝</span>
+                Calculators
+            </summary>
             <ul class="file-list">
                             <li class="file-item">
                     <a href="Calculators/DESMOS.html">
@@ -294,7 +288,10 @@
         </ul>
         </details>
         <details class="section-card" style="--accent-color: #f97316; --accent-hover: #c2410c; --accent-bg: #fff7ed;">
-            <summary class="section-title">Reading</summary>
+            <summary class="section-title">
+                <span class="folder-emoji">🔬</span>
+                Reading
+            </summary>
             <ul class="file-list">
                             <li class="file-item">
                     <a href="reading/READING_Informational Text 1-10.html">
@@ -332,16 +329,38 @@
                         <span class="badge badge-reading">Reading</span>
                     </a>
                 </li>
-                        <li class="file-item">
-                    <a href="reading/test.html">
-                        <span class="file-name">Test</span>
-                        
-                    </a>
-                </li>
         </ul>
         </details>
+</div>
         </div>
-        </div>
+
+        <script>
+            let isOfflineMode = localStorage.getItem('offlineMode') === 'true';
+            updateToggleButtonUI();
+
+            function toggleOfflineMode() {
+                isOfflineMode = !isOfflineMode;
+                localStorage.setItem('offlineMode', isOfflineMode.toString());
+                updateToggleButtonUI();
+            }
+
+            function updateToggleButtonUI() {
+                const btn = document.getElementById('offline-btn');
+                if (isOfflineMode) {
+                    btn.classList.add('active');
+                    btn.innerHTML = '🛑 Offline-Only Mode';
+                } else {
+                    btn.classList.remove('active');
+                    btn.innerHTML = '⚡ Cloud Sync Enabled';
+                }
+            }
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log("Service Worker Registered"))
+                    .catch(err => console.log("Service Worker Registration Failed", err));
+            }
+        </script>
     </body>
     </html>
     
