@@ -5,81 +5,299 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Available Tests and Solutions</title>
         <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding-top: 20px; background-color: #f4f4f4; color: #333; }
-            .container { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 15px rgba(0,0,0,0.1); }
-            h1 { color: #2c3e50; border-bottom: 2px solid #bdc3c7; padding-bottom: 10px; margin-top:0; text-align: center; font-size: 2em; }
-            ul { list-style-type: none; padding: 0; }
-            li {
-                background-color: #ffffff;
-                margin-bottom: 12px;
-                padding: 15px 20px;
-                border-radius: 6px;
-                border-left: 5px solid #bdc3c7; /* Default neutral grey border */
-                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-                transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-left-color 0.2s ease-in-out;
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                margin: 0;
+                padding: 40px 20px;
+                background-color: #f8fafc;
+                color: #1e293b;
             }
-            li.item-math {
-                border-left-color: #3498db; /* Blue for MATH */
+            .container {
+                max-width: 1200px;
+                margin: auto;
             }
-            li.item-reading {
-                border-left-color: #2ecc71; /* Green for READING */
+            header {
+                text-align: center;
+                margin-bottom: 40px;
             }
-            /* Add more .item-xxx classes here for other prefixes */
-
-            li:hover { /* General hover transform, will apply to all */
-                transform: translateY(-2px);
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            h1 {
+                color: #0f172a;
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+                font-weight: 800;
             }
-            li.item-math:hover {
-                border-left-color: #2980b9; /* Darker Blue on hover */
+            .subtitle {
+                color: #64748b;
+                font-size: 1.1rem;
             }
-            li.item-reading:hover {
-                border-left-color: #27ae60; /* Darker Green on hover */
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                gap: 24px;
             }
-            /* Hover for default items (if any) */
-            li:not(.item-math):not(.item-reading):hover {
-                border-left-color: #95a5a6; /* Darker grey for default items on hover */
+            .section-card {
+                background: white;
+                border-radius: 16px;
+                padding: 24px;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+                border-top: 6px solid var(--accent-color);
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                display: flex;
+                flex-direction: column;
             }
-
-            a {
+            .section-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            }
+            .section-title {
+                color: #0f172a;
+                font-size: 1.35rem;
+                font-weight: 700;
+                margin-top: 0;
+                margin-bottom: 16px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #e2e8f0;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .section-title::before {
+                content: "";
+                display: inline-block;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background-color: var(--accent-color);
+            }
+            .file-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .file-item a {
                 text-decoration: none;
-                color: #2c3e50;
+                color: #334155;
                 font-weight: 500;
-                font-size: 1.1em;
-                display: block;
-                width: 100%;
+                font-size: 0.95rem;
+                padding: 10px 12px;
+                border-radius: 8px;
+                background-color: #f1f5f9;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                transition: background-color 0.2s ease, color 0.2s ease;
             }
-            a:hover {
-                color: #3498db; /* Default link hover color, can be more specific if needed */
+            .file-item a:hover {
+                background-color: var(--accent-bg);
+                color: var(--accent-hover);
+            }
+            .file-name {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                max-width: 80%;
+            }
+            .badge {
+                font-size: 0.725rem;
+                font-weight: 700;
+                padding: 2px 8px;
+                border-radius: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.025em;
+            }
+            .badge-math {
+                background-color: #dbeafe;
+                color: #1e40af;
+            }
+            .badge-reading {
+                background-color: #dcfce7;
+                color: #166534;
             }
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>Available Tests and Solutions</h1>
-            <ul>
-      <li><a href="0_new_7_MATH_Exponents.html">0 New 7 Math Exponents</a></li>
-  <li><a href="0_new_7_MATH_OrderOfOperations_improved.html">0 New 7 Math Order Of Operations Improved</a></li>
-  <li><a href="0_new_7_MATH_SingleEquation.html">0 New 7 Math Single Equation</a></li>
-  <li><a href="0_new_7_MATH_systemEquations_noHack.html">0 New 7 Math System Equations No Hack</a></li>
-  <li><a href="6_MATH_1_EASY_OrderOfOperations_GEN5.html">6 Math 1 Easy Order Of Operations Gen5</a></li>
-  <li><a href="6_MATH_algebra2_1.html">6 Math Algebra2 1</a></li>
-  <li><a href="6_MATH_algebra3_1.html">6 Math Algebra3 1</a></li>
-  <li><a href="6_MATH_geometryBasicAll_2.html">6 Math Geometry Basic All 2</a></li>
-  <li><a href="6_MATH_geometryMasteryAll_1.html">6 Math Geometry Mastery All 1</a></li>
-  <li><a href="6_MATH_prob&amp;stats 1.html">6 Math Prob&amp;stats 1</a></li>
-  <li><a href="6_MATH_words2math_1.html">6 Math Words2math 1</a></li>
-  <li><a href="7_MATH_fast 1.html">7 Math Fast 1</a></li>
-  <li><a href="7_MATH_fast 2.html">7 Math Fast 2</a></li>
-  <li><a href="7_MATH_geometryMasteryAll.html">7 Math Geometry Mastery All</a></li>
-  <li><a href="7_MATH_words2math_1.html">7 Math Words2math 1</a></li>
-  <li><a href="7_gemini_ela100.html">7 Gemini Ela100</a></li>
-  <li><a href="7_gemini_science20_P1_PhysicalScience&amp;Biology.html">7 Gemini Science20 P1 Physical Science&amp; Biology</a></li>
-  <li><a href="7_gemini_science20_P2_Chemistry&amp;Physics.html">7 Gemini Science20 P2 Chemistry&amp; Physics</a></li>
-  <li><a href="later_new_7_DESMOS.html">Later New 7 Desmos</a></li>
-  <li><a href="later_new_7_RPN Calculator.html">Later New 7 Rpn calculator</a></li>
-
-            </ul>
+            <header>
+                <h1>Available Tests and Solutions</h1>
+                <p class="subtitle">A grouped view of available resources</p>
+            </header>
+            <div class="grid">
+            <div class="section-card" style="--accent-color: #3b82f6; --accent-hover: #1d4ed8; --accent-bg: #eff6ff;">
+            <h2 class="section-title">General</h2>
+            <ul class="file-list">
+                            <li class="file-item">
+                    <a href="0_new_7_MATH_Exponents.html">
+                        <span class="file-name">0 New 7 Math Exponents</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="0_new_7_MATH_OrderOfOperations_improved.html">
+                        <span class="file-name">0 New 7 Math Order Of Operations Improved</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="0_new_7_MATH_SingleEquation.html">
+                        <span class="file-name">0 New 7 Math Single Equation</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="0_new_7_MATH_systemEquations_noHack.html">
+                        <span class="file-name">0 New 7 Math System Equations No Hack</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="6_MATH_1_EASY_OrderOfOperations_GEN5.html">
+                        <span class="file-name">6 Math 1 Easy Order Of Operations Gen5</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="6_MATH_algebra2_1.html">
+                        <span class="file-name">6 Math Algebra2 1</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="6_MATH_algebra3_1.html">
+                        <span class="file-name">6 Math Algebra3 1</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="6_MATH_geometryBasicAll_2.html">
+                        <span class="file-name">6 Math Geometry Basic All 2</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="6_MATH_geometryMasteryAll_1.html">
+                        <span class="file-name">6 Math Geometry Mastery All 1</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="6_MATH_prob&amp;stats 1.html">
+                        <span class="file-name">6 Math Prob&amp;stats 1</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="6_MATH_words2math_1.html">
+                        <span class="file-name">6 Math Words2math 1</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="7_gemini_ela100.html">
+                        <span class="file-name">7 Gemini Ela100</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="7_gemini_science20_P1_PhysicalScience&amp;Biology.html">
+                        <span class="file-name">7 Gemini Science20 P1 Physical Science&amp; Biology</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="7_gemini_science20_P2_Chemistry&amp;Physics.html">
+                        <span class="file-name">7 Gemini Science20 P2 Chemistry&amp; Physics</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="7_MATH_fast 1.html">
+                        <span class="file-name">7 Math Fast 1</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="7_MATH_fast 2.html">
+                        <span class="file-name">7 Math Fast 2</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="7_MATH_geometryMasteryAll.html">
+                        <span class="file-name">7 Math Geometry Mastery All</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="7_MATH_words2math_1.html">
+                        <span class="file-name">7 Math Words2math 1</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="later_new_7_DESMOS.html">
+                        <span class="file-name">Later New 7 Desmos</span>
+                        
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="later_new_7_RPN Calculator.html">
+                        <span class="file-name">Later New 7 Rpn calculator</span>
+                        
+                    </a>
+                </li>
+        </ul>
+        </div>
+        <div class="section-card" style="--accent-color: #10b981; --accent-hover: #047857; --accent-bg: #ecfdf5;">
+            <h2 class="section-title">Reading</h2>
+            <ul class="file-list">
+                            <li class="file-item">
+                    <a href="reading/READING_Informational Text 1-10.html">
+                        <span class="file-name">Reading Informational text 1 10</span>
+                        <span class="badge badge-reading">Reading</span>
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="reading/READING_Informational Text 11-20 Science Edition.html">
+                        <span class="file-name">Reading Informational text 11 20 science edition</span>
+                        <span class="badge badge-reading">Reading</span>
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="reading/READING_Informational Text 21-30 Animal Edition.html">
+                        <span class="file-name">Reading Informational text 21 30 animal edition</span>
+                        <span class="badge badge-reading">Reading</span>
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="reading/READING_Literature 1-10.html">
+                        <span class="file-name">Reading Literature 1 10</span>
+                        <span class="badge badge-reading">Reading</span>
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="reading/READING_Literature 11-20.html">
+                        <span class="file-name">Reading Literature 11 20</span>
+                        <span class="badge badge-reading">Reading</span>
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="reading/READING_Literature 21-30.html">
+                        <span class="file-name">Reading Literature 21 30</span>
+                        <span class="badge badge-reading">Reading</span>
+                    </a>
+                </li>
+                        <li class="file-item">
+                    <a href="reading/test.html">
+                        <span class="file-name">Test</span>
+                        
+                    </a>
+                </li>
+        </ul>
+        </div>
+        </div>
         </div>
     </body>
     </html>
