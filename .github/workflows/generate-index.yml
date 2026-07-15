@@ -92,7 +92,8 @@ jobs:
                       section_files.append((f, url_path))
               
               if section_files:
-                  section_files.sort(key=lambda x: x[0].lower())
+                  # Sort with "math" files first (case-insensitive), then sort remaining alphabetically
+                  section_files.sort(key=lambda x: (not 'math' in x[0].lower(), x[0].lower()))
                   sections[section_key] = section_files
 
           if not sections:
@@ -118,12 +119,17 @@ jobs:
                       # Identify Prefix Badge Types
                       badge_html = ""
                       fn_lower = filename.lower()
-                      if fn_lower.startswith("math"):
-                          badge_html = '<span class="badge badge-math">Math</span>'
-                      elif fn_lower.startswith("reading"):
-                          badge_html = '<span class="badge badge-reading">Reading</span>'
+                      is_math = 'math' in fn_lower
                       
-                      list_items += f"""                        <li class="file-item">
+                      if is_math:
+                          badge_html = '<span class="badge badge-math">Math</span>'
+                          li_class = "file-item math-item"
+                      else:
+                          li_class = "file-item"
+                          if fn_lower.startswith("reading"):
+                              badge_html = '<span class="badge badge-reading">Reading</span>'
+                      
+                      list_items += f"""                        <li class="{li_class}">
                               <a href="{html.escape(filepath)}">
                                   <span class="file-name">{html.escape(friendly_name)}</span>
                                   {badge_html}
@@ -220,15 +226,30 @@ jobs:
                           padding: 10px 12px;
                           border-radius: 8px;
                           background-color: #f1f5f9;
+                          border-left: 4px solid #e2e8f0;
                           display: flex;
                           align-items: center;
                           justify-content: space-between;
-                          transition: background-color 0.2s ease, color 0.2s ease;
+                          transition: background-color 0.2s ease, color 0.2s ease, border-left-color 0.2s ease;
                       }}
                       .file-item a:hover {{
                           background-color: var(--accent-bg);
                           color: var(--accent-hover);
+                          border-left-color: var(--accent-color);
                       }}
+                      
+                      /* Math specific dynamic style shifts */
+                      .file-item.math-item a {{
+                          background-color: #ecfdf5;
+                          border-left: 4px solid #10b981;
+                          color: #065f46;
+                      }}
+                      .file-item.math-item a:hover {{
+                          background-color: #d1fae5;
+                          color: #047857;
+                          border-left-color: #059669;
+                      }}
+
                       .file-name {{
                           overflow: hidden;
                           text-overflow: ellipsis;
@@ -244,12 +265,12 @@ jobs:
                           letter-spacing: 0.025em;
                       }}
                       .badge-math {{
-                          background-color: #dbeafe;
-                          color: #1e40af;
+                          background-color: #d1fae5;
+                          color: #065f46;
                       }}
                       .badge-reading {{
-                          background-color: #dcfce7;
-                          color: #166534;
+                          background-color: #e0e7ff;
+                          color: #3730a3;
                       }}
                   </style>
               </head>
