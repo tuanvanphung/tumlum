@@ -31,8 +31,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Note: We omit "actions/setup-python" to save ~15 seconds. 
-      # "ubuntu-latest" already has python3 pre-installed.
       - name: Generate index.html
         run: |
           import os
@@ -140,9 +138,10 @@ jobs:
                   <meta name="viewport" content="width=device-width, initial-scale=1.0">
                   <title>{html.escape(INDEX_TITLE)}</title>
                   <style>
-                      @import url('https://fonts.googleapis.com/css2?family=Betania+Patmos+In+Guideline&display=swap');
+                      @import url('https://fonts.googleapis.com/css2?family=Betania+Patmos+In+GDL:wght@400&display=swap');
+                      
                       body {{
-                          font-family: 'Betania Patmos In Guideline', cursive, sans-serif;
+                          font-family: 'Betania Patmos In GDL', cursive, sans-serif;
                           margin: 0;
                           padding: 40px 20px;
                           background-color: #f8fafc;
@@ -261,7 +260,6 @@ jobs:
           print("index.html generated successfully.")
         shell: python
 
-      # Direct upload of Pages build artifacts, cutting out the second deployment pipeline
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
