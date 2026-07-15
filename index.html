@@ -34,12 +34,9 @@
             .section-card {
                 background: white;
                 border-radius: 16px;
-                padding: 24px;
                 box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
                 border-top: 6px solid var(--accent-color);
                 transition: transform 0.2s ease, box-shadow 0.2s ease;
-                display: flex;
-                flex-direction: column;
             }
             .section-card:hover {
                 transform: translateY(-4px);
@@ -49,13 +46,17 @@
                 color: #0f172a;
                 font-size: 1.35rem;
                 font-weight: 700;
-                margin-top: 0;
-                margin-bottom: 16px;
-                padding-bottom: 8px;
-                border-bottom: 1px solid #e2e8f0;
+                margin: 0;
+                padding: 20px 24px;
+                cursor: pointer;
+                user-select: none;
                 display: flex;
                 align-items: center;
-                gap: 8px;
+                gap: 12px;
+                list-style: none; /* Hide standard marker */
+            }
+            .section-title::-webkit-details-marker {
+                display: none; /* Hide standard marker on Webkit */
             }
             .section-title::before {
                 content: "";
@@ -64,14 +65,28 @@
                 height: 8px;
                 border-radius: 50%;
                 background-color: var(--accent-color);
+                flex-shrink: 0;
+            }
+            .section-title::after {
+                content: "▼";
+                margin-left: auto;
+                font-size: 0.8rem;
+                color: #64748b;
+                transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                flex-shrink: 0;
+            }
+            .section-card[open] .section-title::after {
+                transform: rotate(180deg);
             }
             .file-list {
                 list-style: none;
-                padding: 0;
+                padding: 0 24px 24px 24px;
                 margin: 0;
                 display: flex;
                 flex-direction: column;
                 gap: 10px;
+                border-top: 1px solid #e2e8f0;
+                padding-top: 20px;
             }
             .file-item a {
                 text-decoration: none;
@@ -135,8 +150,8 @@
                 <h1>School Materials</h1>
             </header>
             <div class="grid">
-            <div class="section-card" style="--accent-color: #3b82f6; --accent-hover: #1d4ed8; --accent-bg: #eff6ff;">
-            <h2 class="section-title">PRIORITY</h2>
+            <details class="section-card" style="--accent-color: #3b82f6; --accent-hover: #1d4ed8; --accent-bg: #eff6ff;">
+            <summary class="section-title">PRIORITY</summary>
             <ul class="file-list">
                             <li class="file-item math-item">
                     <a href="0_new_7_MATH_Exponents.html">
@@ -211,9 +226,9 @@
                     </a>
                 </li>
         </ul>
-        </div>
-        <div class="section-card" style="--accent-color: #10b981; --accent-hover: #047857; --accent-bg: #ecfdf5;">
-            <h2 class="section-title">6 Math</h2>
+        </details>
+        <details class="section-card" style="--accent-color: #10b981; --accent-hover: #047857; --accent-bg: #ecfdf5;">
+            <summary class="section-title">6 Math</summary>
             <ul class="file-list">
                             <li class="file-item math-item">
                     <a href="6_MATH/6_MATH_1_EASY_OrderOfOperations_GEN5.html">
@@ -258,9 +273,9 @@
                     </a>
                 </li>
         </ul>
-        </div>
-        <div class="section-card" style="--accent-color: #8b5cf6; --accent-hover: #6d28d9; --accent-bg: #f5f3ff;">
-            <h2 class="section-title">Calculators</h2>
+        </details>
+        <details class="section-card" style="--accent-color: #8b5cf6; --accent-hover: #6d28d9; --accent-bg: #f5f3ff;">
+            <summary class="section-title">Calculators</summary>
             <ul class="file-list">
                             <li class="file-item">
                     <a href="Calculators/DESMOS.html">
@@ -275,9 +290,9 @@
                     </a>
                 </li>
         </ul>
-        </div>
-        <div class="section-card" style="--accent-color: #f97316; --accent-hover: #c2410c; --accent-bg: #fff7ed;">
-            <h2 class="section-title">Reading</h2>
+        </details>
+        <details class="section-card" style="--accent-color: #f97316; --accent-hover: #c2410c; --accent-bg: #fff7ed;">
+            <summary class="section-title">Reading</summary>
             <ul class="file-list">
                             <li class="file-item">
                     <a href="reading/READING_Informational Text 1-10.html">
@@ -322,7 +337,7 @@
                     </a>
                 </li>
         </ul>
-        </div>
+        </details>
         </div>
         </div>
     </body>
