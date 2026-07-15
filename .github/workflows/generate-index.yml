@@ -4,8 +4,9 @@ on:
   push:
     branches:
       - main  # Or your default branch
-    paths:    # Only run if HTML files are changed, or this workflow file
+    paths:    # Only run if HTML files are changed (excluding index.html), or this workflow
       - '**.html'
+      - '!index.html'
       - '.github/workflows/generate-index.yml'
   workflow_dispatch: # Allows manual triggering
 
@@ -32,54 +33,109 @@ jobs:
           # --- Configuration ---
           INDEX_TITLE = "Available Tests and Solutions"
           EXCLUDE_FILES = ['index.html'] # Files to exclude (case-insensitive)
+          EXCLUDE_DIRS = ['.git', '.github', 'node_modules', 'venv', 'env'] # Folders to ignore
+          
+          # Color palettes used sequentially for section cards (vibrant primary accents)
+          COLOR_PALETTES = [
+              {"primary": "#3b82f6", "hover": "#1d4ed8", "bg": "#eff6ff"},  # Blue
+              {"primary": "#10b981", "hover": "#047857", "bg": "#ecfdf5"},  # Emerald Green
+              {"primary": "#8b5cf6", "hover": "#6d28d9", "bg": "#f5f3ff"},  # Purple
+              {"primary": "#f97316", "hover": "#c2410c", "bg": "#fff7ed"},  # Orange
+              {"primary": "#ec4899", "hover": "#be185d", "bg": "#fdf2f8"},  # Pink/Rose
+              {"primary": "#14b8a6", "hover": "#0f766e", "bg": "#f0fdfa"},  # Teal
+              {"primary": "#f59e0b", "hover": "#b45309", "bg": "#fffbeb"},  # Amber/Yellow
+              {"primary": "#ef4444", "hover": "#b91c1c", "bg": "#fef2f2"}   # Red
+          ]
           # --- End Configuration ---
 
           exclude_files_lower = [f.lower() for f in EXCLUDE_FILES]
 
-          files = []
-          for f_name in os.listdir('.'):
-              if os.path.isfile(f_name) and \
-                 f_name.endswith('.html') and \
-                 f_name.lower() not in exclude_files_lower:
-                  files.append(f_name)
-          files.sort()
+          def to_friendly_name(name_string):
+              """Helper to split camelCase, snake_case, or hyphenated names into friendly capitalized strings."""
+              base = os.path.splitext(name_string)[0]
+              parts = []
+              current_part = ""
+              for char_idx, char in enumerate(base):
+                  if char.isupper() and current_part and not current_part[-1].isspace() and not (char_idx > 0 and base[char_idx-1].isupper()):
+                      parts.append(current_part)
+                      current_part = char
+                  elif char in ['_', '-']:
+                      if current_part: parts.append(current_part)
+                      current_part = ""
+                  else:
+                      current_part += char
+              if current_part: parts.append(current_part)
 
-          if not files:
-              print(f"No HTML files found to index (excluding {', '.join(EXCLUDE_FILES)}).")
+              friendly = ' '.join(word.capitalize() for word in parts if word.strip()).strip()
+              return friendly if friendly else name_string
+
+          # Traversal & Grouping
+          sections = {}
+          for root, dirs, files in os.walk('.'):
+              # Prune directory search path in-place
+              dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS and not d.startswith('.')]
+              
+              rel_path = os.path.relpath(root, '.')
+              if rel_path == '.':
+                  section_key = "General"
+              else:
+                  # Generate breadcrumb heading for nested folders (e.g. math/algebra -> Math - Algebra)
+                  path_parts = rel_path.split(os.sep)
+                  section_key = " - ".join(to_friendly_name(part) for part in path_parts)
+
+              section_files = []
+              for f in files:
+                  if f.endswith('.html') and f.lower() not in exclude_files_lower:
+                      full_path = os.path.join(rel_path, f) if rel_path != '.' else f
+                      # Normalize slashes for browser path compat
+                      url_path = full_path.replace('\\', '/')
+                      section_files.append((f, url_path))
+              
+              if section_files:
+                  section_files.sort(key=lambda x: x[0].lower())
+                  sections[section_key] = section_files
+
+          if not sections:
+              print(f"No HTML files found to index.")
               index_content = f"""<!DOCTYPE html>
               <html lang="en">
               <head><meta charset="UTF-8"><title>{html.escape(INDEX_TITLE)}</title></head>
-              <body><h1>No other HTML files found.</h1></body></html>"""
+              <body><h1>No HTML files found.</h1></body></html>"""
           else:
-              list_items = ""
-              for filename in files:
-                  friendly_name_base = os.path.splitext(filename)[0]
-                  friendly_name_parts = []
-                  current_part = ""
-                  for char_idx, char in enumerate(friendly_name_base):
-                      if char.isupper() and current_part and not current_part[-1].isspace() and not (char_idx > 0 and friendly_name_base[char_idx-1].isupper()):
-                          friendly_name_parts.append(current_part)
-                          current_part = char
-                      elif char in ['_', '-']:
-                          if current_part: friendly_name_parts.append(current_part)
-                          current_part = ""
-                      else:
-                          current_part += char
-                  if current_part: friendly_name_parts.append(current_part)
+              # Prioritize General section first, then sort other directories alphabetically
+              sorted_section_keys = sorted([k for k in sections.keys() if k != "General"])
+              if "General" in sections:
+                  sorted_section_keys.insert(0, "General")
 
-                  friendly_name = ' '.join(word.capitalize() for word in friendly_name_parts if word.strip()).strip()
-                  if not friendly_name: friendly_name = filename
-
-                  # Determine list item class based on filename prefix
-                  li_class_str = ""
-                  fn_lower = filename.lower()
-                  if fn_lower.startswith("math"):
-                      li_class_str = ' class="item-math"'
-                  elif fn_lower.startswith("reading"):
-                      li_class_str = ' class="item-reading"'
-                  # Add more elif conditions here for other prefixes and classes
-
-                  list_items += f'  <li{li_class_str}><a href="{html.escape(filename)}">{html.escape(friendly_name)}</a></li>\n'
+              cards_html = ""
+              for idx, sec_name in enumerate(sorted_section_keys):
+                  palette = COLOR_PALETTES[idx % len(COLOR_PALETTES)]
+                  
+                  list_items = ""
+                  for filename, filepath in sections[sec_name]:
+                      friendly_name = to_friendly_name(filename)
+                      
+                      # Identify Prefix Badge Types
+                      badge_html = ""
+                      fn_lower = filename.lower()
+                      if fn_lower.startswith("math"):
+                          badge_html = '<span class="badge badge-math">Math</span>'
+                      elif fn_lower.startswith("reading"):
+                          badge_html = '<span class="badge badge-reading">Reading</span>'
+                      
+                      list_items += f"""                        <li class="file-item">
+                              <a href="{html.escape(filepath)}">
+                                  <span class="file-name">{html.escape(friendly_name)}</span>
+                                  {badge_html}
+                              </a>
+                          </li>\n"""
+                  
+                  # Render Section Card using Custom Properties for Accent Colors
+                  cards_html += f"""        <div class="section-card" style="--accent-color: {palette['primary']}; --accent-hover: {palette['hover']}; --accent-bg: {palette['bg']};">
+                      <h2 class="section-title">{html.escape(sec_name)}</h2>
+                      <ul class="file-list">
+              {list_items}        </ul>
+                  </div>\n"""
 
               index_content = f"""<!DOCTYPE html>
               <html lang="en">
@@ -88,61 +144,127 @@ jobs:
                   <meta name="viewport" content="width=device-width, initial-scale=1.0">
                   <title>{html.escape(INDEX_TITLE)}</title>
                   <style>
-                      body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding-top: 20px; background-color: #f4f4f4; color: #333; }}
-                      .container {{ max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 15px rgba(0,0,0,0.1); }}
-                      h1 {{ color: #2c3e50; border-bottom: 2px solid #bdc3c7; padding-bottom: 10px; margin-top:0; text-align: center; font-size: 2em; }}
-                      ul {{ list-style-type: none; padding: 0; }}
-                      li {{
-                          background-color: #ffffff;
-                          margin-bottom: 12px;
-                          padding: 15px 20px;
-                          border-radius: 6px;
-                          border-left: 5px solid #bdc3c7; /* Default neutral grey border */
-                          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-                          transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-left-color 0.2s ease-in-out;
+                      body {{
+                          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                          margin: 0;
+                          padding: 40px 20px;
+                          background-color: #f8fafc;
+                          color: #1e293b;
                       }}
-                      li.item-math {{
-                          border-left-color: #3498db; /* Blue for MATH */
+                      .container {{
+                          max-width: 1200px;
+                          margin: auto;
                       }}
-                      li.item-reading {{
-                          border-left-color: #2ecc71; /* Green for READING */
+                      header {{
+                          text-align: center;
+                          margin-bottom: 40px;
                       }}
-                      /* Add more .item-xxx classes here for other prefixes */
-
-                      li:hover {{ /* General hover transform, will apply to all */
-                          transform: translateY(-2px);
-                          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                      h1 {{
+                          color: #0f172a;
+                          font-size: 2.5rem;
+                          margin-bottom: 10px;
+                          font-weight: 800;
                       }}
-                      li.item-math:hover {{
-                          border-left-color: #2980b9; /* Darker Blue on hover */
+                      .subtitle {{
+                          color: #64748b;
+                          font-size: 1.1rem;
                       }}
-                      li.item-reading:hover {{
-                          border-left-color: #27ae60; /* Darker Green on hover */
+                      .grid {{
+                          display: grid;
+                          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                          gap: 24px;
                       }}
-                      /* Hover for default items (if any) */
-                      li:not(.item-math):not(.item-reading):hover {{
-                          border-left-color: #95a5a6; /* Darker grey for default items on hover */
+                      .section-card {{
+                          background: white;
+                          border-radius: 16px;
+                          padding: 24px;
+                          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+                          border-top: 6px solid var(--accent-color);
+                          transition: transform 0.2s ease, box-shadow 0.2s ease;
+                          display: flex;
+                          flex-direction: column;
                       }}
-
-                      a {{
+                      .section-card:hover {{
+                          transform: translateY(-4px);
+                          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+                      }}
+                      .section-title {{
+                          color: #0f172a;
+                          font-size: 1.35rem;
+                          font-weight: 700;
+                          margin-top: 0;
+                          margin-bottom: 16px;
+                          padding-bottom: 8px;
+                          border-bottom: 1px solid #e2e8f0;
+                          display: flex;
+                          align-items: center;
+                          gap: 8px;
+                      }}
+                      .section-title::before {{
+                          content: "";
+                          display: inline-block;
+                          width: 8px;
+                          height: 8px;
+                          border-radius: 50%;
+                          background-color: var(--accent-color);
+                      }}
+                      .file-list {{
+                          list-style: none;
+                          padding: 0;
+                          margin: 0;
+                          display: flex;
+                          flex-direction: column;
+                          gap: 10px;
+                      }}
+                      .file-item a {{
                           text-decoration: none;
-                          color: #2c3e50;
+                          color: #334155;
                           font-weight: 500;
-                          font-size: 1.1em;
-                          display: block;
-                          width: 100%;
+                          font-size: 0.95rem;
+                          padding: 10px 12px;
+                          border-radius: 8px;
+                          background-color: #f1f5f9;
+                          display: flex;
+                          align-items: center;
+                          justify-content: space-between;
+                          transition: background-color 0.2s ease, color 0.2s ease;
                       }}
-                      a:hover {{
-                          color: #3498db; /* Default link hover color, can be more specific if needed */
+                      .file-item a:hover {{
+                          background-color: var(--accent-bg);
+                          color: var(--accent-hover);
+                      }}
+                      .file-name {{
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          white-space: nowrap;
+                          max-width: 80%;
+                      }}
+                      .badge {{
+                          font-size: 0.725rem;
+                          font-weight: 700;
+                          padding: 2px 8px;
+                          border-radius: 12px;
+                          text-transform: uppercase;
+                          letter-spacing: 0.025em;
+                      }}
+                      .badge-math {{
+                          background-color: #dbeafe;
+                          color: #1e40af;
+                      }}
+                      .badge-reading {{
+                          background-color: #dcfce7;
+                          color: #166534;
                       }}
                   </style>
               </head>
               <body>
                   <div class="container">
-                      <h1>{html.escape(INDEX_TITLE)}</h1>
-                      <ul>
-              {list_items}
-                      </ul>
+                      <header>
+                          <h1>{html.escape(INDEX_TITLE)}</h1>
+                          <p class="subtitle">A grouped view of available resources</p>
+                      </header>
+                      <div class="grid">
+              {cards_html}        </div>
                   </div>
               </body>
               </html>
@@ -150,7 +272,7 @@ jobs:
 
           with open('index.html', 'w', encoding='utf-8') as f:
               f.write(index_content)
-          print("index.html generated successfully with conditional styling.")
+          print("index.html with dynamic nested directory sections generated.")
         shell: python
 
       - name: Commit and push if changes
@@ -159,7 +281,7 @@ jobs:
           git config --local user.name "GitHub Action"
           git add index.html
           if ! git diff --staged --quiet; then
-            git commit -m "Automated: Update index.html (conditional prefix styling)"
+            git commit -m "Automated: Update index.html (dynamic nested sections and dynamic styling)"
             git push
           else
             echo "No changes to index.html. Nothing to commit."
