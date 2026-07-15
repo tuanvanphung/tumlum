@@ -3,18 +3,18 @@ name: Generate Index HTML
 on:
   push:
     branches:
-      - main  # Or your default branch
-    paths:    # Only run if HTML files are changed, or this workflow file
+      - main
+    paths:    
       - '**.html'
-      - '!index.html' # Exclude to prevent infinite loops
+      - '!index.html'
       - '.github/workflows/generate-index.yml'
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch: 
 
 jobs:
   build_index:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Important: Allows the action to write to the repository
+      contents: write 
 
     steps:
       - name: Checkout repository
@@ -88,7 +88,7 @@ jobs:
                       url_path = full_path.replace('\\', '/')
                       section_files.append((f, url_path))
                       
-                      # Append path for the Service Worker
+                      # Append path with root prefix for reliable Service Worker match
                       all_filepaths.append("/" + url_path)
               
               if section_files:
@@ -179,27 +179,32 @@ jobs:
                       h1:hover {{ transform: rotate(1deg) scale(1.05); }}
                       
                       .offline-toggle-container {{ text-align: right; margin-bottom: 20px; }}
+                      
+                      /* Playful Academic Offline Toggle */
                       .offline-btn {{
                           font-family: 'Geo', sans-serif;
                           font-size: 0.9rem;
                           font-weight: 700;
-                          padding: 8px 12px;
+                          padding: 8px 16px;
                           border-radius: 4px;
                           text-transform: uppercase;
                           letter-spacing: 0.05em;
                           cursor: pointer;
                           border: 2px solid #1e293b;
-                          box-shadow: 2px 2px 0px #1e293b;
-                          background-color: white;
-                          color: #1e293b;
-                          display: inline-flex;
-                          align-items: center;
-                          gap: 8px;
                           transition: all 0.1s ease;
                       }}
-                      .offline-btn:hover {{ transform: translate(-1px, -1px); box-shadow: 3px 3px 0px #1e293b; }}
-                      .offline-btn.active {{
-                          background-color: #fca5a5; 
+                      .offline-btn.online {{
+                          background-color: #bbf7d0; /* Green highlighter */
+                          color: #166534;
+                          box-shadow: 2px 2px 0px #1e293b;
+                      }}
+                      .offline-btn.online:hover {{
+                          transform: translate(-1px, -1px);
+                          box-shadow: 3px 3px 0px #1e293b;
+                      }}
+                      .offline-btn.offline {{
+                          background-color: #fecaca; /* Red highlighter */
+                          color: #991b1b;
                           box-shadow: 1px 1px 0px #1e293b;
                           transform: translate(1px, 1px);
                       }}
@@ -274,7 +279,7 @@ jobs:
                       
                       <!-- Offline Button UI -->
                       <div class="offline-toggle-container">
-                          <button id="offline-btn" class="offline-btn" onclick="toggleOfflineMode()">⚡ Cloud Sync Enabled</button>
+                          <button id="offline-btn" class="offline-btn" onclick="toggleOfflineMode()">ONLINE</button>
                       </div>
 
                       <div class="grid">{cards_html}</div>
@@ -293,11 +298,11 @@ jobs:
                       function updateToggleButtonUI() {{
                           const btn = document.getElementById('offline-btn');
                           if (isOfflineMode) {{
-                              btn.classList.add('active');
-                              btn.innerHTML = '🛑 Offline-Only Mode';
+                              btn.className = 'offline-btn offline';
+                              btn.innerHTML = '🛑 OFFLINE';
                           }} else {{
-                              btn.classList.remove('active');
-                              btn.innerHTML = '⚡ Cloud Sync Enabled';
+                              btn.className = 'offline-btn online';
+                              btn.innerHTML = '⚡ ONLINE';
                           }}
                       }}
 
@@ -316,14 +321,20 @@ jobs:
               f.write(index_content)
           print("index.html generated successfully.")
 
-          # 2. Write the sw.js cache file
+          # 2. Write the sw.js cache file with robust independent array mapping
           sw_content = f"""const CACHE_NAME = 'tryhardz-v1';
           const ASSETS = {json.dumps(all_filepaths)};
 
           self.addEventListener('install', event => {{
               event.waitUntil(
                   caches.open(CACHE_NAME).then(cache => {{
-                      return cache.addAll(ASSETS);
+                      return Promise.all(
+                          ASSETS.map(url => {{
+                              return cache.add(url).catch(err => {{
+                                  console.warn('Failed to cache during installation:', url, err);
+                              }});
+                          }})
+                      );
                   }})
               );
           }});
@@ -332,7 +343,16 @@ jobs:
               if (event.request.method !== 'GET') return;
               
               event.respondWith(
-                  fetch(event.request).catch(() => {{
+                  fetch(event.request).then(response => {{
+                      // Cache files dynamically on the fly to protect against any build inconsistencies
+                      if (response.status === 200) {{
+                          const responseClone = response.clone();
+                          caches.open(CACHE_NAME).then(cache => {{
+                              cache.put(event.request, responseClone);
+                          }});
+                      }}
+                      return response;
+                  }}).catch(() => {{
                       return caches.match(event.request);
                   }})
               );
