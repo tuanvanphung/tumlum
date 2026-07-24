@@ -1,5 +1,3 @@
---- START OF FILE Paste ---
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -259,7 +257,7 @@
         }
 
         // =============================================================
-        // PROBLEM TEMPLATES (17 Unique Templates)
+        // PROBLEM TEMPLATES (11 Unique Templates)
         // =============================================================
         const problemTemplates = [
             function t1_basicPEMDAS() {
@@ -307,41 +305,6 @@
                 let v3 = this.checkInt(op1 === '+' ? addFrac(v_pow1, v_pow2) : subFrac(v_pow1, v_pow2));
                 this.finalAnswer = this.checkInt(addFrac(v3, B));
                 this.problemString = `-${formatNumber(A_base)}^{${exp}} ${op1} \\left(-${formatNumber(A_base)}\\right)^{${exp}} + ${formatNumber(B)}`;
-            },
-            function t4_exponentFracDec() {
-                this.tag = 'Fraction/Decimal Exponents';
-                const f_base = simplifyFraction(getRandomInt(1, 4), getRandomItem([2, 3]));
-                const e1 = getRandomItem([2, 3]);
-                const d_base = toFraction(getRandomItem(["0.1", "0.2", "0.5", "1.5"]));
-                const e2 = getRandomItem([2, 3]);
-                const C = generateOperand({min: -5, max: 5, forceInteger: true});
-                const op1 = getRandomItem(['+', '-']); const op2 = getRandomItem(['+', '-']);
-                
-                let v1 = this.checkInt(powFrac(f_base, e1));
-                let v2 = this.checkInt(powFrac(d_base, e2));
-                let v3 = this.checkInt(op1 === '+' ? addFrac(v1, v2) : subFrac(v1, v2));
-                this.finalAnswer = this.checkInt(op2 === '+' ? addFrac(v3, C) : subFrac(v3, C));
-                this.problemString = `\\left(${formatNumber(f_base)}\\right)^{${e1}} ${op1} \\left(${formatNumber(d_base, true)}\\right)^{${e2}} ${op2} ${formatNumber(C)}`;
-            },
-            function t5_distribution() {
-                this.tag = 'Implicit Multiplication';
-                const A = generateOperand({min: 2, max: 5, forceInteger: true, nonZero: true});
-                const B = generateOperand({min: 1, max: 5, forceInteger: true});
-                const C = generateOperand({min: 1, max: 5, forceInteger: true});
-                const D = generateOperand({min: 2, max: 5, forceInteger: true, nonZero: true});
-                const E = generateOperand({min: 1, max: 5, forceInteger: true});
-                const F = generateOperand({min: 1, max: 5, forceInteger: true});
-                const G = generateOperand({min: -5, max: 5, forceInteger: true});
-                const o1 = getRandomItem(['+', '-']); const o2 = getRandomItem(['+', '-']);
-                const o3 = getRandomItem(['+', '-']); const o4 = getRandomItem(['+', '-']);
-                
-                let p1 = this.checkInt(o1 === '+' ? addFrac(B, C) : subFrac(B, C));
-                let p2 = this.checkInt(o2 === '+' ? addFrac(E, F) : subFrac(E, F));
-                let d1 = this.checkInt(mulFrac(A, p1));
-                let d2 = this.checkInt(mulFrac(D, p2));
-                let v5 = this.checkInt(o3 === '+' ? addFrac(d1, d2) : subFrac(d1, d2));
-                this.finalAnswer = this.checkInt(o4 === '+' ? addFrac(v5, G) : subFrac(v5, G));
-                this.problemString = `${formatNumber(A)}\\left(${formatNumber(B)} ${o1} ${formatNumber(C)}\\right) ${o3} ${formatNumber(D)}\\left(${formatNumber(E)} ${o2} ${formatNumber(F)}\\right) ${o4} ${formatNumber(G)}`;
             },
             function t6_fractionBarGrouping() {
                 this.tag = 'Fraction Bar Grouping';
@@ -448,72 +411,6 @@
                 let vm = this.checkInt(mulFrac(mixed2, C));
                 this.finalAnswer = this.checkInt(op1 === '+' ? addFrac(mixed1, vm) : subFrac(mixed1, vm));
                 this.problemString = `${w1}\\frac{${frac1.num}}{${frac1.den}} ${op1} ${w2}\\frac{${frac2.num}}{${frac2.den}} \\times ${formatNumber(C)}`;
-            },
-            function t13_absValFracExp() { 
-                this.tag = 'Abs Value & Exponents';
-                const A_f = generateOperand({forceFraction: true}); const B_i = generateOperand({min: 1, max: 5, nonZero: true}); 
-                const C = generateOperand({min: -4, max: 4}); const D_n = generateOperand({min: -7, max: -1});
-                let {base: E_b, exp: E_e} = generatePowerOperands(); if (E_b.num === 0 && E_e < 0) E_e = 1;
-                
-                let vdiv = this.checkInt(divFrac(A_f, B_i));
-                let vins = this.checkInt(subFrac(vdiv, C));
-                let vabs = this.checkInt(absFrac(vins));
-                let vpow = this.checkInt(powFrac(E_b, E_e));
-                let vpar = this.checkInt(addFrac(D_n, vpow));
-                this.finalAnswer = this.checkInt(mulFrac(vabs, vpar));
-                this.problemString = `\\left|${formatNumber(A_f, true)} \\div ${formatNumber(B_i, true)} - ${formatNumber(C, true)}\\right| \\times \\left(${formatNumber(D_n, true)} + ${formatBaseForExponent(E_b, true)}^{${E_e}}\\right)`;
-            },
-            function t14_complexFraction() { 
-                this.tag = 'Complex Fractions';
-                let {base: A, exp: eA} = generatePowerOperands(); if (A.num === 0 && eA < 0) eA = 1;
-                const B_f = generateOperand({forceFraction: true}); const C_f = generateOperand({forceFraction: true, nonZero: true}); 
-                let {base: D, exp: eD} = generatePowerOperands(); if (D.num === 0 && eD < 0) eD = 1;
-                const E_n = generateOperand({min:-4, max:-1});
-                
-                let vAe = this.checkInt(powFrac(A, eA));
-                let vNum = this.checkInt(addFrac(vAe, B_f));
-                let vDe = this.checkInt(powFrac(D, eD));
-                let vDen = this.checkInt(subFrac(C_f, vDe));
-                if (vDen.num === 0) throw new Error("Zero denominator - regenerate");
-                let vMain = this.checkInt(divFrac(vNum, vDen));
-                this.finalAnswer = this.checkInt(mulFrac(vMain, E_n));
-                this.problemString = `\\left( \\frac{${formatBaseForExponent(A, true)}^{${eA}} + ${formatNumber(B_f, true)}}{${formatNumber(C_f, true)} - ${formatBaseForExponent(D, true)}^{${eD}}} \\right) \\times ${formatNumber(E_n, true)}`;
-            },
-            function t15_nestedBrackets() { 
-                this.tag = 'Nested Brackets';
-                const a = generateOperand({min: -5, max: 5}); const b = generateOperand({min: -3, max: 3, nonZero: true});
-                const c = generateOperand({min: 1, max: 5}); 
-                let {base: d, exp: ed} = generatePowerOperands(); if (d.num === 0 && ed < 0) ed = 1;
-                const o1 = getRandomItem(['+', '-']); const o2 = getRandomItem(['*', '/']); const o3 = getRandomItem(['+', '-']);
-                
-                let vdp = this.checkInt(powFrac(d, ed));
-                if (o2 === '/' && vdp.num === 0) throw new Error("Zero divisor - regenerate");
-                let v2 = this.checkInt(o2 === '*' ? mulFrac(c, vdp) : divFrac(c, vdp));
-                let v3 = this.checkInt(o1 === '+' ? addFrac(b, v2) : subFrac(b, v2));
-                this.finalAnswer = this.checkInt(o3 === '+' ? addFrac(a, v3) : subFrac(a, v3));
-                this.problemString = `\\left\\{ ${formatNumber(a, true)} ${o3} \\left[ ${formatNumber(b, true)} ${o1} \\left( ${formatNumber(c, true)} ${o2 === '/' ? '\\div' : '\\times'} ${formatBaseForExponent(d, true)}^{${ed}} \\right) \\right] \\right\\}`;
-            },
-            function t16_absValSqrtFraction() {
-                this.tag = 'Abs Val, Roots, & Fractions';
-                const A = generateOperand({min: -3, max: 3, nonZero: true});
-                let {base: B, exp: e1} = generatePowerOperands(); if (B.num === 0 && e1 < 0) e1 = 1;
-                const C_sq = toFraction(Math.pow(getRandomItem([1,2,3,4,5]), 2));
-                const D_f = generateOperand({forceFraction: true}); 
-                const E = generateOperand({min: -3, max: 3}); const F = generateOperand({min: -3, max: 3});
-                let { exp: e2 } = generatePowerOperands();
-                
-                let vBe = this.checkInt(powFrac(B, e1));
-                let vABe = this.checkInt(mulFrac(A, vBe));
-                let vSqrt = this.checkInt(powFrac(C_sq, 0.5));
-                let vNum = this.checkInt(absFrac(subFrac(vABe, vSqrt)));
-                
-                let vEF = this.checkInt(subFrac(E, F));
-                if (vEF.num === 0 && e2 < 0) e2 = 1;
-                let vDenom = this.checkInt(addFrac(D_f, powFrac(vEF, e2)));
-                if (vDenom.num === 0) throw new Error("Zero denominator - regenerate");
-                
-                this.finalAnswer = this.checkInt(divFrac(vNum, vDenom));
-                this.problemString = `\\frac{\\left| ${formatNumber(A, true)} \\times ${formatBaseForExponent(B, true)}^{${e1}} - \\sqrt{${C_sq.num}} \\right|}{${formatNumber(D_f, true)} + \\left(${formatNumber(E, true)} - ${formatNumber(F, true)}\\right)^{${e2}}}`;
             },
             function t17_deepNesting() {
                 this.tag = 'Ultimate Deep Nesting';
@@ -706,5 +603,6 @@
         render();
     })();
     </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"9b5b8cd6eb5e46f488651bbf17ed2070"}' crossorigin="anonymous"></script>
 </body>
 </html>
