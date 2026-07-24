@@ -1,3 +1,5 @@
+--- START OF FILE Paste ---
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,14 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mastery Test: Order of Operations</title>
     
-    <!-- MathJax Configuration and Script -->
+    <!-- MathJax Configuration and Script with Offline Fallback -->
     <script>
       MathJax = {
         tex: { inlineMath: [['\\(', '\\)']] },
         chtml: { scale: 1.1 } 
       };
     </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" onerror="console.warn('MathJax script failed to load. Operating in offline/plaintext mode.');"></script>
 
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f0f2f5; color: #333; }
@@ -76,13 +78,13 @@
         const problemCountEl = document.getElementById('problemCount');
         let currentProblems = [];
 
-        // State lock to prevent duplicate submissions or DOM modifications [2]
+        // State lock to prevent duplicate submissions or DOM modifications
         let isSubmitted = false;
 
         const EPSILON = 0.00001; 
         const MAX_INTERMEDIATE_VALUE = 99999; 
 
-        // Private encryption key and cipher utility [2]
+        // Private encryption key and cipher utility
         const CIPHER_KEY = "OrderOfOps_SecureKey_9812";
 
         function encrypt(str) {
@@ -100,6 +102,14 @@
                 xor += String.fromCharCode(decoded.charCodeAt(i) ^ CIPHER_KEY.charCodeAt(i % CIPHER_KEY.length));
             }
             return xor;
+        }
+
+        // Safe Typeset Helper for MathJax / Offline Fallback
+        function typesetMath(elements) {
+            if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                return window.MathJax.typesetPromise(elements).catch((err) => console.warn('MathJax typesetting warning:', err));
+            }
+            return Promise.resolve();
         }
 
         // =============================================================
@@ -167,8 +177,11 @@
             if (exp < 0) result = divFrac(toFraction(1), result);
             return result;
         }
-        function absFrac(f) { 
-            return { ...f, num: Math.abs(f.num), value: Math.abs(f.value || 0) }; 
+        function absFrac(f) {
+            const num = Math.abs(f.num);
+            const den = f.den;
+            const value = den === 0 ? Math.abs(f.value) : num / den;
+            return { num, den, isFraction: true, value };
         }
 
         // =============================================================
@@ -227,7 +240,7 @@
                 value = toFraction(`${intPart}.${decDigit}`); 
             } else { 
                 let den = getRandomItem([2, 3, 4]);
-                let num = getRandomInt(1, den * 1.5) * (Math.random() < 0.4 ? -1 : 1);
+                let num = getRandomInt(1, Math.floor(den * 1.5)) * (Math.random() < 0.4 ? -1 : 1);
                 value = simplifyFraction(num, den);
             }
             
@@ -246,7 +259,7 @@
         }
 
         // =============================================================
-        // PROBLEM TEMPLATES (17 Unique Templates - Math Only)
+        // PROBLEM TEMPLATES (17 Unique Templates)
         // =============================================================
         const problemTemplates = [
             function t1_basicPEMDAS() {
@@ -341,7 +354,7 @@
                 
                 let vn = this.checkInt(on === '+' ? addFrac(A, B) : (on === '-' ? subFrac(A, B) : mulFrac(A, B)));
                 let vd = this.checkInt(od === '+' ? addFrac(C, D) : subFrac(C, D));
-                if(vd.num === 0) vd = toFraction(1); // Anti-crash
+                if (vd.num === 0) throw new Error("Zero denominator - regenerate");
                 let vf = this.checkInt(divFrac(vn, vd));
                 this.finalAnswer = this.checkInt(of === '+' ? addFrac(vf, E) : subFrac(vf, E));
                 this.problemString = `\\frac{${formatNumber(A)} ${on === '*' ? '\\times' : on} ${formatNumber(B)}}{${formatNumber(C)} ${od} ${formatNumber(D)}} ${of} ${formatNumber(E)}`;
@@ -461,7 +474,7 @@
                 let vNum = this.checkInt(addFrac(vAe, B_f));
                 let vDe = this.checkInt(powFrac(D, eD));
                 let vDen = this.checkInt(subFrac(C_f, vDe));
-                if(vDen.num===0) vDen = toFraction(1);
+                if (vDen.num === 0) throw new Error("Zero denominator - regenerate");
                 let vMain = this.checkInt(divFrac(vNum, vDen));
                 this.finalAnswer = this.checkInt(mulFrac(vMain, E_n));
                 this.problemString = `\\left( \\frac{${formatBaseForExponent(A, true)}^{${eA}} + ${formatNumber(B_f, true)}}{${formatNumber(C_f, true)} - ${formatBaseForExponent(D, true)}^{${eD}}} \\right) \\times ${formatNumber(E_n, true)}`;
@@ -474,6 +487,7 @@
                 const o1 = getRandomItem(['+', '-']); const o2 = getRandomItem(['*', '/']); const o3 = getRandomItem(['+', '-']);
                 
                 let vdp = this.checkInt(powFrac(d, ed));
+                if (o2 === '/' && vdp.num === 0) throw new Error("Zero divisor - regenerate");
                 let v2 = this.checkInt(o2 === '*' ? mulFrac(c, vdp) : divFrac(c, vdp));
                 let v3 = this.checkInt(o1 === '+' ? addFrac(b, v2) : subFrac(b, v2));
                 this.finalAnswer = this.checkInt(o3 === '+' ? addFrac(a, v3) : subFrac(a, v3));
@@ -496,7 +510,7 @@
                 let vEF = this.checkInt(subFrac(E, F));
                 if (vEF.num === 0 && e2 < 0) e2 = 1;
                 let vDenom = this.checkInt(addFrac(D_f, powFrac(vEF, e2)));
-                if(vDenom.num===0) vDenom = toFraction(1);
+                if (vDenom.num === 0) throw new Error("Zero denominator - regenerate");
                 
                 this.finalAnswer = this.checkInt(divFrac(vNum, vDenom));
                 this.problemString = `\\frac{\\left| ${formatNumber(A, true)} \\times ${formatBaseForExponent(B, true)}^{${e1}} - \\sqrt{${C_sq.num}} \\right|}{${formatNumber(D_f, true)} + \\left(${formatNumber(E, true)} - ${formatNumber(F, true)}\\right)^{${e2}}}`;
@@ -508,7 +522,7 @@
                 const K = generateOperand({min: -5, max: 5}); const en = getRandomInt(-2, -1); 
                 
                 let vDiv = this.checkInt(subFrac(J, absFrac(K)));
-                if(vDiv.num===0) vDiv=toFraction(1);
+                if (vDiv.num === 0) throw new Error("Zero divisor - regenerate");
                 let vBrExp = this.checkInt(powFrac(divFrac(I, vDiv), en));
                 let vBraces = this.checkInt(addFrac(H, vBrExp));
                 this.finalAnswer = this.checkInt(subFrac(G, vBraces));
@@ -519,8 +533,10 @@
         // =============================================================
         // PROBLEM GENERATION & UI
         // =============================================================
+        // ENHANCEMENT 1: Robust, space-insensitive fraction and numeric parser
         function parseUserFractionInput(inputStr) {
-            inputStr = String(inputStr).trim().toLowerCase(); 
+            inputStr = String(inputStr).replace(/\s+/g, '').toLowerCase(); 
+            if (inputStr === "") return NaN;
             if (inputStr === "infinity" || inputStr === "inf") return Infinity;
             if (inputStr === "-infinity" || inputStr === "-inf") return -Infinity;
             if (inputStr === "nan") return NaN;
@@ -538,24 +554,24 @@
         }
 
         function generateProblem(templateFn) { 
-            let ctx = { 
-                problemString: '', finalAnswer: undefined, tag: '',
-                checkInt: function(value) {
-                    if (!value || typeof value.num === 'undefined') throw new Error("Malformed math");
-                    if (value.error || isValueTooLarge(value)) throw new Error("Safety limit reached");
-                    return value;
-                }
-            };
             let attemptLimit = 50; 
             while (attemptLimit > 0) {
+                let ctx = { 
+                    problemString: '', finalAnswer: undefined, tag: '',
+                    checkInt: function(value) {
+                        if (!value || typeof value.num === 'undefined') throw new Error("Malformed math");
+                        if (value.error || isValueTooLarge(value)) throw new Error("Safety limit reached");
+                        return value;
+                    }
+                };
                 try {
                     templateFn.call(ctx);
-                    if (ctx.finalAnswer && ctx.finalAnswer.value !== undefined) { 
+                    if (ctx.finalAnswer && ctx.finalAnswer.value !== undefined && Number.isFinite(ctx.finalAnswer.value) && ctx.problemString) { 
                         return { problemHTML: ctx.problemString, tag: ctx.tag, answer: ctx.finalAnswer };
                     }
+                    attemptLimit--;
                 } catch (e) { attemptLimit--; }
             }
-            // Fallback if random gen gets totally stuck
             return { problemHTML: "1 + 1", tag: "Fallback", answer: toFraction(2) }; 
         }
 
@@ -568,7 +584,6 @@
             for (let i = 0; i < problemTemplates.length; i++) {
                 const p = generateProblem(problemTemplates[i]);
                 
-                // Store encrypted version of the correct answer details [2]
                 const encrypted = encrypt(JSON.stringify(p.answer));
                 currentProblems.push({ id: i + 1, encrypted: encrypted });
                 
@@ -587,13 +602,12 @@
                         </div>
                         <div class="input-hint">Enter your answer as an integer, decimal, or fraction (e.g., -3/4)</div>
                     </div>
-                    <div class="solution-area" id="sol-${i + 1}"></div>`; // Render blank
+                    <div class="solution-area" id="sol-${i + 1}"></div>`;
                 container.appendChild(div);
             }
 
-            if (typeof MathJax !== 'undefined') {
-                MathJax.typesetPromise([container]).catch((err) => console.log(err.message));
-            }
+            // ENHANCEMENT 2: Safe, fallback-protected typesetting call
+            typesetMath([container]);
         }
 
         function getTimestamp() {
@@ -604,19 +618,16 @@
         }
 
         function check() {
-            // Guard clause to lock inputs and submission on submit [2]
             if (isSubmitted) return;
             isSubmitted = true;
 
             let score = 0;
-            // Set temporary class to prevent visible flashing of answers on screen during typesetting
             document.body.classList.add('typesetting-mode');
 
             currentProblems.forEach(p => {
                 const input = document.getElementById(`input-${p.id}`);
                 const userNum = parseUserFractionInput(input.value);
                 
-                // Decrypt correct answer for scoring logic [2]
                 const correctObj = JSON.parse(decrypt(p.encrypted));
                 const correctNum = correctObj.value;
                 
@@ -625,13 +636,13 @@
                 else if (correctNum === Infinity && userNum === Infinity) isCorrect = true;
                 else if (correctNum === -Infinity && userNum === -Infinity) isCorrect = true;
                 else if (!Number.isNaN(correctNum) && !Number.isNaN(userNum) && isFinite(correctNum) && isFinite(userNum)) {
-                    isCorrect = Math.abs(userNum - correctNum) < EPSILON;
+                    const tol = Math.max(EPSILON, Math.abs(correctNum) * 1e-9);
+                    isCorrect = Math.abs(userNum - correctNum) < tol;
                 }
 
                 input.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
-                input.disabled = true; // Permanently lock inputs [2]
+                input.disabled = true;
                 
-                // Temporarily inject the decrypted answer for typesetting/cloning purposes [2]
                 const solDiv = document.getElementById(`sol-${p.id}`);
                 solDiv.innerHTML = `<div style="color:#27ae60; font-size:1.2em; font-weight:bold;">Correct Answer: \\( ${formatNumber(correctObj)} \\)</div>`;
                 solDiv.style.display = 'block';
@@ -644,9 +655,8 @@
             
             showBtn.disabled = true;
             showBtn.innerHTML = `Score: ${score}/${problemTemplates.length} (${pct}%)<br><small>${timeStr}</small>`;
-            
-            MathJax.typesetPromise().then(() => {
-                // Remove typesetting-mode class before cloning so report rendering is unaffected
+
+            const finishReport = () => {
                 document.body.classList.remove('typesetting-mode');
 
                 const clone = document.documentElement.cloneNode(true);
@@ -678,14 +688,17 @@
                 a.href = URL.createObjectURL(blob);
                 a.download = `Order_Of_Ops_Report_${getTimestamp()}.html`;
                 a.click();
+                URL.revokeObjectURL(a.href);
 
-                // Completely clear and hide solution areas from the active live screen [2]
                 currentProblems.forEach(p => {
                     const solDiv = document.getElementById(`sol-${p.id}`);
                     solDiv.innerHTML = '';
                     solDiv.style.display = 'none';
                 });
-            });
+            };
+
+            // ENHANCEMENT 2: Safe typesetting with promise fallback for report generation
+            typesetMath().then(finishReport).catch(() => finishReport());
         }
 
         generateBtn.addEventListener('click', render);
