@@ -231,6 +231,44 @@
             return formatted;
         }
 
+        // Rich, EXACT LaTeX rendering of a final answer. Shows the exact reduced
+        // fraction and, when helpful, the equivalent mixed number and a terminating
+        // exact decimal — never a rounded float.
+        function formatAnswerLaTeX(n) {
+            if (!n || typeof n.num === 'undefined') return '\\text{Error}';
+            if (n.den === 0) {
+                if (Number.isNaN(n.value)) return '\\text{undefined}';
+                return n.value > 0 ? '\\infty' : '-\\infty';
+            }
+            // Integer
+            if (n.den === 1) return `${n.num}`;
+
+            const parts = [ formatFractionLaTeX(n.num, n.den) ];
+
+            // Mixed number for improper fractions, e.g. 7/2 -> 3\frac{1}{2}
+            if (Math.abs(n.num) > n.den) {
+                const sign = n.num < 0 ? '-' : '';
+                const whole = Math.floor(Math.abs(n.num) / n.den);
+                const rem = Math.abs(n.num) % n.den;
+                if (rem !== 0) parts.push(`${sign}${whole}\\frac{${rem}}{${n.den}}`);
+            }
+
+            // Terminating exact decimal: denominator has only factors 2 and 5.
+            let d = n.den, twos = 0, fives = 0;
+            while (d % 2 === 0) { d /= 2; twos++; }
+            while (d % 5 === 0) { d /= 5; fives++; }
+            if (d === 1) {
+                const dec = (n.num / n.den);
+                // Guard against float noise: only show if it round-trips exactly.
+                const decStr = dec.toString();
+                if (!decStr.includes('e') && Number(decStr) * n.den === n.num) {
+                    parts.push(decStr);
+                }
+            }
+
+            return parts.join(' \\;=\\; ');
+        }
+
         // =============================================================
         // OPERAND GENERATION
         // =============================================================
@@ -554,22 +592,65 @@
         // =============================================================
         // PROBLEM GENERATION & UI
         // =============================================================
+        // Parse the user's typed answer into an EXACT rational { num, den } (or a
+        // sentinel fraction for Infinity/NaN). No floating point is used for judging:
+        // "0.75", "3/4", and "6/8" all resolve to the exact fraction 3/4.
+        // Accepted forms: integer, decimal, "a/b", mixed number "w a/b", and
+        // Infinity / -Infinity / NaN keywords.
         function parseUserFractionInput(inputStr) {
-            inputStr = String(inputStr).trim().toLowerCase();
-            if (inputStr === "infinity" || inputStr === "inf") return Infinity;
-            if (inputStr === "-infinity" || inputStr === "-inf") return -Infinity;
-            if (inputStr === "nan") return NaN;
-            if (inputStr.includes('/')) {
-                const parts = inputStr.split('/');
-                if (parts.length === 2) {
-                    const num = parseFloat(parts[0]), den = parseFloat(parts[1]);
-                    if (!isNaN(num) && !isNaN(den)) {
-                        if (den === 0) return num === 0 ? NaN : (num > 0 ? Infinity : -Infinity);
-                        return num / den;
-                    }
-                }
+            const raw = String(inputStr).trim();
+            const low = raw.toLowerCase();
+            if (low === "infinity" || low === "inf" || low === "+infinity" || low === "+inf")
+                return { num: 1, den: 0, isFraction: true, value: Infinity };
+            if (low === "-infinity" || low === "-inf")
+                return { num: -1, den: 0, isFraction: true, value: -Infinity };
+            if (low === "nan") return { num: 0, den: 0, isFraction: true, value: NaN };
+            if (raw === "") return null;
+
+            // Mixed number: "2 3/4" or "-2 3/4"
+            const mixed = raw.match(/^([+-]?\d+)\s+(\d+)\s*\/\s*(\d+)$/);
+            if (mixed) {
+                const w = parseInt(mixed[1], 10);
+                const n = parseInt(mixed[2], 10);
+                const d = parseInt(mixed[3], 10);
+                if (d === 0) return null;
+                const sign = w < 0 ? -1 : 1;
+                return simplifyFraction(sign * (Math.abs(w) * d + n), d);
             }
-            return parseFloat(inputStr);
+
+            // Simple fraction: "a/b"
+            if (raw.includes('/')) {
+                const parts = raw.split('/');
+                if (parts.length === 2 && /^[+-]?\d+$/.test(parts[0].trim()) && /^[+-]?\d+$/.test(parts[1].trim())) {
+                    const num = parseInt(parts[0].trim(), 10);
+                    const den = parseInt(parts[1].trim(), 10);
+                    if (den === 0) return num === 0
+                        ? { num: 0, den: 0, isFraction: true, value: NaN }
+                        : { num: num > 0 ? 1 : -1, den: 0, isFraction: true, value: Infinity * Math.sign(num) };
+                    return simplifyFraction(num, den);
+                }
+                return null; // malformed
+            }
+
+            // Decimal or integer -> exact fraction via the existing toFraction engine
+            if (/^[+-]?\d+(\.\d+)?$/.test(raw)) {
+                return toFraction(raw);
+            }
+            return null; // unparseable
+        }
+
+        // Exact equality of two rational answers (no epsilon). Handles the
+        // Infinity / NaN sentinels (den === 0) explicitly.
+        function fractionsEqual(a, b) {
+            if (!a || !b) return false;
+            const aDeg = a.den === 0, bDeg = b.den === 0; // degenerate (Inf / NaN)
+            if (aDeg || bDeg) {
+                if (aDeg !== bDeg) return false;
+                if (Number.isNaN(a.value) || Number.isNaN(b.value)) return Number.isNaN(a.value) && Number.isNaN(b.value);
+                return a.value === b.value; // +/-Infinity match
+            }
+            // cross-multiply reduced fractions: a.num/a.den === b.num/b.den
+            return a.num * b.den === b.num * a.den;
         }
 
         function generateProblem(templateFn) {
@@ -628,7 +709,7 @@
                             <label>${mjReady ? '\\( = \\)' : '='}</label>
                             <input type="text" class="user-input" id="input-${i + 1}">
                         </div>
-                        <div class="input-hint">Enter your answer as an integer, decimal, or fraction (e.g., -3/4)</div>
+                        <div class="input-hint">Enter an integer, decimal, fraction (e.g. -3/4), or mixed number (e.g. 2 1/3) &mdash; graded exactly, so 3/4, 6/8 and 0.75 all count.</div>
                     </div>
                     <div class="solution-area" id="sol-${i + 1}"></div>`;
                 container.appendChild(div);
@@ -659,26 +740,23 @@
 
             currentProblems.forEach(p => {
                 const input = document.getElementById(`input-${p.id}`);
-                const userNum = parseUserFractionInput(input.value);
+                const userFrac = parseUserFractionInput(input.value);
 
-                // Decrypt correct answer for scoring logic
+                // Decrypt correct answer (stored as an EXACT reduced fraction).
                 const correctObj = JSON.parse(decrypt(p.encrypted));
-                const correctNum = correctObj.value;
 
-                let isCorrect = false;
-                if (Number.isNaN(correctNum) && Number.isNaN(userNum)) isCorrect = true;
-                else if (correctNum === Infinity && userNum === Infinity) isCorrect = true;
-                else if (correctNum === -Infinity && userNum === -Infinity) isCorrect = true;
-                else if (!Number.isNaN(correctNum) && !Number.isNaN(userNum) && isFinite(correctNum) && isFinite(userNum)) {
-                    isCorrect = Math.abs(userNum - correctNum) < EPSILON;
-                }
+                // EXACT rational comparison — no floating-point tolerance. Any
+                // equivalent exact form the student types (3/4, 6/8, 0.75,
+                // or the mixed number "1 1/2" for 3/2) is judged correct.
+                const isCorrect = fractionsEqual(userFrac, correctObj);
 
                 input.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
                 input.disabled = true; // Permanently lock inputs
 
                 // Inject the decrypted answer (typeset if MathJax is available, else raw)
                 const solDiv = document.getElementById(`sol-${p.id}`);
-                const ansText = mjReady ? `\\( ${formatNumber(correctObj)} \\)` : formatNumber(correctObj);
+                const ansLatex = formatAnswerLaTeX(correctObj);
+                const ansText = mjReady ? `\\( ${ansLatex} \\)` : ansLatex;
                 solDiv.innerHTML = `<div style="color:#27ae60; font-size:1.2em; font-weight:bold;">Correct Answer: ${ansText}</div>`;
                 solDiv.style.display = 'block';
 
