@@ -1,168 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Violin Warm-up Routine</title>
-    <style>
-        :root {
-            --violin-orange: #d35400;
-            --main-wood: #8B4513;
-            --bg-color: #fdfcf0;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Violin Practice Tracker</title>
+  <style>
+    :root {
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --accent-color: #7c2d12; /* Warm violin varnish tone */
+      --accent-hover: #9a3412;
+      --yt-color: #ef4444;
+      --yt-hover: #dc2626;
+      --border-color: #e2e8f0;
+      --radius: 8px;
+    }
 
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: var(--bg-color);
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        .assignment-card {
-            background: white;
-            width: 100%;
-            max-width: 600px;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border-top: 8px solid var(--violin-orange);
-        }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 40px 20px;
+      line-height: 1.5;
+    }
 
-        h1 { color: var(--main-wood); text-align: center; margin-bottom: 10px; }
-        p.subtitle { text-align: center; color: #666; margin-bottom: 25px; font-style: italic; }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
 
-        .resource-section {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            border-left: 4px solid var(--violin-orange);
-        }
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
 
-        .resource-link {
-            display: block;
-            color: var(--violin-orange);
-            text-decoration: none;
-            font-weight: bold;
-            margin: 5px 0;
-        }
+    header h1 {
+      font-size: 2rem;
+      color: var(--accent-color);
+      margin-bottom: 6px;
+    }
 
-        .resource-link:hover { text-decoration: underline; }
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
 
-        .task-list { list-style: none; padding: 0; }
+    .category {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      margin-bottom: 24px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
 
-        .task-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            transition: background 0.2s;
-        }
+    .category-header {
+      background-color: #f1f5f9;
+      padding: 12px 20px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-        .task-item:hover { background: #fffcf5; }
+    .item-list {
+      list-style: none;
+    }
 
-        input[type="checkbox"] {
-            width: 22px;
-            height: 22px;
-            margin-right: 15px;
-            cursor: pointer;
-            accent-color: var(--violin-orange);
-        }
+    .practice-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-color);
+      transition: background 0.15s ease;
+    }
 
-        .task-info { flex-grow: 1; }
-        .task-name { font-weight: 600; color: #333; display: block; }
-        .task-desc { font-size: 0.85em; color: #777; }
+    .practice-item:last-child {
+      border-bottom: none;
+    }
 
-        .video-btn {
-            background: #e74c3c;
-            color: white;
-            text-decoration: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 0.8em;
-            margin-left: 10px;
-            white-space: nowrap;
-        }
+    .practice-item:hover {
+      background-color: #f8fafc;
+    }
 
-        .video-btn:hover { background: #c0392b; }
-    </style>
+    /* Left Side: Checkbox & Details */
+    .item-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .item-left input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent-color);
+      cursor: pointer;
+    }
+
+    .item-details .item-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text-main);
+    }
+
+    .item-details .item-notes {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Completed state styling */
+    .practice-item.completed .item-name {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    /* Right Side: YouTube Button */
+    .item-right {
+      flex-shrink: 0;
+      margin-left: 16px;
+    }
+
+    .yt-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #fee2e2;
+      color: var(--yt-color);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .yt-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .yt-btn:hover {
+      background-color: var(--yt-color);
+      color: #ffffff;
+    }
+  </style>
 </head>
 <body>
 
-<div class="assignment-card">
-    <h1>🎻 Warm-up Routine</h1>
-    <p class="subtitle">Focus: Intonation, Dexterity, and Tonal Consistency</p>
-    
-    <!-- Resources / Lesson Links -->
-    <div id="resource-links" class="resource-section">
-        <!-- Links will appear here -->
-    </div>
+  <div class="container">
+    <header>
+      <h1>🎻 Violin Practice Routine</h1>
+      <p>Daily exercises, etudes, and repertoire with quick reference video links.</p>
+    </header>
 
-    <!-- Main Checklist -->
-    <ul id="assignment-list" class="task-list">
-        <!-- Tasks will appear here -->
-    </ul>
-</div>
+    <!-- ==========================================
+         SECTION: SCALES & WARM-UPS
+         ========================================== -->
+    <section class="category">
+      <div class="category-header">🎼 Scales & Warm-ups</div>
+      <ul class="item-list">
 
-<script>
-    /* ==========================================
-       EDIT YOUR DATA HERE
-       ========================================== */
+        <!-- ITEM TEMPLATE START -->
+        <li class="practice-item">
+          <div class="item-left">
+            <input type="checkbox" onchange="toggleDone(this)">
+            <div class="item-details">
+              <div class="item-name">G Major 3-Octave Scale & Arpeggios</div>
+              <div class="item-notes">Carl Flesch • Focus on intonation & smooth shifts (60 BPM)</div>
+            </div>
+          </div>
+          <div class="item-right">
+            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" class="yt-btn">
+              <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              Watch / Play Along
+            </a>
+          </div>
+        </li>
+        <!-- ITEM TEMPLATE END -->
 
-    // 1. TOP LINKS
-    const lessons = [
-        { name: "Online Metronome", url: "https://www.metronomeonline.com/" },
-        { name: "IMSLP Free Sheet Music", url: "https://imslp.org/" }
-    ];
+        <li class="practice-item">
+          <div class="item-left">
+            <input type="checkbox" onchange="toggleDone(this)">
+            <div class="item-details">
+              <div class="item-name">Sevcik Op. 1 No. 1 (Shifting & Finger Prep)</div>
+              <div class="item-notes">Light finger pressure, clean string crossing</div>
+            </div>
+          </div>
+          <div class="item-right">
+            <a href="https://www.youtube.com" target="_blank" class="yt-btn">
+              <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              Tutorial
+            </a>
+          </div>
+        </li>
 
-    // 2. WARM-UP TASK LIST
-    const assignments = [
-        { 
-            name: "3-Octave G Major Scale", 
-            desc: "Focus on clean shifting and fluid bow changes.",
-            url: "https://www.youtube.com/results?search_query=violin+3+octave+G+major+scale" 
-        },
-        { 
-            name: "Schradieck No. 1", 
-            desc: "Finger dexterity: Keep fingers close to the strings.",
-            url: "https://www.youtube.com/results?search_query=schradieck+1+violin+tutorial" 
-        },
-        { 
-            name: "Sevcik Op. 8 (Shifting)", 
-            desc: "Practice slow slides to master the 1st to 3rd position gap.",
-            url: "https://www.youtube.com/results?search_query=sevcik+op+8+violin+tutorial" 
-        },
-        { 
-            name: "Vibrato Pulses", 
-            desc: "Set metronome to 60. Practice 2, 3, and 4 waves per beat.",
-            url: "https://www.youtube.com/results?search_query=violin+vibrato+exercises" 
-        }
-    ];
+      </ul>
+    </section>
 
-    /* ==========================================
-       AUTO-GENERATION CODE
-       ========================================== */
 
-    const resourceBox = document.getElementById('resource-links');
-    lessons.forEach(link => {
-        resourceBox.innerHTML += `<a href="${link.url}" class="resource-link" target="_blank">🔗 ${link.name}</a>`;
-    });
+    <!-- ==========================================
+         SECTION: ETUDES
+         ========================================== -->
+    <section class="category">
+      <div class="category-header">📖 Etudes</div>
+      <ul class="item-list">
 
-    const taskList = document.getElementById('assignment-list');
-    assignments.forEach(task => {
-        taskList.innerHTML += `
-            <li class="task-item">
-                <input type="checkbox">
-                <div class="task-info">
-                    <span class="task-name">${task.name}</span>
-                    <span class="task-desc">${task.desc}</span>
-                </div>
-                <a href="${task.url}" class="video-btn" target="_blank">Watch Guide</a>
-            </li>
-        `;
-    });
-</script>
- 
+        <li class="practice-item">
+          <div class="item-left">
+            <input type="checkbox" onchange="toggleDone(this)">
+            <div class="item-details">
+              <div class="item-name">Kreutzer Etude No. 2</div>
+              <div class="item-notes">Martelé & Détaché bowing patterns</div>
+            </div>
+          </div>
+          <div class="item-right">
+            <a href="https://www.youtube.com" target="_blank" class="yt-btn">
+              <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              Masterclass
+            </a>
+          </div>
+        </li>
+
+      </ul>
+    </section>
+
+
+    <!-- ==========================================
+         SECTION: REPERTOIRE
+         ========================================== -->
+    <section class="category">
+      <div class="category-header">🎻 Repertoire Pieces</div>
+      <ul class="item-list">
+
+        <li class="practice-item">
+          <div class="item-left">
+            <input type="checkbox" onchange="toggleDone(this)">
+            <div class="item-details">
+              <div class="item-name">Bach - Partita No. 3 in E Major (Preludio)</div>
+              <div class="item-notes">Bariolage section: measure 43–64</div>
+            </div>
+          </div>
+          <div class="item-right">
+            <a href="https://www.youtube.com" target="_blank" class="yt-btn">
+              <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              Performance
+            </a>
+          </div>
+        </li>
+
+      </ul>
+    </section>
+
+  </div>
+
+  <script>
+    // Optional script to toggle strikethrough when checked
+    function toggleDone(checkbox) {
+      const parentRow = checkbox.closest('.practice-item');
+      if (checkbox.checked) {
+        parentRow.classList.add('completed');
+      } else {
+        parentRow.classList.remove('completed');
+      }
+    }
+  </script>
 </body>
 </html>
