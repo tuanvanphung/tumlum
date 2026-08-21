@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Violin Assignment Page</title>
+    <title>Violin Warm-up Routine</title>
     <style>
         :root {
             --violin-orange: #d35400;
@@ -30,6 +30,7 @@
         }
 
         h1 { color: var(--main-wood); text-align: center; margin-bottom: 10px; }
+        p.subtitle { text-align: center; color: #666; margin-bottom: 25px; font-style: italic; }
 
         .resource-section {
             background: #f8f9fa;
@@ -54,7 +55,7 @@
         .task-item {
             display: flex;
             align-items: center;
-            padding: 12px;
+            padding: 15px;
             border-bottom: 1px solid #eee;
             transition: background 0.2s;
         }
@@ -62,23 +63,26 @@
         .task-item:hover { background: #fffcf5; }
 
         input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             margin-right: 15px;
             cursor: pointer;
             accent-color: var(--violin-orange);
         }
 
         .task-info { flex-grow: 1; }
+        .task-name { font-weight: 600; color: #333; display: block; }
+        .task-desc { font-size: 0.85em; color: #777; }
 
         .video-btn {
             background: #e74c3c;
             color: white;
             text-decoration: none;
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 4px;
             font-size: 0.8em;
             margin-left: 10px;
+            white-space: nowrap;
         }
 
         .video-btn:hover { background: #c0392b; }
@@ -87,7 +91,8 @@
 <body>
 
 <div class="assignment-card">
-    <h1>🎻 Assignments</h1>
+    <h1>🎻 Warm-up Routine</h1>
+    <p class="subtitle">Focus: Intonation, Dexterity, and Tonal Consistency</p>
     
     <!-- Resources / Lesson Links -->
     <div id="resource-links" class="resource-section">
@@ -105,21 +110,38 @@
        EDIT YOUR DATA HERE
        ========================================== */
 
-    // 1. TOP LINKS (Add Lesson links here)
+    // 1. TOP LINKS
     const lessons = [
-        { name: "Weekly", url: "http://lesson1.musica.com" },
-        { name: "Violin", url: "https://tuner.example.com" }
+        { name: "Online Metronome", url: "https://www.metronomeonline.com/" },
+        { name: "IMSLP Free Sheet Music", url: "https://imslp.org/" }
     ];
 
-    // 2. ASSIGNMENT LIST
-    // To add a task, copy a line and change the name/url.
+    // 2. WARM-UP TASK LIST
     const assignments = [
-        { name: "Warm Up 1", url: "https://www.youtube.com/watch?v=36lqtAwswpM&list=PLLuzQvZbRBkJ19CnoICv8Zapo5bwbqZZ5&index=2" },
-        { name: "Warm Up 2", url: "https://www.youtube.com/watch?v=5mAb3bqotVU&list=PLLuzQvZbRBkJ19CnoICv8Zapo5bwbqZZ5&index=1" }
+        { 
+            name: "3-Octave G Major Scale", 
+            desc: "Focus on clean shifting and fluid bow changes.",
+            url: "https://www.youtube.com/results?search_query=violin+3+octave+G+major+scale" 
+        },
+        { 
+            name: "Schradieck No. 1", 
+            desc: "Finger dexterity: Keep fingers close to the strings.",
+            url: "https://www.youtube.com/results?search_query=schradieck+1+violin+tutorial" 
+        },
+        { 
+            name: "Sevcik Op. 8 (Shifting)", 
+            desc: "Practice slow slides to master the 1st to 3rd position gap.",
+            url: "https://www.youtube.com/results?search_query=sevcik+op+8+violin+tutorial" 
+        },
+        { 
+            name: "Vibrato Pulses", 
+            desc: "Set metronome to 60. Practice 2, 3, and 4 waves per beat.",
+            url: "https://www.youtube.com/results?search_query=violin+vibrato+exercises" 
+        }
     ];
 
     /* ==========================================
-       AUTO-GENERATION CODE (Don't need to edit)
+       AUTO-GENERATION CODE
        ========================================== */
 
     const resourceBox = document.getElementById('resource-links');
@@ -133,9 +155,10 @@
             <li class="task-item">
                 <input type="checkbox">
                 <div class="task-info">
-                    <span>${task.name}</span>
+                    <span class="task-name">${task.name}</span>
+                    <span class="task-desc">${task.desc}</span>
                 </div>
-                <a href="${task.url}" class="video-btn" target="_blank">Watch Video</a>
+                <a href="${task.url}" class="video-btn" target="_blank">Watch Guide</a>
             </li>
         `;
     });
