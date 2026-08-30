@@ -535,7 +535,7 @@
         }
     }
 
-    // Getting the formatted Date timestamp
+    // Getting the formatted Date timestamp for the report filename
     function getFormattedDate() {
         const d = new Date();
         const pad = (n) => n.toString().padStart(2, '0');
@@ -621,7 +621,7 @@
         return report;
     }
 
-    // Function to trigger the actual HTML download
+    // Function to trigger the automated HTML report download
     function downloadReportHtml(score) {
         const htmlContent = generateReportHtml(score);
         const blob = new Blob([htmlContent], { type: 'text/html' });
@@ -631,6 +631,7 @@
         a.href = url;
         a.download = `07_Exponents_${getFormattedDate()}.html`;
         
+        // Append, click, and clean up
         document.body.appendChild(a);
         a.click();
         
@@ -657,11 +658,11 @@
             const feedbackSpan = document.getElementById(`feedback-${problem.id}`);
             const solutionDiv = document.getElementById(`solution-${problem.id}`);
             
-            // Clean the user input: remove spaces and commas
+            // Clean user input: remove spaces and commas
             const rawInput = inputField.value.replace(/,/g, '').trim();
             const studentInput = parseFloat(rawInput);
 
-            // Precision comparison
+            // Precision safe comparison
             if (rawInput === "" || isNaN(studentInput)) {
                 feedbackSpan.textContent = "⚠️ Invalid / Empty";
                 feedbackSpan.className = "feedback incorrect";
@@ -709,7 +710,7 @@
             MathJax.typesetPromise();
         }
 
-        // Trigger automated report download
+        // 🌟 Trigger the automated HTML report download
         downloadReportHtml(score);
     }
 
