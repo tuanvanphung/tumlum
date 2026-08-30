@@ -7,19 +7,12 @@
 
     <!-- MathJax Configuration and Script -->
     <script>
-      window.MathJax = {
+      MathJax = {
         tex: { inlineMath: [['\\(', '\\)']] },
-        chtml: { scale: 1.05 },
-        startup: {
-          pageReady: () => {
-            return MathJax.startup.defaultPageReady().then(() => {
-              if (window.triggerMathTypeset) window.triggerMathTypeset();
-            });
-          }
-        }
+        chtml: { scale: 1.05 }
       };
     </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" onerror="console.warn('MathJax script failed to load. Operating in offline/plaintext mode.');"></script>
 
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f0f2f5; color: #333; }
@@ -32,9 +25,11 @@
         #generateBtn:hover { background-color: #2980b9; }
         #submitBtn { background-color: #27ae60; }
         #submitBtn:hover { background-color: #219653; }
+        #saveReportBtn { background-color: #8e44ad; }
+        #saveReportBtn:hover { background-color: #732d91; }
         .problem-count { font-size: 0.95em; color: #555; margin-top: 8px; font-weight: bold; }
 
-        .score-banner { display: none; text-align: center; background: #fff; border: 3px solid #27ae60; padding: 16px; margin: 0 auto 25px auto; max-width: 850px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .score-banner { display: none; text-align: center; background: #fff; border: 3px solid #27ae60; padding: 15px; margin: 0 auto 25px auto; max-width: 850px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .score-banner h2 { margin: 0 0 5px 0; color: #27ae60; font-size: 1.6em; }
         .score-banner p { margin: 0; color: #666; font-size: 0.95em; }
 
@@ -43,7 +38,7 @@
 
         .problem-header { display: flex; align-items: center; gap: 15px; margin-bottom: 18px; flex-wrap: wrap; }
         .problem-number { font-weight: bold; font-size: 1.25em; color: #8e44ad; }
-        .problem-expression { font-size: 1.35em; color: #2c3e50; overflow-x: auto; padding: 4px 0; }
+        .problem-expression { font-size: 1.4em; color: #2c3e50; overflow-x: auto; padding: 4px 0; }
 
         .answer-box { display: flex; flex-direction: column; background: #fdfdfd; padding: 14px; border: 1px solid #eee; border-radius: 8px; align-items: center; }
         .multi-input-row { display: flex; gap: 12px; justify-content: center; align-items: center; }
@@ -61,9 +56,6 @@
 
         .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
         .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; font-weight: bold; }
-        .report-header { text-align: center; background: white; border: 3px solid #27ae60; padding: 20px; margin-bottom: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-
-        @media print { .controls-container { display: none; } .solution-area { display: block !important; } }
     </style>
 </head>
 <body>
@@ -72,7 +64,8 @@
 
     <div class="controls-container" id="controls">
         <button id="generateBtn">Generate New Problem Set</button>
-        <button id="submitBtn">Submit & Save Report</button>
+        <button id="submitBtn">Submit Answers</button>
+        <button id="saveReportBtn" style="display: none;">Save Report</button>
         <div class="problem-count" id="problemCount"></div>
     </div>
 
@@ -84,62 +77,52 @@
         const container = document.getElementById('problemContainer');
         const controls = document.getElementById('controls');
         const generateBtn = document.getElementById('generateBtn');
+        const saveReportBtn = document.getElementById('saveReportBtn');
         const problemCountEl = document.getElementById('problemCount');
         const scoreBanner = document.getElementById('scoreBanner');
 
         let currentProblems = [];
+        let completedReportData = [];
         let isSubmitted = false;
 
         const EPSILON = 0.00001;
         const MAX_INTERMEDIATE_VALUE = 99999;
-        const CIPHER_KEY = "OrderOfOps_SecureKey_Steps_8291";
+        const CIPHER_KEY = "OrderOfOps_SecureKey_Steps_4719";
 
         function encrypt(str) {
-            try {
-                const encoder = new TextEncoder();
-                const bytes = encoder.encode(str);
-                const keyBytes = encoder.encode(CIPHER_KEY);
-                for (let i = 0; i < bytes.length; i++) {
-                    bytes[i] ^= keyBytes[i % keyBytes.length];
-                }
-                let bin = "";
-                for (let i = 0; i < bytes.length; i++) {
-                    bin += String.fromCharCode(bytes[i]);
-                }
-                return btoa(bin);
-            } catch (e) {
-                return btoa(unescape(encodeURIComponent(str)));
+            const encoder = new TextEncoder();
+            const bytes = encoder.encode(str);
+            const keyBytes = encoder.encode(CIPHER_KEY);
+            for (let i = 0; i < bytes.length; i++) {
+                bytes[i] ^= keyBytes[i % keyBytes.length];
             }
+            let bin = "";
+            for (let i = 0; i < bytes.length; i++) {
+                bin += String.fromCharCode(bytes[i]);
+            }
+            return btoa(bin);
         }
 
         function decrypt(str) {
-            try {
-                const bin = atob(str);
-                const bytes = new Uint8Array(bin.length);
-                for (let i = 0; i < bin.length; i++) {
-                    bytes[i] = bin.charCodeAt(i);
-                }
-                const encoder = new TextEncoder();
-                const keyBytes = encoder.encode(CIPHER_KEY);
-                for (let i = 0; i < bytes.length; i++) {
-                    bytes[i] ^= keyBytes[i % keyBytes.length];
-                }
-                return new TextDecoder().decode(bytes);
-            } catch (e) {
-                return decodeURIComponent(escape(atob(str)));
+            const bin = atob(str);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) {
+                bytes[i] = bin.charCodeAt(i);
             }
+            const encoder = new TextEncoder();
+            const keyBytes = encoder.encode(CIPHER_KEY);
+            for (let i = 0; i < bytes.length; i++) {
+                bytes[i] ^= keyBytes[i % keyBytes.length];
+            }
+            return new TextDecoder().decode(bytes);
         }
 
         function typesetMath(elements) {
             if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
-                return window.MathJax.typesetPromise(elements).catch((err) => console.warn('Typesetting warning:', err));
+                return window.MathJax.typesetPromise(elements).catch((err) => console.warn('MathJax typesetting warning:', err));
             }
             return Promise.resolve();
         }
-
-        window.triggerMathTypeset = () => {
-            typesetMath([container]);
-        };
 
         // =============================================================
         // UTILITY & MATH ENGINE
@@ -211,6 +194,25 @@
             return n.value !== undefined ? n.value.toString() : 'Error';
         }
 
+        function formatPlainText(str) {
+            if (!str) return '';
+            return str
+                .replace(/<br\s*[\/]?>/gi, '\n      ')
+                .replace(/<[^>]+>/g, '')
+                .replace(/\\left/g, '')
+                .replace(/\\right/g, '')
+                .replace(/\\sqrt\{([^}]+)\}/g, 'sqrt($1)')
+                .replace(/\\sqrt\[3\]\{([^}]+)\}/g, 'cbrt($1)')
+                .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1/$2)')
+                .replace(/\\times/g, '*')
+                .replace(/\\div/g, '/')
+                .replace(/\\\(/g, '')
+                .replace(/\\\)/g, '')
+                .replace(/\{/g, '(')
+                .replace(/\}/g, ')')
+                .trim();
+        }
+
         const PERFECT_SQUARES = [
             { rad: 4, root: 2 }, { rad: 9, root: 3 }, { rad: 16, root: 4 },
             { rad: 25, root: 5 }, { rad: 36, root: 6 }, { rad: 49, root: 7 },
@@ -225,33 +227,70 @@
             return simplifyFraction(n * sign, d);
         }
         function easyDecimalStr() { return getRandomItem(EASY_DECIMALS); }
-        
+
+        // Pool of clean, friendly powers with NO exponent of 1
+        const EASY_POWERS = [
+            // Standard integer powers (> 1)
+            { tex: "2^2", frac: { num: 4, den: 1 }, desc: "2^2 = 4" },
+            { tex: "2^3", frac: { num: 8, den: 1 }, desc: "2^3 = 8" },
+            { tex: "2^4", frac: { num: 16, den: 1 }, desc: "2^4 = 16" },
+            { tex: "3^2", frac: { num: 9, den: 1 }, desc: "3^2 = 9" },
+            { tex: "3^3", frac: { num: 27, den: 1 }, desc: "3^3 = 27" },
+            { tex: "4^2", frac: { num: 16, den: 1 }, desc: "4^2 = 16" },
+            { tex: "5^2", frac: { num: 25, den: 1 }, desc: "5^2 = 25" },
+
+            // Negative integer powers (including -1)
+            { tex: "2^{-1}", frac: { num: 1, den: 2 }, desc: "2^{-1} = \\frac{1}{2}" },
+            { tex: "4^{-1}", frac: { num: 1, den: 4 }, desc: "4^{-1} = \\frac{1}{4}" },
+            { tex: "5^{-1}", frac: { num: 1, den: 5 }, desc: "5^{-1} = \\frac{1}{5}" },
+            { tex: "2^{-2}", frac: { num: 1, den: 4 }, desc: "2^{-2} = \\frac{1}{2^2} = \\frac{1}{4}" },
+            { tex: "2^{-3}", frac: { num: 1, den: 8 }, desc: "2^{-3} = \\frac{1}{2^3} = \\frac{1}{8}" },
+
+            // Fractional exponents (roots and fractional powers)
+            { tex: "4^{\\frac{1}{2}}", frac: { num: 2, den: 1 }, desc: "4^{\\frac{1}{2}} = \\sqrt{4} = 2" },
+            { tex: "9^{\\frac{1}{2}}", frac: { num: 3, den: 1 }, desc: "9^{\\frac{1}{2}} = \\sqrt{9} = 3" },
+            { tex: "16^{\\frac{1}{2}}", frac: { num: 4, den: 1 }, desc: "16^{\\frac{1}{2}} = \\sqrt{16} = 4" },
+            { tex: "25^{\\frac{1}{2}}", frac: { num: 5, den: 1 }, desc: "25^{\\frac{1}{2}} = \\sqrt{25} = 5" },
+            { tex: "8^{\\frac{1}{3}}", frac: { num: 2, den: 1 }, desc: "8^{\\frac{1}{3}} = \\sqrt[3]{8} = 2" },
+            { tex: "27^{\\frac{1}{3}}", frac: { num: 3, den: 1 }, desc: "27^{\\frac{1}{3}} = \\sqrt[3]{27} = 3" },
+            { tex: "4^{\\frac{3}{2}}", frac: { num: 8, den: 1 }, desc: "4^{\\frac{3}{2}} = (\\sqrt{4})^3 = 2^3 = 8" },
+            { tex: "8^{\\frac{2}{3}}", frac: { num: 4, den: 1 }, desc: "8^{\\frac{2}{3}} = (\\sqrt[3]{8})^2 = 2^2 = 4" },
+
+            // Negative fractional exponents
+            { tex: "4^{-\\frac{1}{2}}", frac: { num: 1, den: 2 }, desc: "4^{-\\frac{1}{2}} = \\frac{1}{\\sqrt{4}} = \\frac{1}{2}" },
+            { tex: "16^{-\\frac{1}{2}}", frac: { num: 1, den: 4 }, desc: "16^{-\\frac{1}{2}} = \\frac{1}{\\sqrt{16}} = \\frac{1}{4}" },
+            { tex: "25^{-\\frac{1}{2}}", frac: { num: 1, den: 5 }, desc: "25^{-\\frac{1}{2}} = \\frac{1}{\\sqrt{25}} = \\frac{1}{5}" },
+            { tex: "8^{-\\frac{1}{3}}", frac: { num: 1, den: 2 }, desc: "8^{-\\frac{1}{3}} = \\frac{1}{\\sqrt[3]{8}} = \\frac{1}{2}" }
+        ];
+
         function easyPower() {
-            const powers = [
-                { base: 2, exp: 2, value: 4 },
-                { base: 2, exp: 3, value: 8 },
-                { base: 2, exp: 4, value: 16 },
-                { base: 3, exp: 2, value: 9 },
-                { base: 3, exp: 3, value: 27 },
-                { base: 4, exp: 2, value: 16 },
-                { base: 5, exp: 2, value: 25 },
-                { base: 6, exp: 2, value: 36 }
-            ];
-            return getRandomItem(powers);
+            const p = getRandomItem(EASY_POWERS);
+            return {
+                tex: p.tex,
+                frac: simplifyFraction(p.frac.num, p.frac.den),
+                desc: p.desc
+            };
         }
 
-        // Varied tower and nested powers
+        // Power towers containing NO 1 exponents, including negative exponents
+        const TOWER_POWERS = [
+            { tex: "4^{2^{-1}}", frac: { num: 2, den: 1 }, desc: "Top-down tower: \\(2^{-1} = \\frac{1}{2}\\), so \\(4^{\\frac{1}{2}} = \\sqrt{4} = 2\\)" },
+            { tex: "9^{2^{-1}}", frac: { num: 3, den: 1 }, desc: "Top-down tower: \\(2^{-1} = \\frac{1}{2}\\), so \\(9^{\\frac{1}{2}} = \\sqrt{9} = 3\\)" },
+            { tex: "16^{2^{-1}}", frac: { num: 4, den: 1 }, desc: "Top-down tower: \\(2^{-1} = \\frac{1}{2}\\), so \\(16^{\\frac{1}{2}} = \\sqrt{16} = 4\\)" },
+            { tex: "25^{2^{-1}}", frac: { num: 5, den: 1 }, desc: "Top-down tower: \\(2^{-1} = \\frac{1}{2}\\), so \\(25^{\\frac{1}{2}} = \\sqrt{25} = 5\\)" },
+            { tex: "8^{3^{-1}}", frac: { num: 2, den: 1 }, desc: "Top-down tower: \\(3^{-1} = \\frac{1}{3}\\), so \\(8^{\\frac{1}{3}} = \\sqrt[3]{8} = 2\\)" },
+            { tex: "27^{3^{-1}}", frac: { num: 3, den: 1 }, desc: "Top-down tower: \\(3^{-1} = \\frac{1}{3}\\), so \\(27^{\\frac{1}{3}} = \\sqrt[3]{27} = 3\\)" },
+            { tex: "2^{2^2}", frac: { num: 16, den: 1 }, desc: "Top-down tower: \\(2^2 = 4\\), so \\(2^4 = 16\\)" },
+            { tex: "3^{2^2}", frac: { num: 81, den: 1 }, desc: "Top-down tower: \\(2^2 = 4\\), so \\(3^4 = 81\\)" }
+        ];
+
         function easyTowerPower() {
-            const towers = [
-                { base: 2, mid: 3, top: 1, effExp: 3, value: 8,  tex: `2^{3^{1}}` },
-                { base: 2, mid: 2, top: 2, effExp: 4, value: 16, tex: `2^{2^{2}}` },
-                { base: 3, mid: 2, top: 1, effExp: 2, value: 9,  tex: `3^{2^{1}}` },
-                { base: 4, mid: 2, top: 1, effExp: 2, value: 16, tex: `4^{2^{1}}` },
-                { base: 5, mid: 2, top: 1, effExp: 2, value: 25, tex: `5^{2^{1}}` },
-                { base: 2, mid: 1, top: 3, effExp: 1, value: 2,  tex: `2^{1^{3}}` },
-                { base: 3, mid: 2, top: 2, effExp: 4, value: 81, tex: `3^{2^{2}}` }
-            ];
-            return getRandomItem(towers);
+            const t = getRandomItem(TOWER_POWERS);
+            return {
+                tex: t.tex,
+                frac: simplifyFraction(t.frac.num, t.frac.den),
+                desc: t.desc
+            };
         }
 
         function perfectSquare() { return getRandomItem(PERFECT_SQUARES); }
@@ -259,7 +298,7 @@
         function isNiceAnswer(f) {
             if (!f || typeof f.value === 'undefined' || !Number.isFinite(f.value)) return false;
             if (Math.abs(f.value) > 100) return false;
-            if (f.den === 1 || f.den === 2 || f.den === 4 || f.den === 5) return true;
+            if ([1, 2, 4, 5, 8, 10].includes(f.den)) return true;
             return false;
         }
 
@@ -267,47 +306,47 @@
         // PROBLEM TEMPLATES
         // =============================================================
         const problemTemplates = [
-            // 1) √R + F + D + a^(b^c)
+            // 1) √R + F + D + Power
             function () {
-                const R = perfectSquare(), F = easyFraction(), dStr = easyDecimalStr(), D = toFraction(dStr), P = easyTowerPower();
+                const R = perfectSquare(), F = easyFraction(), dStr = easyDecimalStr(), D = toFraction(dStr), P = easyPower();
                 const o1 = getRandomItem(['+', '-']), o2 = getRandomItem(['+', '-']), o3 = getRandomItem(['+', '-']);
 
                 let v1 = toFraction(R.root);
                 let v2 = this.checkInt(o1 === '+' ? addFrac(v1, F) : subFrac(v1, F));
                 let v3 = this.checkInt(o2 === '+' ? addFrac(v2, D) : subFrac(v2, D));
-                let finalAns = this.checkInt(o3 === '+' ? addFrac(v3, toFraction(P.value)) : subFrac(v3, toFraction(P.value)));
+                let finalAns = this.checkInt(o3 === '+' ? addFrac(v3, P.frac) : subFrac(v3, P.frac));
 
                 this.finalAnswer = finalAns;
                 this.problemString = `\\sqrt{${R.rad}} ${o1} ${formatNumber(F)} ${o2} ${dStr} ${o3} ${P.tex}`;
                 this.steps = [
-                    `<strong>Step 1: Evaluate Powers & Radicals (PEMDAS)</strong><br>
-                     Power tower evaluated top-down: \\(${P.mid}^{${P.top}} = ${P.effExp}\\), so \\(${P.base}^{${P.effExp}} = ${P.value}\\).<br>
+                    `<strong>Step 1: Evaluate Powers & Radicals</strong><br>
+                     Power: \\(${P.desc}\\).<br>
                      Radical: \\(\\sqrt{${R.rad}} = ${R.root}\\).<br>
-                     Expression: \\(${R.root} ${o1} ${formatNumber(F)} ${o2} ${dStr} ${o3} ${P.value}\\)`,
+                     Expression becomes: \\(${R.root} ${o1} ${formatNumber(F)} ${o2} ${dStr} ${o3} ${formatNumber(P.frac)}\\)`,
                     `<strong>Step 2: Add and Subtract (Left to Right)</strong><br>
-                     Convert decimal: \\(${dStr} = ${formatNumber(D)}\\).<br>
+                     Convert decimal to fraction: \\(${dStr} = ${formatNumber(D)}\\).<br>
                      First: \\(${R.root} ${o1} ${formatNumber(F)} = ${formatNumber(v2)}\\).<br>
                      Second: \\(${formatNumber(v2)} ${o2} ${formatNumber(D)} = ${formatNumber(v3)}\\).<br>
-                     Final: \\(${formatNumber(v3)} ${o3} ${P.value} = ${formatNumber(finalAns)}\\)`
+                     Final: \\(${formatNumber(v3)} ${o3} ${formatNumber(P.frac)} = ${formatNumber(finalAns)}\\)`
                 ];
             },
 
-            // 2) (√R + a^b) × F + D
+            // 2) (√R + Power) × F + D
             function () {
                 const R = perfectSquare(), P = easyPower(), F = easyFraction(), dStr = easyDecimalStr(), D = toFraction(dStr);
                 const o1 = getRandomItem(['+', '-']), o2 = getRandomItem(['+', '-']);
 
-                let inner = this.checkInt(o1 === '+' ? addFrac(toFraction(R.root), toFraction(P.value)) : subFrac(toFraction(R.root), toFraction(P.value)));
+                let inner = this.checkInt(o1 === '+' ? addFrac(toFraction(R.root), P.frac) : subFrac(toFraction(R.root), P.frac));
                 let prod = this.checkInt(mulFrac(inner, F));
                 let finalAns = this.checkInt(o2 === '+' ? addFrac(prod, D) : subFrac(prod, D));
 
                 this.finalAnswer = finalAns;
-                this.problemString = `\\left(\\sqrt{${R.rad}} ${o1} ${P.base}^{${P.exp}}\\right) \\times ${formatNumber(F)} ${o2} ${dStr}`;
+                this.problemString = `\\left(\\sqrt{${R.rad}} ${o1} ${P.tex}\\right) \\times ${formatNumber(F)} ${o2} ${dStr}`;
                 this.steps = [
-                    `<strong>Step 1: Parentheses Group</strong><br>
-                     \\(\\sqrt{${R.rad}} = ${R.root}\\) and \\(${P.base}^{${P.exp}} = ${P.value}\\).<br>
-                     Inside: \\(${R.root} ${o1} ${P.value} = ${formatNumber(inner)}\\).`,
-                    `<strong>Step 2: Multiplication</strong><br>
+                    `<strong>Step 1: Inside Parentheses</strong><br>
+                     \\(\\sqrt{${R.rad}} = ${R.root}\\) and \\(${P.desc}\\).<br>
+                     Inside result: \\(${R.root} ${o1} ${formatNumber(P.frac)} = ${formatNumber(inner)}\\).`,
+                    `<strong>Step 2: Multiply</strong><br>
                      \\(${formatNumber(inner)} \\times ${formatNumber(F)} = ${formatNumber(prod)}\\).`,
                     `<strong>Step 3: Add / Subtract Decimal</strong><br>
                      Convert \\(${dStr} = ${formatNumber(D)}\\).<br>
@@ -315,91 +354,91 @@
                 ];
             },
 
-            // 3) a^b / √R + F × D
+            // 3) Power / √R + F × D
             function () {
                 const R = perfectSquare(), P = easyPower(), F = easyFraction(), dStr = easyDecimalStr(), D = toFraction(dStr);
                 const o1 = getRandomItem(['+', '-']);
 
-                let div = this.checkInt(divFrac(toFraction(P.value), toFraction(R.root)));
+                let div = this.checkInt(divFrac(P.frac, toFraction(R.root)));
                 let prod = this.checkInt(mulFrac(F, D));
                 let finalAns = this.checkInt(o1 === '+' ? addFrac(div, prod) : subFrac(div, prod));
 
                 this.finalAnswer = finalAns;
-                this.problemString = `${P.base}^{${P.exp}} \\div \\sqrt{${R.rad}} ${o1} ${formatNumber(F)} \\times ${dStr}`;
+                this.problemString = `${P.tex} \\div \\sqrt{${R.rad}} ${o1} ${formatNumber(F)} \\times ${dStr}`;
                 this.steps = [
                     `<strong>Step 1: Powers and Radicals</strong><br>
-                     \\(${P.base}^{${P.exp}} = ${P.value}\\) and \\(\\sqrt{${R.rad}} = ${R.root}\\).<br>
-                     Expression: \\(${P.value} \\div ${R.root} ${o1} ${formatNumber(F)} \\times ${dStr}\\)`,
+                     \\(${P.desc}\\) and \\(\\sqrt{${R.rad}} = ${R.root}\\).<br>
+                     Expression becomes: \\(${formatNumber(P.frac)} \\div ${R.root} ${o1} ${formatNumber(F)} \\times ${dStr}\\)`,
                     `<strong>Step 2: Division and Multiplication (Left to Right)</strong><br>
-                     Division: \\(${P.value} \\div ${R.root} = ${formatNumber(div)}\\).<br>
-                     Multiplication (with \\(${dStr} = ${formatNumber(D)}\\)): \\(${formatNumber(F)} \\times ${formatNumber(D)} = ${formatNumber(prod)}\\).`,
-                    `<strong>Step 3: Combine Terms</strong><br>
+                     Division: \\(${formatNumber(P.frac)} \\div ${R.root} = ${formatNumber(div)}\\).<br>
+                     Multiplication: \\(${formatNumber(F)} \\times ${formatNumber(D)} = ${formatNumber(prod)}\\).`,
+                    `<strong>Step 3: Add / Subtract</strong><br>
                      \\(${formatNumber(div)} ${o1} ${formatNumber(prod)} = ${formatNumber(finalAns)}\\)`
                 ];
             },
 
-            // 4) (√R + a^b)/(D) + F
+            // 4) (√R + Power)/(D) + F
             function () {
-                const R = perfectSquare(), P = easyPower(), dStr = getRandomItem(["0.5", "2.5", "0.25", "1.5"]), D = toFraction(dStr), F = easyFraction();
+                const R = perfectSquare(), P = easyPower(), dStr = getRandomItem(["0.5", "2.5", "0.25", "1.5", "0.2"]), D = toFraction(dStr), F = easyFraction();
                 const o1 = getRandomItem(['+', '-']), o2 = getRandomItem(['+', '-']);
 
-                let numer = this.checkInt(o1 === '+' ? addFrac(toFraction(R.root), toFraction(P.value)) : subFrac(toFraction(R.root), toFraction(P.value)));
+                let numer = this.checkInt(o1 === '+' ? addFrac(toFraction(R.root), P.frac) : subFrac(toFraction(R.root), P.frac));
                 let frac = this.checkInt(divFrac(numer, D));
                 let finalAns = this.checkInt(o2 === '+' ? addFrac(frac, F) : subFrac(frac, F));
 
                 this.finalAnswer = finalAns;
-                this.problemString = `\\frac{\\sqrt{${R.rad}} ${o1} ${P.base}^{${P.exp}}}{${dStr}} ${o2} ${formatNumber(F)}`;
+                this.problemString = `\\frac{\\sqrt{${R.rad}} ${o1} ${P.tex}}{${dStr}} ${o2} ${formatNumber(F)}`;
                 this.steps = [
                     `<strong>Step 1: Simplify Numerator</strong><br>
-                     \\(\\sqrt{${R.rad}} = ${R.root}\\) and \\(${P.base}^{${P.exp}} = ${P.value}\\).<br>
-                     Numerator: \\(${R.root} ${o1} ${P.value} = ${formatNumber(numer)}\\).`,
+                     \\(\\sqrt{${R.rad}} = ${R.root}\\) and \\(${P.desc}\\).<br>
+                     Numerator: \\(${R.root} ${o1} ${formatNumber(P.frac)} = ${formatNumber(numer)}\\).`,
                     `<strong>Step 2: Divide by Denominator</strong><br>
                      Convert \\(${dStr} = ${formatNumber(D)}\\).<br>
-                     Divide: \\(${formatNumber(numer)} \\div ${formatNumber(D)} = ${formatNumber(frac)}\\).`,
+                     \\(${formatNumber(numer)} \\div ${formatNumber(D)} = ${formatNumber(frac)}\\).`,
                     `<strong>Step 3: Add / Subtract Fraction</strong><br>
                      \\(${formatNumber(frac)} ${o2} ${formatNumber(F)} = ${formatNumber(finalAns)}\\)`
                 ];
             },
 
-            // 5) | F - √R | + a^(b^c) × D
+            // 5) | F - √R | + Power × D
             function () {
-                const R = perfectSquare(), F = easyFraction(), P = easyTowerPower(), dStr = easyDecimalStr(), D = toFraction(dStr);
+                const R = perfectSquare(), F = easyFraction(), P = easyPower(), dStr = easyDecimalStr(), D = toFraction(dStr);
                 const o1 = getRandomItem(['+', '-']);
 
                 let inside = this.checkInt(subFrac(F, toFraction(R.root)));
                 let av = this.checkInt(absFrac(inside));
-                let prod = this.checkInt(mulFrac(toFraction(P.value), D));
+                let prod = this.checkInt(mulFrac(P.frac, D));
                 let finalAns = this.checkInt(o1 === '+' ? addFrac(av, prod) : subFrac(av, prod));
 
                 this.finalAnswer = finalAns;
                 this.problemString = `\\left| ${formatNumber(F)} - \\sqrt{${R.rad}} \\right| ${o1} ${P.tex} \\times ${dStr}`;
                 this.steps = [
-                    `<strong>Step 1: Absolute Value Group</strong><br>
-                     \\(\\sqrt{${R.rad}} = ${R.root}\\). Inside: \\(${formatNumber(F)} - ${R.root} = ${formatNumber(inside)}\\).<br>
+                    `<strong>Step 1: Absolute Value Group & Power</strong><br>
+                     \\(\\sqrt{${R.rad}} = ${R.root}\\) and \\(${P.desc}\\).<br>
+                     Inside absolute value: \\(${formatNumber(F)} - ${R.root} = ${formatNumber(inside)}\\).<br>
                      Absolute value: \\(\\left| ${formatNumber(inside)} \\right| = ${formatNumber(av)}\\).`,
-                    `<strong>Step 2: Power Tower & Multiplication</strong><br>
-                     Tower: \\(${P.base}^{${P.mid}^{${P.top}}} = ${P.base}^{${P.effExp}} = ${P.value}\\).<br>
-                     Multiply (\\(${dStr} = ${formatNumber(D)}\\)): \\(${P.value} \\times ${formatNumber(D)} = ${formatNumber(prod)}\\).`,
-                    `<strong>Step 3: Combine</strong><br>
+                    `<strong>Step 2: Multiplication</strong><br>
+                     Multiply: \\(${formatNumber(P.frac)} \\times ${formatNumber(D)} = ${formatNumber(prod)}\\).`,
+                    `<strong>Step 3: Combine Terms</strong><br>
                      \\(${formatNumber(av)} ${o1} ${formatNumber(prod)} = ${formatNumber(finalAns)}\\)`
                 ];
             },
 
-            // 6) [ √R - (a^b × F) ] + D
+            // 6) [ √R - (Power × F) ] + D
             function () {
                 const R = perfectSquare(), P = easyPower(), F = easyFraction(), dStr = easyDecimalStr(), D = toFraction(dStr);
                 const o1 = getRandomItem(['+', '-']), o2 = getRandomItem(['+', '-']);
 
-                let prod = this.checkInt(mulFrac(toFraction(P.value), F));
+                let prod = this.checkInt(mulFrac(P.frac, F));
                 let bracket = this.checkInt(o1 === '+' ? addFrac(toFraction(R.root), prod) : subFrac(toFraction(R.root), prod));
                 let finalAns = this.checkInt(o2 === '+' ? addFrac(bracket, D) : subFrac(bracket, D));
 
                 this.finalAnswer = finalAns;
-                this.problemString = `\\left[ \\sqrt{${R.rad}} ${o1} \\left(${P.base}^{${P.exp}} \\times ${formatNumber(F)}\\right) \\right] ${o2} ${dStr}`;
+                this.problemString = `\\left[ \\sqrt{${R.rad}} ${o1} \\left(${P.tex} \\times ${formatNumber(F)}\\right) \\right] ${o2} ${dStr}`;
                 this.steps = [
                     `<strong>Step 1: Innermost Parentheses</strong><br>
-                     Power: \\(${P.base}^{${P.exp}} = ${P.value}\\).<br>
-                     Multiply: \\(${P.value} \\times ${formatNumber(F)} = ${formatNumber(prod)}\\).`,
+                     Power: \\(${P.desc}\\).<br>
+                     Multiply: \\(${formatNumber(P.frac)} \\times ${formatNumber(F)} = ${formatNumber(prod)}\\).`,
                     `<strong>Step 2: Brackets</strong><br>
                      Root: \\(\\sqrt{${R.rad}} = ${R.root}\\).<br>
                      Bracket: \\(${R.root} ${o1} ${formatNumber(prod)} = ${formatNumber(bracket)}\\).`,
@@ -408,43 +447,43 @@
                 ];
             },
 
-            // 7) D × √R - a^b + F
+            // 7) D × √R - Power + F
             function () {
                 const dStr = easyDecimalStr(), D = toFraction(dStr), R = perfectSquare(), P = easyPower(), F = easyFraction();
                 const o1 = getRandomItem(['+', '-']), o2 = getRandomItem(['+', '-']);
 
                 let prod = this.checkInt(mulFrac(D, toFraction(R.root)));
-                let v = this.checkInt(o1 === '+' ? addFrac(prod, toFraction(P.value)) : subFrac(prod, toFraction(P.value)));
+                let v = this.checkInt(o1 === '+' ? addFrac(prod, P.frac) : subFrac(prod, P.frac));
                 let finalAns = this.checkInt(o2 === '+' ? addFrac(v, F) : subFrac(v, F));
 
                 this.finalAnswer = finalAns;
-                this.problemString = `${dStr} \\times \\sqrt{${R.rad}} ${o1} ${P.base}^{${P.exp}} ${o2} ${formatNumber(F)}`;
+                this.problemString = `${dStr} \\times \\sqrt{${R.rad}} ${o1} ${P.tex} ${o2} ${formatNumber(F)}`;
                 this.steps = [
                     `<strong>Step 1: Powers and Radicals</strong><br>
-                     \\(\\sqrt{${R.rad}} = ${R.root}\\) and \\(${P.base}^{${P.exp}} = ${P.value}\\).`,
+                     \\(\\sqrt{${R.rad}} = ${R.root}\\) and \\(${P.desc}\\).`,
                     `<strong>Step 2: Multiply</strong><br>
                      \\(${formatNumber(D)} \\times ${R.root} = ${formatNumber(prod)}\\).`,
                     `<strong>Step 3: Add and Subtract (Left to Right)</strong><br>
-                     First: \\(${formatNumber(prod)} ${o1} ${P.value} = ${formatNumber(v)}\\).<br>
+                     First: \\(${formatNumber(prod)} ${o1} ${formatNumber(P.frac)} = ${formatNumber(v)}\\).<br>
                      Second: \\(${formatNumber(v)} ${o2} ${formatNumber(F)} = ${formatNumber(finalAns)}\\)`
                 ];
             },
 
-            // 8) F × (a^b - √R) + D
+            // 8) F × (Power - √R) + D
             function () {
                 const F = easyFraction(), P = easyPower(), R = perfectSquare(), dStr = easyDecimalStr(), D = toFraction(dStr);
                 const o1 = getRandomItem(['+', '-']), o2 = getRandomItem(['+', '-']);
 
-                let inner = this.checkInt(o1 === '+' ? addFrac(toFraction(P.value), toFraction(R.root)) : subFrac(toFraction(P.value), toFraction(R.root)));
+                let inner = this.checkInt(o1 === '+' ? addFrac(P.frac, toFraction(R.root)) : subFrac(P.frac, toFraction(R.root)));
                 let prod = this.checkInt(mulFrac(F, inner));
                 let finalAns = this.checkInt(o2 === '+' ? addFrac(prod, D) : subFrac(prod, D));
 
                 this.finalAnswer = finalAns;
-                this.problemString = `${formatNumber(F)} \\times \\left(${P.base}^{${P.exp}} ${o1} \\sqrt{${R.rad}}\\right) ${o2} ${dStr}`;
+                this.problemString = `${formatNumber(F)} \\times \\left(${P.tex} ${o1} \\sqrt{${R.rad}}\\right) ${o2} ${dStr}`;
                 this.steps = [
-                    `<strong>Step 1: Parentheses</strong><br>
-                     \\(${P.base}^{${P.exp}} = ${P.value}\\) and \\(\\sqrt{${R.rad}} = ${R.root}\\).<br>
-                     Inside: \\(${P.value} ${o1} ${R.root} = ${formatNumber(inner)}\\).`,
+                    `<strong>Step 1: Inside Parentheses</strong><br>
+                     \\(${P.desc}\\) and \\(\\sqrt{${R.rad}} = ${R.root}\\).<br>
+                     Inside: \\(${formatNumber(P.frac)} ${o1} ${R.root} = ${formatNumber(inner)}\\).`,
                     `<strong>Step 2: Multiply</strong><br>
                      \\(${formatNumber(F)} \\times ${formatNumber(inner)} = ${formatNumber(prod)}\\).`,
                     `<strong>Step 3: Add / Subtract Decimal</strong><br>
@@ -452,22 +491,22 @@
                 ];
             },
 
-            // 9) √R - | a^b × D | + F
+            // 9) √R - | Power × D | + F
             function () {
                 const R = perfectSquare(), P = easyPower(), dStr = easyDecimalStr(), D = toFraction(dStr), F = easyFraction();
                 const o1 = getRandomItem(['+', '-']);
 
-                let prod = this.checkInt(mulFrac(toFraction(P.value), D));
+                let prod = this.checkInt(mulFrac(P.frac, D));
                 let av = this.checkInt(absFrac(prod));
                 let v = this.checkInt(subFrac(toFraction(R.root), av));
                 let finalAns = this.checkInt(o1 === '+' ? addFrac(v, F) : subFrac(v, F));
 
                 this.finalAnswer = finalAns;
-                this.problemString = `\\sqrt{${R.rad}} - \\left| ${P.base}^{${P.exp}} \\times ${dStr} \\right| ${o1} ${formatNumber(F)}`;
+                this.problemString = `\\sqrt{${R.rad}} - \\left| ${P.tex} \\times ${dStr} \\right| ${o1} ${formatNumber(F)}`;
                 this.steps = [
-                    `<strong>Step 1: Absolute Value</strong><br>
-                     \\(\\sqrt{${R.rad}} = ${R.root}\\) and \\(${P.base}^{${P.exp}} = ${P.value}\\).<br>
-                     Inside bars: \\(${P.value} \\times ${formatNumber(D)} = ${formatNumber(prod)}\\).<br>
+                    `<strong>Step 1: Evaluate Absolute Value</strong><br>
+                     \\(\\sqrt{${R.rad}} = ${R.root}\\) and \\(${P.desc}\\).<br>
+                     Inside bars: \\(${formatNumber(P.frac)} \\times ${formatNumber(D)} = ${formatNumber(prod)}\\).<br>
                      Absolute value: \\(\\left| ${formatNumber(prod)} \\right| = ${formatNumber(av)}\\).`,
                     `<strong>Step 2: Add and Subtract (Left to Right)</strong><br>
                      \\(${R.root} - ${formatNumber(av)} = ${formatNumber(v)}\\).<br>
@@ -475,12 +514,12 @@
                 ];
             },
 
-            // 10) deep nesting: { D + [ √R - (F × a^(b^c)) ] }
+            // 10) deep nesting with Power Tower: { D + [ √R - (F × PowerTower) ] }
             function () {
                 const dStr = easyDecimalStr(), D = toFraction(dStr), R = perfectSquare(), F = easyFraction(), P = easyTowerPower();
                 const o1 = getRandomItem(['+', '-']), o2 = getRandomItem(['+', '-']);
 
-                let prod = this.checkInt(mulFrac(F, toFraction(P.value)));
+                let prod = this.checkInt(mulFrac(F, P.frac));
                 let bracket = this.checkInt(o1 === '+' ? addFrac(toFraction(R.root), prod) : subFrac(toFraction(R.root), prod));
                 let finalAns = this.checkInt(o2 === '+' ? addFrac(D, bracket) : subFrac(D, bracket));
 
@@ -488,8 +527,8 @@
                 this.problemString = `\\left\\{ ${dStr} ${o2} \\left[ \\sqrt{${R.rad}} ${o1} \\left( ${formatNumber(F)} \\times ${P.tex} \\right) \\right] \\right\\}`;
                 this.steps = [
                     `<strong>Step 1: Innermost Parentheses & Power</strong><br>
-                     Tower: \\(${P.base}^{${P.mid}^{${P.top}}} = ${P.base}^{${P.effExp}} = ${P.value}\\).<br>
-                     Multiply: \\(${formatNumber(F)} \\times ${P.value} = ${formatNumber(prod)}\\).`,
+                     ${P.desc}.<br>
+                     Multiply: \\(${formatNumber(F)} \\times ${formatNumber(P.frac)} = ${formatNumber(prod)}\\).`,
                     `<strong>Step 2: Brackets</strong><br>
                      Root: \\(\\sqrt{${R.rad}} = ${R.root}\\).<br>
                      Bracket: \\(${R.root} ${o1} ${formatNumber(prod)} = ${formatNumber(bracket)}\\).`,
@@ -545,38 +584,40 @@
                 } catch (e) { attemptLimit--; }
             }
             return {
-                problemHTML: "\\sqrt{16} + \\frac{1}{2} - 0.5 + 2^{3^{1}}",
-                answer: toFraction(12),
+                problemHTML: "\\sqrt{16} + \\frac{1}{2} - 0.5 + 2^{2}",
+                answer: toFraction(8),
                 steps: [
-                    "<strong>Step 1: Powers & Roots</strong>: \\(\\sqrt{16} = 4\\) and \\(2^{3^1} = 2^3 = 8\\).",
-                    "<strong>Step 2: Arithmetic (Left to Right)</strong>: \\(4 + \\frac{1}{2} - 0.5 + 8 = 12\\)."
+                    "<strong>Step 1: Powers & Roots</strong>: \\(\\sqrt{16} = 4\\) and \\(2^2 = 4\\).",
+                    "<strong>Step 2: Arithmetic (Left to Right)</strong>: \\(4 + \\frac{1}{2} - 0.5 + 4 = 8\\)."
                 ]
             };
         }
 
         function render() {
             isSubmitted = false;
+            completedReportData = [];
             container.innerHTML = '';
             scoreBanner.style.display = 'none';
             scoreBanner.innerHTML = '';
+            saveReportBtn.style.display = 'none';
             currentProblems = [];
 
             let existingSubmit = document.getElementById('submitBtn');
             if (!existingSubmit) {
                 const btn = document.createElement('button');
                 btn.id = 'submitBtn';
-                btn.textContent = 'Submit & Save Report';
+                btn.textContent = 'Submit Answers';
                 btn.onclick = checkAnswers;
-                controls.insertBefore(btn, problemCountEl);
+                controls.insertBefore(btn, saveReportBtn);
             } else {
                 existingSubmit.onclick = checkAnswers;
             }
 
-            problemCountEl.textContent = `${problemTemplates.length} Problems \u2014 Complete all problems and submit to generate a verified report.`;
+            problemCountEl.textContent = `${problemTemplates.length} Problems \u2014 Complete all problems and submit to reveal step-by-step solutions.`;
 
             for (let i = 0; i < problemTemplates.length; i++) {
                 const p = generateProblem(problemTemplates[i]);
-                const payload = JSON.stringify({ answer: p.answer, steps: p.steps });
+                const payload = JSON.stringify({ answer: p.answer, steps: p.steps, problemHTML: p.problemHTML });
                 const encrypted = encrypt(payload);
 
                 currentProblems.push({ id: i + 1, encrypted: encrypted });
@@ -602,13 +643,6 @@
             typesetMath([container]);
         }
 
-        function getTimestamp() {
-            const now = new Date();
-            const yymmdd = String(now.getFullYear()).slice(-2) + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
-            const hhmi = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
-            return `${yymmdd}_${hhmi}`;
-        }
-
         function checkAnswers() {
             if (isSubmitted) return;
             isSubmitted = true;
@@ -617,10 +651,12 @@
             if (btn) btn.remove();
 
             let score = 0;
+            completedReportData = [];
 
             currentProblems.forEach(p => {
                 const input = document.getElementById(`input-${p.id}`);
-                const userNum = parseUserFractionInput(input.value);
+                const rawVal = input.value.trim();
+                const userNum = parseUserFractionInput(rawVal);
 
                 const data = JSON.parse(decrypt(p.encrypted));
                 const correctObj = data.answer;
@@ -650,62 +686,75 @@
                     <div><strong>Final Value:</strong> <span class="final-ans-tag">\\( ${formatNumber(correctObj)} \\)</span></div>
                 `;
                 solDiv.style.display = 'block';
+
+                completedReportData.push({
+                    id: p.id,
+                    problemPlain: formatPlainText(data.problemHTML),
+                    userRaw: rawVal || "(No answer)",
+                    correctStr: formatPlainText(formatNumber(correctObj)),
+                    isCorrect: isCorrect,
+                    stepsPlain: data.steps.map(s => formatPlainText(s))
+                });
             });
 
-            const timeStr = new Date().toLocaleString();
             const pct = Math.round((score / problemTemplates.length) * 100);
-            
             scoreBanner.innerHTML = `
                 <h2>Test Completed! Score: ${score} / ${problemTemplates.length} (${pct}%)</h2>
-                <p>Date: ${timeStr} | Your downloadable report has been generated below.</p>
+                <p>Review the step-by-step explanations below. You can save your results using the <strong>"Save Report"</strong> button or click <strong>"Generate New Problem Set"</strong> to try again.</p>
             `;
             scoreBanner.style.display = 'block';
+            saveReportBtn.style.display = 'inline-block';
 
-            // Typeset on screen
-            typesetMath([scoreBanner, container]).then(() => {
-                // Generate and download the standalone report HTML file
-                const clone = document.documentElement.cloneNode(true);
-                clone.querySelectorAll('.controls-container').forEach(el => el.remove());
-                
-                const body = clone.querySelector('body');
-                const header = document.createElement('div');
-                header.className = 'report-header';
-                header.innerHTML = `
-                    <h1>Order of Operations Report</h1>
-                    <h2>Score: ${score} / ${problemTemplates.length} (${pct}%)</h2>
-                    <p>Generated: ${timeStr}</p>
-                `;
-                body.insertBefore(header, body.firstChild);
+            typesetMath([scoreBanner, container]);
+        }
 
-                const inputs = clone.querySelectorAll('.user-input');
-                document.querySelectorAll('.user-input').forEach((original, idx) => {
-                    const span = document.createElement('span');
-                    span.textContent = original.value || "—";
-                    span.className = original.className + " static-answer";
-                    span.style.padding = "4px 15px";
-                    span.style.border = "2px solid #ccc";
-                    span.style.borderRadius = "4px";
-                    span.style.backgroundColor = original.classList.contains('correct-input') ? '#d4edda' : '#f8d7da';
-                    span.style.color = original.classList.contains('correct-input') ? '#155724' : '#721c24';
-                    span.style.fontWeight = "bold";
-                    span.style.display = "inline-block";
-                    span.style.minWidth = "60px";
-                    span.style.textAlign = "center";
-                    inputs[idx].parentNode.replaceChild(span, inputs[idx]);
+        function downloadReport() {
+            if (!isSubmitted || completedReportData.length === 0) return;
+            const now = new Date();
+            const dateStr = now.toLocaleString();
+            const scoreCount = completedReportData.filter(d => d.isCorrect).length;
+            const totalCount = completedReportData.length;
+            const pct = Math.round((scoreCount / totalCount) * 100);
+
+            let report = `======================================================================\n`;
+            report += `           MASTERY TEST: ORDER OF OPERATIONS REPORT                  \n`;
+            report += `======================================================================\n`;
+            report += `Date / Time : ${dateStr}\n`;
+            report += `Score       : ${scoreCount} / ${totalCount} (${pct}%)\n`;
+            report += `======================================================================\n\n`;
+
+            completedReportData.forEach((item) => {
+                report += `----------------------------------------------------------------------\n`;
+                report += `PROBLEM #${item.id}\n`;
+                report += `Expression    : ${item.problemPlain}\n`;
+                report += `Your Answer   : ${item.userRaw}\n`;
+                report += `Correct Answer: ${item.correctStr}\n`;
+                report += `Result        : ${item.isCorrect ? "CORRECT (+1)" : "INCORRECT (0)"}\n\n`;
+                report += `Step-by-Step Explanation:\n`;
+                item.stepsPlain.forEach((step, idx) => {
+                    report += `  [Step ${idx + 1}] ${step}\n`;
                 });
-
-                clone.querySelectorAll('.solution-area').forEach(s => s.style.display = 'block');
-
-                const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `Order_Of_Ops_Report_${getTimestamp()}.html`;
-                a.click();
-                URL.revokeObjectURL(a.href);
+                report += `\n`;
             });
+
+            report += `======================================================================\n`;
+            report += `                         END OF REPORT                                \n`;
+            report += `======================================================================\n`;
+
+            const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const fileDate = now.toISOString().slice(0, 10);
+            a.href = url;
+            a.download = `Order_of_Operations_Report_${fileDate}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         generateBtn.addEventListener('click', render);
+        saveReportBtn.addEventListener('click', downloadReport);
         render();
     })();
     </script>
