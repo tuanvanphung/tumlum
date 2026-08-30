@@ -9,7 +9,14 @@
     <script>
       window.MathJax = {
         tex: { inlineMath: [['\\(', '\\)']] },
-        chtml: { scale: 1.1 } 
+        chtml: { scale: 1.05 },
+        startup: {
+          pageReady: () => {
+            return MathJax.startup.defaultPageReady().then(() => {
+              if (window.triggerMathTypeset) window.triggerMathTypeset();
+            });
+          }
+        }
       };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
@@ -17,143 +24,152 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f0f2f5; color: #333; }
         h1 { text-align: center; color: #1a2a6c; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 25px; }
         
-        .controls-container { text-align: center; padding: 20px; margin-bottom: 30px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        button { padding: 12px 28px; font-size: 1.05em; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 5px 10px; transition: 0.2s; }
+        .controls-container { text-align: center; padding: 18px; margin-bottom: 25px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: sticky; top: 10px; z-index: 100; }
+        button { padding: 12px 26px; font-size: 1.05em; font-weight: bold; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 5px 8px; transition: 0.2s; }
         #generateBtn { background-color: #3498db; }
         #generateBtn:hover { background-color: #2980b9; }
-        #showSolutionsBtn { background-color: #27ae60; }
-        #showSolutionsBtn:hover:not(:disabled) { background-color: #219653; }
-        #showSolutionsBtn:disabled { background-color: #7f8c8d; opacity: 1; cursor: default; }
-        .problem-count { font-size: 1.05em; color: #444; margin-top: 8px; font-weight: 500; }
+        #submitBtn { background-color: #27ae60; }
+        #submitBtn:hover { background-color: #219653; }
+        .problem-count { font-size: 0.95em; color: #555; margin-top: 8px; font-weight: bold; }
         
+        .score-banner { display: none; text-align: center; background: #fff; border: 3px solid #27ae60; padding: 16px; margin: 0 auto 25px auto; max-width: 850px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .score-banner h2 { margin: 0 0 5px 0; color: #27ae60; font-size: 1.6em; }
+        .score-banner p { margin: 0; color: #666; font-size: 0.95em; }
+
         .problem-list { list-style-type: none; padding-left: 0; max-width: 850px; margin: 0 auto; }
-        .problem-card { margin-bottom: 30px; padding: 25px; border-radius: 12px; background-color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 8px solid #34495e; }
+        .problem-card { margin-bottom: 25px; padding: 22px; border-radius: 12px; background-color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 8px solid #34495e; }
         
-        .problem-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
-        .problem-number { font-weight: bold; font-size: 1.3em; color: #95a5a6; }
-        .problem-expression { font-size: 1.5em; color: #2c3e50; min-width: 250px; }
-        .problem-tag { font-size: 0.7em; background: #ecf0f1; color: #7f8c8d; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+        .problem-header { display: flex; align-items: center; gap: 15px; margin-bottom: 18px; flex-wrap: wrap; }
+        .problem-number { font-weight: bold; font-size: 1.25em; color: #34495e; }
+        .problem-expression { font-size: 1.35em; color: #2c3e50; min-width: 250px; overflow-x: auto; }
+        .problem-tag { font-size: 0.75em; background: #ecf0f1; color: #7f8c8d; padding: 4px 12px; border-radius: 20px; font-weight: bold; margin-left: auto; }
         
         .answer-box { display: flex; flex-direction: column; background: #fdfdfd; padding: 15px; border: 1px solid #eee; border-radius: 8px; align-items: center; }
         
-        .multi-input-row { display: flex; gap: 15px; justify-content: center; align-items: center; margin: 6px 0; }
-        .multi-input-row label { font-size: 1.2em; font-family: 'Times New Roman', Times, serif; font-style: italic; font-weight: bold; }
-        .multi-input-row input { width: 60px; padding: 8px; font-size: 1.1em; border: 2px solid #ced4da; border-radius: 6px; text-align: center; font-family: monospace; outline: none; transition: border-color 0.2s; }
+        .multi-input-row { display: flex; gap: 15px; justify-content: center; align-items: center; margin: 6px 0; flex-wrap: wrap; }
+        .multi-input-row label { font-size: 1.15em; font-family: 'Times New Roman', Times, serif; font-style: italic; font-weight: bold; }
+        .multi-input-row input { width: 75px; padding: 8px; font-size: 1.1em; border: 2px solid #ced4da; border-radius: 6px; text-align: center; outline: none; }
         .multi-input-row input:focus { border-color: #3498db; }
         .multi-input-row input:disabled { background-color: #e9ecef; color: #495057; cursor: not-allowed; }
-        .pt-label { font-weight: bold; color: #7f8c8d; background: #ecf0f1; padding: 2px 8px; border-radius: 4px; font-size: 0.9em; margin-right: 5px; }
 
-        .input-hint { font-size: 0.85em; color: #e67e22; margin-top: 12px; font-weight: bold; }
+        .input-hint { font-size: 0.85em; color: #e67e22; margin-top: 10px; font-weight: bold; text-align: center; }
         
-        .solution-area { display: none; margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; }
-        .algebra-line { display: block; background: #fff; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin: 8px 0; color: #2c3e50; font-size: 0.95em;}
+        .solution-area { display: none; margin-top: 18px; padding: 16px; background: #f8f9fa; border-radius: 8px; border-left: 5px solid #27ae60; text-align: left; }
+        .solution-title { font-weight: bold; font-size: 1.1em; color: #27ae60; margin-bottom: 10px; }
+        .step-list { margin: 8px 0 12px 20px; padding: 0; }
+        .step-list li { margin-bottom: 10px; color: #2c3e50; line-height: 1.5; }
+        .algebra-line { display: block; background: #fff; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; margin: 6px 0; overflow-x: auto; }
+        .final-ans-tag { display: inline-block; background: #d4edda; color: #155724; padding: 4px 10px; border-radius: 4px; font-weight: bold; margin-top: 4px; }
         
-        .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; }
-        .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
-        .report-header { text-align: center; background: white; border: 3px solid #27ae60; padding: 20px; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        
-        /* Temporary style to hide elements during generation to avoid screen flashing */
-        body.typesetting-mode .solution-area {
-            opacity: 0 !important;
-        }
-
-        @media print { .controls-container { display: none; } .solution-area { display: block !important; } }
+        .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
+        .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; font-weight: bold; }
     </style>
 </head>
 <body>
     <h1>Algebra: Systems of Equations</h1>
     <p class="subtitle">Practice Problems</p>
     
-    <div class="controls-container">
+    <div class="controls-container" id="controls">
         <button id="generateBtn">Generate New Problem Set</button>
-        <button id="showSolutionsBtn">Submit & Generate Report</button>
+        <button id="submitBtn">Submit Answers</button>
         <div class="problem-count" id="problemCount"></div>
     </div>
     
+    <div id="scoreBanner" class="score-banner"></div>
     <div id="problemContainer" class="problem-list"></div>
 
     <script>
     (() => {
         const TOTAL_PROBLEMS = 5;
         const container = document.getElementById('problemContainer');
+        const controls = document.getElementById('controls');
         const generateBtn = document.getElementById('generateBtn');
-        const showBtn = document.getElementById('showSolutionsBtn');
         const problemCountEl = document.getElementById('problemCount');
-        let currentProblems = [];
+        const scoreBanner = document.getElementById('scoreBanner');
 
-        // State lock to prevent duplicate submissions or DOM modifications
+        let currentProblems = [];
         let isSubmitted = false;
 
-        // Secret salt to generate unpredictable hashes.
-        const SECRET_SALT = "AlgebraMastery_SecureSalt_98234";
+        let usedExpressions = new Set();
+        try {
+            const saved = JSON.parse(localStorage.getItem('algebraMasteryHistory') || '[]');
+            saved.forEach(e => usedExpressions.add(e));
+        } catch (e) {
+            console.warn('LocalStorage unavailable.');
+        }
 
-        let savedHistory = JSON.parse(localStorage.getItem('algebraMasteryHistory')) || [];
-        let usedExpressions = new Set(savedHistory);
-
-        // Private encryption key and cipher utility
-        const CIPHER_KEY = "SystemsOfEq_SecureKey_4829";
+        const CIPHER_KEY = "SystemsOfEq_SecureKey_Steps_9381";
 
         function encrypt(str) {
-            let xor = "";
-            for (let i = 0; i < str.length; i++) {
-                xor += String.fromCharCode(str.charCodeAt(i) ^ CIPHER_KEY.charCodeAt(i % CIPHER_KEY.length));
+            try {
+                const encoder = new TextEncoder();
+                const bytes = encoder.encode(str);
+                const keyBytes = encoder.encode(CIPHER_KEY);
+                for (let i = 0; i < bytes.length; i++) {
+                    bytes[i] ^= keyBytes[i % keyBytes.length];
+                }
+                let bin = "";
+                for (let i = 0; i < bytes.length; i++) {
+                    bin += String.fromCharCode(bytes[i]);
+                }
+                return btoa(bin);
+            } catch (e) {
+                return btoa(unescape(encodeURIComponent(str)));
             }
-            return btoa(unescape(encodeURIComponent(xor)));
         }
 
         function decrypt(str) {
-            let decoded = decodeURIComponent(escape(atob(str)));
-            let xor = "";
-            for (let i = 0; i < decoded.length; i++) {
-                xor += String.fromCharCode(decoded.charCodeAt(i) ^ CIPHER_KEY.charCodeAt(i % CIPHER_KEY.length));
+            try {
+                const bin = atob(str);
+                const bytes = new Uint8Array(bin.length);
+                for (let i = 0; i < bin.length; i++) {
+                    bytes[i] = bin.charCodeAt(i);
+                }
+                const encoder = new TextEncoder();
+                const keyBytes = encoder.encode(CIPHER_KEY);
+                for (let i = 0; i < bytes.length; i++) {
+                    bytes[i] ^= keyBytes[i % keyBytes.length];
+                }
+                return new TextDecoder().decode(bytes);
+            } catch (e) {
+                return decodeURIComponent(escape(atob(str)));
             }
-            return xor;
         }
 
-        // Verification token hash generator
-        function generateWatermark(score, total, timestamp) {
-            const raw = `${score}|${total}|${timestamp}|${SECRET_SALT}`;
-            let hash1 = 5381;
-            let hash2 = 12345;
-            for (let i = 0; i < raw.length; i++) {
-                const char = raw.charCodeAt(i);
-                hash1 = ((hash1 << 5) + hash1) ^ char;
-                hash2 = ((hash2 << 7) + hash2) ^ char;
+        function typesetMath(elements) {
+            if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                return window.MathJax.typesetPromise(elements).catch((err) => console.warn('Typesetting error:', err));
             }
-            const p1 = (hash1 >>> 0).toString(16).padStart(8, '0');
-            const p2 = (hash2 >>> 0).toString(16).padStart(8, '0');
-            const p3 = (hash1 ^ hash2 >>> 0).toString(16).padStart(8, '0');
-            return `${p1}-${p2}-${p3}`.toUpperCase();
+            return Promise.resolve();
         }
 
-        function typesetMath(callback) {
-            if (window.MathJax && window.MathJax.typesetPromise) {
-                window.MathJax.typesetPromise([container])
-                    .then(() => { if (callback) callback(); })
-                    .catch((err) => console.log(err.message));
-            } else {
-                setTimeout(() => typesetMath(callback), 100);
-            }
-        }
+        window.triggerMathTypeset = () => {
+            typesetMath([container]);
+        };
 
         function getRnd(min, max, exclude=[]) {
             let val;
-            do { val = Math.floor(Math.random() * (max - min + 1)) + min; } while(exclude.includes(val));
+            let count = 0;
+            do { 
+                val = Math.floor(Math.random() * (max - min + 1)) + min;
+                count++;
+            } while (exclude.includes(val) && count < 100);
             return val;
         }
 
         function shuffle(arr) {
-            for (let i = arr.length - 1; i > 0; i--) {
+            let copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [arr[i], arr[j]] = [arr[j], arr[i]];
+                [copy[i], copy[j]] = [copy[j], copy[i]];
             }
-            return arr;
+            return copy;
         }
 
         function gcd(a, b) {
-            return b ? gcd(b, a % b) : a;
+            return b ? gcd(b, a % b) : Math.abs(a);
         }
 
         function term(coeff, v, first) {
@@ -165,7 +181,7 @@
         }
         
         function constant(c, first=false) {
-            if (c === 0) return "";
+            if (c === 0) return first ? "0" : "";
             if (first) return `${c}`;
             return c < 0 ? `- ${Math.abs(c)}` : `+ ${c}`;
         }
@@ -194,48 +210,16 @@
             return `${sign}\\frac{${n}${v}}{${d}}`;
         }
 
+        // =============================================================
+        // PROBLEM GENERATORS (ALL STRICTLY INTEGER OUTCOMES)
+        // =============================================================
         function generateProblem(id, type) {
             let prob = { id, type, expression: "", hint: "" };
-            let stepsArr = [];
-            
-            const buildStepsHTML = (steps) => `<strong>Solution Guide:</strong>` + steps.map(s => `<div class="step-row">${s.m}<span class="algebra-line">\\( ${s.l} \\)</span></div>`).join('');
-
+            let steps = [];
             let x, y, z;
 
             switch(type) {
                 case 'hard_elim': {
-                    let d1 = getRnd(2, 5);
-                    let d2 = getRnd(2, 5, [d1]);
-                    
-                    let kx = getRnd(-2, 2, [0]);
-                    let ky = getRnd(-2, 2, [0]);
-                    x = kx * d1;
-                    y = ky * d2;
-                    
-                    // Force a1 = 1 so that after clearing fractions, x has a coefficient of 1 (substitution friendly)
-                    let a1 = 1; 
-                    let b1 = getRnd(-4, 4, [0]);
-                    
-                    let a2 = getRnd(-4, 4, [0]);
-                    let b2 = getRnd(1, 5);
-                    while (gcd(b2, d2) !== 1) b2 = getRnd(1, 5);
-                    
-                    while ((a1 * b2) === (a2 * b1 * d1 * d2)) {
-                        a2 = getRnd(-4, 4, [0]);
-                    }
-                    
-                    let c1 = a1 * kx + b1 * y;
-                    let c2 = a2 * x + b2 * ky;
-                    
-                    prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\ ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} = ${c2} \\end{cases}`;
-                    prob.hint = "Clear fractions first, then use substitution.";
-                    
-                    stepsArr.push({m: "Step 1: Multiply both equations by their denominators to clear fractions.", l: `\\begin{cases} ${term(a1, 'x', true)} ${term(b1 * d1, 'y', false)} = ${c1 * d1} \\\\ ${term(a2 * d2, 'x', true)} ${term(b2, 'y', false)} = ${c2 * d2} \\end{cases}`});
-                    stepsArr.push({m: "Step 2: Solve the resulting system using substitution (x has a coefficient of 1).", l: `\\text{Isolate x in the first equation and substitute.}`});
-                    stepsArr.push({m: "Step 3: Substitute back.", l: `x = ${x}, \\quad y = ${y}`});
-                    break;
-                }
-                case 'scrambled': {
                     let d1 = getRnd(2, 4);
                     let d2 = getRnd(2, 4, [d1]);
                     
@@ -244,173 +228,277 @@
                     x = kx * d1;
                     y = ky * d2;
                     
-                    // Force a1 = 1 so x isolates cleanly
-                    let a1 = 1;
-                    let b1 = getRnd(2, 5);
-                    let c1 = a1 * kx + b1 * y;
-                    
-                    let eq1 = c1 === 0 ? `${fracTerm(a1, d1, 'x', true)} = ${term(-b1, 'y', true)}` : `${fracTerm(a1, d1, 'x', true)} = ${c1} ${term(-b1, 'y', false)}`; 
-                    
-                    let a2 = getRnd(-4, -2);
+                    let a1 = 1; 
+                    let b1 = getRnd(-3, 3, [0]);
+                    let a2 = getRnd(-3, 3, [0]);
                     let b2 = getRnd(1, 4);
                     while (gcd(b2, d2) !== 1) b2 = getRnd(1, 4);
                     
-                    // Avoid dependency condition
-                    while ((1 * b2) === (-a2 * d2 * b1 * d1)) {
-                        b2 = getRnd(1, 4);
-                        while (gcd(b2, d2) !== 1) b2 = getRnd(1, 4);
-                    }
-
-                    let c2 = b2 * ky - a2 * x;
-                    let eq2 = `${fracTerm(b2, d2, 'y', true)} = ${term(a2, 'x', true)} ${constant(c2, false)}`; 
+                    // Exact integer constants
+                    let c1 = a1 * kx + b1 * y;
+                    let c2 = a2 * x + b2 * ky;
                     
-                    prob.expression = `\\begin{cases} ${eq1} \\\\ ${eq2} \\end{cases}`;
-                    prob.hint = "Rearrange, clear fractions, and substitute.";
+                    prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\[6pt] ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} = ${c2} \\end{cases}`;
+                    prob.hint = "Clear fractions first, then use substitution.";
+                    
+                    let eq1ClearConst = c1 * d1;
+                    let eq1YCoeff = b1 * d1;
+                    let eq2ClearConst = c2 * d2;
+                    let eq2XCoeff = a2 * d2;
 
-                    stepsArr.push({m: "Step 1: Rearrange both into standard form (Ax + By = C).", l: `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\ ${term(-a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} = ${c2} \\end{cases}`});
-                    stepsArr.push({m: "Step 2: Clear fractions by multiplying each equation by its denominator.", l: `\\begin{cases} ${term(a1, 'x', true)} ${term(b1 * d1, 'y', false)} = ${c1 * d1} \\\\ ${term(-a2 * d2, 'x', true)} ${term(b2, 'y', false)} = ${c2 * d2} \\end{cases}`});
-                    stepsArr.push({m: "Step 3: Solve using substitution (isolate x in Eq 1).", l: `x = ${x}, \\quad y = ${y}`});
+                    steps.push(
+                        `<strong>Step 1: Clear fractions in both equations</strong><br>
+                         Multiply Eq (1) by \\(${d1}\\) and Eq (2) by \\(${d2}\\):
+                         <span class="algebra-line">\\(\\begin{cases} x ${term(eq1YCoeff, 'y', false)} = ${eq1ClearConst} \\quad \\text{--- (1')} \\\\[4pt] ${term(eq2XCoeff, 'x', true)} ${term(b2, 'y', false)} = ${eq2ClearConst} \\quad \\text{--- (2')} \\end{cases}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Isolate \\(x\\) in Eq (1')</strong><br>
+                         <span class="algebra-line">\\(x = ${eq1ClearConst} ${term(-eq1YCoeff, 'y', false)}\\)</span>`
+                    );
+                    let combinedYCoeff = (eq2XCoeff * (-eq1YCoeff)) + b2;
+                    let combinedConst = eq2ClearConst - (eq2XCoeff * eq1ClearConst);
+                    steps.push(
+                        `<strong>Step 3: Substitute \\(x\\) into Eq (2') and solve for \\(y\\)</strong><br>
+                         <span class="algebra-line">\\(${eq2XCoeff}(${eq1ClearConst} ${term(-eq1YCoeff, 'y', false)}) ${term(b2, 'y', false)} = ${eq2ClearConst}\\)</span>
+                         <span class="algebra-line">\\(${combinedYCoeff}y = ${combinedConst} \\implies y = ${y}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 4: Back-substitute \\(y = ${y}\\) to find \\(x\\)</strong><br>
+                         <span class="algebra-line">\\(x = ${eq1ClearConst} ${term(-eq1YCoeff, '', false)}(${y}) = ${x}\\)</span>`
+                    );
                     break;
                 }
-                case 'fractional': {
-                    let d1 = getRnd(2, 4);
-                    let d2 = getRnd(2, 5, [d1]);
-                    x = getRnd(-3, 3, [0]) * d1; 
-                    y = getRnd(-2, 2, [0]) * d2; 
-                    let c1 = (x/d1) + (y/d2);
-                    
-                    // Force a2 = 1 so the second equation has no fractional coefficients during substitution
-                    let a2 = 1; 
-                    let b2 = getRnd(-4, -1); 
-                    let c2 = a2*x + b2*y;
-                    
-                    prob.expression = `\\begin{cases} \\frac{x}{${d1}} + \\frac{y}{${d2}} = ${c1} \\\\ ${term(a2, 'x', true)} ${term(b2, 'y', false)} = ${c2} \\end{cases}`;
-                    prob.hint = "Clear fractions or isolate x in the second equation.";
-
-                    stepsArr.push({m: `Step 1: Multiply the top equation by the LCD (${d1 * d2}) to clear fractions.`, l: `${term(d2, 'x', true)} ${term(d1, 'y', false)} = ${c1 * d1 * d2}`});
-                    stepsArr.push({m: "Step 2: Solve the system using substitution (isolate x in the second equation).", l: `x = ${x}, \\quad y = ${y}`});
-                    break;
-                }
-                case 'three_var': {
-                    let d1 = getRnd(2, 4);
-                    let d2 = getRnd(2, 3, [d1]);
+                case 'scrambled': {
+                    let d1 = getRnd(2, 3);
+                    let d2 = getRnd(2, 4, [d1]);
                     
                     let kx = getRnd(-2, 2, [0]);
                     let ky = getRnd(-2, 2, [0]);
                     x = kx * d1;
                     y = ky * d2;
-                    z = getRnd(-3, 3, [0]);
                     
-                    // Force a1 = 1 so the first eq clears perfectly for substituting x
+                    let a1 = 1;
+                    let b1 = getRnd(2, 4);
+                    let c1 = a1 * kx + b1 * y;
+                    
+                    let eq1 = `${fracTerm(a1, d1, 'x', true)} = ${c1} ${term(-b1, 'y', false)}`; 
+                    let a2 = getRnd(-3, -1);
+                    let b2 = getRnd(1, 3);
+                    while (gcd(b2, d2) !== 1) b2 = getRnd(1, 3);
+
+                    let c2 = b2 * ky - a2 * x;
+                    let eq2 = `${fracTerm(b2, d2, 'y', true)} = ${term(a2, 'x', true)} ${constant(c2, false)}`; 
+                    
+                    prob.expression = `\\begin{cases} ${eq1} \\\\[6pt] ${eq2} \\end{cases}`;
+                    prob.hint = "Rearrange, clear fractions, and substitute.";
+
+                    let eq1ClearConst = c1 * d1;
+                    let eq1YCoeff = b1 * d1;
+                    let eq2ClearConst = c2 * d2;
+
+                    steps.push(
+                        `<strong>Step 1: Rearrange and clear fractions</strong><br>
+                         Multiply Eq (1) by \\(${d1}\\) and Eq (2) by \\(${d2}\\):
+                         <span class="algebra-line">\\(\\begin{cases} x = ${eq1ClearConst} ${term(-eq1YCoeff, 'y', false)} \\quad \\text{--- (1')} \\\\[4pt] ${b2}y = ${term(a2 * d2, 'x', true)} ${constant(eq2ClearConst, false)} \\quad \\text{--- (2')} \\end{cases}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Substitute \\(x\\) into Eq (2') and solve for \\(y\\)</strong><br>
+                         <span class="algebra-line">\\(${b2}y = ${a2 * d2}(${eq1ClearConst} ${term(-eq1YCoeff, 'y', false)}) ${constant(eq2ClearConst, false)} \\implies y = ${y}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 3: Back-substitute \\(y = ${y}\\) to find \\(x\\)</strong><br>
+                         <span class="algebra-line">\\(x = ${eq1ClearConst} ${term(-eq1YCoeff, '', false)}(${y}) = ${x}\\)</span>`
+                    );
+                    break;
+                }
+                case 'fractional': {
+                    let d1 = getRnd(2, 3);
+                    let d2 = getRnd(2, 4, [d1]);
+                    let kx = getRnd(-2, 2, [0]);
+                    let ky = getRnd(-2, 2, [0]);
+                    x = kx * d1; 
+                    y = ky * d2; 
+                    
+                    let c1 = kx + ky; // Exact integer
+                    let a2 = 1; 
+                    let b2 = getRnd(-3, -1); 
+                    let c2 = a2 * x + b2 * y; // Exact integer
+                    let lcd = d1 * d2;
+                    
+                    prob.expression = `\\begin{cases} \\frac{x}{${d1}} + \\frac{y}{${d2}} = ${c1} \\\\[6pt] ${term(a2, 'x', true)} ${term(b2, 'y', false)} = ${c2} \\end{cases}`;
+                    prob.hint = "Clear fractions or isolate x in the second equation.";
+
+                    let eq1XCoeff = d2;
+                    let eq1YCoeff = d1;
+                    let eq1Const = c1 * lcd;
+
+                    steps.push(
+                        `<strong>Step 1: Multiply Eq (1) by LCD (\\(${lcd}\\)) to clear fractions</strong><br>
+                         <span class="algebra-line">\\(${eq1XCoeff}x + ${eq1YCoeff}y = ${eq1Const} \\quad \\text{--- (1')}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Isolate \\(x\\) in Eq (2)</strong><br>
+                         <span class="algebra-line">\\(x = ${c2} ${term(-b2, 'y', false)}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 3: Substitute \\(x\\) into Eq (1') to solve for \\(y\\)</strong><br>
+                         <span class="algebra-line">\\(${eq1XCoeff}(${c2} ${term(-b2, 'y', false)}) + ${eq1YCoeff}y = ${eq1Const} \\implies y = ${y}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 4: Back-substitute \\(y = ${y}\\) into Eq (2) to solve for \\(x\\)</strong><br>
+                         <span class="algebra-line">\\(x = ${c2} ${term(-b2, '', false)}(${y}) = ${x}\\)</span>`
+                    );
+                    break;
+                }
+                case 'three_var': {
+                    let d1 = getRnd(2, 3);
+                    let d2 = 2;
+                    
+                    let kx = getRnd(-2, 2, [0]);
+                    let ky = getRnd(-2, 2, [0]);
+                    x = kx * d1;
+                    y = ky * d2;
+                    z = getRnd(-2, 2, [0]);
+                    
                     let a1 = 1;
                     let c1 = a1 * kx + y + z;
                     
-                    let a2 = getRnd(2, 4);
-                    let b2 = getRnd(-3, -1);
-                    while (gcd(Math.abs(b2), d2) !== 1) b2 = getRnd(-3, -1);
-                    let c_2 = getRnd(1, 3);
+                    let a2 = 2;
+                    let b2 = -1;
+                    let c_2 = 1;
                     let d2_val = a2 * x + b2 * ky + c_2 * z;
                     
-                    let a3 = getRnd(-2, 2, [0]);
-                    let b3 = getRnd(2, 4);
-                    let c_3 = getRnd(-4, -2);
+                    let a3 = 1;
+                    let b3 = 2;
+                    let c_3 = -2;
                     let d3 = a3 * x + b3 * y + c_3 * z;
                     
-                    prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} + y + z = ${c1} \\\\ ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} ${term(c_2, 'z', false)} = ${d2_val} \\\\ ${term(a3, 'x', true)} ${term(b3, 'y', false)} ${term(c_3, 'z', false)} = ${d3} \\end{cases}`;
-                    prob.hint = "Clear fractions, then use substitution.";
+                    prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} + y + z = ${c1} \\\\[6pt] ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} ${term(c_2, 'z', false)} = ${d2_val} \\\\[6pt] ${term(a3, 'x', true)} ${term(b3, 'y', false)} ${term(c_3, 'z', false)} = ${d3} \\end{cases}`;
+                    prob.hint = "Clear fractions, isolate x in Eq (1), and substitute.";
 
-                    stepsArr.push({m: "Step 1: Multiply equations to clear fractions and rewrite the system with integer coefficients.", l: `\\begin{cases} ${term(a1, 'x', true)} + ${term(d1, 'y', false)} + ${term(d1, 'z', false)} = ${c1 * d1} \\\\ ${term(a2 * d2, 'x', true)} ${term(b2, 'y', false)} ${term(c_2 * d2, 'z', false)} = ${d2_val * d2} \\\\ ${term(a3, 'x', true)} ${term(b3, 'y', false)} ${term(c_3, 'z', false)} = ${d3} \\end{cases}`});
-                    stepsArr.push({m: "Step 2: Solve the 3x3 system using substitution (x is easy to isolate in Eq 1).", l: `x = ${x}, \\quad y = ${y}, \\quad z = ${z}`});
+                    let eq1ClearConst = c1 * d1;
+                    let eq2ClearConst = d2_val * d2;
+
+                    steps.push(
+                        `<strong>Step 1: Clear fractions to write system with integer coefficients</strong><br>
+                         Multiply Eq (1) by \\(${d1}\\) and Eq (2) by \\(${d2}\\):
+                         <span class="algebra-line">\\(\\begin{cases} x + ${d1}y + ${d1}z = ${eq1ClearConst} \\quad \\text{--- (1')} \\\\[3pt] ${a2 * d2}x + ${b2}y + ${c_2 * d2}z = ${eq2ClearConst} \\quad \\text{--- (2')} \\\\[3pt] ${term(a3, 'x', true)} ${term(b3, 'y', false)} ${term(c_3, 'z', false)} = ${d3} \\quad \\text{--- (3')} \\end{cases}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Isolate \\(x\\) in Eq (1')</strong><br>
+                         <span class="algebra-line">\\(x = ${eq1ClearConst} - ${d1}y - ${d1}z\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 3: Substitute \\(x\\) into Eq (2') and Eq (3') to reduce to a 2×2 system</strong><br>
+                         Solving the resulting system yields:
+                         <span class="algebra-line">\\(y = ${y}, \\quad z = ${z}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 4: Back-substitute \\(y = ${y}\\) and \\(z = ${z}\\) to find \\(x\\)</strong><br>
+                         <span class="algebra-line">\\(x = ${eq1ClearConst} - ${d1}(${y}) - ${d1}(${z}) = ${x}\\)</span>`
+                    );
                     break;
                 }
                 case 'heavy_fractional': {
-                    // Pre-defined denominator options allowing a mathematically seamless substitution
-                    let d1_options = [4, 6];
-                    let d1 = d1_options[getRnd(0, 1)];
-                    let g1 = d1 / 2;
-                    let d2 = getRnd(2, 3);
-                    let g2 = getRnd(2, 3);
+                    // Pre-engineered exact integer system
+                    let d1 = 2, g1 = 3;
+                    let d2 = 4, g2 = 2;
                     
                     let kx = getRnd(-1, 1, [0]);
                     let ky = getRnd(-1, 1, [0]);
                     
-                    x = kx * d1 * d2;
-                    y = ky * g1 * g2;
+                    // x is a multiple of both d1 and d2 (LCM = 4)
+                    // y is a multiple of both g1 and g2 (LCM = 6)
+                    x = kx * 4;
+                    y = ky * 6;
                     
-                    // Force a1 = 1 so clearing multiplying by the LCD perfectly produces a coefficient of exactly 1
-                    let a1 = 1;
+                    let a1 = 1, b1 = 1;
+                    let a2 = -1, b2 = 1;
                     
-                    let b1 = getRnd(-3, 3, [0]);
-                    while (gcd(Math.abs(b1), g1) !== 1) b1 = getRnd(-3, 3, [0]);
+                    // Guaranteed exact integer constants
+                    let c1 = (x / d1) + (y / g1); // (4kx / 2) + (6ky / 3) = 2kx + 2ky
+                    let c2 = (-x / d2) + (y / g2); // (-4kx / 4) + (6ky / 2) = -kx + 3ky
                     
-                    let a2 = getRnd(-3, 3, [0]);
-                    while (gcd(Math.abs(a2), d2) !== 1) a2 = getRnd(-3, 3, [0]);
-                    
-                    let b2 = getRnd(1, 3);
-                    while (gcd(b2, g2) !== 1) b2 = getRnd(1, 3);
-                    
-                    while (a1 * b2 * d2 * g1 === a2 * b1 * d1 * g2) {
-                        a2 = getRnd(-3, 3, [0]);
-                        while (gcd(Math.abs(a2), d2) !== 1) a2 = getRnd(-3, 3, [0]);
-                    }
-                    
-                    let c1 = (a1 / d1) * x + (b1 / g1) * y;
-                    let c2 = (a2 / d2) * x + (b2 / g2) * y;
-                    
-                    prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${fracTerm(b1, g1, 'y', false)} = ${c1} \\\\ ${fracTerm(a2, d2, 'x', true)} ${fracTerm(b2, g2, 'y', false)} = ${c2} \\end{cases}`;
+                    prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${fracTerm(b1, g1, 'y', false)} = ${c1} \\\\[6pt] ${fracTerm(a2, d2, 'x', true)} ${fracTerm(b2, g2, 'y', false)} = ${c2} \\end{cases}`;
                     prob.hint = "Clear fractions first, then use substitution.";
                     
-                    let lcd1 = d1;
-                    let lcd2 = (d2 * g2) / gcd(d2, g2);
+                    let lcd1 = 6;
+                    let lcd2 = 4;
                     
-                    stepsArr.push({
-                        m: `Step 1: Multiply Eq 1 by its LCD (${lcd1}) and Eq 2 by its LCD (${lcd2}) to clear all fractions.`,
-                        l: `\\begin{cases} ${term((a1 * lcd1) / d1, 'x', true)} ${term((b1 * lcd1) / g1, 'y', false)} = ${c1 * lcd1} \\\\ ${term((a2 * lcd2) / d2, 'x', true)} ${term((b2 * lcd2) / g2, 'y', false)} = ${c2 * lcd2} \\end{cases}`
-                    });
-                    stepsArr.push({m: "Step 2: Solve the system using substitution (isolate x in Eq 1).", l: `\\text{Substitute x into the other equation.}`});
-                    stepsArr.push({m: "Step 3: Substitute back to get the final answers.", l: `x = ${x}, \\quad y = ${y}`});
+                    let eq1XCoeff = 3;
+                    let eq1YCoeff = 2;
+                    let eq1Const = c1 * lcd1;
+                    
+                    let eq2XCoeff = -1;
+                    let eq2YCoeff = 2;
+                    let eq2Const = c2 * lcd2;
+
+                    steps.push(
+                        `<strong>Step 1: Multiply Eq (1) by LCD (\\(${lcd1}\\)) and Eq (2) by LCD (\\(${lcd2}\\))</strong><br>
+                         <span class="algebra-line">\\(\\begin{cases} ${eq1XCoeff}x + ${eq1YCoeff}y = ${eq1Const} \\quad \\text{--- (1')} \\\\[4pt] -x + ${eq2YCoeff}y = ${eq2Const} \\quad \\text{--- (2')} \\end{cases}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Isolate \\(x\\) in Eq (2')</strong><br>
+                         <span class="algebra-line">\\(x = ${eq2YCoeff}y - (${eq2Const})\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 3: Substitute \\(x\\) into Eq (1') and solve for \\(y\\)</strong><br>
+                         <span class="algebra-line">\\(${eq1XCoeff}(${eq2YCoeff}y - ${eq2Const}) + ${eq1YCoeff}y = ${eq1Const}\\)</span>
+                         <span class="algebra-line">\\(8y - ${eq1XCoeff * eq2Const} = ${eq1Const} \\implies 8y = ${eq1Const + eq1XCoeff * eq2Const} \\implies y = ${y}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 4: Back-substitute \\(y = ${y}\\) to find \\(x\\)</strong><br>
+                         <span class="algebra-line">\\(x = ${eq2YCoeff}(${y}) - ${eq2Const} = ${x}\\)</span>`
+                    );
                     break;
                 }
             }
             
-            // Build and encrypt the secured verification payload
+            const answers = (type === 'three_var') 
+                ? { x: x.toString(), y: y.toString(), z: z.toString() } 
+                : { x: x.toString(), y: y.toString() };
+                
             const payload = {
-                answers: (type === 'three_var') ? [x.toString(), y.toString(), z.toString()] : [x.toString(), y.toString()],
-                stepsHTML: buildStepsHTML(stepsArr)
+                answers: answers,
+                steps: steps,
+                finalText: (type === 'three_var') ? `x = ${x}, \\; y = ${y}, \\; z = ${z}` : `x = ${x}, \\; y = ${y}`
             };
+
             prob.securedPayload = encrypt(JSON.stringify(payload));
-            
             return prob;
         }
 
         const typeLabels = {
-            hard_elim: 'System with Fractions', scrambled: 'Scrambled Terms', 
-            fractional: 'Fractional Coefficients', three_var: '3-Variables (x,y,z)', heavy_fractional: 'Heavy Fractional'
+            hard_elim: 'System with Fractions',
+            scrambled: 'Scrambled Terms', 
+            fractional: 'Fractional Coefficients',
+            three_var: '3-Variables (x,y,z)',
+            heavy_fractional: 'Heavy Fractional'
         };
 
         function render() {
             isSubmitted = false;
-            container.innerHTML = ''; currentProblems = [];
-            showBtn.disabled = false; showBtn.style.backgroundColor = '#27ae60'; showBtn.textContent = "Submit & Generate Report";
+            container.innerHTML = ''; 
+            currentProblems = [];
+            scoreBanner.style.display = 'none';
+            scoreBanner.innerHTML = '';
+
+            let existingSubmit = document.getElementById('submitBtn');
+            if (!existingSubmit) {
+                const btn = document.createElement('button');
+                btn.id = 'submitBtn';
+                btn.textContent = 'Submit Answers';
+                btn.onclick = checkAnswers;
+                controls.insertBefore(btn, problemCountEl);
+            } else {
+                existingSubmit.onclick = checkAnswers;
+            }
             
-            let types = ['hard_elim', 'scrambled', 'fractional', 'three_var', 'heavy_fractional'];
-            types = shuffle(types);
-            
-            problemCountEl.innerHTML = `<strong>Practice Set:</strong> 5 Algebraic Systems of Equations`;
+            let types = shuffle(['hard_elim', 'scrambled', 'fractional', 'three_var', 'heavy_fractional']);
+            problemCountEl.innerHTML = `<strong>${TOTAL_PROBLEMS} Systems of Equations</strong> \u2014 Solve each system and submit to see full steps.`;
 
             for (let i = 1; i <= TOTAL_PROBLEMS; i++) {
-                let p;
-                let attempts = 0;
-                
-                do {
-                    p = generateProblem(i, types[i - 1]);
-                    attempts++;
-                } while (usedExpressions.has(p.expression) && attempts < 50);
-
-                if (attempts >= 50) {
-                    usedExpressions.clear();
-                }
-
+                let p = generateProblem(i, types[i - 1]);
                 usedExpressions.add(p.expression);
                 currentProblems.push(p);
                 
@@ -418,15 +506,15 @@
                 if (p.type === 'three_var') {
                     inputHTML = `
                         <div class="multi-input-row">
-                            <label>x = </label><input type="text" class="user-input" id="input-${i}-x" autocomplete="off">
-                            <label>&nbsp;&nbsp;y = </label><input type="text" class="user-input" id="input-${i}-y" autocomplete="off">
-                            <label>&nbsp;&nbsp;z = </label><input type="text" class="user-input" id="input-${i}-z" autocomplete="off">
+                            <label>x = </label><input type="text" class="user-input" id="input-${i}-x" autocomplete="off" placeholder="x">
+                            <label>&nbsp;&nbsp;y = </label><input type="text" class="user-input" id="input-${i}-y" autocomplete="off" placeholder="y">
+                            <label>&nbsp;&nbsp;z = </label><input type="text" class="user-input" id="input-${i}-z" autocomplete="off" placeholder="z">
                         </div>`;
                 } else {
                     inputHTML = `
                         <div class="multi-input-row">
-                            <label>x = </label><input type="text" class="user-input" id="input-${i}-x" autocomplete="off">
-                            <label>&nbsp;&nbsp;y = </label><input type="text" class="user-input" id="input-${i}-y" autocomplete="off">
+                            <label>x = </label><input type="text" class="user-input" id="input-${i}-x" autocomplete="off" placeholder="x">
+                            <label>&nbsp;&nbsp;y = </label><input type="text" class="user-input" id="input-${i}-y" autocomplete="off" placeholder="y">
                         </div>`;
                 }
 
@@ -434,9 +522,9 @@
                 div.className = 'problem-card';
                 div.innerHTML = `
                     <div class="problem-header">
-                        <span class="problem-number">#${i}</span>
+                        <span class="problem-number">Problem #${i}</span>
                         <div class="problem-expression">\\( ${p.expression} \\)</div>
-                        <span class="problem-tag" style="background-color: #ecf0f1; color: #7f8c8d;">${typeLabels[p.type]}</span>
+                        <span class="problem-tag">${typeLabels[p.type]}</span>
                     </div>
                     <div class="answer-box">
                         ${inputHTML}
@@ -447,51 +535,46 @@
                 container.appendChild(div);
             }
 
-            localStorage.setItem('algebraMasteryHistory', JSON.stringify(Array.from(usedExpressions)));
-            typesetMath();
+            try {
+                localStorage.setItem('algebraMasteryHistory', JSON.stringify(Array.from(usedExpressions)));
+            } catch (e) {}
+
+            typesetMath([container]);
         }
 
-        function getTimestamp() {
-            const now = new Date();
-            const yymmdd = String(now.getFullYear()).slice(-2) + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
-            const hhmi = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
-            return `${yymmdd}_${hhmi}`;
-        }
-
-        function check() {
+        function checkAnswers() {
             if (isSubmitted) return;
             isSubmitted = true;
 
-            let score = 0;
+            const btn = document.getElementById('submitBtn');
+            if (btn) btn.remove();
 
-            document.body.classList.add('typesetting-mode');
+            let score = 0;
+            const clean = str => (str || '').toLowerCase().replace(/\s+/g, '');
 
             currentProblems.forEach(p => {
+                const data = JSON.parse(decrypt(p.securedPayload));
+                const correctAnswers = data.answers;
+                
+                let isCorrect = true;
                 let inputElements = [];
-                let userValues = [];
 
                 if (p.type === 'three_var') {
                     const ix = document.getElementById(`input-${p.id}-x`);
                     const iy = document.getElementById(`input-${p.id}-y`);
                     const iz = document.getElementById(`input-${p.id}-z`);
-                    inputElements.push(ix, iy, iz);
-                    userValues.push(ix.value, iy.value, iz.value);
+                    inputElements = [ix, iy, iz];
+
+                    if (clean(ix.value) !== correctAnswers.x || clean(iy.value) !== correctAnswers.y || clean(iz.value) !== correctAnswers.z) {
+                        isCorrect = false;
+                    }
                 } else {
                     const ix = document.getElementById(`input-${p.id}-x`);
                     const iy = document.getElementById(`input-${p.id}-y`);
-                    inputElements.push(ix, iy);
-                    userValues.push(ix.value, iy.value);
-                }
+                    inputElements = [ix, iy];
 
-                const payload = JSON.parse(decrypt(p.securedPayload));
-                const answers = payload.answers;
-
-                const clean = str => (str || '').toLowerCase().replace(/\s+/g, '');
-                let isCorrect = true;
-                for (let idx = 0; idx < answers.length; idx++) {
-                    if (clean(userValues[idx]) !== answers[idx]) {
+                    if (clean(ix.value) !== correctAnswers.x || clean(iy.value) !== correctAnswers.y) {
                         isCorrect = false;
-                        break;
                     }
                 }
 
@@ -500,125 +583,34 @@
                     el.disabled = true;
                 });
                 
-                const solDiv = document.getElementById(`sol-${p.id}`);
-                solDiv.innerHTML = payload.stepsHTML;
-                solDiv.style.display = 'block';
-                
                 if (isCorrect) score++;
+
+                const solDiv = document.getElementById(`sol-${p.id}`);
+                let stepsHtml = `<ol class="step-list">`;
+                data.steps.forEach(st => {
+                    stepsHtml += `<li>${st}</li>`;
+                });
+                stepsHtml += `</ol>`;
+
+                solDiv.innerHTML = `
+                    <div class="solution-title">${isCorrect ? '✓ Correct' : '✗ Incorrect'} \u2014 Step-by-Step Solution:</div>
+                    ${stepsHtml}
+                    <div><strong>Final Solution:</strong> <span class="final-ans-tag">\\( ${data.finalText} \\)</span></div>
+                `;
+                solDiv.style.display = 'block';
             });
             
-            const timeStr = new Date().toLocaleString();
             const pct = Math.round((score / TOTAL_PROBLEMS) * 100);
+            scoreBanner.innerHTML = `
+                <h2>Test Completed! Score: ${score} / ${TOTAL_PROBLEMS} (${pct}%)</h2>
+                <p>Review the step-by-step solutions below. To practice again, click <strong>"Generate New Problem Set"</strong>.</p>
+            `;
+            scoreBanner.style.display = 'block';
             
-            showBtn.disabled = true;
-            showBtn.innerHTML = `Score: ${score}/${TOTAL_PROBLEMS} (${pct}%)<br><small>${timeStr}</small>`;
-            
-            typesetMath(() => {
-                document.body.classList.remove('typesetting-mode');
-
-                const clone = document.documentElement.cloneNode(true);
-                clone.querySelectorAll('script, .controls-container').forEach(el => el.remove());
-                
-                const body = clone.querySelector('body');
-                
-                const watermark = generateWatermark(score, TOTAL_PROBLEMS, timeStr);
-
-                const header = document.createElement('div');
-                header.className = 'report-header';
-                header.innerHTML = `
-                    <h1>Systems of Equations Report</h1>
-                    <div style="margin: 12px 0;" id="report-status">
-                        <span style="color: #7f8c8d; font-weight: bold; border: 2px solid #ccc; padding: 4px 8px; border-radius: 4px; background: #fafafa;">Verification Pending...</span>
-                    </div>
-                    <h2>Score: <span id="report-score">${score}</span> / <span id="report-total">${TOTAL_PROBLEMS}</span> (${pct}%)</h2>
-                    <p>Date: <span id="report-time">${timeStr}</span></p>
-                    <div id="report-token" data-token="${watermark}" style="font-family: monospace; font-size: 0.85em; color: #7f8c8d; margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 10px;">
-                        Security Token: ${watermark}
-                    </div>
-                `;
-                body.insertBefore(header, body.firstChild);
-                
-                const inputs = clone.querySelectorAll('.user-input');
-                document.querySelectorAll('.user-input').forEach((original, idx) => {
-                    const span = document.createElement('span');
-                    span.textContent = original.value || "—";
-                    span.className = original.className + " static-answer";
-                    span.style.padding = "4px 8px";
-                    span.style.border = "2px solid #ccc";
-                    span.style.borderRadius = "4px";
-                    span.style.backgroundColor = "#fff";
-                    span.style.display = "inline-block";
-                    span.style.minWidth = "35px";
-                    span.style.textAlign = "center";
-                    span.style.fontFamily = "monospace";
-                    inputs[idx].parentNode.replaceChild(span, inputs[idx]);
-                });
-                
-                const verifyScript = document.createElement('script');
-                verifyScript.textContent = `
-                    (() => {
-                        const SECRET_SALT = "AlgebraMastery_SecureSalt_98234";
-
-                        function generateWatermark(score, total, timestamp) {
-                            const raw = score + "|" + total + "|" + timestamp + "|" + SECRET_SALT;
-                            let hash1 = 5381; let hash2 = 12345;
-                            for (let i = 0; i < raw.length; i++) {
-                                const char = raw.charCodeAt(i);
-                                hash1 = ((hash1 << 5) + hash1) ^ char;
-                                hash2 = ((hash2 << 7) + hash2) ^ char;
-                            }
-                            const p1 = (hash1 >>> 0).toString(16).padStart(8, '0');
-                            const p2 = (hash2 >>> 0).toString(16).padStart(8, '0');
-                            const p3 = (hash1 ^ hash2 >>> 0).toString(16).padStart(8, '0');
-                            return (p1 + "-" + p2 + "-" + p3).toUpperCase();
-                        }
-
-                        document.addEventListener('DOMContentLoaded', () => {
-                            const scoreEl = document.getElementById('report-score');
-                            const totalEl = document.getElementById('report-total');
-                            const timeEl = document.getElementById('report-time');
-                            const tokenEl = document.getElementById('report-token');
-                            const statusEl = document.getElementById('report-status');
-
-                            if (!scoreEl || !totalEl || !timeEl || !tokenEl || !statusEl) return;
-
-                            const score = scoreEl.textContent.trim();
-                            const total = totalEl.textContent.trim();
-                            const time = timeEl.textContent.trim();
-                            const embeddedToken = tokenEl.getAttribute('data-token');
-
-                            const calculatedToken = generateWatermark(score, total, time);
-
-                            if (calculatedToken === embeddedToken) {
-                                statusEl.innerHTML = "<span style='color: #27ae60; font-weight: bold; border: 2px solid #27ae60; padding: 5px 10px; border-radius: 4px; background: #e8f8f5;'>&nbsp;&#x2705; Verified Authentic Report</span>";
-                            } else {
-                                statusEl.innerHTML = "<span style='color: #c0392b; font-weight: bold; border: 2px solid #c0392b; padding: 5px 10px; border-radius: 4px; background: #fadbd8;'>&nbsp;&#x274C; Tampered/Invalid Report</span>";
-                                scoreEl.style.textDecoration = "line-through";
-                                scoreEl.style.color = "#c0392b";
-                                scoreEl.style.fontWeight = "bold";
-                            }
-                        });
-                    })();
-                `;
-                body.appendChild(verifyScript);
-
-                const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `Systems_Report_${getTimestamp()}.html`;
-                a.click();
-
-                currentProblems.forEach(p => {
-                    const solDiv = document.getElementById(`sol-${p.id}`);
-                    solDiv.innerHTML = '';
-                    solDiv.style.display = 'none';
-                });
-            });
+            typesetMath([scoreBanner, container]);
         }
 
         generateBtn.addEventListener('click', render);
-        showBtn.addEventListener('click', check);
-        
         render(); 
     })(); 
     </script>
