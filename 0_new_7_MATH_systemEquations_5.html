@@ -69,7 +69,7 @@
 </head>
 <body>
     <h1>Algebra: Systems of Equations</h1>
-    <p class="subtitle">Practice Problems</p>
+    <p class="subtitle">Dynamic Randomized Practice & Report Generator</p>
     
     <div class="controls-container" id="controls">
         <button id="generateBtn">Generate New Problem Set</button>
@@ -91,14 +91,6 @@
 
         let currentProblems = [];
         let isSubmitted = false;
-
-        let usedExpressions = new Set();
-        try {
-            const saved = JSON.parse(localStorage.getItem('algebraMasteryHistory') || '[]');
-            saved.forEach(e => usedExpressions.add(e));
-        } catch (e) {
-            console.warn('LocalStorage unavailable.');
-        }
 
         const CIPHER_KEY = "SystemsOfEq_SecureKey_Steps_9381";
 
@@ -155,7 +147,7 @@
             do { 
                 val = Math.floor(Math.random() * (max - min + 1)) + min;
                 count++;
-            } while (exclude.includes(val) && count < 100);
+            } while (exclude.includes(val) && count < 200);
             return val;
         }
 
@@ -169,14 +161,23 @@
         }
 
         function gcd(a, b) {
-            return b ? gcd(b, a % b) : Math.abs(a);
+            a = Math.abs(a);
+            b = Math.abs(b);
+            return b ? gcd(b, a % b) : a;
         }
 
-        function term(coeff, v, first) {
+        function lcm(a, b) {
+            if (!a || !b) return 0;
+            return Math.abs((a * b) / gcd(a, b));
+        }
+
+        function term(coeff, v, first=false) {
             if (coeff === 0) return "";
             let absC = Math.abs(coeff);
-            let cStr = absC === 1 ? "" : absC;
-            if (first) return coeff < 0 ? `-${cStr}${v}` : `${cStr}${v}`;
+            let cStr = absC === 1 ? "" : `${absC}`;
+            if (first) {
+                return coeff < 0 ? `-${cStr}${v}` : `${cStr}${v}`;
+            }
             return coeff < 0 ? `- ${cStr}${v}` : `+ ${cStr}${v}`;
         }
         
@@ -186,32 +187,38 @@
             return c < 0 ? `- ${Math.abs(c)}` : `+ ${c}`;
         }
 
-        function fracTerm(num, den, v, first) {
+        function fracTerm(num, den, v, first=false) {
             if (num === 0) return "";
-            const g = gcd(Math.abs(num), Math.abs(den));
+            const g = gcd(num, den);
             let n = Math.abs(num) / g;
             let d = Math.abs(den) / g;
+            let isNeg = (num * den < 0);
             
-            let sign = (num * den < 0) ? "-" : "+";
-            if (first) {
-                sign = (num * den < 0) ? "-" : "";
-            } else {
-                sign = (num * den < 0) ? "- " : "+ ";
-            }
+            let sign = isNeg ? "-" : (first ? "" : "+ ");
+            if (!first && isNeg) sign = "- ";
             
             if (d === 1) {
-                if (n === 1) return `${sign}${v}`;
-                return `${sign}${n}${v}`;
+                let coeffStr = n === 1 ? "" : `${n}`;
+                return `${sign}${coeffStr}${v}`;
             }
             
-            if (n === 1) {
-                return `${sign}\\frac{${v}}{${d}}`;
-            }
-            return `${sign}\\frac{${n}${v}}{${d}}`;
+            let numStr = n === 1 ? v : `${n}${v}`;
+            return `${sign}\\frac{${numStr}}{${d}}`;
+        }
+
+        function formatTimestamp(date) {
+            const pad = (n) => String(n).padStart(2, '0');
+            const yyyy = date.getFullYear();
+            const mm = pad(date.getMonth() + 1);
+            const dd = pad(date.getDate());
+            const hh = pad(date.getHours());
+            const min = pad(date.getMinutes());
+            const ss = pad(date.getSeconds());
+            return `${yyyy}${mm}${dd}_${hh}${ss}`;
         }
 
         // =============================================================
-        // PROBLEM GENERATORS (ALL STRICTLY INTEGER OUTCOMES)
+        // PROBLEM GENERATORS (DYNAMIC & STRICT INTEGER SOLUTIONS)
         // =============================================================
         function generateProblem(id, type) {
             let prob = { id, type, expression: "", hint: "" };
@@ -220,235 +227,286 @@
 
             switch(type) {
                 case 'hard_elim': {
-                    let d1 = getRnd(2, 4);
-                    let d2 = getRnd(2, 4, [d1]);
+                    let d1 = getRnd(2, 5);
+                    let d2 = getRnd(2, 5);
                     
-                    let kx = getRnd(-2, 2, [0]);
-                    let ky = getRnd(-2, 2, [0]);
+                    let kx = getRnd(-3, 3, [0]);
+                    let ky = getRnd(-3, 3, [0]);
                     x = kx * d1;
                     y = ky * d2;
                     
-                    let a1 = 1; 
-                    let b1 = getRnd(-3, 3, [0]);
-                    let a2 = getRnd(-3, 3, [0]);
-                    let b2 = getRnd(1, 4);
-                    while (gcd(b2, d2) !== 1) b2 = getRnd(1, 4);
+                    let a1 = getRnd(-3, 3, [0]);
+                    while (gcd(a1, d1) !== 1) a1 = getRnd(-3, 3, [0]);
                     
-                    // Exact integer constants
+                    let b1 = getRnd(-4, 4, [0]);
+                    let a2 = getRnd(-4, 4, [0]);
+                    let b2 = getRnd(-3, 3, [0]);
+                    while (gcd(b2, d2) !== 1) b2 = getRnd(-3, 3, [0]);
+                    
+                    let A1 = a1, B1 = b1 * d1;
+                    let A2 = a2 * d2, B2 = b2;
+                    while (A1 * B2 - A2 * B1 === 0) {
+                        b1 = getRnd(-4, 4, [0]);
+                        B1 = b1 * d1;
+                    }
+                    
                     let c1 = a1 * kx + b1 * y;
                     let c2 = a2 * x + b2 * ky;
                     
                     prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\[6pt] ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} = ${c2} \\end{cases}`;
-                    prob.hint = "Clear fractions first, then use substitution.";
+                    prob.hint = "Multiply each equation by its denominator to clear fractions, then solve.";
                     
-                    let eq1ClearConst = c1 * d1;
-                    let eq1YCoeff = b1 * d1;
-                    let eq2ClearConst = c2 * d2;
-                    let eq2XCoeff = a2 * d2;
+                    let C1 = c1 * d1;
+                    let C2 = c2 * d2;
 
                     steps.push(
-                        `<strong>Step 1: Clear fractions in both equations</strong><br>
+                        `<strong>Step 1: Clear fractions across both equations</strong><br>
                          Multiply Eq (1) by \\(${d1}\\) and Eq (2) by \\(${d2}\\):
-                         <span class="algebra-line">\\(\\begin{cases} x ${term(eq1YCoeff, 'y', false)} = ${eq1ClearConst} \\quad \\text{--- (1')} \\\\[4pt] ${term(eq2XCoeff, 'x', true)} ${term(b2, 'y', false)} = ${eq2ClearConst} \\quad \\text{--- (2')} \\end{cases}\\)</span>`
+                         <span class="algebra-line">\\(\\begin{cases} ${term(A1, 'x', true)} ${term(B1, 'y', false)} = ${C1} \\quad \\text{--- (1')} \\\\[4pt] ${term(A2, 'x', true)} ${term(B2, 'y', false)} = ${C2} \\quad \\text{--- (2')} \\end{cases}\\)</span>`
+                    );
+                    
+                    let mult1 = A2;
+                    let mult2 = A1;
+                    let gA = gcd(mult1, mult2);
+                    mult1 /= gA;
+                    mult2 /= gA;
+                    if (mult1 < 0) { mult1 = -mult1; mult2 = -mult2; }
+
+                    let elimY = (mult1 * B1) - (mult2 * B2);
+                    let elimConst = (mult1 * C1) - (mult2 * C2);
+
+                    steps.push(
+                        `<strong>Step 2: Eliminate \\(x\\) by linear combination</strong><br>
+                         Multiply Eq (1') by \\(${mult1}\\) and subtract \\(${mult2}\\) times Eq (2'):
+                         <span class="algebra-line">\\((${mult1 * A1}x ${term(mult1 * B1, 'y', false)}) - (${mult2 * A2}x ${term(mult2 * B2, 'y', false)}) = ${mult1 * C1} - (${mult2 * C2})\\)</span>
+                         <span class="algebra-line">\\(${elimY}y = ${elimConst} \\implies y = ${y}\\)</span>`
                     );
                     steps.push(
-                        `<strong>Step 2: Isolate \\(x\\) in Eq (1')</strong><br>
-                         <span class="algebra-line">\\(x = ${eq1ClearConst} ${term(-eq1YCoeff, 'y', false)}\\)</span>`
-                    );
-                    let combinedYCoeff = (eq2XCoeff * (-eq1YCoeff)) + b2;
-                    let combinedConst = eq2ClearConst - (eq2XCoeff * eq1ClearConst);
-                    steps.push(
-                        `<strong>Step 3: Substitute \\(x\\) into Eq (2') and solve for \\(y\\)</strong><br>
-                         <span class="algebra-line">\\(${eq2XCoeff}(${eq1ClearConst} ${term(-eq1YCoeff, 'y', false)}) ${term(b2, 'y', false)} = ${eq2ClearConst}\\)</span>
-                         <span class="algebra-line">\\(${combinedYCoeff}y = ${combinedConst} \\implies y = ${y}\\)</span>`
-                    );
-                    steps.push(
-                        `<strong>Step 4: Back-substitute \\(y = ${y}\\) to find \\(x\\)</strong><br>
-                         <span class="algebra-line">\\(x = ${eq1ClearConst} ${term(-eq1YCoeff, '', false)}(${y}) = ${x}\\)</span>`
+                        `<strong>Step 3: Back-substitute \\(y = ${y}\\) to solve for \\(x\\)</strong><br>
+                         Substitute into Eq (1'):
+                         <span class="algebra-line">\\(${term(A1, 'x', true)} ${term(B1, '', false)}(${y}) = ${C1} \\implies ${A1}x = ${C1 - B1 * y} \\implies x = ${x}\\)</span>`
                     );
                     break;
                 }
                 case 'scrambled': {
-                    let d1 = getRnd(2, 3);
-                    let d2 = getRnd(2, 4, [d1]);
-                    
-                    let kx = getRnd(-2, 2, [0]);
-                    let ky = getRnd(-2, 2, [0]);
-                    x = kx * d1;
-                    y = ky * d2;
-                    
-                    let a1 = 1;
-                    let b1 = getRnd(2, 4);
-                    let c1 = a1 * kx + b1 * y;
-                    
-                    let eq1 = `${fracTerm(a1, d1, 'x', true)} = ${c1} ${term(-b1, 'y', false)}`; 
-                    let a2 = getRnd(-3, -1);
-                    let b2 = getRnd(1, 3);
-                    while (gcd(b2, d2) !== 1) b2 = getRnd(1, 3);
+                    x = getRnd(-6, 6, [0]);
+                    y = getRnd(-6, 6, [0]);
 
-                    let c2 = b2 * ky - a2 * x;
-                    let eq2 = `${fracTerm(b2, d2, 'y', true)} = ${term(a2, 'x', true)} ${constant(c2, false)}`; 
-                    
-                    prob.expression = `\\begin{cases} ${eq1} \\\\[6pt] ${eq2} \\end{cases}`;
-                    prob.hint = "Rearrange, clear fractions, and substitute.";
+                    let a1_left = getRnd(2, 5);
+                    let a1_right = getRnd(-4, 4, [a1_left]);
+                    let A1 = a1_left - a1_right;
 
-                    let eq1ClearConst = c1 * d1;
-                    let eq1YCoeff = b1 * d1;
-                    let eq2ClearConst = c2 * d2;
+                    let b1_right = getRnd(2, 6);
+                    let b1_left = getRnd(-3, 3, [b1_right]);
+                    let B1 = b1_left - b1_right;
+
+                    let C1 = A1 * x + B1 * y;
+                    let c1_left = getRnd(-10, 10);
+                    let c1_right = c1_left - C1;
+
+                    let A2 = getRnd(-5, 5, [0]);
+                    let B2 = getRnd(-5, 5, [0]);
+                    while (A1 * B2 - A2 * B1 === 0) {
+                        B2 = getRnd(-5, 5, [0]);
+                    }
+                    let C2 = A2 * x + B2 * y;
+                    let k2 = getRnd(-4, 4, [0]);
+
+                    let eq1LHS = `${term(a1_left, 'x', true)} ${term(b1_left, 'y', false)} ${constant(c1_left, false)}`;
+                    let eq1RHS = `${term(a1_right, 'x', true)} ${term(b1_right, 'y', false)} ${constant(c1_right, false)}`.trim();
+                    if (!eq1RHS) eq1RHS = "0";
+
+                    let eq2LHS = `${term(A2 - k2, 'x', true)} ${term(B2, 'y', false)}`;
+                    let eq2RHS = `${constant(C2, true)} ${term(-k2, 'x', false)}`;
+
+                    prob.expression = `\\begin{cases} ${eq1LHS} = ${eq1RHS} \\\\[6pt] ${eq2LHS} = ${eq2RHS} \\end{cases}`;
+                    prob.hint = "Rearrange all variable terms to the left side and constant terms to the right side.";
 
                     steps.push(
-                        `<strong>Step 1: Rearrange and clear fractions</strong><br>
-                         Multiply Eq (1) by \\(${d1}\\) and Eq (2) by \\(${d2}\\):
-                         <span class="algebra-line">\\(\\begin{cases} x = ${eq1ClearConst} ${term(-eq1YCoeff, 'y', false)} \\quad \\text{--- (1')} \\\\[4pt] ${b2}y = ${term(a2 * d2, 'x', true)} ${constant(eq2ClearConst, false)} \\quad \\text{--- (2')} \\end{cases}\\)</span>`
+                        `<strong>Step 1: Simplify and align into standard form \\(Ax + By = C\\)</strong><br>
+                         Group like terms on the LHS and constants on the RHS:
+                         <span class="algebra-line">\\(\\begin{cases} ${term(A1, 'x', true)} ${term(B1, 'y', false)} = ${C1} \\quad \\text{--- (1')} \\\\[4pt] ${term(A2, 'x', true)} ${term(B2, 'y', false)} = ${C2} \\quad \\text{--- (2')} \\end{cases}\\)</span>`
+                    );
+
+                    let det = A1 * B2 - A2 * B1;
+                    steps.push(
+                        `<strong>Step 2: Solve the aligned system via elimination</strong><br>
+                         Multiply Eq (1') by \\(${B2}\\) and Eq (2') by \\(${B1}\\):
+                         <span class="algebra-line">\\(${B2}(${term(A1, 'x', true)} ${term(B1, 'y', false)}) - ${B1}(${term(A2, 'x', true)} ${term(B2, 'y', false)}) = ${B2}(${C1}) - ${B1}(${C2})\\)</span>
+                         <span class="algebra-line">\\(${det}x = ${det * x} \\implies x = ${x}\\)</span>`
                     );
                     steps.push(
-                        `<strong>Step 2: Substitute \\(x\\) into Eq (2') and solve for \\(y\\)</strong><br>
-                         <span class="algebra-line">\\(${b2}y = ${a2 * d2}(${eq1ClearConst} ${term(-eq1YCoeff, 'y', false)}) ${constant(eq2ClearConst, false)} \\implies y = ${y}\\)</span>`
-                    );
-                    steps.push(
-                        `<strong>Step 3: Back-substitute \\(y = ${y}\\) to find \\(x\\)</strong><br>
-                         <span class="algebra-line">\\(x = ${eq1ClearConst} ${term(-eq1YCoeff, '', false)}(${y}) = ${x}\\)</span>`
+                        `<strong>Step 3: Substitute \\(x = ${x}\\) to determine \\(y\\)</strong><br>
+                         <span class="algebra-line">\\(${term(A1, '', true)}(${x}) ${term(B1, 'y', false)} = ${C1} \\implies ${B1}y = ${C1 - A1 * x} \\implies y = ${y}\\)</span>`
                     );
                     break;
                 }
                 case 'fractional': {
-                    let d1 = getRnd(2, 3);
-                    let d2 = getRnd(2, 4, [d1]);
+                    let d1 = getRnd(2, 4);
+                    let g1 = getRnd(3, 5, [d1]);
+                    let d2 = getRnd(2, 5);
+                    let g2 = getRnd(2, 4, [d2]);
+
+                    let lcd1 = lcm(d1, g1);
+                    let lcd2 = lcm(d2, g2);
+
                     let kx = getRnd(-2, 2, [0]);
                     let ky = getRnd(-2, 2, [0]);
-                    x = kx * d1; 
-                    y = ky * d2; 
-                    
-                    let c1 = kx + ky; // Exact integer
-                    let a2 = 1; 
-                    let b2 = getRnd(-3, -1); 
-                    let c2 = a2 * x + b2 * y; // Exact integer
-                    let lcd = d1 * d2;
-                    
-                    prob.expression = `\\begin{cases} \\frac{x}{${d1}} + \\frac{y}{${d2}} = ${c1} \\\\[6pt] ${term(a2, 'x', true)} ${term(b2, 'y', false)} = ${c2} \\end{cases}`;
-                    prob.hint = "Clear fractions or isolate x in the second equation.";
+                    x = kx * lcm(d1, d2);
+                    y = ky * lcm(g1, g2);
 
-                    let eq1XCoeff = d2;
-                    let eq1YCoeff = d1;
-                    let eq1Const = c1 * lcd;
+                    let numA1 = getRnd(-2, 2, [0]);
+                    let numB1 = getRnd(-2, 2, [0]);
+                    let numA2 = getRnd(-2, 2, [0]);
+                    let numB2 = getRnd(-2, 2, [0]);
+
+                    let A1 = (lcd1 / d1) * numA1;
+                    let B1 = (lcd1 / g1) * numB1;
+                    let A2 = (lcd2 / d2) * numA2;
+                    let B2 = (lcd2 / g2) * numB2;
+
+                    while (A1 * B2 - A2 * B1 === 0) {
+                        numB2 = getRnd(-3, 3, [0, numB2]);
+                        B2 = (lcd2 / g2) * numB2;
+                    }
+
+                    let c1 = (numA1 * x) / d1 + (numB1 * y) / g1;
+                    let c2 = (numA2 * x) / d2 + (numB2 * y) / g2;
+
+                    prob.expression = `\\begin{cases} ${fracTerm(numA1, d1, 'x', true)} ${fracTerm(numB1, g1, 'y', false)} = ${c1} \\\\[6pt] ${fracTerm(numA2, d2, 'x', true)} ${fracTerm(numB2, g2, 'y', false)} = ${c2} \\end{cases}`;
+                    prob.hint = "Multiply each equation by its least common denominator (LCD).";
+
+                    let C1 = c1 * lcd1;
+                    let C2 = c2 * lcd2;
 
                     steps.push(
-                        `<strong>Step 1: Multiply Eq (1) by LCD (\\(${lcd}\\)) to clear fractions</strong><br>
-                         <span class="algebra-line">\\(${eq1XCoeff}x + ${eq1YCoeff}y = ${eq1Const} \\quad \\text{--- (1')}\\)</span>`
+                        `<strong>Step 1: Multiply each equation by its LCD</strong><br>
+                         Multiply Eq (1) by \\(${lcd1}\\) and Eq (2) by \\(${lcd2}\\):
+                         <span class="algebra-line">\\(\\begin{cases} ${term(A1, 'x', true)} ${term(B1, 'y', false)} = ${C1} \\quad \\text{--- (1')} \\\\[4pt] ${term(A2, 'x', true)} ${term(B2, 'y', false)} = ${C2} \\quad \\text{--- (2')} \\end{cases}\\)</span>`
+                    );
+
+                    let det = A1 * B2 - A2 * B1;
+                    steps.push(
+                        `<strong>Step 2: Solve the cleared system</strong><br>
+                         Eliminating \\(y\\):
+                         <span class="algebra-line">\\(${B2}(${term(A1, 'x', true)} ${term(B1, 'y', false)}) - (${B1})(${term(A2, 'x', true)} ${term(B2, 'y', false)}) = ${B2 * C1} - (${B1 * C2})\\)</span>
+                         <span class="algebra-line">\\(${det}x = ${det * x} \\implies x = ${x}\\)</span>`
                     );
                     steps.push(
-                        `<strong>Step 2: Isolate \\(x\\) in Eq (2)</strong><br>
-                         <span class="algebra-line">\\(x = ${c2} ${term(-b2, 'y', false)}\\)</span>`
-                    );
-                    steps.push(
-                        `<strong>Step 3: Substitute \\(x\\) into Eq (1') to solve for \\(y\\)</strong><br>
-                         <span class="algebra-line">\\(${eq1XCoeff}(${c2} ${term(-b2, 'y', false)}) + ${eq1YCoeff}y = ${eq1Const} \\implies y = ${y}\\)</span>`
-                    );
-                    steps.push(
-                        `<strong>Step 4: Back-substitute \\(y = ${y}\\) into Eq (2) to solve for \\(x\\)</strong><br>
-                         <span class="algebra-line">\\(x = ${c2} ${term(-b2, '', false)}(${y}) = ${x}\\)</span>`
+                        `<strong>Step 3: Solve for \\(y\\)</strong><br>
+                         <span class="algebra-line">\\(${term(A1, '', true)}(${x}) ${term(B1, 'y', false)} = ${C1} \\implies y = ${y}\\)</span>`
                     );
                     break;
                 }
                 case 'three_var': {
-                    let d1 = getRnd(2, 3);
-                    let d2 = 2;
-                    
-                    let kx = getRnd(-2, 2, [0]);
-                    let ky = getRnd(-2, 2, [0]);
-                    x = kx * d1;
-                    y = ky * d2;
-                    z = getRnd(-2, 2, [0]);
-                    
-                    let a1 = 1;
-                    let c1 = a1 * kx + y + z;
-                    
-                    let a2 = 2;
-                    let b2 = -1;
-                    let c_2 = 1;
-                    let d2_val = a2 * x + b2 * ky + c_2 * z;
-                    
-                    let a3 = 1;
-                    let b3 = 2;
-                    let c_3 = -2;
-                    let d3 = a3 * x + b3 * y + c_3 * z;
-                    
-                    prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} + y + z = ${c1} \\\\[6pt] ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} ${term(c_2, 'z', false)} = ${d2_val} \\\\[6pt] ${term(a3, 'x', true)} ${term(b3, 'y', false)} ${term(c_3, 'z', false)} = ${d3} \\end{cases}`;
-                    prob.hint = "Clear fractions, isolate x in Eq (1), and substitute.";
+                    x = getRnd(-4, 4, [0]);
+                    y = getRnd(-4, 4, [0]);
+                    z = getRnd(-4, 4, [0]);
 
-                    let eq1ClearConst = c1 * d1;
-                    let eq2ClearConst = d2_val * d2;
+                    let mat, det3;
+                    let count = 0;
+                    do {
+                        mat = [
+                            [getRnd(-3, 3, [0]), getRnd(-3, 3, [0]), getRnd(-3, 3, [0])],
+                            [getRnd(-3, 3, [0]), getRnd(-3, 3, [0]), getRnd(-3, 3, [0])],
+                            [getRnd(-3, 3, [0]), getRnd(-3, 3, [0]), getRnd(-3, 3, [0])]
+                        ];
+                        det3 = mat[0][0] * (mat[1][1] * mat[2][2] - mat[1][2] * mat[2][1])
+                             - mat[0][1] * (mat[1][0] * mat[2][2] - mat[1][2] * mat[2][0])
+                             + mat[0][2] * (mat[1][0] * mat[2][1] - mat[1][1] * mat[2][0]);
+                        count++;
+                    } while ((det3 === 0 || Math.abs(det3) > 40) && count < 100);
+
+                    let c1 = mat[0][0] * x + mat[0][1] * y + mat[0][2] * z;
+                    let c2 = mat[1][0] * x + mat[1][1] * y + mat[1][2] * z;
+                    let c3 = mat[2][0] * x + mat[2][1] * y + mat[2][2] * z;
+
+                    prob.expression = `\\begin{cases} 
+                        ${term(mat[0][0], 'x', true)} ${term(mat[0][1], 'y', false)} ${term(mat[0][2], 'z', false)} = ${c1} \\\\[4pt] 
+                        ${term(mat[1][0], 'x', true)} ${term(mat[1][1], 'y', false)} ${term(mat[1][2], 'z', false)} = ${c2} \\\\[4pt] 
+                        ${term(mat[2][0], 'x', true)} ${term(mat[2][1], 'y', false)} ${term(mat[2][2], 'z', false)} = ${c3} 
+                    \\end{cases}`;
+                    prob.hint = "Systematically eliminate one variable from two pairs of equations.";
+
+                    let e2_y = mat[1][1] * mat[0][0] - mat[0][1] * mat[1][0];
+                    let e2_z = mat[1][2] * mat[0][0] - mat[0][2] * mat[1][0];
+                    let e2_c = c2 * mat[0][0] - c1 * mat[1][0];
+
+                    let e3_y = mat[2][1] * mat[0][0] - mat[0][1] * mat[2][0];
+                    let e3_z = mat[2][2] * mat[0][0] - mat[0][2] * mat[2][0];
+                    let e3_c = c3 * mat[0][0] - c1 * mat[2][0];
 
                     steps.push(
-                        `<strong>Step 1: Clear fractions to write system with integer coefficients</strong><br>
-                         Multiply Eq (1) by \\(${d1}\\) and Eq (2) by \\(${d2}\\):
-                         <span class="algebra-line">\\(\\begin{cases} x + ${d1}y + ${d1}z = ${eq1ClearConst} \\quad \\text{--- (1')} \\\\[3pt] ${a2 * d2}x + ${b2}y + ${c_2 * d2}z = ${eq2ClearConst} \\quad \\text{--- (2')} \\\\[3pt] ${term(a3, 'x', true)} ${term(b3, 'y', false)} ${term(c_3, 'z', false)} = ${d3} \\quad \\text{--- (3')} \\end{cases}\\)</span>`
+                        `<strong>Step 1: Eliminate \\(x\\) using Eq (1)</strong><br>
+                         Combine Eq (1) with Eq (2), and Eq (1) with Eq (3) to eliminate \\(x\\):
+                         <span class="algebra-line">\\(\\begin{cases} ${term(e2_y, 'y', true)} ${term(e2_z, 'z', false)} = ${e2_c} \\quad \\text{--- (A)} \\\\[4pt] ${term(e3_y, 'y', true)} ${term(e3_z, 'z', false)} = ${e3_c} \\quad \\text{--- (B)} \\end{cases}\\)</span>`
                     );
                     steps.push(
-                        `<strong>Step 2: Isolate \\(x\\) in Eq (1')</strong><br>
-                         <span class="algebra-line">\\(x = ${eq1ClearConst} - ${d1}y - ${d1}z\\)</span>`
-                    );
-                    steps.push(
-                        `<strong>Step 3: Substitute \\(x\\) into Eq (2') and Eq (3') to reduce to a 2×2 system</strong><br>
-                         Solving the resulting system yields:
+                        `<strong>Step 2: Solve the 2-variable system for \\(y\\) and \\(z\\)</strong><br>
+                         Solving system (A) and (B) gives:
                          <span class="algebra-line">\\(y = ${y}, \\quad z = ${z}\\)</span>`
                     );
                     steps.push(
-                        `<strong>Step 4: Back-substitute \\(y = ${y}\\) and \\(z = ${z}\\) to find \\(x\\)</strong><br>
-                         <span class="algebra-line">\\(x = ${eq1ClearConst} - ${d1}(${y}) - ${d1}(${z}) = ${x}\\)</span>`
+                        `<strong>Step 3: Back-substitute \\(y\\) and \\(z\\) into Eq (1) to solve for \\(x\\)</strong><br>
+                         <span class="algebra-line">\\(${term(mat[0][0], 'x', true)} ${term(mat[0][1], '', false)}(${y}) ${term(mat[0][2], '', false)}(${z}) = ${c1} \\implies x = ${x}\\)</span>`
                     );
                     break;
                 }
                 case 'heavy_fractional': {
-                    // Pre-engineered exact integer system
-                    let d1 = 2, g1 = 3;
-                    let d2 = 4, g2 = 2;
-                    
-                    let kx = getRnd(-1, 1, [0]);
-                    let ky = getRnd(-1, 1, [0]);
-                    
-                    // x is a multiple of both d1 and d2 (LCM = 4)
-                    // y is a multiple of both g1 and g2 (LCM = 6)
-                    x = kx * 4;
-                    y = ky * 6;
-                    
-                    let a1 = 1, b1 = 1;
-                    let a2 = -1, b2 = 1;
-                    
-                    // Guaranteed exact integer constants
-                    let c1 = (x / d1) + (y / g1); // (4kx / 2) + (6ky / 3) = 2kx + 2ky
-                    let c2 = (-x / d2) + (y / g2); // (-4kx / 4) + (6ky / 2) = -kx + 3ky
-                    
-                    prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${fracTerm(b1, g1, 'y', false)} = ${c1} \\\\[6pt] ${fracTerm(a2, d2, 'x', true)} ${fracTerm(b2, g2, 'y', false)} = ${c2} \\end{cases}`;
-                    prob.hint = "Clear fractions first, then use substitution.";
-                    
-                    let lcd1 = 6;
-                    let lcd2 = 4;
-                    
-                    let eq1XCoeff = 3;
-                    let eq1YCoeff = 2;
-                    let eq1Const = c1 * lcd1;
-                    
-                    let eq2XCoeff = -1;
-                    let eq2YCoeff = 2;
-                    let eq2Const = c2 * lcd2;
+                    let d1 = getRnd(2, 4);
+                    let d2 = getRnd(3, 5, [d1]);
+
+                    let kx = getRnd(-2, 2, [0]);
+                    let ky = getRnd(-2, 2, [0]);
+                    x = kx * d1;
+                    y = ky * d2;
+
+                    let a1 = getRnd(1, 3);
+                    let b1 = getRnd(-3, 3, [0]);
+                    let numConst1 = getRnd(-4, 4);
+
+                    let a2 = getRnd(-3, 3, [0]);
+                    let b2 = getRnd(1, 3);
+
+                    let numVal1 = a1 * x + b1 * y + numConst1;
+                    while (numVal1 % d1 !== 0) {
+                        numConst1++;
+                        numVal1 = a1 * x + b1 * y + numConst1;
+                    }
+                    let C1_val = numVal1 / d1;
+
+                    let c2 = a2 * x + (b2 * y) / d2;
+                    while (!Number.isInteger(c2)) {
+                        y += d2;
+                        c2 = a2 * x + (b2 * y) / d2;
+                    }
+
+                    let binomialNum = `${term(a1, 'x', true)} ${term(b1, 'y', false)} ${constant(numConst1, false)}`;
+                    prob.expression = `\\begin{cases} \\frac{${binomialNum}}{${d1}} = ${C1_val} \\\\[8pt] ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} = ${c2} \\end{cases}`;
+                    prob.hint = "Clear denominators first, then isolate and eliminate.";
+
+                    let A1 = a1, B1 = b1;
+                    let C1 = C1_val * d1 - numConst1;
+
+                    let A2 = a2 * d2, B2 = b2;
+                    let C2 = c2 * d2;
 
                     steps.push(
-                        `<strong>Step 1: Multiply Eq (1) by LCD (\\(${lcd1}\\)) and Eq (2) by LCD (\\(${lcd2}\\))</strong><br>
-                         <span class="algebra-line">\\(\\begin{cases} ${eq1XCoeff}x + ${eq1YCoeff}y = ${eq1Const} \\quad \\text{--- (1')} \\\\[4pt] -x + ${eq2YCoeff}y = ${eq2Const} \\quad \\text{--- (2')} \\end{cases}\\)</span>`
+                        `<strong>Step 1: Multiply out denominators and collect constants</strong><br>
+                         Clear Eq (1) by \\(${d1}\\) and Eq (2) by \\(${d2}\\):
+                         <span class="algebra-line">\\(\\begin{cases} ${term(A1, 'x', true)} ${term(B1, 'y', false)} = ${C1} \\quad \\text{--- (1')} \\\\[4pt] ${term(A2, 'x', true)} ${term(B2, 'y', false)} = ${C2} \\quad \\text{--- (2')} \\end{cases}\\)</span>`
+                    );
+
+                    let det = A1 * B2 - A2 * B1;
+                    steps.push(
+                        `<strong>Step 2: Solve the linear system</strong><br>
+                         Eliminating \\(y\\):
+                         <span class="algebra-line">\\(${B2}(${term(A1, 'x', true)} ${term(B1, 'y', false)}) - (${B1})(${term(A2, 'x', true)} ${term(B2, 'y', false)}) = ${B2 * C1} - (${B1 * C2})\\)</span>
+                         <span class="algebra-line">\\(${det}x = ${det * x} \\implies x = ${x}\\)</span>`
                     );
                     steps.push(
-                        `<strong>Step 2: Isolate \\(x\\) in Eq (2')</strong><br>
-                         <span class="algebra-line">\\(x = ${eq2YCoeff}y - (${eq2Const})\\)</span>`
-                    );
-                    steps.push(
-                        `<strong>Step 3: Substitute \\(x\\) into Eq (1') and solve for \\(y\\)</strong><br>
-                         <span class="algebra-line">\\(${eq1XCoeff}(${eq2YCoeff}y - ${eq2Const}) + ${eq1YCoeff}y = ${eq1Const}\\)</span>
-                         <span class="algebra-line">\\(8y - ${eq1XCoeff * eq2Const} = ${eq1Const} \\implies 8y = ${eq1Const + eq1XCoeff * eq2Const} \\implies y = ${y}\\)</span>`
-                    );
-                    steps.push(
-                        `<strong>Step 4: Back-substitute \\(y = ${y}\\) to find \\(x\\)</strong><br>
-                         <span class="algebra-line">\\(x = ${eq2YCoeff}(${y}) - ${eq2Const} = ${x}\\)</span>`
+                        `<strong>Step 3: Back-substitute to find \\(y\\)</strong><br>
+                         <span class="algebra-line">\\(${term(A1, '', true)}(${x}) ${term(B1, 'y', false)} = ${C1} \\implies y = ${y}\\)</span>`
                     );
                     break;
                 }
@@ -469,11 +527,11 @@
         }
 
         const typeLabels = {
-            hard_elim: 'System with Fractions',
-            scrambled: 'Scrambled Terms', 
-            fractional: 'Fractional Coefficients',
-            three_var: '3-Variables (x,y,z)',
-            heavy_fractional: 'Heavy Fractional'
+            hard_elim: 'Fractional Elimination',
+            scrambled: 'Scrambled Multi-Variable', 
+            fractional: 'Dual-Fraction System',
+            three_var: '3-Variables System (x,y,z)',
+            heavy_fractional: 'Fractional Binomial'
         };
 
         function render() {
@@ -495,11 +553,10 @@
             }
             
             let types = shuffle(['hard_elim', 'scrambled', 'fractional', 'three_var', 'heavy_fractional']);
-            problemCountEl.innerHTML = `<strong>${TOTAL_PROBLEMS} Systems of Equations</strong> \u2014 Solve each system and submit to see full steps.`;
+            problemCountEl.innerHTML = `<strong>${TOTAL_PROBLEMS} Systems of Equations</strong> \u2014 Solve each system and submit to see full steps and download report.`;
 
             for (let i = 1; i <= TOTAL_PROBLEMS; i++) {
                 let p = generateProblem(i, types[i - 1]);
-                usedExpressions.add(p.expression);
                 currentProblems.push(p);
                 
                 let inputHTML = '';
@@ -535,11 +592,111 @@
                 container.appendChild(div);
             }
 
-            try {
-                localStorage.setItem('algebraMasteryHistory', JSON.stringify(Array.from(usedExpressions)));
-            } catch (e) {}
-
             typesetMath([container]);
+        }
+
+        function triggerDownload(htmlContent, filename) {
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 4000);
+        }
+
+        function generateReportHtml(score, total, resultsList, timestampStr, readableTime) {
+            const pct = Math.round((score / total) * 100);
+            let itemsHtml = "";
+
+            resultsList.forEach(r => {
+                let userAnsFormatted = "";
+                let correctAnsFormatted = "";
+                if (r.type === 'three_var') {
+                    userAnsFormatted = `x = ${r.userAnswers.x || 'blank'}, y = ${r.userAnswers.y || 'blank'}, z = ${r.userAnswers.z || 'blank'}`;
+                    correctAnsFormatted = `x = ${r.correctAnswers.x}, y = ${r.correctAnswers.y}, z = ${r.correctAnswers.z}`;
+                } else {
+                    userAnsFormatted = `x = ${r.userAnswers.x || 'blank'}, y = ${r.userAnswers.y || 'blank'}`;
+                    correctAnsFormatted = `x = ${r.correctAnswers.x}, y = ${r.correctAnswers.y}`;
+                }
+
+                let stepsFormatted = r.steps.map(s => `<li>${s}</li>`).join('');
+
+                itemsHtml += `
+                    <div class="report-card ${r.isCorrect ? 'border-correct' : 'border-incorrect'}">
+                        <div class="report-card-header">
+                            <span class="card-title">Problem #${r.id} (${r.tag})</span>
+                            <span class="badge ${r.isCorrect ? 'badge-correct' : 'badge-incorrect'}">${r.isCorrect ? '✓ Correct' : '✗ Incorrect'}</span>
+                        </div>
+                        <div class="math-expr">\\[ ${r.expression} \\]</div>
+                        <div class="ans-summary">
+                            <p><strong>Your Answer:</strong> <span class="${r.isCorrect ? 'text-correct' : 'text-incorrect'}">${userAnsFormatted}</span></p>
+                            <p><strong>Correct Solution:</strong> <span class="text-correct">${correctAnsFormatted}</span></p>
+                        </div>
+                        <div class="sol-container">
+                            <div class="sol-header">Step-by-Step Solution:</div>
+                            <ol class="step-list">${stepsFormatted}</ol>
+                            <div><strong>Final Result:</strong> <span class="final-tag">\\( ${r.finalText} \\)</span></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Systems of Equations Report - ${timestampStr}</title>
+    <script>
+      window.MathJax = {
+        tex: { inlineMath: [['\\\\(', '\\\\)']], displayMath: [['\\\\[', '\\\\]']] },
+        chtml: { scale: 1.05 }
+      };
+    <\/script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"><\/script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 25px; background-color: #f4f6f9; color: #2c3e50; }
+        .container { max-width: 850px; margin: 0 auto; }
+        .header { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; margin-bottom: 25px; }
+        h1 { margin: 0 0 8px 0; color: #1a2a6c; }
+        .meta { color: #7f8c8d; font-size: 0.95em; margin-bottom: 15px; }
+        .score-box { display: inline-block; padding: 10px 24px; background: #eafaf1; border: 2px solid #27ae60; border-radius: 30px; font-weight: bold; font-size: 1.3em; color: #27ae60; }
+        .report-card { background: #fff; padding: 22px; margin-bottom: 22px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .border-correct { border-left: 8px solid #27ae60; }
+        .border-incorrect { border-left: 8px solid #e74c3c; }
+        .report-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .card-title { font-weight: bold; font-size: 1.15em; color: #34495e; }
+        .badge { padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85em; }
+        .badge-correct { background: #d4edda; color: #155724; }
+        .badge-incorrect { background: #f8d7da; color: #721c24; }
+        .math-expr { margin: 15px 0; padding: 12px; background: #fcfdfe; border: 1px solid #eef2f5; border-radius: 8px; overflow-x: auto; }
+        .ans-summary { background: #f8f9fa; padding: 12px 16px; border-radius: 6px; margin: 12px 0; }
+        .ans-summary p { margin: 4px 0; }
+        .text-correct { color: #27ae60; font-weight: bold; }
+        .text-incorrect { color: #e74c3c; font-weight: bold; }
+        .sol-container { margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
+        .sol-header { font-weight: bold; color: #27ae60; margin-bottom: 8px; }
+        .step-list { margin: 6px 0 12px 20px; padding: 0; }
+        .step-list li { margin-bottom: 8px; }
+        .algebra-line { display: block; background: #fdfdfd; padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 5px; margin: 5px 0; overflow-x: auto; }
+        .final-tag { display: inline-block; background: #d4edda; color: #155724; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+        @media print { body { background: #fff; padding: 0; } .report-card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Algebra Mastery: Performance Report</h1>
+            <div class="meta">Systems of Equations \u2014 Generated on ${readableTime}</div>
+            <div class="score-box">Score: ${score} / ${total} (${pct}%)</div>
+        </div>
+        ${itemsHtml}
+    </div>
+</body>
+</html>`;
         }
 
         function checkAnswers() {
@@ -551,6 +708,7 @@
 
             let score = 0;
             const clean = str => (str || '').toLowerCase().replace(/\s+/g, '');
+            const resultsList = [];
 
             currentProblems.forEach(p => {
                 const data = JSON.parse(decrypt(p.securedPayload));
@@ -558,12 +716,14 @@
                 
                 let isCorrect = true;
                 let inputElements = [];
+                let userAnswers = {};
 
                 if (p.type === 'three_var') {
                     const ix = document.getElementById(`input-${p.id}-x`);
                     const iy = document.getElementById(`input-${p.id}-y`);
                     const iz = document.getElementById(`input-${p.id}-z`);
                     inputElements = [ix, iy, iz];
+                    userAnswers = { x: ix.value.trim(), y: iy.value.trim(), z: iz.value.trim() };
 
                     if (clean(ix.value) !== correctAnswers.x || clean(iy.value) !== correctAnswers.y || clean(iz.value) !== correctAnswers.z) {
                         isCorrect = false;
@@ -572,6 +732,7 @@
                     const ix = document.getElementById(`input-${p.id}-x`);
                     const iy = document.getElementById(`input-${p.id}-y`);
                     inputElements = [ix, iy];
+                    userAnswers = { x: ix.value.trim(), y: iy.value.trim() };
 
                     if (clean(ix.value) !== correctAnswers.x || clean(iy.value) !== correctAnswers.y) {
                         isCorrect = false;
@@ -584,6 +745,18 @@
                 });
                 
                 if (isCorrect) score++;
+
+                resultsList.push({
+                    id: p.id,
+                    type: p.type,
+                    tag: typeLabels[p.type],
+                    expression: p.expression,
+                    userAnswers: userAnswers,
+                    correctAnswers: correctAnswers,
+                    steps: data.steps,
+                    finalText: data.finalText,
+                    isCorrect: isCorrect
+                });
 
                 const solDiv = document.getElementById(`sol-${p.id}`);
                 let stepsHtml = `<ol class="step-list">`;
@@ -601,11 +774,21 @@
             });
             
             const pct = Math.round((score / TOTAL_PROBLEMS) * 100);
+            const now = new Date();
+            const timestamp = formatTimestamp(now);
+            const readableTime = now.toLocaleString();
+            const filename = `systems_equations_${timestamp}.html`;
+
+            const reportHtml = generateReportHtml(score, TOTAL_PROBLEMS, resultsList, timestamp, readableTime);
+
             scoreBanner.innerHTML = `
                 <h2>Test Completed! Score: ${score} / ${TOTAL_PROBLEMS} (${pct}%)</h2>
-                <p>Review the step-by-step solutions below. To practice again, click <strong>"Generate New Problem Set"</strong>.</p>
+                <p>Review the step-by-step solutions below. A copy of your report has been downloaded.</p>
             `;
             scoreBanner.style.display = 'block';
+
+            // Trigger the download automatically
+            triggerDownload(reportHtml, filename);
             
             typesetMath([scoreBanner, container]);
         }
