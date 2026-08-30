@@ -177,6 +177,34 @@
             color: var(--incorrect-red);
         }
 
+        /* On-page Step-by-Step Solution Block */
+        .solution-block {
+            display: none;
+            margin-top: 18px;
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary-blue);
+            border-radius: 0 6px 6px 0;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .solution-block strong.correct-answer-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #202124;
+            font-size: 1rem;
+        }
+
+        .solution-block ul {
+            margin: 8px 0 0 0;
+            padding-left: 20px;
+        }
+
+        .solution-block li {
+            margin-bottom: 6px;
+            line-height: 1.5;
+        }
+
         #test-area {
             opacity: 0; /* Hiding initially to prevent MathJax flashing (FOUC) */
         }
@@ -191,7 +219,7 @@
 
 <div class="container">
     <h1>Exponent Operations Practice Test</h1>
-    <p class="subtitle">Complete the 10 problems below. When you click "Check Answers", you will see your score and correct/incorrect indicators. <br><b>A Test Report with step-by-step solutions will automatically download.</b></p>
+    <p class="subtitle">Complete the 10 problems below. When you click "Check Answers", you will receive your score, on-screen step-by-step solutions, and an automated report download.</p>
 
     <div class="controls">
         <button class="btn-generate" onclick="generateTest()">Generate New Test</button>
@@ -209,6 +237,7 @@
 <script>
     // Global container for the 10 current problems
     let currentProblems = [];
+    let isSubmitted = false;
 
     // Helper functions for randomizations
     function getRandomElement(arr) {
@@ -444,8 +473,12 @@
 
     // Function to render the 10 problems onto the HTML page
     function generateTest() {
-        // Reset UI Elements
-        document.getElementById('btn-check-answers').disabled = false;
+        isSubmitted = false;
+        
+        // Show and enable the check answers button
+        const checkBtn = document.getElementById('btn-check-answers');
+        checkBtn.style.display = 'inline-block';
+        checkBtn.disabled = false;
         
         const scoreBanner = document.getElementById('score-banner');
         scoreBanner.style.display = 'none';
@@ -461,6 +494,8 @@
             card.className = 'problem-card';
             card.id = `card-${problem.id}`;
 
+            let stepsHtml = problem.steps.map(step => `<li>${step}</li>`).join('');
+
             card.innerHTML = `
                 <div class="problem-number">Problem ${problem.id}</div>
                 <div class="math-display">${problem.latex}</div>
@@ -468,6 +503,11 @@
                     <label for="input-${problem.id}">Your Answer:</label>
                     <input type="text" class="answer-input" id="input-${problem.id}" placeholder="e.g. 5">
                     <span class="feedback" id="feedback-${problem.id}" aria-live="polite"></span>
+                </div>
+                <div class="solution-block" id="solution-${problem.id}">
+                    <strong class="correct-answer-label">Correct Answer: ${problem.answer}</strong>
+                    <strong>Step-by-Step Solution:</strong>
+                    <ul>${stepsHtml}</ul>
                 </div>
             `;
             testArea.appendChild(card);
@@ -477,21 +517,21 @@
         currentProblems.forEach((problem) => {
             const inputField = document.getElementById(`input-${problem.id}`);
             inputField.addEventListener("keypress", function(event) {
-                if (event.key === "Enter") {
+                if (event.key === "Enter" && !isSubmitted) {
                     event.preventDefault();
                     checkAnswers();
                 }
             });
         });
 
-        // Use a Promise to safely format MathJax before showing the UI
+        // Typeset initial problems and smoothly reveal
         if (window.MathJax) {
             MathJax.typesetPromise().then(() => {
                 testArea.style.transition = "opacity 0.5s ease";
-                testArea.style.opacity = 1; // Smoothly fade in content
+                testArea.style.opacity = 1;
             });
         } else {
-            testArea.style.opacity = 1; // Fallback if MathJax fails to load
+            testArea.style.opacity = 1;
         }
     }
 
@@ -591,7 +631,6 @@
         a.href = url;
         a.download = `07_Exponents_${getFormattedDate()}.html`;
         
-        // Append, click, and remove to silently trigger download
         document.body.appendChild(a);
         a.click();
         
@@ -601,26 +640,28 @@
         }, 100);
     }
 
-    // Checking answers, scoring, and providing minimal visual feedback on page
+    // Checking answers, scoring, showing explanations, and removing submit button
     function checkAnswers() {
-        if (currentProblems.length === 0) return;
+        if (currentProblems.length === 0 || isSubmitted) return;
         
-        // Prevent double checking
+        isSubmitted = true;
+        
+        // Remove the submit button completely to prevent inspect and resubmit
         const checkBtn = document.getElementById('btn-check-answers');
-        if (checkBtn.disabled) return; 
-        checkBtn.disabled = true;
+        checkBtn.style.display = 'none';
 
         let score = 0;
 
         currentProblems.forEach((problem) => {
             const inputField = document.getElementById(`input-${problem.id}`);
             const feedbackSpan = document.getElementById(`feedback-${problem.id}`);
+            const solutionDiv = document.getElementById(`solution-${problem.id}`);
             
-            // Clean the user input: remove all spaces and commas
+            // Clean the user input: remove spaces and commas
             const rawInput = inputField.value.replace(/,/g, '').trim();
             const studentInput = parseFloat(rawInput);
 
-            // Floating point precision safe comparison (epsilon = 0.0001)
+            // Precision comparison
             if (rawInput === "" || isNaN(studentInput)) {
                 feedbackSpan.textContent = "⚠️ Invalid / Empty";
                 feedbackSpan.className = "feedback incorrect";
@@ -633,8 +674,13 @@
                 feedbackSpan.className = "feedback incorrect";
             }
 
-            // Disable input so the student can't edit it after checking
+            // Lock input field
             inputField.disabled = true;
+
+            // Reveal step-by-step solution
+            if (solutionDiv) {
+                solutionDiv.style.display = "block";
+            }
         });
 
         // Format and display the overall score banner
@@ -658,11 +704,16 @@
             scoreBanner.style.border = "1px solid #fad2cf";
         }
 
-        // 🌟 Trigger the automated HTML report download
+        // Render MathJax formulas inside the newly displayed step-by-step solutions
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+
+        // Trigger automated report download
         downloadReportHtml(score);
     }
 
-    // Auto-generate a test on initial window load
+    // Auto-generate test on page load
     window.onload = function() {
         generateTest();
     };
