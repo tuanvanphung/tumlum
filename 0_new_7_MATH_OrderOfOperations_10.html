@@ -25,8 +25,6 @@
         #generateBtn:hover { background-color: #2980b9; }
         #submitBtn { background-color: #27ae60; }
         #submitBtn:hover { background-color: #219653; }
-        #saveReportBtn { background-color: #8e44ad; }
-        #saveReportBtn:hover { background-color: #732d91; }
         .problem-count { font-size: 0.95em; color: #555; margin-top: 8px; font-weight: bold; }
 
         .score-banner { display: none; text-align: center; background: #fff; border: 3px solid #27ae60; padding: 15px; margin: 0 auto 25px auto; max-width: 850px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
@@ -65,7 +63,6 @@
     <div class="controls-container" id="controls">
         <button id="generateBtn">Generate New Problem Set</button>
         <button id="submitBtn">Submit Answers</button>
-        <button id="saveReportBtn" style="display: none;">Save Report</button>
         <div class="problem-count" id="problemCount"></div>
     </div>
 
@@ -77,7 +74,6 @@
         const container = document.getElementById('problemContainer');
         const controls = document.getElementById('controls');
         const generateBtn = document.getElementById('generateBtn');
-        const saveReportBtn = document.getElementById('saveReportBtn');
         const problemCountEl = document.getElementById('problemCount');
         const scoreBanner = document.getElementById('scoreBanner');
 
@@ -194,25 +190,6 @@
             return n.value !== undefined ? n.value.toString() : 'Error';
         }
 
-        function formatPlainText(str) {
-            if (!str) return '';
-            return str
-                .replace(/<br\s*[\/]?>/gi, '\n      ')
-                .replace(/<[^>]+>/g, '')
-                .replace(/\\left/g, '')
-                .replace(/\\right/g, '')
-                .replace(/\\sqrt\{([^}]+)\}/g, 'sqrt($1)')
-                .replace(/\\sqrt\[3\]\{([^}]+)\}/g, 'cbrt($1)')
-                .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1/$2)')
-                .replace(/\\times/g, '*')
-                .replace(/\\div/g, '/')
-                .replace(/\\\(/g, '')
-                .replace(/\\\)/g, '')
-                .replace(/\{/g, '(')
-                .replace(/\}/g, ')')
-                .trim();
-        }
-
         const PERFECT_SQUARES = [
             { rad: 4, root: 2 }, { rad: 9, root: 3 }, { rad: 16, root: 4 },
             { rad: 25, root: 5 }, { rad: 36, root: 6 }, { rad: 49, root: 7 },
@@ -228,9 +205,7 @@
         }
         function easyDecimalStr() { return getRandomItem(EASY_DECIMALS); }
 
-        // Pool of clean, friendly powers with NO exponent of 1
         const EASY_POWERS = [
-            // Standard integer powers (> 1)
             { tex: "2^2", frac: { num: 4, den: 1 }, desc: "2^2 = 4" },
             { tex: "2^3", frac: { num: 8, den: 1 }, desc: "2^3 = 8" },
             { tex: "2^4", frac: { num: 16, den: 1 }, desc: "2^4 = 16" },
@@ -239,14 +214,12 @@
             { tex: "4^2", frac: { num: 16, den: 1 }, desc: "4^2 = 16" },
             { tex: "5^2", frac: { num: 25, den: 1 }, desc: "5^2 = 25" },
 
-            // Negative integer powers (including -1)
             { tex: "2^{-1}", frac: { num: 1, den: 2 }, desc: "2^{-1} = \\frac{1}{2}" },
             { tex: "4^{-1}", frac: { num: 1, den: 4 }, desc: "4^{-1} = \\frac{1}{4}" },
             { tex: "5^{-1}", frac: { num: 1, den: 5 }, desc: "5^{-1} = \\frac{1}{5}" },
             { tex: "2^{-2}", frac: { num: 1, den: 4 }, desc: "2^{-2} = \\frac{1}{2^2} = \\frac{1}{4}" },
             { tex: "2^{-3}", frac: { num: 1, den: 8 }, desc: "2^{-3} = \\frac{1}{2^3} = \\frac{1}{8}" },
 
-            // Fractional exponents (roots and fractional powers)
             { tex: "4^{\\frac{1}{2}}", frac: { num: 2, den: 1 }, desc: "4^{\\frac{1}{2}} = \\sqrt{4} = 2" },
             { tex: "9^{\\frac{1}{2}}", frac: { num: 3, den: 1 }, desc: "9^{\\frac{1}{2}} = \\sqrt{9} = 3" },
             { tex: "16^{\\frac{1}{2}}", frac: { num: 4, den: 1 }, desc: "16^{\\frac{1}{2}} = \\sqrt{16} = 4" },
@@ -256,7 +229,6 @@
             { tex: "4^{\\frac{3}{2}}", frac: { num: 8, den: 1 }, desc: "4^{\\frac{3}{2}} = (\\sqrt{4})^3 = 2^3 = 8" },
             { tex: "8^{\\frac{2}{3}}", frac: { num: 4, den: 1 }, desc: "8^{\\frac{2}{3}} = (\\sqrt[3]{8})^2 = 2^2 = 4" },
 
-            // Negative fractional exponents
             { tex: "4^{-\\frac{1}{2}}", frac: { num: 1, den: 2 }, desc: "4^{-\\frac{1}{2}} = \\frac{1}{\\sqrt{4}} = \\frac{1}{2}" },
             { tex: "16^{-\\frac{1}{2}}", frac: { num: 1, den: 4 }, desc: "16^{-\\frac{1}{2}} = \\frac{1}{\\sqrt{16}} = \\frac{1}{4}" },
             { tex: "25^{-\\frac{1}{2}}", frac: { num: 1, den: 5 }, desc: "25^{-\\frac{1}{2}} = \\frac{1}{\\sqrt{25}} = \\frac{1}{5}" },
@@ -272,7 +244,6 @@
             };
         }
 
-        // Power towers containing NO 1 exponents, including negative exponents
         const TOWER_POWERS = [
             { tex: "4^{2^{-1}}", frac: { num: 2, den: 1 }, desc: "Top-down tower: \\(2^{-1} = \\frac{1}{2}\\), so \\(4^{\\frac{1}{2}} = \\sqrt{4} = 2\\)" },
             { tex: "9^{2^{-1}}", frac: { num: 3, den: 1 }, desc: "Top-down tower: \\(2^{-1} = \\frac{1}{2}\\), so \\(9^{\\frac{1}{2}} = \\sqrt{9} = 3\\)" },
@@ -306,7 +277,6 @@
         // PROBLEM TEMPLATES
         // =============================================================
         const problemTemplates = [
-            // 1) √R + F + D + Power
             function () {
                 const R = perfectSquare(), F = easyFraction(), dStr = easyDecimalStr(), D = toFraction(dStr), P = easyPower();
                 const o1 = getRandomItem(['+', '-']), o2 = getRandomItem(['+', '-']), o3 = getRandomItem(['+', '-']);
@@ -331,7 +301,6 @@
                 ];
             },
 
-            // 2) (√R + Power) × F + D
             function () {
                 const R = perfectSquare(), P = easyPower(), F = easyFraction(), dStr = easyDecimalStr(), D = toFraction(dStr);
                 const o1 = getRandomItem(['+', '-']), o2 = getRandomItem(['+', '-']);
@@ -354,7 +323,6 @@
                 ];
             },
 
-            // 3) Power / √R + F × D
             function () {
                 const R = perfectSquare(), P = easyPower(), F = easyFraction(), dStr = easyDecimalStr(), D = toFraction(dStr);
                 const o1 = getRandomItem(['+', '-']);
@@ -377,7 +345,6 @@
                 ];
             },
 
-            // 4) (√R + Power)/(D) + F
             function () {
                 const R = perfectSquare(), P = easyPower(), dStr = getRandomItem(["0.5", "2.5", "0.25", "1.5", "0.2"]), D = toFraction(dStr), F = easyFraction();
                 const o1 = getRandomItem(['+', '-']), o2 = getRandomItem(['+', '-']);
@@ -400,7 +367,6 @@
                 ];
             },
 
-            // 5) | F - √R | + Power × D
             function () {
                 const R = perfectSquare(), F = easyFraction(), P = easyPower(), dStr = easyDecimalStr(), D = toFraction(dStr);
                 const o1 = getRandomItem(['+', '-']);
@@ -424,7 +390,6 @@
                 ];
             },
 
-            // 6) [ √R - (Power × F) ] + D
             function () {
                 const R = perfectSquare(), P = easyPower(), F = easyFraction(), dStr = easyDecimalStr(), D = toFraction(dStr);
                 const o1 = getRandomItem(['+', '-']), o2 = getRandomItem(['+', '-']);
@@ -447,7 +412,6 @@
                 ];
             },
 
-            // 7) D × √R - Power + F
             function () {
                 const dStr = easyDecimalStr(), D = toFraction(dStr), R = perfectSquare(), P = easyPower(), F = easyFraction();
                 const o1 = getRandomItem(['+', '-']), o2 = getRandomItem(['+', '-']);
@@ -469,7 +433,6 @@
                 ];
             },
 
-            // 8) F × (Power - √R) + D
             function () {
                 const F = easyFraction(), P = easyPower(), R = perfectSquare(), dStr = easyDecimalStr(), D = toFraction(dStr);
                 const o1 = getRandomItem(['+', '-']), o2 = getRandomItem(['+', '-']);
@@ -491,7 +454,6 @@
                 ];
             },
 
-            // 9) √R - | Power × D | + F
             function () {
                 const R = perfectSquare(), P = easyPower(), dStr = easyDecimalStr(), D = toFraction(dStr), F = easyFraction();
                 const o1 = getRandomItem(['+', '-']);
@@ -514,7 +476,6 @@
                 ];
             },
 
-            // 10) deep nesting with Power Tower: { D + [ √R - (F × PowerTower) ] }
             function () {
                 const dStr = easyDecimalStr(), D = toFraction(dStr), R = perfectSquare(), F = easyFraction(), P = easyTowerPower();
                 const o1 = getRandomItem(['+', '-']), o2 = getRandomItem(['+', '-']);
@@ -599,7 +560,6 @@
             container.innerHTML = '';
             scoreBanner.style.display = 'none';
             scoreBanner.innerHTML = '';
-            saveReportBtn.style.display = 'none';
             currentProblems = [];
 
             let existingSubmit = document.getElementById('submitBtn');
@@ -608,7 +568,7 @@
                 btn.id = 'submitBtn';
                 btn.textContent = 'Submit Answers';
                 btn.onclick = checkAnswers;
-                controls.insertBefore(btn, saveReportBtn);
+                controls.insertBefore(btn, problemCountEl);
             } else {
                 existingSubmit.onclick = checkAnswers;
             }
@@ -641,6 +601,132 @@
             }
 
             typesetMath([container]);
+        }
+
+        // =============================================================
+        // HTML REPORT GENERATOR & DOWNLOADER
+        // =============================================================
+        function downloadReportHTML() {
+            if (completedReportData.length === 0) return;
+            const now = new Date();
+            const dateStr = now.toLocaleString();
+            const scoreCount = completedReportData.filter(d => d.isCorrect).length;
+            const totalCount = completedReportData.length;
+            const pct = Math.round((scoreCount / totalCount) * 100);
+
+            let problemsHTML = '';
+            completedReportData.forEach((item) => {
+                let stepsItems = item.steps.map(s => `<li>${s}</li>`).join('');
+                problemsHTML += `
+                <div class="problem-card ${item.isCorrect ? 'is-correct' : 'is-incorrect'}">
+                    <div class="problem-top">
+                        <span class="problem-num">Problem #${item.id}</span>
+                        <span class="badge ${item.isCorrect ? 'badge-correct' : 'badge-incorrect'}">
+                            ${item.isCorrect ? '✓ Correct (+1)' : '✗ Incorrect (0)'}
+                        </span>
+                    </div>
+                    <div class="expression-box">
+                        \\( ${item.problemHTML} \\)
+                    </div>
+                    <div class="answers-grid">
+                        <div class="answer-pill">
+                            <strong>Your Answer:</strong> <span class="${item.isCorrect ? 'text-correct' : 'text-incorrect'}">${item.userRaw}</span>
+                        </div>
+                        <div class="answer-pill">
+                            <strong>Correct Value:</strong> <span class="text-correct">\\( ${item.correctFormatted} \\)</span>
+                        </div>
+                    </div>
+                    <div class="solution-box">
+                        <div class="solution-title">Step-by-Step Explanation:</div>
+                        <ol>${stepsItems}</ol>
+                        <div class="final-tag">Final Value: \\( ${item.correctFormatted} \\)</div>
+                    </div>
+                </div>`;
+            });
+
+            const reportDocument = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order of Operations - Performance Report</title>
+    <script>
+      MathJax = {
+        tex: { inlineMath: [['\\\\(', '\\\\)']] },
+        chtml: { scale: 1.05 }
+      };
+    <\/script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"><\/script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 25px 15px; background-color: #f4f6f9; color: #333; }
+        .report-wrapper { max-width: 850px; margin: 0 auto; }
+        .header-card { background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); text-align: center; margin-bottom: 25px; }
+        .header-card h1 { margin: 0 0 6px 0; color: #1a2a6c; font-size: 1.85em; }
+        .header-card p { margin: 0 0 18px 0; color: #666; font-size: 0.95em; }
+        .summary-stats { display: flex; justify-content: space-around; background: #f8f9fa; border-radius: 10px; padding: 16px; border: 1px solid #e9ecef; }
+        .stat-item { text-align: center; }
+        .stat-num { font-size: 1.6em; font-weight: bold; }
+        .stat-pass { color: #27ae60; }
+        .stat-neutral { color: #2980b9; }
+        .stat-lbl { font-size: 0.85em; color: #777; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+        .problem-card { background: #fff; border-radius: 12px; padding: 22px; margin-bottom: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .problem-card.is-correct { border-left: 7px solid #27ae60; }
+        .problem-card.is-incorrect { border-left: 7px solid #e74c3c; }
+        .problem-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+        .problem-num { font-weight: bold; font-size: 1.2em; color: #1a2a6c; }
+        .badge { padding: 5px 14px; border-radius: 20px; font-weight: bold; font-size: 0.85em; }
+        .badge-correct { background: #d4edda; color: #155724; }
+        .badge-incorrect { background: #f8d7da; color: #721c24; }
+        .expression-box { background: #f8fafd; border: 1px solid #e2e8f0; padding: 14px 18px; border-radius: 8px; font-size: 1.35em; margin-bottom: 16px; color: #2c3e50; overflow-x: auto; }
+        .answers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; font-size: 0.95em; }
+        .answer-pill { padding: 10px 14px; border-radius: 8px; background: #f8f9fa; border: 1px solid #edf2f7; }
+        .text-correct { color: #27ae60; font-weight: bold; }
+        .text-incorrect { color: #e74c3c; font-weight: bold; }
+        .solution-box { background: #fcfcfc; border-left: 4px solid #3498db; padding: 16px; border-radius: 6px; }
+        .solution-title { font-weight: bold; color: #2980b9; margin-bottom: 10px; font-size: 1em; }
+        .solution-box ol { margin: 0 0 10px 20px; padding: 0; }
+        .solution-box li { margin-bottom: 8px; color: #2c3e50; line-height: 1.55; }
+        .final-tag { display: inline-block; background: #d4edda; color: #155724; padding: 4px 10px; border-radius: 4px; font-weight: bold; margin-top: 6px; }
+        .footer-note { text-align: center; color: #888; font-size: 0.85em; margin-top: 25px; }
+        @media print { body { background: #fff; padding: 0; } .problem-card, .header-card { box-shadow: none; } }
+    </style>
+</head>
+<body>
+    <div class="report-wrapper">
+        <div class="header-card">
+            <h1>Mastery Test: Order of Operations</h1>
+            <p>Generated on ${dateStr}</p>
+            <div class="summary-stats">
+                <div class="stat-item">
+                    <div class="stat-num stat-pass">${scoreCount} / ${totalCount}</div>
+                    <div class="stat-lbl">Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num stat-pass">${pct}%</div>
+                    <div class="stat-lbl">Accuracy</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num stat-neutral">${totalCount}</div>
+                    <div class="stat-lbl">Total Questions</div>
+                </div>
+            </div>
+        </div>
+        ${problemsHTML}
+        <div class="footer-note">Order of Operations Mastery Assessment Report &bull; Self-Contained HTML</div>
+    </div>
+</body>
+</html>`;
+
+            const blob = new Blob([reportDocument], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const fileDate = now.toISOString().slice(0, 10);
+            a.href = url;
+            a.download = `Order_of_Operations_Report_${fileDate}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         function checkAnswers() {
@@ -689,72 +775,28 @@
 
                 completedReportData.push({
                     id: p.id,
-                    problemPlain: formatPlainText(data.problemHTML),
+                    problemHTML: data.problemHTML,
                     userRaw: rawVal || "(No answer)",
-                    correctStr: formatPlainText(formatNumber(correctObj)),
+                    correctFormatted: formatNumber(correctObj),
                     isCorrect: isCorrect,
-                    stepsPlain: data.steps.map(s => formatPlainText(s))
+                    steps: data.steps
                 });
             });
 
+            // Automatically download formatted HTML report on submission
+            downloadReportHTML();
+
             const pct = Math.round((score / problemTemplates.length) * 100);
             scoreBanner.innerHTML = `
-                <h2>Test Completed! Score: ${score} / ${problemTemplates.length} (${pct}%)</h2>
-                <p>Review the step-by-step explanations below. You can save your results using the <strong>"Save Report"</strong> button or click <strong>"Generate New Problem Set"</strong> to try again.</p>
+                <h2>Test Completed! Score: ${score} / ${problemTemplates.length} (${pct}%)\u200b</h2>
+                <p>Review the step-by-step explanations below. Your formatted HTML report has been downloaded automatically. Click <strong>"Generate New Problem Set"</strong> to try again.</p>
             `;
             scoreBanner.style.display = 'block';
-            saveReportBtn.style.display = 'inline-block';
 
             typesetMath([scoreBanner, container]);
         }
 
-        function downloadReport() {
-            if (!isSubmitted || completedReportData.length === 0) return;
-            const now = new Date();
-            const dateStr = now.toLocaleString();
-            const scoreCount = completedReportData.filter(d => d.isCorrect).length;
-            const totalCount = completedReportData.length;
-            const pct = Math.round((scoreCount / totalCount) * 100);
-
-            let report = `======================================================================\n`;
-            report += `           MASTERY TEST: ORDER OF OPERATIONS REPORT                  \n`;
-            report += `======================================================================\n`;
-            report += `Date / Time : ${dateStr}\n`;
-            report += `Score       : ${scoreCount} / ${totalCount} (${pct}%)\n`;
-            report += `======================================================================\n\n`;
-
-            completedReportData.forEach((item) => {
-                report += `----------------------------------------------------------------------\n`;
-                report += `PROBLEM #${item.id}\n`;
-                report += `Expression    : ${item.problemPlain}\n`;
-                report += `Your Answer   : ${item.userRaw}\n`;
-                report += `Correct Answer: ${item.correctStr}\n`;
-                report += `Result        : ${item.isCorrect ? "CORRECT (+1)" : "INCORRECT (0)"}\n\n`;
-                report += `Step-by-Step Explanation:\n`;
-                item.stepsPlain.forEach((step, idx) => {
-                    report += `  [Step ${idx + 1}] ${step}\n`;
-                });
-                report += `\n`;
-            });
-
-            report += `======================================================================\n`;
-            report += `                         END OF REPORT                                \n`;
-            report += `======================================================================\n`;
-
-            const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            const fileDate = now.toISOString().slice(0, 10);
-            a.href = url;
-            a.download = `Order_of_Operations_Report_${fileDate}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
         generateBtn.addEventListener('click', render);
-        saveReportBtn.addEventListener('click', downloadReport);
         render();
     })();
     </script>
