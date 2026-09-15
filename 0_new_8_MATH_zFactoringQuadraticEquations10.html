@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebra Mastery: The Big Three Factoring Shortcuts</title>
+    
+    <!-- MathJax Configuration and Script -->
+    <script>
+      window.MathJax = {
+        tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+        chtml: { scale: 1.0 },
+        startup: {
+          pageReady: () => {
+            return MathJax.startup.defaultPageReady().then(() => {
+              if (window.triggerMathTypeset) window.triggerMathTypeset();
+            });
+          }
+        }
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 16px 12px; 
+            background-color: #f0f2f5; 
+            color: #333; 
+            overflow-x: hidden;
+        }
+
+        h1 { 
+            text-align: center; 
+            color: #1a2a6c; 
+            margin-bottom: 4px; 
+            font-size: 1.8em;
+        }
+        
+        .subtitle { 
+            text-align: center; 
+            color: #666; 
+            margin-bottom: 16px; 
+            font-size: 0.95em;
+        }
+
+        /* Reference Rules Banner */
+        .reference-banner {
+            max-width: 880px;
+            margin: 0 auto 20px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 14px 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            border-top: 4px solid #3498db;
+        }
+        .reference-title {
+            font-weight: bold;
+            font-size: 1.05em;
+            color: #1a2a6c;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .reference-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 10px;
+            text-align: center;
+        }
+        .rule-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px;
+        }
+        .rule-name {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #718096;
+            font-weight: 700;
+        }
+        .rule-math {
+            font-size: 1.05em;
+            color: #2b6cb0;
+            margin-top: 2px;
+        }
+        
+        .controls-container { 
+            text-align: center; 
+            padding: 14px 16px; 
+            margin: 0 auto 20px auto; 
+            max-width: 880px;
+            background-color: #fff; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            position: sticky; 
+            top: 8px; 
+            z-index: 100; 
+        }
+
+        button { 
+            padding: 10px 20px; 
+            font-size: 1em; 
+            font-weight: bold; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin: 4px 6px; 
+            transition: background 0.2s ease, transform 0.1s ease; 
+        }
+        button:active { transform: scale(0.98); }
+        #generateBtn { background-color: #3498db; }
+        #generateBtn:hover { background-color: #2980b9; }
+        #submitBtn { background-color: #27ae60; }
+        #submitBtn:hover { background-color: #219653; }
+        
+        .problem-count { 
+            font-size: 0.9em; 
+            color: #555; 
+            margin-top: 8px; 
+            line-height: 1.4;
+        }
+        
+        .score-banner { 
+            display: none; 
+            text-align: center; 
+            background: #fff; 
+            border: 3px solid #27ae60; 
+            padding: 16px; 
+            margin: 0 auto 20px auto; 
+            max-width: 880px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+        }
+        .score-banner h2 { margin: 0 0 5px 0; color: #27ae60; font-size: 1.5em; }
+        .score-banner p { margin: 0; color: #666; font-size: 0.9em; }
+
+        .problem-list { 
+            list-style-type: none; 
+            padding-left: 0; 
+            max-width: 880px; 
+            margin: 0 auto; 
+        }
+
+        .problem-card { 
+            margin-bottom: 20px; 
+            padding: 18px 20px; 
+            border-radius: 12px; 
+            background-color: #fff; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+            border-left: 6px solid #34495e; 
+            width: 100%;
+        }
+        
+        .problem-header { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            gap: 12px; 
+            margin-bottom: 16px; 
+            flex-wrap: wrap; 
+        }
+
+        .problem-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .problem-number { 
+            font-weight: bold; 
+            font-size: 1.15em; 
+            color: #34495e; 
+        }
+
+        .problem-tag { 
+            font-size: 0.75em; 
+            background: #e8f4fd; 
+            color: #2980b9; 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-weight: 600; 
+        }
+
+        .problem-expression { 
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.4em; 
+            color: #2c3e50; 
+            padding: 10px 4px;
+            margin: 0 auto;
+            text-align: center;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .problem-expression::-webkit-scrollbar { display: none; }
+        
+        .answer-box { 
+            display: flex; 
+            flex-direction: column; 
+            background: #fcfdfe; 
+            padding: 16px; 
+            border: 1px solid #eef2f5; 
+            border-radius: 8px; 
+            align-items: center; 
+            gap: 12px;
+            width: 100%;
+        }
+        
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .input-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 0.95em;
+        }
+
+        select.pattern-select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 2px solid #ced4da;
+            background: #fff;
+            font-size: 0.95em;
+            outline: none;
+            transition: border-color 0.2s;
+            cursor: pointer;
+        }
+        select.pattern-select:focus { border-color: #3498db; }
+        select.pattern-select:disabled { background: #edf2f7; cursor: not-allowed; }
+
+        input.factor-input { 
+            width: 220px; 
+            padding: 8px 12px; 
+            font-size: 1.05em; 
+            border: 2px solid #ced4da; 
+            border-radius: 6px; 
+            text-align: center; 
+            outline: none; 
+            transition: border-color 0.2s;
+        }
+        input.factor-input:focus { border-color: #3498db; }
+        input.factor-input:disabled { background-color: #e9ecef; color: #495057; cursor: not-allowed; }
+
+        .input-hint { 
+            font-size: 0.85em; 
+            color: #d35400; 
+            font-weight: 600; 
+            text-align: center; 
+        }
+        
+        .solution-area { 
+            display: none; 
+            margin-top: 16px; 
+            padding: 14px 16px; 
+            background: #f8f9fa; 
+            border-radius: 8px; 
+            border-left: 5px solid #27ae60; 
+            text-align: left; 
+        }
+        .solution-title { font-weight: bold; font-size: 1.05em; color: #27ae60; margin-bottom: 8px; }
+        .step-list { margin: 6px 0 10px 18px; padding: 0; }
+        .step-list li { margin-bottom: 8px; color: #2c3e50; line-height: 1.45; }
+        
+        .algebra-line { 
+            display: block; 
+            background: #fff; 
+            padding: 8px 10px; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 6px; 
+            margin: 6px 0; 
+            overflow-x: auto; 
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .algebra-line::-webkit-scrollbar { display: none; }
+
+        .final-ans-tag { 
+            display: inline-block; 
+            background: #d4edda; 
+            color: #155724; 
+            padding: 4px 10px; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            margin-top: 4px; 
+        }
+        
+        .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
+        .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; font-weight: bold; }
+
+        mjx-container {
+            max-width: 100% !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            vertical-align: middle !important;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        mjx-container::-webkit-scrollbar { display: none; }
+
+        @media (max-width: 650px) {
+            body { padding: 12px 8px; }
+            h1 { font-size: 1.4em; }
+            .subtitle { font-size: 0.85em; }
+            .reference-banner { padding: 12px; }
+            .controls-container { padding: 12px 10px; }
+            button { padding: 9px 16px; font-size: 0.9em; width: 100%; margin: 4px 0; }
+            .problem-card { padding: 14px 12px; }
+            .problem-expression { font-size: 1.15em; }
+            .algebra-line { font-size: 0.9em; }
+            select.pattern-select { width: 100%; }
+            input.factor-input { width: 100%; }
+            .input-group { width: 100%; flex-direction: column; align-items: stretch; gap: 4px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Algebra: The "Big Three" Factoring Shortcuts</h1>
+    <p class="subtitle">Mastering Special Products &bull; Difference of Squares &bull; Perfect Square Trinomials</p>
+    
+    <!-- Quick Reference Cheat-Sheet -->
+    <div class="reference-banner">
+        <div class="reference-title">The "Big Three" Shortcut Formulas</div>
+        <div class="reference-grid">
+            <div class="rule-card">
+                <div class="rule-name">1. Difference of Squares</div>
+                <div class="rule-math">\( a^2 - b^2 = (a - b)(a + b) \)</div>
+            </div>
+            <div class="rule-card">
+                <div class="rule-name">2. Perfect Square (Sum)</div>
+                <div class="rule-math">\( a^2 + 2ab + b^2 = (a + b)^2 \)</div>
+            </div>
+            <div class="rule-card">
+                <div class="rule-name">3. Perfect Square (Diff)</div>
+                <div class="rule-math">\( a^2 - 2ab + b^2 = (a - b)^2 \)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls-container" id="controls">
+        <button id="generateBtn">Generate New Problem Set</button>
+        <button id="submitBtn">Submit Answers</button>
+        <div class="problem-count" id="problemCount"></div>
+    </div>
+    
+    <div id="scoreBanner" class="score-banner"></div>
+    <div id="problemContainer" class="problem-list"></div>
+
+    <script>
+    (() => {
+        const TOTAL_PROBLEMS = 10;
+        const container = document.getElementById('problemContainer');
+        const controls = document.getElementById('controls');
+        const generateBtn = document.getElementById('generateBtn');
+        const problemCountEl = document.getElementById('problemCount');
+        const scoreBanner = document.getElementById('scoreBanner');
+
+        let currentProblems = [];
+        let isSubmitted = false;
+
+        const CIPHER_KEY = "BigThree_Factoring_MasteryKey_9918";
+
+        function encrypt(str) {
+            try {
+                const encoder = new TextEncoder();
+                const bytes = encoder.encode(str);
+                const keyBytes = encoder.encode(CIPHER_KEY);
+                for (let i = 0; i < bytes.length; i++) bytes[i] ^= keyBytes[i % keyBytes.length];
+                let bin = "";
+                for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+                return btoa(bin);
+            } catch (e) {
+                return btoa(unescape(encodeURIComponent(str)));
+            }
+        }
+
+        function decrypt(str) {
+            try {
+                const bin = atob(str);
+                const bytes = new Uint8Array(bin.length);
+                for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+                const encoder = new TextEncoder();
+                const keyBytes = encoder.encode(CIPHER_KEY);
+                for (let i = 0; i < bytes.length; i++) {
+                    bytes[i] ^= keyBytes[i % keyBytes.length];
+                }
+                return new TextDecoder().decode(bytes);
+            } catch (e) {
+                return decodeURIComponent(escape(atob(str)));
+            }
+        }
+
+        function typesetMath(elements) {
+            if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                return window.MathJax.typesetPromise(elements).catch((err) => console.warn('Typesetting error:', err));
+            }
+            return Promise.resolve();
+        }
+
+        window.triggerMathTypeset = () => {
+            typesetMath([container]);
+        };
+
+        function getRnd(min, max, exclude=[]) {
+            let val;
+            let count = 0;
+            do { 
+                val = Math.floor(Math.random() * (max - min + 1)) + min;
+                count++;
+            } while (exclude.includes(val) && count < 200);
+            return val;
+        }
+
+        function shuffle(arr) {
+            let copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function gcd(a, b) {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            return b ? gcd(b, a % b) : a;
+        }
+
+        function term(coeff, v, first=false) {
+            if (coeff === 0) return "";
+            let absC = Math.abs(coeff);
+            let cStr = absC === 1 && v !== "" ? "" : `${absC}`;
+            if (first) {
+                return coeff < 0 ? `-${cStr}${v}` : `${cStr}${v}`;
+            }
+            return coeff < 0 ? `- ${cStr}${v}` : `+ ${cStr}${v}`;
+        }
+
+        function constant(c, first=false) {
+            if (c === 0) return first ? "0" : "";
+            if (first) return `${c}`;
+            return c < 0 ? `- ${Math.abs(c)}` : `+ ${c}`;
+        }
+
+        function cleanString(str) {
+            return (str || "").toLowerCase().replace(/\s+/g, '').replace(/\[/g, '(').replace(/\]/g, ')');
+        }
+
+        function formatTimestamp(date) {
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}_${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+        }
+
+        // =============================================================
+        // PROBLEM GENERATORS (THE "BIG THREE" SPECIAL PRODUCTS)
+        // =============================================================
+        function generateProblem(id, type) {
+            let prob = { id, type, expression: "", hint: "" };
+            let steps = [];
+            let correctPattern = ""; 
+            let validStrings = [];
+            let finalText = "";
+
+            switch(type) {
+                // 1. Monic Difference of Squares
+                case 'dots_monic': {
+                    let b = getRnd(3, 12);
+                    let bSq = b * b;
+
+                    prob.expression = `x^2 - ${bSq}`;
+                    prob.hint = "Recognize a² - b² = (a - b)(a + b).";
+                    correctPattern = "dots";
+
+                    steps.push(
+                        `<strong>Step 1: Check the Difference of Squares criteria</strong><br>
+                         There are exactly two terms separated by subtraction, both perfect squares:
+                         <span class="algebra-line">\\(a^2 = x^2 \\implies a = x\\)</span>
+                         <span class="algebra-line">\\(b^2 = ${bSq} \\implies b = ${b}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Apply the shortcut formula \\(a^2 - b^2 = (a - b)(a + b)\\)</strong><br>
+                         <span class="algebra-line">\\(x^2 - ${bSq} = (x - ${b})(x + ${b})\\)</span>`
+                    );
+
+                    finalText = `(x - ${b})(x + ${b})`;
+                    validStrings = [
+                        `(x-${b})(x+${b})`, `(x+${b})(x-${b})`,
+                        `(1x-${b})(1x+${b})`, `(1x+${b})(1x-${b})`
+                    ];
+                    break;
+                }
+
+                // 2. Non-Monic Difference of Squares
+                case 'dots_nonmonic': {
+                    let a = getRnd(2, 6);
+                    let b = getRnd(2, 9);
+                    while (gcd(a, b) !== 1) b = getRnd(2, 9);
+
+                    let aSq = a * a;
+                    let bSq = b * b;
+
+                    prob.expression = `${aSq}x^2 - ${bSq}`;
+                    prob.hint = "Find a = √(first term) and b = √(last term), then use (a - b)(a + b).";
+                    correctPattern = "dots";
+
+                    steps.push(
+                        `<strong>Step 1: Identify \\(a\\) and \\(b\\)</strong><br>
+                         <span class="algebra-line">\\(a = \\sqrt{${aSq}x^2} = ${a}x\\)</span>
+                         <span class="algebra-line">\\(b = \\sqrt{${bSq}} = ${b}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Substitute into \\((a - b)(a + b)\\)</strong><br>
+                         <span class="algebra-line">\\(${aSq}x^2 - ${bSq} = (${a}x - ${b})(${a}x + ${b})\\)</span>`
+                    );
+
+                    finalText = `(${a}x - ${b})(${a}x + ${b})`;
+                    validStrings = [
+                        `(${a}x-${b})(${a}x+${b})`,
+                        `(${a}x+${b})(${a}x-${b})`
+                    ];
+                    break;
+                }
+
+                // 3. Perfect Square Trinomial: Sum (Monic)
+                case 'pst_sum_monic': {
+                    let b = getRnd(2, 11);
+                    let mid = 2 * b;
+                    let bSq = b * b;
+
+                    prob.expression = `x^2 + ${mid}x + ${bSq}`;
+                    prob.hint = "Check if the middle term is 2ab where a = x and b = √(last term).";
+                    correctPattern = "pst_sum";
+
+                    steps.push(
+                        `<strong>Step 1: Check Perfect Square Trinomial conditions</strong><br>
+                         &bull; First term is a square: \\(a^2 = x^2 \\implies a = x\\)<br>
+                         &bull; Last term is a square: \\(b^2 = ${bSq} \\implies b = ${b}\\)<br>
+                         &bull; Middle term matches \\(+2ab\\): \\(2(x)(${b}) = ${mid}x\\) &check;`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Apply the shortcut formula \\(a^2 + 2ab + b^2 = (a + b)^2\\)</strong><br>
+                         <span class="algebra-line">\\(x^2 + ${mid}x + ${bSq} = (x + ${b})^2\\)</span>`
+                    );
+
+                    finalText = `(x + ${b})^2`;
+                    validStrings = [
+                        `(x+${b})^2`, `(x+${b})(x+${b})`,
+                        `(1x+${b})^2`, `(1x+${b})(1x+${b})`
+                    ];
+                    break;
+                }
+
+                // 4. Perfect Square Trinomial: Difference (Monic)
+                case 'pst_diff_monic': {
+                    let b = getRnd(2, 11);
+                    let mid = 2 * b;
+                    let bSq = b * b;
+
+                    prob.expression = `x^2 - ${mid}x + ${bSq}`;
+                    prob.hint = "Notice the minus sign in the middle: a² - 2ab + b² = (a - b)².";
+                    correctPattern = "pst_diff";
+
+                    steps.push(
+                        `<strong>Step 1: Check Perfect Square Trinomial conditions</strong><br>
+                         &bull; \\(a = x\\) and \\(b = ${b}\\)<br>
+                         &bull; Middle term matches \\(-2ab\\): \\(-2(x)(${b}) = -${mid}x\\) &check;`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Apply the shortcut formula \\(a^2 - 2ab + b^2 = (a - b)^2\\)</strong><br>
+                         <span class="algebra-line">\\(x^2 - ${mid}x + ${bSq} = (x - ${b})^2\\)</span>`
+                    );
+
+                    finalText = `(x - ${b})^2`;
+                    validStrings = [
+                        `(x-${b})^2`, `(x-${b})(x-${b})`,
+                        `(1x-${b})^2`, `(1x-${b})(1x-${b})`
+                    ];
+                    break;
+                }
+
+                // 5. Perfect Square Trinomial: Sum (Non-Monic)
+                case 'pst_sum_nonmonic': {
+                    let a = getRnd(2, 4);
+                    let b = getRnd(2, 7);
+                    while (gcd(a, b) !== 1) b = getRnd(2, 7);
+
+                    let aSq = a * a;
+                    let mid = 2 * a * b;
+                    let bSq = b * b;
+
+                    prob.expression = `${aSq}x^2 + ${mid}x + ${bSq}`;
+                    prob.hint = "a = √(first term), b = √(last term). Verify that 2ab equals the middle term.";
+                    correctPattern = "pst_sum";
+
+                    steps.push(
+                        `<strong>Step 1: Identify components \\(a\\) and \\(b\\)</strong><br>
+                         <span class="algebra-line">\\(a = \\sqrt{${aSq}x^2} = ${a}x\\)</span>
+                         <span class="algebra-line">\\(b = \\sqrt{${bSq}} = ${b}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Test the middle term</strong><br>
+                         <span class="algebra-line">\\(2ab = 2(${a}x)(${b}) = ${mid}x \\quad (\\text{Matches the given middle term!})\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 3: Factor as \\((a + b)^2\\)</strong><br>
+                         <span class="algebra-line">\\(${aSq}x^2 + ${mid}x + ${bSq} = (${a}x + ${b})^2\\)</span>`
+                    );
+
+                    finalText = `(${a}x + ${b})^2`;
+                    validStrings = [
+                        `(${a}x+${b})^2`,
+                        `(${a}x+${b})(${a}x+${b})`
+                    ];
+                    break;
+                }
+
+                // 6. Perfect Square Trinomial: Difference (Non-Monic)
+                case 'pst_diff_nonmonic': {
+                    let a = getRnd(2, 5);
+                    let b = getRnd(2, 6);
+                    while (gcd(a, b) !== 1) b = getRnd(2, 6);
+
+                    let aSq = a * a;
+                    let mid = 2 * a * b;
+                    let bSq = b * b;
+
+                    prob.expression = `${aSq}x^2 - ${mid}x + ${bSq}`;
+                    prob.hint = "Middle term has a minus sign: factors into (ax - b)².";
+                    correctPattern = "pst_diff";
+
+                    steps.push(
+                        `<strong>Step 1: Identify components \\(a\\) and \\(b\\)</strong><br>
+                         <span class="algebra-line">\\(a = \\sqrt{${aSq}x^2} = ${a}x\\)</span>
+                         <span class="algebra-line">\\(b = \\sqrt{${bSq}} = ${b}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Test the middle term</strong><br>
+                         <span class="algebra-line">\\(-2ab = -2(${a}x)(${b}) = -${mid}x \\quad (\\text{Matches!})\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 3: Factor as \\((a - b)^2\\)</strong><br>
+                         <span class="algebra-line">\\(${aSq}x^2 - ${mid}x + ${bSq} = (${a}x - ${b})^2\\)</span>`
+                    );
+
+                    finalText = `(${a}x - ${b})^2`;
+                    validStrings = [
+                        `(${a}x-${b})^2`,
+                        `(${a}x-${b})(${a}x-${b})`
+                    ];
+                    break;
+                }
+
+                // 7. Difference of Squares with GCF First
+                case 'dots_gcf': {
+                    let k = getRnd(2, 5);
+                    let b = getRnd(2, 7);
+                    let bSq = b * b;
+                    let c = k * bSq;
+
+                    prob.expression = `${k}x^2 - ${c}`;
+                    prob.hint = "Always check for a Greatest Common Factor (GCF) first, then use a² - b².";
+                    correctPattern = "dots";
+
+                    steps.push(
+                        `<strong>Step 1: Factor out the GCF first</strong><br>
+                         Both terms share a common factor of \\(${k}\\):
+                         <span class="algebra-line">\\(${k}x^2 - ${c} = ${k}(x^2 - ${bSq})\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Factor the remaining Difference of Squares</strong><br>
+                         \\(x^2 - ${bSq} = (x - ${b})(x + ${b})\\). Keep the GCF on the outside:
+                         <span class="algebra-line">\\(${k}(x - ${b})(x + ${b})\\)</span>`
+                    );
+
+                    finalText = `${k}(x - ${b})(x + ${b})`;
+                    validStrings = [
+                        `${k}(x-${b})(x+${b})`,
+                        `${k}(x+${b})(x-${b})`
+                    ];
+                    break;
+                }
+
+                // 8. Perfect Square Trinomial with GCF First
+                case 'pst_gcf': {
+                    let k = getRnd(2, 4);
+                    let isPlus = Math.random() > 0.5;
+                    let b = getRnd(2, 5);
+                    let mid = 2 * b * k;
+                    let c = k * b * b;
+                    let signStr = isPlus ? '+' : '-';
+
+                    prob.expression = `${k}x^2 ${signStr} ${mid}x + ${c}`;
+                    prob.hint = "Pull out the common numerical factor first, then inspect the trinomial inside.";
+                    correctPattern = isPlus ? "pst_sum" : "pst_diff";
+
+                    steps.push(
+                        `<strong>Step 1: Factor out the GCF \\(${k}\\)</strong><br>
+                         <span class="algebra-line">\\(${k}(x^2 ${signStr} ${2*b}x + ${b*b})\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Recognize the Perfect Square Trinomial inside</strong><br>
+                         \\(x^2 ${signStr} ${2*b}x + ${b*b} = (x ${signStr} ${b})^2\\)`
+                    );
+                    steps.push(
+                        `<strong>Step 3: Combine with the GCF</strong><br>
+                         <span class="algebra-line">\\(${k}(x ${signStr} ${b})^2\\)</span>`
+                    );
+
+                    finalText = `${k}(x ${signStr} ${b})^2`;
+                    validStrings = [
+                        `${k}(x${signStr}${b})^2`,
+                        `${k}(x${signStr}${b})(x${signStr}${b})`
+                    ];
+                    break;
+                }
+
+                // 9. Two-Variable Difference of Squares
+                case 'dots_multivar': {
+                    let a = getRnd(2, 6);
+                    let b = getRnd(2, 7);
+                    while (gcd(a, b) !== 1) b = getRnd(2, 7);
+
+                    let aSq = a * a;
+                    let bSq = b * b;
+
+                    prob.expression = `${aSq}x^2 - ${bSq}y^2`;
+                    prob.hint = "Same pattern: a = √(first term) and b = √(second term with y).";
+                    correctPattern = "dots";
+
+                    steps.push(
+                        `<strong>Step 1: Identify \\(a\\) and \\(b\\)</strong><br>
+                         <span class="algebra-line">\\(a = \\sqrt{${aSq}x^2} = ${a}x\\)</span>
+                         <span class="algebra-line">\\(b = \\sqrt{${bSq}y^2} = ${b}y\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Apply \\((a - b)(a + b)\\)</strong><br>
+                         <span class="algebra-line">\\(${aSq}x^2 - ${bSq}y^2 = (${a}x - ${b}y)(${a}x + ${b}y)\\)</span>`
+                    );
+
+                    finalText = `(${a}x - ${b}y)(${a}x + ${b}y)`;
+                    validStrings = [
+                        `(${a}x-${b}y)(${a}x+${b}y)`,
+                        `(${a}x+${b}y)(${a}x-${b}y)`
+                    ];
+                    break;
+                }
+
+                // 10. Two-Variable Perfect Square Trinomial
+                case 'pst_multivar': {
+                    let a = getRnd(2, 5);
+                    let b = getRnd(2, 6);
+                    while (gcd(a, b) !== 1) b = getRnd(2, 6);
+                    let isPlus = Math.random() > 0.5;
+
+                    let aSq = a * a;
+                    let mid = 2 * a * b;
+                    let bSq = b * b;
+                    let signStr = isPlus ? '+' : '-';
+
+                    prob.expression = `${aSq}x^2 ${signStr} ${mid}xy + ${bSq}y^2`;
+                    prob.hint = "Check a = ax and b = by. Test 2ab = middle term.";
+                    correctPattern = isPlus ? "pst_sum" : "pst_diff";
+
+                    steps.push(
+                        `<strong>Step 1: Check components</strong><br>
+                         \\(a = ${a}x\\), \\; \\(b = ${b}y\\).<br>
+                         Middle term test: \\(2ab = 2(${a}x)(${b}y) = ${mid}xy\\) &check;`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Factor into binomial squared</strong><br>
+                         <span class="algebra-line">\\(${aSq}x^2 ${signStr} ${mid}xy + ${bSq}y^2 = (${a}x ${signStr} ${b}y)^2\\)</span>`
+                    );
+
+                    finalText = `(${a}x ${signStr} ${b}y)^2`;
+                    validStrings = [
+                        `(${a}x${signStr}${b}y)^2`,
+                        `(${a}x${signStr}${b}y)(${a}x${signStr}${b}y)`
+                    ];
+                    break;
+                }
+            }
+
+            const payload = {
+                correctPattern: correctPattern,
+                validStrings: validStrings,
+                steps: steps,
+                finalText: finalText
+            };
+
+            prob.securedPayload = encrypt(JSON.stringify(payload));
+            return prob;
+        }
+
+        const typeLabels = {
+            dots_monic: 'Difference of Squares (Monic)',
+            dots_nonmonic: 'Difference of Squares (Non-Monic)',
+            pst_sum_monic: 'Perfect Square Trinomial (Sum, Monic)',
+            pst_diff_monic: 'Perfect Square Trinomial (Diff, Monic)',
+            pst_sum_nonmonic: 'Perfect Square Trinomial (Sum, Non-Monic)',
+            pst_diff_nonmonic: 'Perfect Square Trinomial (Diff, Non-Monic)',
+            dots_gcf: 'Diff of Squares (GCF First)',
+            pst_gcf: 'Perfect Square Trinomial (GCF First)',
+            dots_multivar: 'Diff of Squares (Two Variables)',
+            pst_multivar: 'Perfect Square Trinomial (Two Variables)'
+        };
+
+        const patternNames = {
+            dots: 'Difference of Squares: a² - b²',
+            pst_sum: 'Perfect Square Trinomial: a² + 2ab + b²',
+            pst_diff: 'Perfect Square Trinomial: a² - 2ab + b²'
+        };
+
+        function render() {
+            isSubmitted = false;
+            container.innerHTML = ''; 
+            currentProblems = [];
+            scoreBanner.style.display = 'none';
+            scoreBanner.innerHTML = '';
+
+            let existingSubmit = document.getElementById('submitBtn');
+            if (!existingSubmit) {
+                const btn = document.createElement('button');
+                btn.id = 'submitBtn';
+                btn.textContent = 'Submit Answers';
+                btn.onclick = checkAnswers;
+                controls.insertBefore(btn, problemCountEl);
+            } else {
+                existingSubmit.onclick = checkAnswers;
+            }
+            
+            const allTypes = [
+                'dots_monic', 
+                'dots_nonmonic', 
+                'pst_sum_monic', 
+                'pst_diff_monic', 
+                'pst_sum_nonmonic', 
+                'pst_diff_nonmonic', 
+                'dots_gcf', 
+                'pst_gcf', 
+                'dots_multivar', 
+                'pst_multivar'
+            ];
+
+            let types = shuffle(allTypes);
+            problemCountEl.innerHTML = `<strong>${TOTAL_PROBLEMS} Shortcut Problems</strong> &mdash; For each expression, select which shortcut applies and write the factored form (e.g. <code>(5x-7)(5x+7)</code> or <code>(3x+4)^2</code>).`;
+
+            for (let i = 1; i <= TOTAL_PROBLEMS; i++) {
+                let p = generateProblem(i, types[i - 1]);
+                currentProblems.push(p);
+
+                const div = document.createElement('div');
+                div.className = 'problem-card';
+                div.innerHTML = `
+                    <div class="problem-header">
+                        <div class="problem-meta">
+                            <span class="problem-number">Problem #${i}</span>
+                            <span class="problem-tag">${typeLabels[p.type]}</span>
+                        </div>
+                        <div class="problem-expression">\\( ${p.expression} \\)</div>
+                    </div>
+                    <div class="answer-box">
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label for="pattern-${i}">Shortcut Formula:</label>
+                                <select class="pattern-select" id="pattern-${i}">
+                                    <option value="">-- Choose Shortcut Pattern --</option>
+                                    <option value="dots">Difference of Squares: a² - b²</option>
+                                    <option value="pst_sum">Perfect Square (Sum): a² + 2ab + b²</option>
+                                    <option value="pst_diff">Perfect Square (Diff): a² - 2ab + b²</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="factor-${i}">Factored Form:</label>
+                                <input type="text" class="factor-input" id="factor-${i}" autocomplete="off" placeholder="e.g. (x-4)(x+4) or (2x+3)^2">
+                            </div>
+                        </div>
+                        <div class="input-hint">${p.hint}</div>
+                    </div>
+                    <div class="solution-area" id="sol-${i}"></div>`;
+                    
+                container.appendChild(div);
+            }
+
+            typesetMath([container]);
+        }
+
+        function triggerDownload(htmlContent, filename) {
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 4000);
+        }
+
+        function generateReportHtml(score, total, resultsList, timestampStr, readableTime) {
+            const pct = Math.round((score / total) * 100);
+            let itemsHtml = "";
+
+            resultsList.forEach(r => {
+                let stepsFormatted = r.steps.map(s => `<li>${s}</li>`).join('');
+                itemsHtml += `
+                    <div class="report-card ${r.isCorrect ? 'border-correct' : 'border-incorrect'}">
+                        <div class="report-card-header">
+                            <span class="card-title">Problem #${r.id} &mdash; ${r.tag}</span>
+                            <span class="badge ${r.isCorrect ? 'badge-correct' : 'badge-incorrect'}">${r.isCorrect ? '✓ Correct' : '✗ Incorrect'}</span>
+                        </div>
+                        <div class="math-expr">\\[ ${r.expression} \\]</div>
+                        <div class="ans-summary">
+                            <p><strong>Your Selected Pattern:</strong> ${r.userPatternName}</p>
+                            <p><strong>Your Factored Form:</strong> <span class="${r.isFactorCorrect ? 'text-correct' : 'text-incorrect'}">${r.userFactor || '(empty)'}</span></p>
+                            <p><strong>Correct Factored Form:</strong> <span class="text-correct">\\( ${r.finalText} \\)</span></p>
+                        </div>
+                        <div class="sol-container">
+                            <div class="sol-header">Step-by-Step Breakdown:</div>
+                            <ol class="step-list">${stepsFormatted}</ol>
+                            <div><strong>Final Factored Answer:</strong> <span class="final-tag">\\( ${r.finalText} \\)</span></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factoring Shortcuts Report - ${timestampStr}</title>
+    <script>
+      window.MathJax = {
+        tex: { inlineMath: [['\\\\(', '\\\\)']], displayMath: [['\\\\[', '\\\\]']] },
+        chtml: { scale: 1.0 }
+      };
+    <\/script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"><\/script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 16px 12px; background-color: #f4f6f9; color: #2c3e50; }
+        .container { max-width: 880px; margin: 0 auto; width: 100%; }
+        .header { background: #fff; padding: 20px 16px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; margin-bottom: 20px; }
+        h1 { margin: 0 0 6px 0; color: #1a2a6c; font-size: 1.6em; }
+        .meta { color: #7f8c8d; font-size: 0.9em; margin-bottom: 12px; }
+        .score-box { display: inline-block; padding: 8px 20px; background: #eafaf1; border: 2px solid #27ae60; border-radius: 30px; font-weight: bold; font-size: 1.2em; color: #27ae60; }
+        .report-card { background: #fff; padding: 18px; margin-bottom: 18px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .border-correct { border-left: 6px solid #27ae60; }
+        .border-incorrect { border-left: 6px solid #e74c3c; }
+        .report-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+        .card-title { font-weight: bold; font-size: 1.1em; color: #34495e; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 0.8em; }
+        .badge-correct { background: #d4edda; color: #155724; }
+        .badge-incorrect { background: #f8d7da; color: #721c24; }
+        .math-expr { margin: 12px 0; padding: 10px; background: #fcfdfe; border: 1px solid #eef2f5; border-radius: 8px; text-align: center; overflow-x: auto; }
+        .ans-summary { background: #f8f9fa; padding: 10px 14px; border-radius: 6px; margin: 10px 0; font-size: 0.95em; }
+        .ans-summary p { margin: 3px 0; }
+        .text-correct { color: #27ae60; font-weight: bold; }
+        .text-incorrect { color: #e74c3c; font-weight: bold; }
+        .sol-container { margin-top: 14px; padding-top: 12px; border-top: 1px solid #eee; }
+        .sol-header { font-weight: bold; color: #27ae60; margin-bottom: 6px; }
+        .step-list { margin: 6px 0 10px 16px; padding: 0; font-size: 0.95em; }
+        .step-list li { margin-bottom: 6px; }
+        .algebra-line { display: block; background: #fdfdfd; padding: 6px 8px; border: 1px solid #e2e8f0; border-radius: 5px; margin: 4px 0; overflow-x: auto; }
+        .final-tag { display: inline-block; background: #d4edda; color: #155724; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+        @media print { body { background: #fff; padding: 0; } .report-card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Big Three Factoring Shortcuts: Student Performance Report</h1>
+            <div class="meta">Generated on ${readableTime}</div>
+            <div class="score-box">Final Score: ${score} / ${total} (${pct}%)</div>
+        </div>
+        ${itemsHtml}
+    </div>
+</body>
+</html>`;
+        }
+
+        function checkAnswers() {
+            if (isSubmitted) return;
+            isSubmitted = true;
+
+            const btn = document.getElementById('submitBtn');
+            if (btn) btn.remove();
+
+            let score = 0;
+            const resultsList = [];
+
+            currentProblems.forEach(p => {
+                const data = JSON.parse(decrypt(p.securedPayload));
+                
+                const sel = document.getElementById(`pattern-${p.id}`);
+                const inp = document.getElementById(`factor-${p.id}`);
+
+                const userPattern = sel.value;
+                const userFactor = inp.value.trim();
+                const userClean = cleanString(userFactor);
+
+                const isPatternCorrect = (userPattern === data.correctPattern);
+                const isFactorCorrect = data.validStrings.some(ans => cleanString(ans) === userClean);
+
+                const isFullyCorrect = isPatternCorrect && isFactorCorrect;
+
+                sel.disabled = true;
+                inp.disabled = true;
+
+                sel.classList.add(isPatternCorrect ? 'correct-input' : 'incorrect-input');
+                inp.classList.add(isFactorCorrect ? 'correct-input' : 'incorrect-input');
+
+                if (isFullyCorrect) score++;
+
+                resultsList.push({
+                    id: p.id,
+                    type: p.type,
+                    tag: typeLabels[p.type],
+                    expression: p.expression,
+                    userPattern: userPattern,
+                    userPatternName: patternNames[userPattern] || '(None chosen)',
+                    userFactor: userFactor,
+                    isFactorCorrect: isFactorCorrect,
+                    isPatternCorrect: isPatternCorrect,
+                    isCorrect: isFullyCorrect,
+                    steps: data.steps,
+                    finalText: data.finalText
+                });
+
+                const solDiv = document.getElementById(`sol-${p.id}`);
+                let stepsHtml = `<ol class="step-list">`;
+                data.steps.forEach(st => { stepsHtml += `<li>${st}</li>`; });
+                stepsHtml += `</ol>`;
+
+                solDiv.innerHTML = `
+                    <div class="solution-title">${isFullyCorrect ? '✓ Correct' : '✗ Needs Review'} &mdash; Step-by-Step Breakdown:</div>
+                    <p style="margin: 4px 0 8px 0; font-size: 0.9em; color: #4a5568;"><strong>Shortcut Rule:</strong> ${patternNames[data.correctPattern]}</p>
+                    ${stepsHtml}
+                    <div><strong>Factored Form:</strong> <span class="final-ans-tag">\\( ${data.finalText} \\)</span></div>
+                `;
+                solDiv.style.display = 'block';
+            });
+
+            const pct = Math.round((score / TOTAL_PROBLEMS) * 100);
+            const now = new Date();
+            const timestamp = formatTimestamp(now);
+            const readableTime = now.toLocaleString();
+            const filename = `factoring_shortcuts_${timestamp}.html`;
+
+            const reportHtml = generateReportHtml(score, TOTAL_PROBLEMS, resultsList, timestamp, readableTime);
+
+            scoreBanner.innerHTML = `
+                <h2>Set Completed! Score: ${score} / ${TOTAL_PROBLEMS} (${pct}%)</h2>
+                <p>Detailed step-by-step factoring explanations are available below. Your performance report has been downloaded.</p>
+            `;
+            scoreBanner.style.display = 'block';
+
+            triggerDownload(reportHtml, filename);
+            typesetMath([scoreBanner, container]);
+        }
+
+        generateBtn.addEventListener('click', render);
+        render(); 
+    })(); 
+    </script>
+</body>
+</html>
