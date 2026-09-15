@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebra Mastery: The Ultimate 10 Quadratic Equations</title>
+    
+    <!-- MathJax Configuration and Script -->
+    <script>
+      window.MathJax = {
+        tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+        chtml: { scale: 1.0 },
+        startup: {
+          pageReady: () => {
+            return MathJax.startup.defaultPageReady().then(() => {
+              if (window.triggerMathTypeset) window.triggerMathTypeset();
+            });
+          }
+        }
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 16px 12px; 
+            background-color: #f0f2f5; 
+            color: #333; 
+            overflow-x: hidden;
+        }
+
+        h1 { 
+            text-align: center; 
+            color: #1a2a6c; 
+            margin-bottom: 4px; 
+            font-size: 1.8em;
+        }
+        
+        .subtitle { 
+            text-align: center; 
+            color: #666; 
+            margin-bottom: 20px; 
+            font-size: 0.95em;
+        }
+        
+        .controls-container { 
+            text-align: center; 
+            padding: 14px 16px; 
+            margin: 0 auto 20px auto; 
+            max-width: 880px;
+            background-color: #fff; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            position: sticky; 
+            top: 8px; 
+            z-index: 100; 
+        }
+
+        button { 
+            padding: 10px 20px; 
+            font-size: 1em; 
+            font-weight: bold; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin: 4px 6px; 
+            transition: background 0.2s ease, transform 0.1s ease; 
+        }
+        button:active { transform: scale(0.98); }
+        #generateBtn { background-color: #3498db; }
+        #generateBtn:hover { background-color: #2980b9; }
+        #submitBtn { background-color: #27ae60; }
+        #submitBtn:hover { background-color: #219653; }
+        
+        .problem-count { 
+            font-size: 0.9em; 
+            color: #555; 
+            margin-top: 8px; 
+            line-height: 1.4;
+        }
+        
+        .score-banner { 
+            display: none; 
+            text-align: center; 
+            background: #fff; 
+            border: 3px solid #27ae60; 
+            padding: 16px; 
+            margin: 0 auto 20px auto; 
+            max-width: 880px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+        }
+        .score-banner h2 { margin: 0 0 5px 0; color: #27ae60; font-size: 1.5em; }
+        .score-banner p { margin: 0; color: #666; font-size: 0.9em; }
+
+        .problem-list { 
+            list-style-type: none; 
+            padding-left: 0; 
+            max-width: 880px; 
+            margin: 0 auto; 
+        }
+
+        .problem-card { 
+            margin-bottom: 20px; 
+            padding: 18px 20px; 
+            border-radius: 12px; 
+            background-color: #fff; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+            border-left: 6px solid #34495e; 
+            width: 100%;
+        }
+        
+        .problem-header { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            gap: 12px; 
+            margin-bottom: 16px; 
+            flex-wrap: wrap; 
+        }
+
+        .problem-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .problem-number { 
+            font-weight: bold; 
+            font-size: 1.15em; 
+            color: #34495e; 
+        }
+
+        .problem-tag { 
+            font-size: 0.75em; 
+            background: #e8f4fd; 
+            color: #2980b9; 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-weight: 600; 
+        }
+
+        .problem-expression { 
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.3em; 
+            color: #2c3e50; 
+            padding: 10px 4px;
+            margin: 0 auto;
+            text-align: center;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .problem-expression::-webkit-scrollbar { display: none; }
+        
+        .answer-box { 
+            display: flex; 
+            flex-direction: column; 
+            background: #fcfdfe; 
+            padding: 14px; 
+            border: 1px solid #eef2f5; 
+            border-radius: 8px; 
+            align-items: center; 
+            width: 100%;
+        }
+        
+        .multi-input-row { 
+            display: flex; 
+            gap: 14px; 
+            justify-content: center; 
+            align-items: center; 
+            margin: 4px 0; 
+            flex-wrap: wrap; 
+            width: 100%;
+        }
+
+        .input-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .multi-input-row label { 
+            font-size: 1.1em; 
+            font-family: 'Times New Roman', Times, serif; 
+            font-style: italic; 
+            font-weight: bold; 
+        }
+
+        .multi-input-row input { 
+            width: 84px; 
+            padding: 7px 6px; 
+            font-size: 1.05em; 
+            border: 2px solid #ced4da; 
+            border-radius: 6px; 
+            text-align: center; 
+            outline: none; 
+            transition: border-color 0.2s;
+        }
+        .multi-input-row input:focus { border-color: #3498db; }
+        .multi-input-row input:disabled { background-color: #e9ecef; color: #495057; cursor: not-allowed; }
+
+        .input-hint { 
+            font-size: 0.85em; 
+            color: #d35400; 
+            margin-top: 8px; 
+            font-weight: 600; 
+            text-align: center; 
+        }
+        
+        .solution-area { 
+            display: none; 
+            margin-top: 16px; 
+            padding: 14px 16px; 
+            background: #f8f9fa; 
+            border-radius: 8px; 
+            border-left: 5px solid #27ae60; 
+            text-align: left; 
+        }
+        .solution-title { font-weight: bold; font-size: 1.05em; color: #27ae60; margin-bottom: 8px; }
+        .step-list { margin: 6px 0 10px 18px; padding: 0; }
+        .step-list li { margin-bottom: 8px; color: #2c3e50; line-height: 1.45; }
+        
+        .algebra-line { 
+            display: block; 
+            background: #fff; 
+            padding: 8px 10px; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 6px; 
+            margin: 6px 0; 
+            overflow-x: auto; 
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .algebra-line::-webkit-scrollbar { display: none; }
+
+        .final-ans-tag { 
+            display: inline-block; 
+            background: #d4edda; 
+            color: #155724; 
+            padding: 4px 10px; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            margin-top: 4px; 
+        }
+        
+        .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
+        .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; font-weight: bold; }
+
+        mjx-container {
+            max-width: 100% !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            vertical-align: middle !important;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        mjx-container::-webkit-scrollbar { display: none; }
+
+        @media (max-width: 600px) {
+            body { padding: 12px 8px; }
+            h1 { font-size: 1.45em; }
+            .subtitle { font-size: 0.85em; margin-bottom: 15px; }
+            .controls-container { padding: 12px 10px; }
+            button { padding: 9px 16px; font-size: 0.9em; width: 100%; margin: 4px 0; }
+            .problem-card { padding: 14px 12px; }
+            .problem-expression { font-size: 1.1em; padding: 6px 0; }
+            .algebra-line { font-size: 0.9em; padding: 6px 8px; }
+            .multi-input-row input { width: 70px; padding: 6px; font-size: 1em; }
+            .step-list { margin-left: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Algebra: The Mastery 10 Quadratics</h1>
+    <p class="subtitle">Complete Coverage: Factoring, Radicals, Extraneous Roots, Irrational Forms &amp; Biquadratics</p>
+    
+    <div class="controls-container" id="controls">
+        <button id="generateBtn">Generate New Problem Set</button>
+        <button id="submitBtn">Submit Answers</button>
+        <div class="problem-count" id="problemCount"></div>
+    </div>
+    
+    <div id="scoreBanner" class="score-banner"></div>
+    <div id="problemContainer" class="problem-list"></div>
+
+    <script>
+    (() => {
+        const TOTAL_PROBLEMS = 10;
+        const container = document.getElementById('problemContainer');
+        const controls = document.getElementById('controls');
+        const generateBtn = document.getElementById('generateBtn');
+        const problemCountEl = document.getElementById('problemCount');
+        const scoreBanner = document.getElementById('scoreBanner');
+
+        let currentProblems = [];
+        let isSubmitted = false;
+
+        const CIPHER_KEY = "QuadMastery10_CurriculumKey_2026_z88";
+
+        function encrypt(str) {
+            try {
+                const encoder = new TextEncoder();
+                const bytes = encoder.encode(str);
+                const keyBytes = encoder.encode(CIPHER_KEY);
+                for (let i = 0; i < bytes.length; i++) bytes[i] ^= keyBytes[i % keyBytes.length];
+                let bin = "";
+                for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+                return btoa(bin);
+            } catch (e) {
+                return btoa(unescape(encodeURIComponent(str)));
+            }
+        }
+
+        function decrypt(str) {
+            try {
+                const bin = atob(str);
+                const bytes = new Uint8Array(bin.length);
+                for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+                const encoder = new TextEncoder();
+                const keyBytes = encoder.encode(CIPHER_KEY);
+                for (let i = 0; i < bytes.length; i++) bytes[i] ^= keyBytes[i % keyBytes.length];
+                return new TextDecoder().decode(bytes);
+            } catch (e) {
+                return decodeURIComponent(escape(atob(str)));
+            }
+        }
+
+        function typesetMath(elements) {
+            if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                return window.MathJax.typesetPromise(elements).catch((err) => console.warn('Typesetting error:', err));
+            }
+            return Promise.resolve();
+        }
+
+        window.triggerMathTypeset = () => {
+            typesetMath([container]);
+        };
+
+        function getRnd(min, max, exclude=[]) {
+            let val;
+            let count = 0;
+            do { 
+                val = Math.floor(Math.random() * (max - min + 1)) + min;
+                count++;
+            } while (exclude.includes(val) && count < 200);
+            return val;
+        }
+
+        function shuffle(arr) {
+            let copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function gcd(a, b) {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            return b ? gcd(b, a % b) : a;
+        }
+
+        function formatFrac(num, den) {
+            if (den === 0) return "undefined";
+            let g = gcd(num, den);
+            num = num / g;
+            den = den / g;
+            if (den < 0) { num = -num; den = -den; }
+            if (den === 1) return `${num}`;
+            return (num < 0 ? `-\\frac{${Math.abs(num)}}{${den}}` : `\\frac{${num}}{${den}}`);
+        }
+
+        function toFractionString(num, den) {
+            let g = gcd(num, den);
+            num = num / g;
+            den = den / g;
+            if (den < 0) { num = -num; den = -den; }
+            if (den === 1) return `${num}`;
+            return `${num}/${den}`;
+        }
+
+        function term(coeff, v, first=false) {
+            if (coeff === 0) return "";
+            let absC = Math.abs(coeff);
+            let cStr = absC === 1 && v !== "" ? "" : `${absC}`;
+            if (first) {
+                return coeff < 0 ? `-${cStr}${v}` : `${cStr}${v}`;
+            }
+            return coeff < 0 ? `- ${cStr}${v}` : `+ ${cStr}${v}`;
+        }
+
+        function constant(c, first=false) {
+            if (c === 0) return first ? "0" : "";
+            if (first) return `${c}`;
+            return c < 0 ? `- ${Math.abs(c)}` : `+ ${c}`;
+        }
+
+        function parseNum(val) {
+            if (!val && val !== 0) return null;
+            val = String(val).trim().replace(/\s+/g, '');
+            if (val.includes('/')) {
+                const parts = val.split('/');
+                if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1]) && Number(parts[1]) !== 0) {
+                    return Number(parts[0]) / Number(parts[1]);
+                }
+            }
+            const n = Number(val);
+            return isNaN(n) ? null : n;
+        }
+
+        function formatTimestamp(date) {
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}_${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+        }
+
+        // =============================================================
+        // THE REVISED "MASTERY 10" CURRICULUM TEMPLATES
+        // =============================================================
+        function generateProblem(id, type) {
+            let prob = { id, type, expression: "", hint: "" };
+            let steps = [];
+            let correctAnswers = {};
+            let finalText = "";
+
+            switch(type) {
+                // 1. Monic Trinomial (a = 1)
+                case 'monic_trinomial': {
+                    let r1 = getRnd(-8, 8, [0]);
+                    let r2 = getRnd(-8, 8, [0, r1]);
+                    let B = -(r1 + r2);
+                    let C = r1 * r2;
+
+                    prob.expression = `x^2 ${term(B, 'x')} ${constant(C)} = 0`;
+                    prob.hint = "Factor into two binomials (x - r₁)(x - r₂) = 0.";
+
+                    steps.push(
+                        `<strong>Step 1: Product-Sum Inspection</strong><br>
+                         Identify two integers whose product is \\(C = ${C}\\) and sum is \\(B = ${B}\\):
+                         <span class="algebra-line">\\((${ -r1 }) + (${ -r2 }) = ${B}, \\quad (${ -r1 })(${ -r2 }) = ${C}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Factored Form &amp; Zero Product Property</strong><br>
+                         <span class="algebra-line">\\((x ${constant(-r1)})(x ${constant(-r2)}) = 0\\)</span>
+                         <span class="algebra-line">\\(x = ${r1} \\quad \\text{or} \\quad x = ${r2}\\)</span>`
+                    );
+
+                    correctAnswers = { kind: 'pair', r1_val: r1, r2_val: r2, display1: `${r1}`, display2: `${r2}` };
+                    finalText = `x_1 = ${r1}, \\quad x_2 = ${r2}`;
+                    break;
+                }
+
+                // 2. Non-Monic Trinomial (a > 1)
+                case 'non_monic_trinomial': {
+                    let a = getRnd(2, 4);
+                    let num1 = getRnd(-5, 5, [0]);
+                    while (gcd(Math.abs(num1), a) !== 1) num1 = getRnd(-5, 5, [0]);
+                    let int_root = getRnd(-4, 4, [0]);
+
+                    let A = a;
+                    let B = -(a * int_root + num1);
+                    let C = num1 * int_root;
+
+                    let r1_val = num1 / a;
+                    let r2_val = int_root;
+                    let r1_str = toFractionString(num1, a);
+                    let r2_str = `${int_root}`;
+
+                    prob.expression = `${term(A, 'x^2', true)} ${term(B, 'x')} ${constant(C)} = 0`;
+                    prob.hint = "Use the ac method to split the middle term and factor by grouping.";
+
+                    let ac = A * C;
+                    let s1 = -num1, s2 = -(a * int_root);
+
+                    steps.push(
+                        `<strong>Step 1: Apply the ac method</strong><br>
+                         Find two factors of \\(ac = (${A})(${C}) = ${ac}\\) that sum to \\(b = ${B}\\):
+                         <span class="algebra-line">\\(${s1} + (${s2}) = ${B}, \\quad (${s1})(${s2}) = ${ac}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Split linear term and factor by grouping</strong><br>
+                         <span class="algebra-line">\\(${A}x^2 ${term(s1, 'x')} ${term(s2, 'x')} ${constant(C)} = 0\\)</span>
+                         <span class="algebra-line">\\((${A}x ${constant(-num1)})(x ${constant(-int_root)}) = 0\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 3: Solve each binomial factor</strong><br>
+                         <span class="algebra-line">\\(x = ${formatFrac(num1, a)}, \\quad x = ${int_root}\\)</span>`
+                    );
+
+                    correctAnswers = { kind: 'pair', r1_val: r1_val, r2_val: r2_val, display1: r1_str, display2: r2_str };
+                    finalText = `x_1 = ${r1_str}, \\quad x_2 = ${r2_str}`;
+                    break;
+                }
+
+                // 3. Difference of Squares (b = 0)
+                case 'diff_of_squares': {
+                    let a = getRnd(1, 3);
+                    let k = getRnd(2, 7);
+                    let A = a * a;
+                    let C = -(k * k);
+
+                    let r1_val = k / a;
+                    let r2_val = -k / a;
+                    let r1_str = toFractionString(k, a);
+                    let r2_str = toFractionString(-k, a);
+
+                    prob.expression = `${term(A, 'x^2', true)} ${constant(C)} = 0`;
+                    prob.hint = "Isolate x² and take square roots of both sides (remembering ±).";
+
+                    steps.push(
+                        `<strong>Step 1: Isolate the squared variable</strong><br>
+                         <span class="algebra-line">\\(${A}x^2 = ${-C} \\implies x^2 = ${formatFrac(k*k, A)}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Extract both square roots</strong><br>
+                         <span class="algebra-line">\\(x = \\pm \\sqrt{${formatFrac(k*k, A)}} = \\pm ${formatFrac(k, a)}\\)</span>`
+                    );
+
+                    correctAnswers = { kind: 'pair', r1_val: r1_val, r2_val: r2_val, display1: r1_str, display2: r2_str };
+                    finalText = `x = \\pm ${r1_str}`;
+                    break;
+                }
+
+                // 4. Missing Constant / GCF (c = 0)
+                case 'gcf_missing_c': {
+                    let A = getRnd(2, 5);
+                    let B = getRnd(-9, 9, [0]);
+
+                    let r1_val = 0;
+                    let r2_val = -B / A;
+                    let r1_str = "0";
+                    let r2_str = toFractionString(-B, A);
+
+                    prob.expression = `${term(A, 'x^2', true)} ${term(B, 'x')} = 0`;
+                    prob.hint = "Never divide by x! Factor out the common monomial x.";
+
+                    steps.push(
+                        `<strong>Step 1: Factor out the common x</strong><br>
+                         <span class="algebra-line">\\(x(${term(A, 'x', true)} ${constant(B)}) = 0\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Zero Product Property</strong><br>
+                         <span class="algebra-line">\\(x = 0 \\quad \\text{or} \\quad ${A}x ${constant(B)} = 0 \\implies x = ${formatFrac(-B, A)}\\)</span>`
+                    );
+
+                    correctAnswers = { kind: 'pair', r1_val: r1_val, r2_val: r2_val, display1: r1_str, display2: r2_str };
+                    finalText = `x_1 = 0, \\quad x_2 = ${r2_str}`;
+                    break;
+                }
+
+                // 5. Completing the Square
+                case 'completing_square': {
+                    let p = getRnd(-6, 6, [0]);
+                    let k = getRnd(1, 6);
+                    let B = 2 * p;
+                    let RHS = k * k - p * p;
+
+                    let r1 = -p + k;
+                    let r2 = -p - k;
+
+                    prob.expression = `x^2 ${term(B, 'x')} = ${RHS}`;
+                    prob.hint = "Add (b/2)² to both sides to form a binomial squared.";
+
+                    let halfB = p;
+                    let halfBSq = p * p;
+                    let sumRHS = RHS + halfBSq;
+
+                    steps.push(
+                        `<strong>Step 1: Calculate \\((b/2)^2\\) and add to both sides</strong><br>
+                         Here \\(b = ${B}\\), so \\(b/2 = ${halfB}\\), and \\((b/2)^2 = ${halfBSq}\\):
+                         <span class="algebra-line">\\(x^2 ${term(B, 'x')} + ${halfBSq} = ${RHS} + ${halfBSq} \\implies x^2 ${term(B, 'x')} + ${halfBSq} = ${sumRHS}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Write as a binomial squared and take square root</strong><br>
+                         <span class="algebra-line">\\((x ${constant(halfB)})^2 = ${sumRHS}\\)</span>
+                         <span class="algebra-line">\\(x ${constant(halfB)} = \\pm ${k} \\implies x = ${-halfB} \\pm ${k}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 3: List both distinct values</strong><br>
+                         <span class="algebra-line">\\(x_1 = ${r1}, \\quad x_2 = ${r2}\\)</span>`
+                    );
+
+                    correctAnswers = { kind: 'pair', r1_val: r1, r2_val: r2, display1: `${r1}`, display2: `${r2}` };
+                    finalText = `x_1 = ${r1}, \\quad x_2 = ${r2}`;
+                    break;
+                }
+
+                // 6. Scrambled / Both Sides
+                case 'scrambled_quadratic': {
+                    let r1 = getRnd(-5, 5, [0]);
+                    let r2 = getRnd(-5, 5, [0, r1]);
+                    let B = -(r1 + r2);
+                    let C = r1 * r2;
+
+                    let m = getRnd(-4, 4, [0]);
+                    let rhs_linear = B - m;
+                    let k = getRnd(1, 9);
+                    let rhs_const = C + k;
+
+                    let lhs_str = `x(x ${constant(m)}) - ${k}`;
+                    let rhs_str = `${term(rhs_linear, 'x', true)} ${constant(rhs_const)}`.trim();
+                    if (!rhs_str) rhs_str = "0";
+
+                    prob.expression = `${lhs_str} = ${rhs_str}`;
+                    prob.hint = "Expand brackets and move all terms to the left side into Ax² + Bx + C = 0.";
+
+                    steps.push(
+                        `<strong>Step 1: Expand both sides</strong><br>
+                         <span class="algebra-line">\\(x^2 ${term(m, 'x')} - ${k} = ${rhs_str}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Gather all terms on the LHS</strong><br>
+                         <span class="algebra-line">\\(x^2 ${term(B, 'x')} ${constant(C)} = 0\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 3: Factor and solve</strong><br>
+                         <span class="algebra-line">\\((x ${constant(-r1)})(x ${constant(-r2)}) = 0 \\implies x_1 = ${r1}, \\quad x_2 = ${r2}\\)</span>`
+                    );
+
+                    correctAnswers = { kind: 'pair', r1_val: r1, r2_val: r2, display1: `${r1}`, display2: `${r2}` };
+                    finalText = `x_1 = ${r1}, \\quad x_2 = ${r2}`;
+                    break;
+                }
+
+                // 7. Rational Algebraic Form
+                case 'rational_to_quadratic': {
+                    let k = getRnd(-4, 4, [0]);
+                    let m = getRnd(-5, 5, [0, k]);
+                    let S = k + m;
+                    let P = k * m;
+
+                    prob.expression = `x ${constant(P < 0 ? `- \\frac{${Math.abs(P)}}{x}` : `+ \\frac{${P}}{x}`)} = ${S}`;
+                    prob.hint = "Multiply through by LCD x (noting restriction x ≠ 0) to form a quadratic.";
+
+                    steps.push(
+                        `<strong>Step 1: Note restriction and multiply by LCD \\(x\\)</strong><br>
+                         Domain restriction: \\(x \\neq 0\\).
+                         <span class="algebra-line">\\(x(x) + x\\left(\\frac{${P}}{x}\\right) = x(${S}) \\implies x^2 ${constant(P)} = ${S}x\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Standard quadratic form</strong><br>
+                         <span class="algebra-line">\\(x^2 ${term(-S, 'x')} ${constant(P)} = 0\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 3: Factor and verify domain</strong><br>
+                         <span class="algebra-line">\\((x ${constant(-k)})(x ${constant(-m)}) = 0 \\implies x = ${k}, \\quad x = ${m}\\)</span>
+                         Both solutions satisfy \\(x \\neq 0\\).`
+                    );
+
+                    correctAnswers = { kind: 'pair', r1_val: k, r2_val: m, display1: `${k}`, display2: `${m}` };
+                    finalText = `x_1 = ${k}, \\quad x_2 = ${m}`;
+                    break;
+                }
+
+                // 8. Radical Equation with Extraneous Root (NEW)
+                case 'radical_extraneous': {
+                    // sqrt(ax + b) = x - c
+                    let c = getRnd(2, 4);
+                    let r_valid = getRnd(c + 2, c + 5);      // Valid root: r_valid >= c
+                    let r_extra = getRnd(c - 3, c - 1);      // Extraneous root: r_extra < c
+
+                    // (x - r_valid)(x - r_extra) = x^2 - (r_v + r_e)x + r_v*r_e
+                    // (x - c)^2 = x^2 - 2cx + c^2
+                    // ax + b = (x - c)^2 - (x - r_v)(x - r_e)
+                    let a = 2 * c - (r_valid + r_extra);
+                    let b = c * c - (r_valid * r_extra);
+
+                    prob.expression = `\\sqrt{${term(a, 'x', true)} ${constant(b)}} = x ${constant(-c)}`;
+                    prob.hint = "Square both sides, solve the quadratic, and check BOTH roots in the original equation to eliminate the extraneous root!";
+
+                    steps.push(
+                        `<strong>Step 1: Square both sides</strong><br>
+                         <span class="algebra-line">\\(\\left(\\sqrt{${term(a, 'x', true)} ${constant(b)}}\\right)^2 = (x ${constant(-c)})^2\\)</span>
+                         <span class="algebra-line">\\(${term(a, 'x', true)} ${constant(b)} = x^2 ${term(-2*c, 'x')} + ${c*c}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Collect terms into standard form and factor</strong><br>
+                         <span class="algebra-line">\\(x^2 ${term(-(r_valid + r_extra), 'x')} ${constant(r_valid * r_extra)} = 0\\)</span>
+                         <span class="algebra-line">\\((x ${constant(-r_valid)})(x ${constant(-r_extra)}) = 0 \\implies x = ${r_valid}, \\quad x = ${r_extra}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 3: Test for extraneous solutions in original equation</strong><br>
+                         &bull; Check \\(x = ${r_valid}\\): \\(\\sqrt{${a*r_valid + b}} = ${Math.round(Math.sqrt(a*r_valid + b))}\\) and RHS \\(= ${r_valid} - ${c} = ${r_valid - c}\\). (<strong>Valid!</strong>)<br>
+                         &bull; Check \\(x = ${r_extra}\\): \\(\\sqrt{${a*r_extra + b}} = ${Math.round(Math.sqrt(a*r_extra + b))}\\) but RHS \\(= ${r_extra} - ${c} = ${r_extra - c}\\). Since a principal square root cannot equal a negative number, \\(x = ${r_extra}\\) is <strong>extraneous</strong>.`
+                    );
+
+                    correctAnswers = { kind: 'single', val: r_valid, display: `${r_valid}`, extra: r_extra };
+                    finalText = `x = ${r_valid} \\quad (x = ${r_extra} \\text{ is extraneous})`;
+                    break;
+                }
+
+                // 9. Non-Factorable / Irrational Quadratic (NEW)
+                case 'irrational_formula': {
+                    let A = getRnd(1, 2);
+                    let B, C, D;
+                    let count = 0;
+                    do {
+                        B = getRnd(-7, 7, [0]);
+                        C = getRnd(-8, 8, [0]);
+                        D = B * B - 4 * A * C;
+                        count++;
+                    } while ((D <= 0 || Math.round(Math.sqrt(D))**2 === D) && count < 150);
+
+                    let sqrtD = Math.sqrt(D);
+                    let r1_exact = (-B + sqrtD) / (2 * A);
+                    let r2_exact = (-B - sqrtD) / (2 * A);
+
+                    let r1_round = Math.round(r1_exact * 100) / 100;
+                    let r2_round = Math.round(r2_exact * 100) / 100;
+
+                    prob.expression = `${term(A, 'x^2', true)} ${term(B, 'x')} ${constant(C)} = 0`;
+                    prob.hint = "This does not factor! Use the Quadratic Formula and round your answers to 2 decimal places (e.g. 1.85, -0.35).";
+
+                    steps.push(
+                        `<strong>Step 1: Compute the Discriminant \\(\\Delta\\)</strong><br>
+                         \\(a = ${A}, \\; b = ${B}, \\; c = ${C}\\):
+                         <span class="algebra-line">\\(\\Delta = b^2 - 4ac = (${B})^2 - 4(${A})(${C}) = ${B*B} - (${4*A*C}) = ${D}\\)</span>
+                         Since \\(\\Delta = ${D}\\) is not a perfect square, roots are irrational.`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Apply the Quadratic Formula</strong><br>
+                         <span class="algebra-line">\\(x = \\frac{-b \\pm \\sqrt{\\Delta}}{2a} = \\frac{${-B} \\pm \\sqrt{${D}}}{${2*A}}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 3: Approximate to 2 decimal places</strong><br>
+                         <span class="algebra-line">\\(x_1 \\approx \\frac{${-B} + ${sqrtD.toFixed(3)}}{${2*A}} \\approx ${r1_round.toFixed(2)}\\)</span>
+                         <span class="algebra-line">\\(x_2 \\approx \\frac{${-B} - ${sqrtD.toFixed(3)}}{${2*A}} \\approx ${r2_round.toFixed(2)}\\)</span>`
+                    );
+
+                    correctAnswers = { kind: 'approx_pair', r1_val: r1_round, r2_val: r2_round, display1: `${r1_round.toFixed(2)}`, display2: `${r2_round.toFixed(2)}` };
+                    finalText = `x_1 \\approx ${r1_round.toFixed(2)}, \\quad x_2 \\approx ${r2_round.toFixed(2)} \\quad \\left(\\text{Exact: } \\frac{${-B} \\pm \\sqrt{${D}}}{${2*A}}\\right)`;
+                    break;
+                }
+
+                // 10. Biquadratic Form (u = x²) (NEW)
+                case 'biquadratic_usub': {
+                    let m = getRnd(1, 3);
+                    let n = getRnd(m + 1, 4);
+
+                    let u1 = m * m;
+                    let u2 = n * n;
+
+                    let B = -(u1 + u2);
+                    let C = u1 * u2;
+
+                    prob.expression = `x^4 ${term(B, 'x^2')} ${constant(C)} = 0`;
+                    prob.hint = "Let u = x². Solve the quadratic in u first, then take square roots to find all 4 values of x.";
+
+                    steps.push(
+                        `<strong>Step 1: Perform substitution \\(u = x^2\\)</strong><br>
+                         Rewrite the equation in terms of \\(u\\):
+                         <span class="algebra-line">\\(u^2 ${term(B, 'u')} ${constant(C)} = 0\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 2: Factor and solve for \\(u\\)</strong><br>
+                         <span class="algebra-line">\\((u - ${u1})(u - ${u2}) = 0 \\implies u = ${u1} \\quad \\text{or} \\quad u = ${u2}\\)</span>`
+                    );
+                    steps.push(
+                        `<strong>Step 3: Back-substitute \\(x^2 = u\\) to solve for all 4 roots</strong><br>
+                         <span class="algebra-line">\\(x^2 = ${u1} \\implies x = \\pm ${m}\\)</span>
+                         <span class="algebra-line">\\(x^2 = ${u2} \\implies x = \\pm ${n}\\)</span>
+                         Total 4 roots: \\(x \\in \\{${m}, -${m}, ${n}, -${n}\\}\\)`
+                    );
+
+                    correctAnswers = { kind: 'quad', vals: [m, -m, n, -n], display: `${m}, -${m}, ${n}, -${n}` };
+                    finalText = `x = \\pm ${m}, \\; \\pm ${n}`;
+                    break;
+                }
+            }
+
+            const payload = {
+                answers: correctAnswers,
+                steps: steps,
+                finalText: finalText
+            };
+
+            prob.securedPayload = encrypt(JSON.stringify(payload));
+            return prob;
+        }
+
+        const typeLabels = {
+            monic_trinomial: '1. Monic Trinomial (a = 1)',
+            non_monic_trinomial: '2. Non-Monic Trinomial (a > 1)',
+            diff_of_squares: '3. Difference of Squares (b = 0)',
+            gcf_missing_c: '4. Factoring GCF (c = 0)',
+            completing_square: '5. Completing the Square',
+            scrambled_quadratic: '6. Scrambled / Terms on Both Sides',
+            rational_to_quadratic: '7. Rational Algebraic Form',
+            radical_extraneous: '8. Radical Equation (Extraneous Root Check)',
+            irrational_formula: '9. Irrational Formula (2 Decimal Places)',
+            biquadratic_usub: '10. Biquadratic (u-Substitution)'
+        };
+
+        function render() {
+            isSubmitted = false;
+            container.innerHTML = ''; 
+            currentProblems = [];
+            scoreBanner.style.display = 'none';
+            scoreBanner.innerHTML = '';
+
+            let existingSubmit = document.getElementById('submitBtn');
+            if (!existingSubmit) {
+                const btn = document.createElement('button');
+                btn.id = 'submitBtn';
+                btn.textContent = 'Submit Answers';
+                btn.onclick = checkAnswers;
+                controls.insertBefore(btn, problemCountEl);
+            } else {
+                existingSubmit.onclick = checkAnswers;
+            }
+            
+            const allTypes = [
+                'monic_trinomial', 
+                'non_monic_trinomial', 
+                'diff_of_squares', 
+                'gcf_missing_c', 
+                'completing_square', 
+                'scrambled_quadratic', 
+                'rational_to_quadratic', 
+                'radical_extraneous', 
+                'irrational_formula', 
+                'biquadratic_usub'
+            ];
+
+            let types = shuffle(allTypes);
+            problemCountEl.innerHTML = `<strong>The Mastery 10 Problem Set</strong> &mdash; Covers all aspects of quadratics. Order of roots does not matter.`;
+
+            for (let i = 1; i <= TOTAL_PROBLEMS; i++) {
+                let p = generateProblem(i, types[i - 1]);
+                currentProblems.push(p);
+
+                // Build tailored inputs based on template requirements
+                let inputHTML = '';
+                if (p.type === 'radical_extraneous') {
+                    inputHTML = `
+                        <div class="multi-input-row">
+                            <div class="input-group">
+                                <label>Valid Root x = </label>
+                                <input type="text" class="user-input" id="input-${i}-1" autocomplete="off" placeholder="valid root">
+                            </div>
+                        </div>`;
+                } else if (p.type === 'biquadratic_usub') {
+                    inputHTML = `
+                        <div class="multi-input-row">
+                            <div class="input-group"><label>x₁ = </label><input type="text" class="user-input" id="input-${i}-1" autocomplete="off" placeholder="root"></div>
+                            <div class="input-group"><label>x₂ = </label><input type="text" class="user-input" id="input-${i}-2" autocomplete="off" placeholder="root"></div>
+                            <div class="input-group"><label>x₃ = </label><input type="text" class="user-input" id="input-${i}-3" autocomplete="off" placeholder="root"></div>
+                            <div class="input-group"><label>x₄ = </label><input type="text" class="user-input" id="input-${i}-4" autocomplete="off" placeholder="root"></div>
+                        </div>`;
+                } else {
+                    inputHTML = `
+                        <div class="multi-input-row">
+                            <div class="input-group">
+                                <label>x₁ = </label>
+                                <input type="text" class="user-input" id="input-${i}-1" autocomplete="off" placeholder="root 1">
+                            </div>
+                            <div class="input-group">
+                                <label>x₂ = </label>
+                                <input type="text" class="user-input" id="input-${i}-2" autocomplete="off" placeholder="root 2">
+                            </div>
+                        </div>`;
+                }
+
+                const div = document.createElement('div');
+                div.className = 'problem-card';
+                div.innerHTML = `
+                    <div class="problem-header">
+                        <div class="problem-meta">
+                            <span class="problem-number">Problem #${i}</span>
+                            <span class="problem-tag">${typeLabels[p.type]}</span>
+                        </div>
+                        <div class="problem-expression">\\( ${p.expression} \\)</div>
+                    </div>
+                    <div class="answer-box">
+                        ${inputHTML}
+                        <div class="input-hint">${p.hint}</div>
+                    </div>
+                    <div class="solution-area" id="sol-${i}"></div>`;
+                    
+                container.appendChild(div);
+            }
+
+            typesetMath([container]);
+        }
+
+        function triggerDownload(htmlContent, filename) {
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 4000);
+        }
+
+        function generateReportHtml(score, total, resultsList, timestampStr, readableTime) {
+            const pct = Math.round((score / total) * 100);
+            let itemsHtml = "";
+
+            resultsList.forEach(r => {
+                let stepsFormatted = r.steps.map(s => `<li>${s}</li>`).join('');
+                itemsHtml += `
+                    <div class="report-card ${r.isCorrect ? 'border-correct' : 'border-incorrect'}">
+                        <div class="report-card-header">
+                            <span class="card-title">Problem #${r.id} &mdash; ${r.tag}</span>
+                            <span class="badge ${r.isCorrect ? 'badge-correct' : 'badge-incorrect'}">${r.isCorrect ? '✓ Correct' : '✗ Incorrect'}</span>
+                        </div>
+                        <div class="math-expr">\\[ ${r.expression} \\]</div>
+                        <div class="ans-summary">
+                            <p><strong>Your Submitted Solution:</strong> <span class="${r.isCorrect ? 'text-correct' : 'text-incorrect'}">${r.userAnsText}</span></p>
+                            <p><strong>Correct Solution:</strong> <span class="text-correct">${r.correctAnsText}</span></p>
+                        </div>
+                        <div class="sol-container">
+                            <div class="sol-header">Step-by-Step Solution:</div>
+                            <ol class="step-list">${stepsFormatted}</ol>
+                            <div><strong>Final Result:</strong> <span class="final-tag">\\( ${r.finalText} \\)</span></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastery 10 Quadratic Report - ${timestampStr}</title>
+    <script>
+      window.MathJax = {
+        tex: { inlineMath: [['\\\\(', '\\\\)']], displayMath: [['\\\\[', '\\\\]']] },
+        chtml: { scale: 1.0 }
+      };
+    <\/script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"><\/script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 16px 12px; background-color: #f4f6f9; color: #2c3e50; }
+        .container { max-width: 880px; margin: 0 auto; width: 100%; }
+        .header { background: #fff; padding: 20px 16px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; margin-bottom: 20px; }
+        h1 { margin: 0 0 6px 0; color: #1a2a6c; font-size: 1.6em; }
+        .meta { color: #7f8c8d; font-size: 0.9em; margin-bottom: 12px; }
+        .score-box { display: inline-block; padding: 8px 20px; background: #eafaf1; border: 2px solid #27ae60; border-radius: 30px; font-weight: bold; font-size: 1.2em; color: #27ae60; }
+        .report-card { background: #fff; padding: 18px; margin-bottom: 18px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .border-correct { border-left: 6px solid #27ae60; }
+        .border-incorrect { border-left: 6px solid #e74c3c; }
+        .report-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+        .card-title { font-weight: bold; font-size: 1.1em; color: #34495e; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 0.8em; }
+        .badge-correct { background: #d4edda; color: #155724; }
+        .badge-incorrect { background: #f8d7da; color: #721c24; }
+        .math-expr { margin: 12px 0; padding: 10px; background: #fcfdfe; border: 1px solid #eef2f5; border-radius: 8px; text-align: center; overflow-x: auto; }
+        .ans-summary { background: #f8f9fa; padding: 10px 14px; border-radius: 6px; margin: 10px 0; font-size: 0.95em; }
+        .ans-summary p { margin: 3px 0; }
+        .text-correct { color: #27ae60; font-weight: bold; }
+        .text-incorrect { color: #e74c3c; font-weight: bold; }
+        .sol-container { margin-top: 14px; padding-top: 12px; border-top: 1px solid #eee; }
+        .sol-header { font-weight: bold; color: #27ae60; margin-bottom: 6px; }
+        .step-list { margin: 6px 0 10px 16px; padding: 0; font-size: 0.95em; }
+        .step-list li { margin-bottom: 6px; }
+        .algebra-line { display: block; background: #fdfdfd; padding: 6px 8px; border: 1px solid #e2e8f0; border-radius: 5px; margin: 4px 0; overflow-x: auto; }
+        .final-tag { display: inline-block; background: #d4edda; color: #155724; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+        @media print { body { background: #fff; padding: 0; } .report-card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Mastery 10: Quadratic Performance Report</h1>
+            <div class="meta">Generated on ${readableTime}</div>
+            <div class="score-box">Score: ${score} / ${total} (${pct}%)</div>
+        </div>
+        ${itemsHtml}
+    </div>
+</body>
+</html>`;
+        }
+
+        function checkAnswers() {
+            if (isSubmitted) return;
+            isSubmitted = true;
+
+            const btn = document.getElementById('submitBtn');
+            if (btn) btn.remove();
+
+            let score = 0;
+            const resultsList = [];
+
+            currentProblems.forEach(p => {
+                const data = JSON.parse(decrypt(p.securedPayload));
+                const correct = data.answers;
+
+                let isCorrect = false;
+                let userAnsText = "";
+                let correctAnsText = "";
+                let inputElements = [];
+
+                if (correct.kind === 'single') {
+                    // Problem 8: Radical Equation (1 root)
+                    const inp = document.getElementById(`input-${p.id}-1`);
+                    inputElements = [inp];
+                    const val = parseNum(inp.value);
+                    userAnsText = inp.value.trim() || '(empty)';
+                    correctAnsText = `x = ${correct.display}`;
+
+                    if (val !== null && Math.abs(val - correct.val) < 1e-4) {
+                        isCorrect = true;
+                    }
+                } else if (correct.kind === 'quad') {
+                    // Problem 10: Biquadratic (4 roots)
+                    const inps = [
+                        document.getElementById(`input-${p.id}-1`),
+                        document.getElementById(`input-${p.id}-2`),
+                        document.getElementById(`input-${p.id}-3`),
+                        document.getElementById(`input-${p.id}-4`)
+                    ];
+                    inputElements = inps;
+                    const vals = inps.map(el => parseNum(el.value));
+                    userAnsText = inps.map(el => el.value.trim() || '(empty)').join(', ');
+                    correctAnsText = `x ∈ {${correct.display}}`;
+
+                    if (vals.every(v => v !== null)) {
+                        let sortedUser = [...vals].sort((a,b) => a - b);
+                        let sortedCorr = [...correct.vals].sort((a,b) => a - b);
+                        isCorrect = sortedUser.every((v, idx) => Math.abs(v - sortedCorr[idx]) < 1e-4);
+                    }
+                } else if (correct.kind === 'approx_pair') {
+                    // Problem 9: Irrational Formula (2 roots, rounded to 2 decimals)
+                    const inp1 = document.getElementById(`input-${p.id}-1`);
+                    const inp2 = document.getElementById(`input-${p.id}-2`);
+                    inputElements = [inp1, inp2];
+
+                    const val1 = parseNum(inp1.value);
+                    const val2 = parseNum(inp2.value);
+                    userAnsText = `x₁ = ${inp1.value.trim() || '(empty)'}, x₂ = ${inp2.value.trim() || '(empty)'}`;
+                    correctAnsText = `x₁ ≈ ${correct.display1}, x₂ ≈ ${correct.display2}`;
+
+                    if (val1 !== null && val2 !== null) {
+                        const EPS = 0.04; // Tolerance for rounding
+                        const match1 = (Math.abs(val1 - correct.r1_val) < EPS && Math.abs(val2 - correct.r2_val) < EPS);
+                        const match2 = (Math.abs(val1 - correct.r2_val) < EPS && Math.abs(val2 - correct.r1_val) < EPS);
+                        isCorrect = match1 || match2;
+                    }
+                } else {
+                    // Standard Pairs (Templates 1-7)
+                    const inp1 = document.getElementById(`input-${p.id}-1`);
+                    const inp2 = document.getElementById(`input-${p.id}-2`);
+                    inputElements = [inp1, inp2];
+
+                    const val1 = parseNum(inp1.value);
+                    const val2 = parseNum(inp2.value);
+                    userAnsText = `x₁ = ${inp1.value.trim() || '(empty)'}, x₂ = ${inp2.value.trim() || '(empty)'}`;
+                    correctAnsText = `x₁ = ${correct.display1}, x₂ = ${correct.display2}`;
+
+                    if (val1 !== null && val2 !== null) {
+                        const EPS = 1e-4;
+                        const match1 = (Math.abs(val1 - correct.r1_val) < EPS && Math.abs(val2 - correct.r2_val) < EPS);
+                        const match2 = (Math.abs(val1 - correct.r2_val) < EPS && Math.abs(val2 - correct.r1_val) < EPS);
+                        isCorrect = match1 || match2;
+                    }
+                }
+
+                inputElements.forEach(el => {
+                    el.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                    el.disabled = true;
+                });
+
+                if (isCorrect) score++;
+
+                resultsList.push({
+                    id: p.id,
+                    type: p.type,
+                    tag: typeLabels[p.type],
+                    expression: p.expression,
+                    userAnsText: userAnsText,
+                    correctAnsText: correctAnsText,
+                    steps: data.steps,
+                    finalText: data.finalText,
+                    isCorrect: isCorrect
+                });
+
+                const solDiv = document.getElementById(`sol-${p.id}`);
+                let stepsHtml = `<ol class="step-list">`;
+                data.steps.forEach(st => { stepsHtml += `<li>${st}</li>`; });
+                stepsHtml += `</ol>`;
+
+                solDiv.innerHTML = `
+                    <div class="solution-title">${isCorrect ? '✓ Correct' : '✗ Incorrect'} &mdash; Step-by-Step Solution:</div>
+                    ${stepsHtml}
+                    <div><strong>Final Result:</strong> <span class="final-ans-tag">\\( ${data.finalText} \\)</span></div>
+                `;
+                solDiv.style.display = 'block';
+            });
+
+            const pct = Math.round((score / TOTAL_PROBLEMS) * 100);
+            const now = new Date();
+            const timestamp = formatTimestamp(now);
+            const readableTime = now.toLocaleString();
+            const filename = `mastery10_quadratics_${timestamp}.html`;
+
+            const reportHtml = generateReportHtml(score, TOTAL_PROBLEMS, resultsList, timestamp, readableTime);
+
+            scoreBanner.innerHTML = `
+                <h2>Test Completed! Score: ${score} / ${TOTAL_PROBLEMS} (${pct}%)</h2>
+                <p>Detailed step-by-step solutions have been revealed below. A printable performance report has been downloaded.</p>
+            `;
+            scoreBanner.style.display = 'block';
+
+            triggerDownload(reportHtml, filename);
+            typesetMath([scoreBanner, container]);
+        }
+
+        generateBtn.addEventListener('click', render);
+        render(); 
+    })(); 
+    </script>
+</body>
+</html>
