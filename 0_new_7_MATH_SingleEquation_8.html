@@ -9,57 +9,280 @@
     <script>
       window.MathJax = {
         tex: { inlineMath: [['\\(', '\\)']] },
-        chtml: { scale: 1.1 } 
+        chtml: { scale: 1.0 },
+        startup: {
+          pageReady: () => {
+            return MathJax.startup.defaultPageReady().then(() => {
+              if (window.triggerMathTypeset) window.triggerMathTypeset();
+            });
+          }
+        }
       };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f0f2f5; color: #333; }
-        h1 { text-align: center; color: #1a2a6c; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 16px 12px; 
+            background-color: #f0f2f5; 
+            color: #333; 
+            overflow-x: hidden;
+        }
+
+        h1 { 
+            text-align: center; 
+            color: #1a2a6c; 
+            margin-bottom: 4px; 
+            font-size: 1.8em;
+        }
+
+        .subtitle { 
+            text-align: center; 
+            color: #666; 
+            margin-bottom: 20px; 
+            font-size: 0.95em;
+        }
         
-        .controls-container { text-align: center; padding: 20px; margin-bottom: 30px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        button { padding: 12px 28px; font-size: 1.05em; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 5px 10px; transition: 0.2s; }
+        .controls-container { 
+            text-align: center; 
+            padding: 14px 16px; 
+            margin: 0 auto 20px auto; 
+            max-width: 850px;
+            background-color: #fff; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            position: sticky; 
+            top: 8px; 
+            z-index: 100; 
+        }
+
+        button { 
+            padding: 10px 22px; 
+            font-size: 1em; 
+            font-weight: bold;
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin: 4px 6px; 
+            transition: background 0.2s ease, transform 0.1s ease; 
+        }
+        button:active:not(:disabled) { transform: scale(0.98); }
         #generateBtn { background-color: #3498db; }
         #generateBtn:hover { background-color: #2980b9; }
         #showSolutionsBtn { background-color: #27ae60; }
         #showSolutionsBtn:hover:not(:disabled) { background-color: #219653; }
         #showSolutionsBtn:disabled { background-color: #7f8c8d; opacity: 1; cursor: default; }
-        .problem-count { font-size: 0.95em; color: #555; margin-top: 8px; }
         
-        .problem-list { list-style-type: none; padding-left: 0; max-width: 850px; margin: 0 auto; }
-        .problem-card { margin-bottom: 30px; padding: 25px; border-radius: 12px; background-color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 8px solid #ddd; }
+        .problem-count { 
+            font-size: 0.9em; 
+            color: #555; 
+            margin-top: 8px; 
+            line-height: 1.4;
+        }
+
+        .score-banner {
+            display: none;
+            text-align: center;
+            background: #fff;
+            border: 3px solid #27ae60;
+            padding: 16px;
+            margin: 0 auto 20px auto;
+            max-width: 850px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .score-banner h2 { margin: 0 0 5px 0; color: #27ae60; font-size: 1.5em; }
+        .score-banner p { margin: 0; color: #666; font-size: 0.9em; }
         
-        .problem-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
-        .problem-number { font-weight: bold; font-size: 1.3em; color: #95a5a6; }
-        .problem-expression { font-size: 1.5em; color: #2c3e50; }
-        .problem-tag { font-size: 0.7em; background: #ecf0f1; color: #7f8c8d; padding: 2px 10px; border-radius: 20px; vertical-align: middle; }
+        .problem-list { 
+            list-style-type: none; 
+            padding-left: 0; 
+            max-width: 850px; 
+            margin: 0 auto; 
+        }
+
+        .problem-card { 
+            margin-bottom: 20px; 
+            padding: 18px 20px; 
+            border-radius: 12px; 
+            background-color: #fff; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+            border-left: 6px solid #95a5a6; 
+            width: 100%;
+        }
         
-        .answer-box { display: flex; flex-direction: column; background: #fdfdfd; padding: 15px; border: 1px solid #eee; border-radius: 8px; align-items: center; }
+        .problem-header { 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            gap: 8px; 
+            margin-bottom: 16px; 
+            width: 100%;
+        }
+
+        .problem-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .problem-number { 
+            font-weight: bold; 
+            font-size: 1.15em; 
+            color: #7f8c8d; 
+        }
+
+        .problem-tag { 
+            font-size: 0.75em; 
+            background: #ecf0f1; 
+            color: #576574; 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-weight: 600;
+        }
+
+        .problem-expression { 
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.25em; 
+            color: #2c3e50; 
+            padding: 8px 4px;
+            margin: 0 auto;
+            text-align: center;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .problem-expression::-webkit-scrollbar {
+            display: none;
+        }
         
-        /* Multi-input Grid Styling */
-        .multi-input-row { display: flex; gap: 15px; justify-content: center; align-items: center; margin: 6px 0; }
-        .multi-input-row label { font-size: 1.2em; font-weight: bold; }
-        .multi-input-row input { width: 80px; padding: 10px; font-size: 1.2em; border: 2px solid #ced4da; border-radius: 6px; text-align: center; outline: none; transition: border-color 0.2s; }
+        .answer-box { 
+            display: flex; 
+            flex-direction: column; 
+            background: #fcfdfe; 
+            padding: 14px; 
+            border: 1px solid #eef2f5; 
+            border-radius: 8px; 
+            align-items: center; 
+            width: 100%;
+        }
+        
+        .multi-input-row { 
+            display: flex; 
+            gap: 12px; 
+            justify-content: center; 
+            align-items: center; 
+            margin: 4px 0; 
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .multi-input-row label { font-size: 1.15em; font-weight: bold; }
+        .multi-input-row input { 
+            width: 75px; 
+            padding: 8px 6px; 
+            font-size: 1.1em; 
+            border: 2px solid #ced4da; 
+            border-radius: 6px; 
+            text-align: center; 
+            outline: none; 
+            transition: border-color 0.2s; 
+        }
         .multi-input-row input:focus { border-color: #3498db; }
         .multi-input-row input:disabled { background-color: #e9ecef; color: #495057; cursor: not-allowed; }
         
-        .input-hint { font-size: 0.85em; color: #888; margin-top: 8px; text-align: center;}
+        .input-hint { 
+            font-size: 0.85em; 
+            color: #d35400; 
+            margin-top: 8px; 
+            text-align: center;
+            font-weight: 500;
+        }
         
-        .solution-area { display: none; margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; text-align: center; }
-        .algebra-line { display: block; background: #fff; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin: 8px 0; color: #2c3e50; }
+        .solution-area { 
+            display: none; 
+            margin-top: 16px; 
+            padding: 14px 16px; 
+            background: #f8f9fa; 
+            border-radius: 8px; 
+            border-left: 5px solid #27ae60; 
+            text-align: left; 
+        }
+        .solution-title { font-weight: bold; font-size: 1.05em; color: #27ae60; margin-bottom: 8px; }
+        .algebra-line { 
+            display: block; 
+            background: #fff; 
+            padding: 8px 10px; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 6px; 
+            margin: 6px 0; 
+            color: #2c3e50; 
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .algebra-line::-webkit-scrollbar { display: none; }
         
-        .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; }
-        .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
-        .report-header { text-align: center; background: white; border: 3px solid #27ae60; padding: 20px; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
+        .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; font-weight: bold; }
+        .report-header { text-align: center; background: white; border: 3px solid #27ae60; padding: 20px; margin-bottom: 24px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
         
-        /* Temporary style to hide elements during generation to avoid screen flashing */
+        mjx-container {
+            max-width: 100% !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            vertical-align: middle !important;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        mjx-container::-webkit-scrollbar {
+            display: none;
+        }
+
         body.typesetting-mode .solution-area {
             opacity: 0 !important;
         }
 
         @media print { .controls-container { display: none; } .solution-area { display: block !important; } }
+
+        /* Mobile Screens Optimization */
+        @media (max-width: 600px) {
+            body { padding: 12px 8px; }
+            h1 { font-size: 1.45em; }
+            .subtitle { font-size: 0.85em; margin-bottom: 15px; }
+            .controls-container { padding: 12px 10px; }
+            button { padding: 9px 16px; font-size: 0.9em; width: 100%; margin: 4px 0; }
+            .problem-card { padding: 14px 12px; }
+            .problem-expression { font-size: 1.05em; padding: 6px 0; }
+            .algebra-line { font-size: 0.9em; padding: 6px 8px; }
+            .multi-input-row input { width: 66px; padding: 6px; font-size: 1em; }
+        }
+
+        @media (max-width: 380px) {
+            .problem-expression { font-size: 0.92em; }
+            .multi-input-row { gap: 8px; }
+            .multi-input-row input { width: 58px; }
+        }
     </style>
 </head>
 <body>
@@ -72,6 +295,7 @@
         <div class="problem-count" id="problemCount"></div>
     </div>
     
+    <div id="scoreBanner" class="score-banner"></div>
     <div id="problemContainer" class="problem-list"></div>
 
     <script>
@@ -81,9 +305,9 @@
         const generateBtn = document.getElementById('generateBtn');
         const showBtn = document.getElementById('showSolutionsBtn');
         const problemCountEl = document.getElementById('problemCount');
+        const scoreBanner = document.getElementById('scoreBanner');
         let currentProblems = [];
 
-        // State lock to prevent double-submission or DOM tampering [2]
         let isSubmitted = false;
 
         const SECRET_SALT = "SolveForX_SecuredKey_39482";
@@ -91,7 +315,6 @@
         let savedHistory = JSON.parse(localStorage.getItem('solveForXHistory')) || [];
         let usedExpressions = new Set(savedHistory);
 
-        // Private encryption key and cipher utility [2]
         const CIPHER_KEY = "SolveForX_SecuredKey_39482";
 
         function encrypt(str) {
@@ -126,22 +349,26 @@
             return `${p1}-${p2}-${p3}`.toUpperCase();
         }
 
-        // Helper to format a file-safe timestamp for the report download
         function getTimestamp() {
             const now = new Date();
             const pad = (n) => String(n).padStart(2, '0');
             return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
         }
 
-        function typesetMath(callback) {
-            if (window.MathJax && window.MathJax.typesetPromise) {
-                window.MathJax.typesetPromise([container])
+        function typesetMath(elements, callback) {
+            if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                const target = elements || [container];
+                window.MathJax.typesetPromise(target)
                     .then(() => { if (callback) callback(); })
-                    .catch((err) => console.log(err.message));
+                    .catch((err) => console.warn('MathJax warning:', err));
             } else {
-                setTimeout(() => typesetMath(callback), 100);
+                if (callback) setTimeout(callback, 50);
             }
         }
+
+        window.triggerMathTypeset = () => {
+            typesetMath([container]);
+        };
 
         function getRandom(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
         
@@ -175,6 +402,30 @@
             return `${sign}\\frac{${absNum}}{${absDen}}`;
         }
 
+        // Student input parser supporting negative numbers, European commas, and fractions
+        function parseStudentNumber(valStr) {
+            if (!valStr) return NaN;
+            let str = String(valStr).trim().toLowerCase().replace(/[()]/g, '');
+            if (str === "") return NaN;
+
+            if (str.includes(',') && !str.includes('.')) {
+                str = str.replace(',', '.');
+            }
+
+            if (str.includes('/')) {
+                const parts = str.split('/');
+                if (parts.length === 2) {
+                    const n = parseFloat(parts[0].replace(/\s+/g, ''));
+                    const d = parseFloat(parts[1].replace(/\s+/g, ''));
+                    if (!isNaN(n) && !isNaN(d) && d !== 0) return n / d;
+                }
+                return NaN;
+            }
+
+            str = str.replace(/\s+/g, '');
+            return parseFloat(str);
+        }
+
         function buildTypeList() {
             return shuffle(['radical', 'absolute', 'rational_linear', 'rational', 'two_step_sqrt', 'variables_both', 'distributive', 'ambiguity']);
         }
@@ -182,14 +433,6 @@
         function generateProblem(id, type) {
             let prob = { id, type, lhs: "", rhs: "", hint: "" };
             let correctAnswers = [];
-
-            const buildStepsHTML = () => {
-                return `
-                    <div style="color:#27ae60; font-size:1.2em; font-weight:bold; margin-top:10px;">
-                        Correct Answer(s): \\( x = ${correctAnswers.join(', ')} \\)
-                    </div>
-                `;
-            };
 
             switch(type) {
                 case 'radical': {
@@ -373,7 +616,17 @@
 
             prob.inputCount = correctAnswers.length;
 
-            // Encrypt and secure correct answers payload [2]
+            const buildStepsHTML = () => {
+                let ansStr = correctAnswers.length === 1 
+                    ? `x = ${correctAnswers[0]}` 
+                    : `x_1 = ${correctAnswers[0]}, \\quad x_2 = ${correctAnswers[1]}`;
+                return `
+                    <div class="solution-title">Solution Guide:</div>
+                    <span class="algebra-line"><strong>Strategy:</strong> ${prob.hint}</span>
+                    <span class="algebra-line"><strong>Correct Answer(s):</strong> \\( ${ansStr} \\)</span>
+                `;
+            };
+
             const payload = {
                 answers: correctAnswers,
                 stepsHTML: buildStepsHTML()
@@ -390,16 +643,18 @@
         };
 
         function render() {
-            // Reset submission state lock on generate
             isSubmitted = false;
             container.innerHTML = ''; 
             currentProblems = [];
+            scoreBanner.style.display = 'none';
+            scoreBanner.innerHTML = '';
+
             showBtn.disabled = false; 
             showBtn.style.backgroundColor = '#27ae60'; 
             showBtn.textContent = "Submit & Generate Report";
             
             const typeList = buildTypeList();
-            problemCountEl.textContent = `${TOTAL_PROBLEMS} unique problems — one from each template.`;
+            problemCountEl.textContent = `${TOTAL_PROBLEMS} unique problems \u2014 one from each template.`;
             
             for (let i = 1; i <= TOTAL_PROBLEMS; i++) {
                 let p;
@@ -421,16 +676,22 @@
                 if (p.inputCount === 1) {
                     inputHTML = `
                         <div class="multi-input-row">
-                            <label>\\( x = \\)</label>
-                            <input type="text" class="user-input" id="input-${i}-0" placeholder="?">
+                            <div class="input-group">
+                                <label>\\( x = \\)</label>
+                                <input type="text" class="user-input" id="input-${i}-0" placeholder="?" autocomplete="off">
+                            </div>
                         </div>`;
                 } else {
                     inputHTML = `
                         <div class="multi-input-row">
-                            <label>\\( x_1 = \\)</label>
-                            <input type="text" class="user-input" id="input-${i}-0" placeholder="?">
-                            <label style="margin-left: 15px;">\\( x_2 = \\)</label>
-                            <input type="text" class="user-input" id="input-${i}-1" placeholder="?">
+                            <div class="input-group">
+                                <label>\\( x_1 = \\)</label>
+                                <input type="text" class="user-input" id="input-${i}-0" placeholder="?" autocomplete="off">
+                            </div>
+                            <div class="input-group">
+                                <label>\\( x_2 = \\)</label>
+                                <input type="text" class="user-input" id="input-${i}-1" placeholder="?" autocomplete="off">
+                            </div>
                         </div>`;
                 }
 
@@ -438,9 +699,11 @@
                 div.className = 'problem-card';
                 div.innerHTML = `
                     <div class="problem-header">
-                        <span class="problem-number">#${i}</span>
+                        <div class="problem-meta">
+                            <span class="problem-number">Problem #${i}</span>
+                            <span class="problem-tag">${typeLabels[p.type]}</span>
+                        </div>
                         <div class="problem-expression">\\( ${p.lhs} = ${p.rhs} \\)</div>
-                        <span class="problem-tag">${typeLabels[p.type]}</span>
                     </div>
                     <div class="answer-box">
                         ${inputHTML}
@@ -451,16 +714,14 @@
             }
 
             localStorage.setItem('solveForXHistory', JSON.stringify(Array.from(usedExpressions)));
-            typesetMath();
+            typesetMath([container]);
         }
 
         function check() {
-            // Guard clause: prevent multiple submissions even if the submit button is altered in Inspect [2]
             if (isSubmitted) return;
             isSubmitted = true;
 
             let score = 0;
-            // Set temporary class to prevent visible flashing of answers on screen during typesetting
             document.body.classList.add('typesetting-mode');
 
             currentProblems.forEach(p => {
@@ -471,25 +732,23 @@
                     let el = document.getElementById(`input-${p.id}-${j}`);
                     inputElements.push(el);
                     userVals.push(el.value);
-                    // Permanently disable editing of input fields after submission [2]
                     el.disabled = true;
                 }
 
-                // Decrypt verification payload [2]
                 const payload = JSON.parse(decrypt(p.securedPayload));
                 const correctAnswers = payload.answers;
 
-                const clean = str => (str || '').replace(/\s+/g, '');
-                let sortedUser = userVals.map(clean).sort();
-                let sortedCorrect = correctAnswers.map(clean).sort();
-                let isCorrect = (sortedUser.length === sortedCorrect.length) && 
-                               sortedUser.every((val, index) => val === sortedCorrect[index]);
+                // Numerical comparison: handles signs, spaces, and reversed inputs for multi-root problems
+                let userNums = userVals.map(parseStudentNumber).sort((a, b) => a - b);
+                let correctNums = correctAnswers.map(Number).sort((a, b) => a - b);
+
+                let isCorrect = (userNums.length === correctNums.length) &&
+                                userNums.every((val, idx) => !isNaN(val) && Math.abs(val - correctNums[idx]) < 0.0001);
 
                 inputElements.forEach(el => {
                     el.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
                 });
                 
-                // Inject solutions temporarily for report generation [2]
                 const solDiv = document.getElementById(`sol-${p.id}`);
                 solDiv.innerHTML = payload.stepsHTML;
                 solDiv.style.display = 'block';
@@ -502,13 +761,18 @@
             
             showBtn.disabled = true;
             showBtn.innerHTML = `Score: ${score}/${TOTAL_PROBLEMS} (${pct}%)<br><small>${timeStr}</small>`;
+
+            scoreBanner.innerHTML = `
+                <h2>Assessment Completed! Score: ${score} / ${TOTAL_PROBLEMS} (${pct}%)</h2>
+                <p>Review the solution guide below. Your authenticated report has downloaded automatically.</p>
+            `;
+            scoreBanner.style.display = 'block';
             
-            typesetMath(() => {
-                // Remove typesetting-mode class before cloning so report rendering is unaffected
+            typesetMath([scoreBanner, container], () => {
                 document.body.classList.remove('typesetting-mode');
 
                 const clone = document.documentElement.cloneNode(true);
-                clone.querySelectorAll('script, .controls-container').forEach(el => el.remove());
+                clone.querySelectorAll('.controls-container').forEach(el => el.remove());
                 const body = clone.querySelector('body');
                 
                 const watermark = generateWatermark(score, TOTAL_PROBLEMS, timeStr);
@@ -533,7 +797,7 @@
                     const span = document.createElement('span');
                     span.textContent = original.value || "—";
                     span.className = original.className + " static-answer";
-                    span.style.padding = "4px 15px";
+                    span.style.padding = "4px 12px";
                     span.style.border = "2px solid #ccc";
                     span.style.borderRadius = "4px";
                     span.style.backgroundColor = "#fff";
@@ -591,7 +855,6 @@
                 `;
                 body.appendChild(verifyScript);
 
-                // Show all decoded solution areas in report clone
                 clone.querySelectorAll('.solution-area').forEach(s => {
                     s.style.display = 'block';
                 });
@@ -601,13 +864,6 @@
                 a.href = URL.createObjectURL(blob);
                 a.download = `Algebra_Mastery_Report_${getTimestamp()}.html`;
                 a.click();
-
-                // Clear out and hide the solution guides on the user's active screen
-                currentProblems.forEach(p => {
-                    const solDiv = document.getElementById(`sol-${p.id}`);
-                    solDiv.innerHTML = '';
-                    solDiv.style.display = 'none';
-                });
             });
         }
 
@@ -615,7 +871,7 @@
         showBtn.addEventListener('click', check);
         
         render();
-    })(); // End of IIFE
+    })();
     </script>
 </body>
 </html>
