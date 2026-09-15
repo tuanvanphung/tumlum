@@ -9,7 +9,7 @@
     <script>
       window.MathJax = {
         tex: { inlineMath: [['\\(', '\\)']] },
-        chtml: { scale: 1.05 },
+        chtml: { scale: 1.0 },
         startup: {
           pageReady: () => {
             return MathJax.startup.defaultPageReady().then(() => {
@@ -22,49 +22,280 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f0f2f5; color: #333; }
-        h1 { text-align: center; color: #1a2a6c; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #666; margin-bottom: 25px; }
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 16px 12px; 
+            background-color: #f0f2f5; 
+            color: #333; 
+            overflow-x: hidden;
+        }
+
+        h1 { 
+            text-align: center; 
+            color: #1a2a6c; 
+            margin-bottom: 4px; 
+            font-size: 1.8em;
+        }
         
-        .controls-container { text-align: center; padding: 18px; margin-bottom: 25px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: sticky; top: 10px; z-index: 100; }
-        button { padding: 12px 26px; font-size: 1.05em; font-weight: bold; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 5px 8px; transition: 0.2s; }
+        .subtitle { 
+            text-align: center; 
+            color: #666; 
+            margin-bottom: 20px; 
+            font-size: 0.95em;
+        }
+        
+        .controls-container { 
+            text-align: center; 
+            padding: 14px 16px; 
+            margin: 0 auto 20px auto; 
+            max-width: 850px;
+            background-color: #fff; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            position: sticky; 
+            top: 8px; 
+            z-index: 100; 
+        }
+
+        button { 
+            padding: 10px 20px; 
+            font-size: 1em; 
+            font-weight: bold; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin: 4px 6px; 
+            transition: background 0.2s ease, transform 0.1s ease; 
+        }
+        button:active { transform: scale(0.98); }
         #generateBtn { background-color: #3498db; }
         #generateBtn:hover { background-color: #2980b9; }
         #submitBtn { background-color: #27ae60; }
         #submitBtn:hover { background-color: #219653; }
-        .problem-count { font-size: 0.95em; color: #555; margin-top: 8px; font-weight: bold; }
         
-        .score-banner { display: none; text-align: center; background: #fff; border: 3px solid #27ae60; padding: 16px; margin: 0 auto 25px auto; max-width: 850px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .score-banner h2 { margin: 0 0 5px 0; color: #27ae60; font-size: 1.6em; }
-        .score-banner p { margin: 0; color: #666; font-size: 0.95em; }
+        .problem-count { 
+            font-size: 0.9em; 
+            color: #555; 
+            margin-top: 8px; 
+            line-height: 1.4;
+        }
+        
+        .score-banner { 
+            display: none; 
+            text-align: center; 
+            background: #fff; 
+            border: 3px solid #27ae60; 
+            padding: 16px; 
+            margin: 0 auto 20px auto; 
+            max-width: 850px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+        }
+        .score-banner h2 { margin: 0 0 5px 0; color: #27ae60; font-size: 1.5em; }
+        .score-banner p { margin: 0; color: #666; font-size: 0.9em; }
 
-        .problem-list { list-style-type: none; padding-left: 0; max-width: 850px; margin: 0 auto; }
-        .problem-card { margin-bottom: 25px; padding: 22px; border-radius: 12px; background-color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 8px solid #34495e; }
+        .problem-list { 
+            list-style-type: none; 
+            padding-left: 0; 
+            max-width: 850px; 
+            margin: 0 auto; 
+        }
+
+        .problem-card { 
+            margin-bottom: 20px; 
+            padding: 18px 20px; 
+            border-radius: 12px; 
+            background-color: #fff; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+            border-left: 6px solid #34495e; 
+            width: 100%;
+        }
         
-        .problem-header { display: flex; align-items: center; gap: 15px; margin-bottom: 18px; flex-wrap: wrap; }
-        .problem-number { font-weight: bold; font-size: 1.25em; color: #34495e; }
-        .problem-expression { font-size: 1.35em; color: #2c3e50; min-width: 250px; overflow-x: auto; }
-        .problem-tag { font-size: 0.75em; background: #ecf0f1; color: #7f8c8d; padding: 4px 12px; border-radius: 20px; font-weight: bold; margin-left: auto; }
+        .problem-header { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            gap: 12px; 
+            margin-bottom: 16px; 
+            flex-wrap: wrap; 
+        }
+
+        .problem-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .problem-number { 
+            font-weight: bold; 
+            font-size: 1.15em; 
+            color: #34495e; 
+        }
+
+        .problem-tag { 
+            font-size: 0.75em; 
+            background: #ecf0f1; 
+            color: #576574; 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-weight: 600; 
+        }
+
+        .problem-expression { 
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.25em; 
+            color: #2c3e50; 
+            padding: 10px 4px;
+            margin: 0 auto;
+            text-align: center;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;        /* Firefox */
+            -ms-overflow-style: none;     /* IE / Edge */
+        }
+        .problem-expression::-webkit-scrollbar {
+            display: none;                /* Chrome, Safari, Opera */
+        }
         
-        .answer-box { display: flex; flex-direction: column; background: #fdfdfd; padding: 15px; border: 1px solid #eee; border-radius: 8px; align-items: center; }
+        .answer-box { 
+            display: flex; 
+            flex-direction: column; 
+            background: #fcfdfe; 
+            padding: 14px; 
+            border: 1px solid #eef2f5; 
+            border-radius: 8px; 
+            align-items: center; 
+            width: 100%;
+        }
         
-        .multi-input-row { display: flex; gap: 15px; justify-content: center; align-items: center; margin: 6px 0; flex-wrap: wrap; }
-        .multi-input-row label { font-size: 1.15em; font-family: 'Times New Roman', Times, serif; font-style: italic; font-weight: bold; }
-        .multi-input-row input { width: 75px; padding: 8px; font-size: 1.1em; border: 2px solid #ced4da; border-radius: 6px; text-align: center; outline: none; }
+        .multi-input-row { 
+            display: flex; 
+            gap: 14px; 
+            justify-content: center; 
+            align-items: center; 
+            margin: 4px 0; 
+            flex-wrap: wrap; 
+            width: 100%;
+        }
+
+        .input-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .multi-input-row label { 
+            font-size: 1.15em; 
+            font-family: 'Times New Roman', Times, serif; 
+            font-style: italic; 
+            font-weight: bold; 
+        }
+
+        .multi-input-row input { 
+            width: 70px; 
+            padding: 7px 6px; 
+            font-size: 1.05em; 
+            border: 2px solid #ced4da; 
+            border-radius: 6px; 
+            text-align: center; 
+            outline: none; 
+            transition: border-color 0.2s;
+        }
         .multi-input-row input:focus { border-color: #3498db; }
         .multi-input-row input:disabled { background-color: #e9ecef; color: #495057; cursor: not-allowed; }
 
-        .input-hint { font-size: 0.85em; color: #e67e22; margin-top: 10px; font-weight: bold; text-align: center; }
+        .input-hint { 
+            font-size: 0.85em; 
+            color: #d35400; 
+            margin-top: 8px; 
+            font-weight: 600; 
+            text-align: center; 
+        }
         
-        .solution-area { display: none; margin-top: 18px; padding: 16px; background: #f8f9fa; border-radius: 8px; border-left: 5px solid #27ae60; text-align: left; }
-        .solution-title { font-weight: bold; font-size: 1.1em; color: #27ae60; margin-bottom: 10px; }
-        .step-list { margin: 8px 0 12px 20px; padding: 0; }
-        .step-list li { margin-bottom: 10px; color: #2c3e50; line-height: 1.5; }
-        .algebra-line { display: block; background: #fff; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; margin: 6px 0; overflow-x: auto; }
-        .final-ans-tag { display: inline-block; background: #d4edda; color: #155724; padding: 4px 10px; border-radius: 4px; font-weight: bold; margin-top: 4px; }
+        .solution-area { 
+            display: none; 
+            margin-top: 16px; 
+            padding: 14px 16px; 
+            background: #f8f9fa; 
+            border-radius: 8px; 
+            border-left: 5px solid #27ae60; 
+            text-align: left; 
+        }
+        .solution-title { font-weight: bold; font-size: 1.05em; color: #27ae60; margin-bottom: 8px; }
+        .step-list { margin: 6px 0 10px 18px; padding: 0; }
+        .step-list li { margin-bottom: 8px; color: #2c3e50; line-height: 1.45; }
+        
+        .algebra-line { 
+            display: block; 
+            background: #fff; 
+            padding: 8px 10px; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 6px; 
+            margin: 6px 0; 
+            overflow-x: auto; 
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .algebra-line::-webkit-scrollbar { display: none; }
+
+        .final-ans-tag { 
+            display: inline-block; 
+            background: #d4edda; 
+            color: #155724; 
+            padding: 4px 10px; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            margin-top: 4px; 
+        }
         
         .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
         .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; font-weight: bold; }
+
+        /* Ensure MathJax scales seamlessly without causing card overflow */
+        mjx-container {
+            max-width: 100% !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            vertical-align: middle !important;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        mjx-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Mobile Screens Optimization */
+        @media (max-width: 600px) {
+            body { padding: 12px 8px; }
+            h1 { font-size: 1.45em; }
+            .subtitle { font-size: 0.85em; margin-bottom: 15px; }
+            .controls-container { padding: 12px 10px; }
+            button { padding: 9px 16px; font-size: 0.9em; width: 100%; margin: 4px 0; }
+            .problem-card { padding: 14px 12px; }
+            .problem-expression { font-size: 1.05em; padding: 6px 0; }
+            .algebra-line { font-size: 0.9em; padding: 6px 8px; }
+            .multi-input-row input { width: 62px; padding: 6px; font-size: 1em; }
+            .step-list { margin-left: 14px; }
+        }
+
+        @media (max-width: 380px) {
+            .problem-expression { font-size: 0.95em; }
+            .multi-input-row { gap: 8px; }
+            .multi-input-row input { width: 56px; }
+        }
     </style>
 </head>
 <body>
@@ -253,7 +484,7 @@
                     let c1 = a1 * kx + b1 * y;
                     let c2 = a2 * x + b2 * ky;
                     
-                    prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\[6pt] ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} = ${c2} \\end{cases}`;
+                    prob.expression = `\\begin{cases} ${fracTerm(a1, d1, 'x', true)} ${term(b1, 'y', false)} = ${c1} \\\\[5pt] ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} = ${c2} \\end{cases}`;
                     prob.hint = "Multiply each equation by its denominator to clear fractions, then solve.";
                     
                     let C1 = c1 * d1;
@@ -302,7 +533,6 @@
 
                     let C1 = A1 * x + B1 * y;
                     let c1_left = getRnd(-10, 10);
-                    // FIXED BUG: Proper isolation of the constant maps to c1_left + C1
                     let c1_right = c1_left + C1;
 
                     let A2 = getRnd(-5, 5, [0]);
@@ -320,7 +550,7 @@
                     let eq2LHS = `${term(A2 - k2, 'x', true)} ${term(B2, 'y', false)}`;
                     let eq2RHS = `${constant(C2, true)} ${term(-k2, 'x', false)}`;
 
-                    prob.expression = `\\begin{cases} ${eq1LHS} = ${eq1RHS} \\\\[6pt] ${eq2LHS} = ${eq2RHS} \\end{cases}`;
+                    prob.expression = `\\begin{cases} ${eq1LHS} = ${eq1RHS} \\\\[5pt] ${eq2LHS} = ${eq2RHS} \\end{cases}`;
                     prob.hint = "Rearrange all variable terms to the left side and constant terms to the right side.";
 
                     steps.push(
@@ -374,7 +604,7 @@
                     let c1 = (numA1 * x) / d1 + (numB1 * y) / g1;
                     let c2 = (numA2 * x) / d2 + (numB2 * y) / g2;
 
-                    prob.expression = `\\begin{cases} ${fracTerm(numA1, d1, 'x', true)} ${fracTerm(numB1, g1, 'y', false)} = ${c1} \\\\[6pt] ${fracTerm(numA2, d2, 'x', true)} ${fracTerm(numB2, g2, 'y', false)} = ${c2} \\end{cases}`;
+                    prob.expression = `\\begin{cases} ${fracTerm(numA1, d1, 'x', true)} ${fracTerm(numB1, g1, 'y', false)} = ${c1} \\\\[5pt] ${fracTerm(numA2, d2, 'x', true)} ${fracTerm(numB2, g2, 'y', false)} = ${c2} \\end{cases}`;
                     prob.hint = "Multiply each equation by its least common denominator (LCD).";
 
                     let C1 = c1 * lcd1;
@@ -423,8 +653,8 @@
                     let c3 = mat[2][0] * x + mat[2][1] * y + mat[2][2] * z;
 
                     prob.expression = `\\begin{cases} 
-                        ${term(mat[0][0], 'x', true)} ${term(mat[0][1], 'y', false)} ${term(mat[0][2], 'z', false)} = ${c1} \\\\[4pt] 
-                        ${term(mat[1][0], 'x', true)} ${term(mat[1][1], 'y', false)} ${term(mat[1][2], 'z', false)} = ${c2} \\\\[4pt] 
+                        ${term(mat[0][0], 'x', true)} ${term(mat[0][1], 'y', false)} ${term(mat[0][2], 'z', false)} = ${c1} \\\\[3pt] 
+                        ${term(mat[1][0], 'x', true)} ${term(mat[1][1], 'y', false)} ${term(mat[1][2], 'z', false)} = ${c2} \\\\[3pt] 
                         ${term(mat[2][0], 'x', true)} ${term(mat[2][1], 'y', false)} ${term(mat[2][2], 'z', false)} = ${c3} 
                     \\end{cases}`;
                     prob.hint = "Systematically eliminate one variable from two pairs of equations.";
@@ -470,7 +700,6 @@
                     let A1 = a1, B1 = b1;
                     let A2 = a2 * d2, B2 = b2;
                     
-                    // FIXED BUG: Added singularity check before locking equation constraints 
                     while (A1 * B2 - A2 * B1 === 0) {
                         b2 = getRnd(1, 5, [b2]);
                         B2 = b2;
@@ -484,12 +713,10 @@
                     }
                     let C1_val = numVal1 / d1;
 
-                    // FIXED BUG: Removed useless while (!Number.isInteger(c2)) loop that was 
-                    // changing "y" completely breaking the C1_val calculation derived previously.
                     let c2 = a2 * x + (b2 * y) / d2; 
                     
                     let binomialNum = `${term(a1, 'x', true)} ${term(b1, 'y', false)} ${constant(numConst1, false)}`;
-                    prob.expression = `\\begin{cases} \\frac{${binomialNum}}{${d1}} = ${C1_val} \\\\[8pt] ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} = ${c2} \\end{cases}`;
+                    prob.expression = `\\begin{cases} \\frac{${binomialNum}}{${d1}} = ${C1_val} \\\\[6pt] ${term(a2, 'x', true)} ${fracTerm(b2, d2, 'y', false)} = ${c2} \\end{cases}`;
                     prob.hint = "Clear denominators first, then isolate and eliminate.";
 
                     let C1 = C1_val * d1 - numConst1;
@@ -567,15 +794,25 @@
                 if (p.type === 'three_var') {
                     inputHTML = `
                         <div class="multi-input-row">
-                            <label>x = </label><input type="text" class="user-input" id="input-${i}-x" autocomplete="off" placeholder="x">
-                            <label>&nbsp;&nbsp;y = </label><input type="text" class="user-input" id="input-${i}-y" autocomplete="off" placeholder="y">
-                            <label>&nbsp;&nbsp;z = </label><input type="text" class="user-input" id="input-${i}-z" autocomplete="off" placeholder="z">
+                            <div class="input-group">
+                                <label>x = </label><input type="text" class="user-input" id="input-${i}-x" autocomplete="off" placeholder="x">
+                            </div>
+                            <div class="input-group">
+                                <label>y = </label><input type="text" class="user-input" id="input-${i}-y" autocomplete="off" placeholder="y">
+                            </div>
+                            <div class="input-group">
+                                <label>z = </label><input type="text" class="user-input" id="input-${i}-z" autocomplete="off" placeholder="z">
+                            </div>
                         </div>`;
                 } else {
                     inputHTML = `
                         <div class="multi-input-row">
-                            <label>x = </label><input type="text" class="user-input" id="input-${i}-x" autocomplete="off" placeholder="x">
-                            <label>&nbsp;&nbsp;y = </label><input type="text" class="user-input" id="input-${i}-y" autocomplete="off" placeholder="y">
+                            <div class="input-group">
+                                <label>x = </label><input type="text" class="user-input" id="input-${i}-x" autocomplete="off" placeholder="x">
+                            </div>
+                            <div class="input-group">
+                                <label>y = </label><input type="text" class="user-input" id="input-${i}-y" autocomplete="off" placeholder="y">
+                            </div>
                         </div>`;
                 }
 
@@ -583,9 +820,11 @@
                 div.className = 'problem-card';
                 div.innerHTML = `
                     <div class="problem-header">
-                        <span class="problem-number">Problem #${i}</span>
+                        <div class="problem-meta">
+                            <span class="problem-number">Problem #${i}</span>
+                            <span class="problem-tag">${typeLabels[p.type]}</span>
+                        </div>
                         <div class="problem-expression">\\( ${p.expression} \\)</div>
-                        <span class="problem-tag">${typeLabels[p.type]}</span>
                     </div>
                     <div class="answer-box">
                         ${inputHTML}
@@ -657,37 +896,43 @@
     <script>
       window.MathJax = {
         tex: { inlineMath: [['\\\\(', '\\\\)']], displayMath: [['\\\\[', '\\\\]']] },
-        chtml: { scale: 1.05 }
+        chtml: { scale: 1.0 }
       };
     <\/script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"><\/script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 25px; background-color: #f4f6f9; color: #2c3e50; }
-        .container { max-width: 850px; margin: 0 auto; }
-        .header { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; margin-bottom: 25px; }
-        h1 { margin: 0 0 8px 0; color: #1a2a6c; }
-        .meta { color: #7f8c8d; font-size: 0.95em; margin-bottom: 15px; }
-        .score-box { display: inline-block; padding: 10px 24px; background: #eafaf1; border: 2px solid #27ae60; border-radius: 30px; font-weight: bold; font-size: 1.3em; color: #27ae60; }
-        .report-card { background: #fff; padding: 22px; margin-bottom: 22px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .border-correct { border-left: 8px solid #27ae60; }
-        .border-incorrect { border-left: 8px solid #e74c3c; }
-        .report-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .card-title { font-weight: bold; font-size: 1.15em; color: #34495e; }
-        .badge { padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85em; }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 16px 12px; background-color: #f4f6f9; color: #2c3e50; overflow-x: hidden; }
+        .container { max-width: 850px; margin: 0 auto; width: 100%; }
+        .header { background: #fff; padding: 20px 16px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; margin-bottom: 20px; }
+        h1 { margin: 0 0 6px 0; color: #1a2a6c; font-size: 1.6em; }
+        .meta { color: #7f8c8d; font-size: 0.9em; margin-bottom: 12px; }
+        .score-box { display: inline-block; padding: 8px 20px; background: #eafaf1; border: 2px solid #27ae60; border-radius: 30px; font-weight: bold; font-size: 1.2em; color: #27ae60; }
+        .report-card { background: #fff; padding: 18px; margin-bottom: 18px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .border-correct { border-left: 6px solid #27ae60; }
+        .border-incorrect { border-left: 6px solid #e74c3c; }
+        .report-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+        .card-title { font-weight: bold; font-size: 1.1em; color: #34495e; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 0.8em; }
         .badge-correct { background: #d4edda; color: #155724; }
         .badge-incorrect { background: #f8d7da; color: #721c24; }
-        .math-expr { margin: 15px 0; padding: 12px; background: #fcfdfe; border: 1px solid #eef2f5; border-radius: 8px; overflow-x: auto; }
-        .ans-summary { background: #f8f9fa; padding: 12px 16px; border-radius: 6px; margin: 12px 0; }
-        .ans-summary p { margin: 4px 0; }
+        .math-expr { margin: 12px 0; padding: 10px; background: #fcfdfe; border: 1px solid #eef2f5; border-radius: 8px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; }
+        .math-expr::-webkit-scrollbar { display: none; }
+        .ans-summary { background: #f8f9fa; padding: 10px 14px; border-radius: 6px; margin: 10px 0; font-size: 0.95em; }
+        .ans-summary p { margin: 3px 0; }
         .text-correct { color: #27ae60; font-weight: bold; }
         .text-incorrect { color: #e74c3c; font-weight: bold; }
-        .sol-container { margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
-        .sol-header { font-weight: bold; color: #27ae60; margin-bottom: 8px; }
-        .step-list { margin: 6px 0 12px 20px; padding: 0; }
-        .step-list li { margin-bottom: 8px; }
-        .algebra-line { display: block; background: #fdfdfd; padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 5px; margin: 5px 0; overflow-x: auto; }
+        .sol-container { margin-top: 14px; padding-top: 12px; border-top: 1px solid #eee; }
+        .sol-header { font-weight: bold; color: #27ae60; margin-bottom: 6px; }
+        .step-list { margin: 6px 0 10px 16px; padding: 0; font-size: 0.95em; }
+        .step-list li { margin-bottom: 6px; }
+        .algebra-line { display: block; background: #fdfdfd; padding: 6px 8px; border: 1px solid #e2e8f0; border-radius: 5px; margin: 4px 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; }
+        .algebra-line::-webkit-scrollbar { display: none; }
         .final-tag { display: inline-block; background: #d4edda; color: #155724; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+        mjx-container { max-width: 100% !important; overflow-x: auto !important; overflow-y: hidden !important; scrollbar-width: none; -ms-overflow-style: none; }
+        mjx-container::-webkit-scrollbar { display: none; }
         @media print { body { background: #fff; padding: 0; } .report-card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; } }
+        @media (max-width: 600px) { body { padding: 10px 8px; } .header { padding: 16px 12px; } h1 { font-size: 1.35em; } .report-card { padding: 14px 12px; } }
     </style>
 </head>
 <body>
@@ -791,7 +1036,6 @@
             `;
             scoreBanner.style.display = 'block';
 
-            // Trigger the download automatically
             triggerDownload(reportHtml, filename);
             
             typesetMath([scoreBanner, container]);
