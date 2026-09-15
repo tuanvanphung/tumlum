@@ -5,12 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exponent Operations Practice Test</title>
     
-    <!-- Load MathJax for elegant LaTeX mathematical rendering -->
+    <!-- Load MathJax with robust startup hooks -->
     <script>
         window.MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
                 displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            chtml: { scale: 1.0 },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (window.triggerMathTypeset) window.triggerMathTypeset();
+                    });
+                }
             }
         };
     </script>
@@ -26,49 +34,59 @@
             --incorrect-red: #c5221f;
         }
 
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--background-gray);
             color: #3c4043;
             margin: 0;
-            padding: 20px;
+            padding: 16px 12px;
+            overflow-x: hidden;
         }
 
         .container {
             max-width: 800px;
             margin: 0 auto;
             background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            padding: 24px 20px;
+            width: 100%;
         }
 
         h1 {
             color: #202124;
             text-align: center;
-            margin-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 1.8em;
         }
 
         p.subtitle {
             text-align: center;
             color: #5f6368;
-            margin-bottom: 20px;
+            margin-bottom: 22px;
             line-height: 1.5;
+            font-size: 0.95em;
         }
 
         .controls {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
         }
 
         button {
-            padding: 12px 24px;
+            padding: 11px 22px;
             font-size: 1rem;
             font-weight: 600;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             transition: background-color 0.2s ease, transform 0.1s ease, opacity 0.2s;
         }
@@ -104,36 +122,50 @@
         #score-banner {
             display: none;
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: bold;
-            padding: 15px;
-            margin-bottom: 25px;
-            border-radius: 6px;
+            padding: 14px 16px;
+            margin-bottom: 22px;
+            border-radius: 8px;
+            line-height: 1.4;
         }
 
         .problem-card {
             background: #ffffff;
             border: 1px solid var(--card-border);
-            border-radius: 6px;
-            padding: 20px;
+            border-radius: 8px;
+            padding: 18px 20px;
             margin-bottom: 20px;
             position: relative;
+            width: 100%;
         }
 
         .problem-number {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: bold;
             color: #202124;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
-        /* Bold blue styling for the textbook-format math equations */
+        /* Responsive Math Display - No Scrollbars */
         .math-display {
             color: var(--primary-blue);
             font-weight: bold;
-            font-size: 1.4rem;
-            margin: 15px 0;
+            font-size: 1.3rem;
+            margin: 12px 0;
             text-align: center;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .math-display::-webkit-scrollbar {
+            display: none;
         }
 
         .math-display mjx-container {
@@ -144,18 +176,34 @@
         .answer-section {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
-            margin-top: 15px;
+            margin-top: 14px;
             flex-wrap: wrap;
+            background: #fcfdfe;
+            padding: 12px;
+            border: 1px solid #edf2f7;
+            border-radius: 6px;
+        }
+
+        .answer-section label {
+            font-weight: 600;
+            font-size: 0.95em;
         }
 
         .answer-input {
             padding: 8px 12px;
             font-size: 1rem;
-            border: 1px solid var(--card-border);
-            border-radius: 4px;
-            width: 120px;
-            transition: background-color 0.2s;
+            border: 2px solid var(--card-border);
+            border-radius: 6px;
+            width: 130px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .answer-input:focus {
+            border-color: var(--primary-blue);
         }
 
         .answer-input:disabled {
@@ -166,7 +214,7 @@
 
         .feedback {
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
         .feedback.correct {
@@ -180,12 +228,19 @@
         /* On-page Step-by-Step Solution Block */
         .solution-block {
             display: none;
-            margin-top: 18px;
-            padding: 15px 20px;
+            margin-top: 16px;
+            padding: 14px 16px;
             background-color: #f8f9fa;
             border-left: 4px solid var(--primary-blue);
-            border-radius: 0 6px 6px 0;
-            animation: fadeIn 0.4s ease;
+            border-radius: 0 8px 8px 0;
+            animation: fadeIn 0.35s ease;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .solution-block::-webkit-scrollbar {
+            display: none;
         }
 
         .solution-block strong.correct-answer-label {
@@ -197,21 +252,58 @@
 
         .solution-block ul {
             margin: 8px 0 0 0;
-            padding-left: 20px;
+            padding-left: 18px;
         }
 
         .solution-block li {
             margin-bottom: 6px;
             line-height: 1.5;
+            font-size: 0.95em;
+        }
+
+        /* Suppress inner MathJax scrollbars across devices */
+        mjx-container {
+            max-width: 100% !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            vertical-align: middle !important;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        mjx-container::-webkit-scrollbar {
+            display: none;
         }
 
         #test-area {
-            opacity: 0; /* Hiding initially to prevent MathJax flashing (FOUC) */
+            opacity: 0;
+            transition: opacity 0.4s ease;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
+            from { opacity: 0; transform: translateY(-4px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile Screens Optimization */
+        @media (max-width: 600px) {
+            body { padding: 12px 8px; }
+            .container { padding: 18px 14px; border-radius: 8px; }
+            h1 { font-size: 1.45em; }
+            .subtitle { font-size: 0.88em; margin-bottom: 16px; }
+            .controls { flex-direction: column; gap: 8px; margin-bottom: 18px; }
+            button { width: 100%; padding: 10px 16px; font-size: 0.95rem; }
+            .problem-card { padding: 14px 12px; margin-bottom: 15px; }
+            .math-display { font-size: 1.15rem; margin: 8px 0; }
+            .answer-section { padding: 10px 8px; gap: 8px; }
+            .answer-input { width: 105px; padding: 7px 8px; font-size: 0.95rem; }
+            .solution-block { padding: 12px; }
+            .solution-block ul { padding-left: 15px; }
+            #score-banner { font-size: 1.15rem; padding: 12px; }
+        }
+
+        @media (max-width: 380px) {
+            .math-display { font-size: 1.05rem; }
+            .answer-input { width: 90px; }
         }
     </style>
 </head>
@@ -235,11 +327,9 @@
 </div>
 
 <script>
-    // Global container for the 10 current problems
     let currentProblems = [];
     let isSubmitted = false;
 
-    // Helper functions for randomizations
     function getRandomElement(arr) {
         return arr[Math.floor(Math.random() * arr.length)];
     }
@@ -248,7 +338,53 @@
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    // Generator function containing the 10 unique problem templates
+    // Safe typeset helper preventing runtime crashes if MathJax is still loading
+    function typesetMath(elements) {
+        if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+            return window.MathJax.typesetPromise(elements).catch(err => console.warn('MathJax typesetting warning:', err));
+        }
+        return Promise.resolve();
+    }
+
+    window.triggerMathTypeset = () => {
+        const testArea = document.getElementById('test-area');
+        if (testArea) {
+            typesetMath([testArea]).then(() => {
+                testArea.style.opacity = 1;
+            });
+        }
+    };
+
+    // Robust user input parser (handles integers, decimals, negative values, commas, and simple fractions)
+    function parseStudentInput(valStr) {
+        if (!valStr) return NaN;
+        let str = String(valStr).trim().toLowerCase().replace(/[()]/g, '');
+        if (str === "") return NaN;
+
+        // Convert European comma decimal to standard dot (e.g. "5,0" -> "5.0")
+        if (str.includes(',') && !str.includes('.')) {
+            str = str.replace(',', '.');
+        }
+
+        // Support simple fractions like "24/2" or "-10/2"
+        if (str.includes('/')) {
+            const parts = str.split('/');
+            if (parts.length === 2) {
+                const num = parseFloat(parts[0].replace(/\s+/g, ''));
+                const den = parseFloat(parts[1].replace(/\s+/g, ''));
+                if (!isNaN(num) && !isNaN(den) && den !== 0) {
+                    return num / den;
+                }
+            }
+            return NaN;
+        }
+
+        // Remove whitespace between signs and digits (e.g. "- 89" -> "-89")
+        str = str.replace(/\s+/g, '');
+        return parseFloat(str);
+    }
+
+    // Generator containing the 10 unique problem templates
     function build10Problems() {
         let problems = [];
 
@@ -266,7 +402,7 @@
             latex: `\\[ ${p1_a}^{${p1_b}} \\cdot ${p1_a}^{${p1_c}} + ${p1_d} \\cdot ${p1_e} \\]`,
             steps: [
                 `Apply the product rule to the first term: \\( ${p1_a}^{${p1_b}} \\cdot ${p1_a}^{${p1_c}} = ${p1_a}^{${p1_b} + ${p1_c}} = ${p1_a}^{${p1_b + p1_c}} \\)`,
-                `Evaluate the exponent and the multiplication: \\( ${p1_a}^{${p1_b + p1_c}} = ${p1_p_val} \\) and \\( ${p1_d} \\cdot ${p1_e} = ${p1_m_val} \\)`,
+                `Evaluate the exponent and multiplication: \\( ${p1_a}^{${p1_b + p1_c}} = ${p1_p_val} \\) and \\( ${p1_d} \\cdot ${p1_e} = ${p1_m_val} \\)`,
                 `Add the results: \\( ${p1_p_val} + ${p1_m_val} = ${p1_ans} \\)`
             ],
             answer: p1_ans
@@ -308,7 +444,7 @@
             steps: [
                 `Apply the power of a power rule: \\( (2^{-${p3_b}})^{-${p3_c}} = 2^{(-${p3_b}) \\cdot (-${p3_c})} = 2^{${p3_p1}} \\)`,
                 `Evaluate the exponent terms: \\( 2^{${p3_p1}} = ${p3_p_val} \\) and \\( 2^{${p3_e}} = ${Math.pow(p3_a, p3_e)} \\)`,
-                `Perform the multiplication: \\( ${p3_d} \\cdot ${Math.pow(p3_a, p3_e)} = ${p3_m_val} \\)`,
+                `Perform multiplication: \\( ${p3_d} \\cdot ${Math.pow(p3_a, p3_e)} = ${p3_m_val} \\)`,
                 `Add the terms: \\( ${p3_p_val} + ${p3_m_val} = ${p3_ans} \\)`
             ],
             answer: p3_ans
@@ -331,7 +467,7 @@
             steps: [
                 `Evaluate the fractional exponent: \\( ${p4_b}^{2/3} = (\\sqrt[3]{${p4_b}})^2 = (${p4_root})^2 = ${p4_frac_val} \\)`,
                 `Evaluate the square root: \\( ${p4_e}^{1/2} = \\sqrt{${p4_e}} = ${p4_e_val} \\)`,
-                `Perform the multiplication: \\( ${p4_a} \\cdot ${p4_frac_val} = ${p4_m_val} \\)`,
+                `Perform multiplication: \\( ${p4_a} \\cdot ${p4_frac_val} = ${p4_m_val} \\)`,
                 `Perform final subtraction: \\( ${p4_m_val} - ${p4_e_val} = ${p4_ans} \\)`
             ],
             answer: p4_ans
@@ -346,9 +482,9 @@
             id: 5,
             latex: `\\[ (2 \\cdot 5)^{-${p5_c}} \\cdot 10^{${p5_d}}  \\]`,
             steps: [
-                `Simplify the product inside the parentheses: \\( 2 \\cdot 5 = 10 \\)`,
-                `Rewrite the expression with the base 10: \\( 10^{-${p5_c}} \\cdot 10^{${p5_d}} \\)`,
-                `Apply the product rule to add exponents: \\( 10^{-${p5_c} + ${p5_d}} = 10^{${p5_diff}} \\)`,
+                `Simplify the product inside parentheses: \\( 2 \\cdot 5 = 10 \\)`,
+                `Rewrite the expression with base 10: \\( 10^{-${p5_c}} \\cdot 10^{${p5_d}} \\)`,
+                `Apply the product rule: \\( 10^{-${p5_c} + ${p5_d}} = 10^{${p5_diff}} \\)`,
                 `Evaluate the final power: \\( 10^{${p5_diff}} = ${p5_ans} \\)`
             ],
             answer: p5_ans
@@ -364,8 +500,8 @@
             id: 6,
             latex: `\\[ \\left(\\frac{1}{${p6_b}}\\right)^{-${p6_c}} + ${p6_b}^{${p6_c}} - ${p6_d} \\]`,
             steps: [
-                `Rewrite the fraction to remove the negative exponent: \\( \\left(\\frac{1}{${p6_b}}\\right)^{-${p6_c}} = (${p6_b})^{${p6_c}} \\)`,
-                `Rewrite the whole expression: \\( ${p6_b}^{${p6_c}} + ${p6_b}^{${p6_c}} - ${p6_d} \\)`,
+                `Invert the fraction to remove the negative exponent: \\( \\left(\\frac{1}{${p6_b}}\\right)^{-${p6_c}} = (${p6_b})^{${p6_c}} \\)`,
+                `Rewrite the full expression: \\( ${p6_b}^{${p6_c}} + ${p6_b}^{${p6_c}} - ${p6_d} \\)`,
                 `Evaluate the exponential terms: \\( ${p6_b}^{${p6_c}} = ${p6_term} \\)`,
                 `Perform addition and subtraction: \\( ${p6_term} + ${p6_term} - ${p6_d} = ${p6_term * 2} - ${p6_d} = ${p6_ans} \\)`
             ],
@@ -385,10 +521,10 @@
             id: 7,
             latex: `\\[ ( ${p7_a}^{\\sqrt{${p7_b}}} )^{\\sqrt{${p7_b}}} - ${p7_c} \\cdot ${p7_d}^{${p7_e}} \\]`,
             steps: [
-                `Apply the power of a power rule to the first term: \\( (${p7_a}^{\\sqrt{${p7_b}}})^{\\sqrt{${p7_b}}} = ${p7_a}^{\\sqrt{${p7_b}} \\cdot \\sqrt{${p7_b}}} = ${p7_a}^{${p7_b}} \\)`,
-                `Evaluate the exponential terms: \\( ${p7_a}^{${p7_b}} = ${p7_p_val} \\) and \\( ${p7_d}^{${p7_e}} = ${Math.pow(p7_d, p7_e)} \\)`,
-                `Perform the multiplication: \\( ${p7_c} \\cdot ${Math.pow(p7_d, p7_e)} = ${p7_m_val} \\)`,
-                `Subtract to find the final value: \\( ${p7_p_val} - ${p7_m_val} = ${p7_ans} \\)`
+                `Apply the power of a power rule: \\( (${p7_a}^{\\sqrt{${p7_b}}})^{\\sqrt{${p7_b}}} = ${p7_a}^{\\sqrt{${p7_b}} \\cdot \\sqrt{${p7_b}}} = ${p7_a}^{${p7_b}} \\)`,
+                `Evaluate exponential terms: \\( ${p7_a}^{${p7_b}} = ${p7_p_val} \\) and \\( ${p7_d}^{${p7_e}} = ${Math.pow(p7_d, p7_e)} \\)`,
+                `Perform multiplication: \\( ${p7_c} \\cdot ${Math.pow(p7_d, p7_e)} = ${p7_m_val} \\)`,
+                `Subtract to find final value: \\( ${p7_p_val} - ${p7_m_val} = ${p7_ans} \\)`
             ],
             answer: p7_ans
         });
@@ -408,9 +544,9 @@
             latex: `\\[ ${p8_a} \\cdot (-${p8_b})^{${p8_c}} + ${p8_d} \\cdot (-${p8_b})^{${p8_c}} - ${p8_e}^2 \\]`,
             steps: [
                 `Combine matching base-exponent terms: \\( (${p8_a} + ${p8_d}) \\cdot (-${p8_b})^{${p8_c}} = ${p8_combined} \\cdot (-${p8_b})^{${p8_c}} \\)`,
-                `Evaluate the exponential terms: \\( (-${p8_b})^{${p8_c}} = ${p8_base_val} \\) and \\( ${p8_e}^2 = ${p8_e_val} \\)`,
-                `Perform the multiplication: \\( ${p8_combined} \\cdot ${p8_base_val} = ${p8_combined * p8_base_val} \\)`,
-                `Perform the final subtraction: \\( ${p8_combined * p8_base_val} - ${p8_e_val} = ${p8_ans} \\)`
+                `Evaluate exponential terms: \\( (-${p8_b})^{${p8_c}} = ${p8_base_val} \\) and \\( ${p8_e}^2 = ${p8_e_val} \\)`,
+                `Perform multiplication: \\( ${p8_combined} \\cdot ${p8_base_val} = ${p8_combined * p8_base_val} \\)`,
+                `Perform final subtraction: \\( ${p8_combined * p8_base_val} - ${p8_e_val} = ${p8_ans} \\)`
             ],
             answer: p8_ans
         });
@@ -436,10 +572,10 @@
             id: 9,
             latex: `\\[ ${p9_a}^{-1/${p9_b}} \\cdot ${p9_c} + (${p9_d}^{${p9_e}})^0  \\]`,
             steps: [
-                `Simplify the negative fractional exponent: \\( ${p9_a}^{-1/${p9_b}} = \\frac{1}{${p9_a}^{1/${p9_b}}} = \\frac{1}{\\sqrt[${p9_b}]{${p9_a}}} = \\frac{1}{${p9_denom}} \\)`,
-                `Evaluate the term raised to 0: \\( (${p9_d}^{${p9_e}})^0 = 1 \\)`,
+                `Simplify negative fractional exponent: \\( ${p9_a}^{-1/${p9_b}} = \\frac{1}{${p9_a}^{1/${p9_b}}} = \\frac{1}{\\sqrt[${p9_b}]{${p9_a}}} = \\frac{1}{${p9_denom}} \\)`,
+                `Evaluate term raised to 0: \\( (${p9_d}^{${p9_e}})^0 = 1 \\)`,
                 `Perform multiplication: \\( \\frac{1}{${p9_denom}} \\cdot ${p9_c} = ${p9_m_val} \\)`,
-                `Add the terms: \\( ${p9_m_val} + 1 = ${p9_ans} \\)`
+                `Add terms: \\( ${p9_m_val} + 1 = ${p9_ans} \\)`
             ],
             answer: p9_ans
         });
@@ -461,8 +597,8 @@
             latex: `\\[ \\frac{(${p10_a}^{${p10_b}} \\cdot ${p10_c}^{${p10_d}})^{${p10_e}}}{${p10_a}^{${p10_f}} \\cdot ${p10_c}^{${p10_g}}} - ${p10_h}  \\]`,
             steps: [
                 `Simplify numerator using power of a product: \\( (${p10_a}^{${p10_b}} \\cdot ${p10_c}^{${p10_d}})^{${p10_e}} = ${p10_a}^{${p10_b * p10_e}} \\cdot ${p10_c}^{${p10_d * p10_e}} \\)`,
-                `Simplify using the quotient rule: \\( \\frac{${p10_a}^{${p10_b * p10_e}} \\cdot ${p10_c}^{${p10_d * p10_e}}}{${p10_a}^{${p10_f}} \\cdot ${p10_c}^{${p10_g}}} = ${p10_a}^{${p10_b * p10_e} - ${p10_f}} \\cdot ${p10_c}^{${p10_d * p10_e} - ${p10_g}} = ${p10_a}^{${p10_base2_pow}} \\cdot ${p10_c}^{${p10_base3_pow}} \\)`,
-                `Evaluate the exponential terms: \\( ${p10_a}^{${p10_base2_pow}} \\cdot ${p10_c}^{${p10_base3_pow}} = ${Math.pow(p10_a, p10_base2_pow)} \\cdot ${Math.pow(p10_c, p10_base3_pow)} = ${p10_frac_val} \\)`,
+                `Simplify using quotient rule: \\( \\frac{${p10_a}^{${p10_b * p10_e}} \\cdot ${p10_c}^{${p10_d * p10_e}}}{${p10_a}^{${p10_f}} \\cdot ${p10_c}^{${p10_g}}} = ${p10_a}^{${p10_b * p10_e} - ${p10_f}} \\cdot ${p10_c}^{${p10_d * p10_e} - ${p10_g}} = ${p10_a}^{${p10_base2_pow}} \\cdot ${p10_c}^{${p10_base3_pow}} \\)`,
+                `Evaluate exponential terms: \\( ${p10_a}^{${p10_base2_pow}} \\cdot ${p10_c}^{${p10_base3_pow}} = ${Math.pow(p10_a, p10_base2_pow)} \\cdot ${Math.pow(p10_c, p10_base3_pow)} = ${p10_frac_val} \\)`,
                 `Subtract: \\( ${p10_frac_val} - ${p10_h} = ${p10_ans} \\)`
             ],
             answer: p10_ans
@@ -471,11 +607,9 @@
         return problems;
     }
 
-    // Function to render the 10 problems onto the HTML page
     function generateTest() {
         isSubmitted = false;
         
-        // Show and enable the check answers button
         const checkBtn = document.getElementById('btn-check-answers');
         checkBtn.style.display = 'inline-block';
         checkBtn.disabled = false;
@@ -484,7 +618,7 @@
         scoreBanner.style.display = 'none';
 
         const testArea = document.getElementById('test-area');
-        testArea.style.opacity = 0; // Hide initially to prevent FOUC (flash of raw LaTeX)
+        testArea.style.opacity = '0';
         testArea.innerHTML = '';
 
         currentProblems = build10Problems();
@@ -497,11 +631,11 @@
             let stepsHtml = problem.steps.map(step => `<li>${step}</li>`).join('');
 
             card.innerHTML = `
-                <div class="problem-number">Problem ${problem.id}</div>
+                <div class="problem-number">Problem #${problem.id}</div>
                 <div class="math-display">${problem.latex}</div>
                 <div class="answer-section">
                     <label for="input-${problem.id}">Your Answer:</label>
-                    <input type="text" class="answer-input" id="input-${problem.id}" placeholder="e.g. 5">
+                    <input type="text" class="answer-input" id="input-${problem.id}" placeholder="e.g. 5" autocomplete="off">
                     <span class="feedback" id="feedback-${problem.id}" aria-live="polite"></span>
                 </div>
                 <div class="solution-block" id="solution-${problem.id}">
@@ -513,7 +647,7 @@
             testArea.appendChild(card);
         });
 
-        // Add 'Enter' key support to submit the answers
+        // Add 'Enter' key support
         currentProblems.forEach((problem) => {
             const inputField = document.getElementById(`input-${problem.id}`);
             inputField.addEventListener("keypress", function(event) {
@@ -524,114 +658,113 @@
             });
         });
 
-        // Typeset initial problems and smoothly reveal
-        if (window.MathJax) {
-            MathJax.typesetPromise().then(() => {
-                testArea.style.transition = "opacity 0.5s ease";
-                testArea.style.opacity = 1;
-            });
-        } else {
-            testArea.style.opacity = 1;
-        }
+        typesetMath([testArea]).then(() => {
+            testArea.style.opacity = '1';
+        });
     }
 
-    // Getting the formatted Date timestamp for the report filename
     function getFormattedDate() {
         const d = new Date();
         const pad = (n) => n.toString().padStart(2, '0');
-        return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+        return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
     }
 
-    // Function to generate the downloadable HTML report text
-    function generateReportHtml(score) {
-        let report = `<!DOCTYPE html>
+    function generateReportHtml(score, resultsList) {
+        const total = currentProblems.length;
+        const pct = Math.round((score / total) * 100);
+        let itemsHtml = '';
+
+        resultsList.forEach(item => {
+            let stepsHtml = item.steps.map(s => `<li>${s}</li>`).join('');
+            itemsHtml += `
+            <div class="problem-card ${item.isCorrect ? 'border-correct' : 'border-incorrect'}">
+                <div class="problem-top">
+                    <h3>Problem #${item.id}</h3>
+                    <span class="badge ${item.isCorrect ? 'badge-correct' : 'badge-incorrect'}">
+                        ${item.isCorrect ? '✓ Correct (+1)' : '✗ Incorrect (0)'}
+                    </span>
+                </div>
+                <div class="math-display">${item.latex}</div>
+                <div class="answers-grid">
+                    <p><strong>Your Answer:</strong> <span class="${item.isCorrect ? 'text-correct' : 'text-incorrect'}">${item.userRaw || '(No answer)'}</span></p>
+                    <p><strong>Correct Answer:</strong> <span class="text-correct">${item.answer}</span></p>
+                </div>
+                <div class="solution-block">
+                    <strong>Step-by-Step Solution:</strong>
+                    <ul>${stepsHtml}</ul>
+                </div>
+            </div>
+            `;
+        });
+
+        return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exponents Test Report</title>
     <script>
         window.MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
                 displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']]
-            }
+            },
+            chtml: { scale: 1.0 }
         };
-    </` + `script>
-    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></` + `script>
+    <\/script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"><\/script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; color: #3c4043; padding: 20px; line-height: 1.6; }
-        .container { max-width: 800px; margin: 0 auto; background: #ffffff; border-radius: 8px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #202124; }
-        .score { text-align: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 30px; color: #1a73e8; }
-        .problem-card { border: 1px solid #dadce0; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
-        .correct { color: #137333; font-weight: bold; }
-        .incorrect { color: #c5221f; font-weight: bold; }
-        .math-display { color: #1a73e8; font-weight: bold; font-size: 1.4rem; margin: 15px 0; text-align: center; }
-        .solution-block { margin-top: 15px; padding: 15px; background-color: #f1f3f4; border-left: 4px solid #1a73e8; border-radius: 0 4px 4px 0; }
-        ul { padding-left: 20px; margin: 5px 0 0 0; }
-        li { margin-bottom: 8px; }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; color: #3c4043; padding: 16px 12px; line-height: 1.6; margin: 0; overflow-x: hidden; }
+        .container { max-width: 800px; margin: 0 auto; background: #ffffff; border-radius: 10px; padding: 22px 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); width: 100%; }
+        h1 { text-align: center; color: #202124; margin: 0 0 6px 0; font-size: 1.6em; }
+        .score-box { text-align: center; font-size: 1.25rem; font-weight: bold; margin-bottom: 22px; padding: 10px 18px; background: #eaf3fe; color: #1a73e8; border-radius: 30px; display: inline-block; }
+        .score-wrapper { text-align: center; margin-bottom: 20px; }
+        .problem-card { border: 1px solid #dadce0; border-radius: 8px; padding: 16px; margin-bottom: 18px; background: #fff; }
+        .border-correct { border-left: 6px solid #137333; }
+        .border-incorrect { border-left: 6px solid #c5221f; }
+        .problem-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+        .problem-top h3 { margin: 0; font-size: 1.1em; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 0.8em; }
+        .badge-correct { background: #d4edda; color: #155724; }
+        .badge-incorrect { background: #f8d7da; color: #721c24; }
+        .text-correct { color: #137333; font-weight: bold; }
+        .text-incorrect { color: #c5221f; font-weight: bold; }
+        .math-display { color: #1a73e8; font-weight: bold; font-size: 1.2rem; margin: 10px 0; text-align: center; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; }
+        .math-display::-webkit-scrollbar { display: none; }
+        .answers-grid { background: #f8f9fa; padding: 10px 14px; border-radius: 6px; margin: 10px 0; font-size: 0.95em; }
+        .answers-grid p { margin: 4px 0; }
+        .solution-block { margin-top: 12px; padding: 12px 14px; background-color: #f1f3f4; border-left: 4px solid #1a73e8; border-radius: 0 6px 6px 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; }
+        .solution-block::-webkit-scrollbar { display: none; }
+        ul { padding-left: 18px; margin: 6px 0 0 0; font-size: 0.95em; }
+        li { margin-bottom: 6px; }
+        mjx-container { max-width: 100% !important; overflow-x: auto !important; overflow-y: hidden !important; scrollbar-width: none; -ms-overflow-style: none; }
+        mjx-container::-webkit-scrollbar { display: none; }
+        @media print { body { background: #fff; padding: 0; } .problem-card, .container { box-shadow: none; } }
+        @media (max-width: 600px) { body { padding: 10px 8px; } .container { padding: 16px 12px; } h1 { font-size: 1.35em; } }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Exponents Test Report</h1>
-        <div class="score">Final Score: ${score} / ${currentProblems.length} (${Math.round((score / currentProblems.length) * 100)}%)</div>
-`;
-
-        currentProblems.forEach(problem => {
-            const inputField = document.getElementById(`input-${problem.id}`);
-            const rawInput = inputField.value.trim().replace(/,/g, '');
-            const studentInput = parseFloat(rawInput);
-            
-            let isCorrect = false;
-            let statusText = "Unanswered / Invalid";
-            let statusClass = "incorrect";
-
-            if (rawInput !== "" && !isNaN(studentInput)) {
-                if (Math.abs(studentInput - problem.answer) < 0.0001) {
-                    isCorrect = true;
-                    statusText = "Correct!";
-                    statusClass = "correct";
-                } else {
-                    statusText = "Incorrect";
-                }
-            }
-
-            let stepsHtml = problem.steps.map(step => `<li>${step}</li>`).join('');
-
-            report += `
-        <div class="problem-card">
-            <h3>Problem ${problem.id}</h3>
-            <div class="math-display">${problem.latex}</div>
-            <p><strong>Your Answer:</strong> ${inputField.value.trim() || '<em>None</em>'} 
-               <span class="${statusClass}">(${statusText})</span></p>
-            <p><strong>Correct Answer:</strong> ${problem.answer}</p>
-            <div class="solution-block">
-                <strong>Step-by-Step Solution:</strong>
-                <ul>${stepsHtml}</ul>
-            </div>
+        <div class="score-wrapper">
+            <div class="score-box">Final Score: ${score} / ${total} (${pct}%)</div>
         </div>
-            `;
-        });
-
-        report += `
+        ${itemsHtml}
     </div>
 </body>
 </html>`;
-        return report;
     }
 
-    // Function to trigger the automated HTML report download
-    function downloadReportHtml(score) {
-        const htmlContent = generateReportHtml(score);
-        const blob = new Blob([htmlContent], { type: 'text/html' });
+    function downloadReportHtml(score, resultsList) {
+        const htmlContent = generateReportHtml(score, resultsList);
+        const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         
         const a = document.createElement('a');
         a.href = url;
         a.download = `07_Exponents_${getFormattedDate()}.html`;
         
-        // Append, click, and clean up
         document.body.appendChild(a);
         a.click();
         
@@ -641,50 +774,56 @@
         }, 100);
     }
 
-    // Checking answers, scoring, showing explanations, and removing submit button
     function checkAnswers() {
         if (currentProblems.length === 0 || isSubmitted) return;
         
         isSubmitted = true;
         
-        // Remove the submit button completely to prevent inspect and resubmit
         const checkBtn = document.getElementById('btn-check-answers');
         checkBtn.style.display = 'none';
 
         let score = 0;
+        let resultsList = [];
 
         currentProblems.forEach((problem) => {
             const inputField = document.getElementById(`input-${problem.id}`);
             const feedbackSpan = document.getElementById(`feedback-${problem.id}`);
             const solutionDiv = document.getElementById(`solution-${problem.id}`);
             
-            // Clean user input: remove spaces and commas
-            const rawInput = inputField.value.replace(/,/g, '').trim();
-            const studentInput = parseFloat(rawInput);
+            const rawInput = inputField.value.trim();
+            const studentInput = parseStudentInput(rawInput);
 
-            // Precision safe comparison
+            let isCorrect = false;
             if (rawInput === "" || isNaN(studentInput)) {
-                feedbackSpan.textContent = "⚠️ Invalid / Empty";
+                feedbackSpan.textContent = "⚠️ Empty / Invalid";
                 feedbackSpan.className = "feedback incorrect";
             } else if (Math.abs(studentInput - problem.answer) < 0.0001) {
                 feedbackSpan.textContent = "✓ Correct";
                 feedbackSpan.className = "feedback correct";
+                isCorrect = true;
                 score++;
             } else {
                 feedbackSpan.textContent = `✗ Incorrect`;
                 feedbackSpan.className = "feedback incorrect";
             }
 
-            // Lock input field
             inputField.disabled = true;
 
-            // Reveal step-by-step solution
             if (solutionDiv) {
                 solutionDiv.style.display = "block";
             }
+
+            resultsList.push({
+                id: problem.id,
+                latex: problem.latex,
+                userRaw: rawInput,
+                answer: problem.answer,
+                isCorrect: isCorrect,
+                steps: problem.steps
+            });
         });
 
-        // Format and display the overall score banner
+        // Overall score banner
         const scoreBanner = document.getElementById('score-banner');
         const percentage = Math.round((score / currentProblems.length) * 100);
         
@@ -705,19 +844,17 @@
             scoreBanner.style.border = "1px solid #fad2cf";
         }
 
-        // Render MathJax formulas inside the newly displayed step-by-step solutions
-        if (window.MathJax) {
-            MathJax.typesetPromise();
-        }
+        // Render solution math
+        typesetMath([document.getElementById('test-area')]);
 
-        // 🌟 Trigger the automated HTML report download
-        downloadReportHtml(score);
+        // Auto-download synchronized report
+        downloadReportHtml(score, resultsList);
     }
 
-    // Auto-generate test on page load
-    window.onload = function() {
+    // Auto-generate test on window load
+    window.addEventListener('load', () => {
         generateTest();
-    };
+    });
 </script>
 
 </body>
