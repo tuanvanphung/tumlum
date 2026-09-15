@@ -7,53 +7,255 @@
 
     <!-- MathJax Configuration and Script -->
     <script>
-      MathJax = {
+      window.MathJax = {
         tex: { inlineMath: [['\\(', '\\)']] },
-        chtml: { scale: 1.05 }
+        chtml: { scale: 1.0 },
+        startup: {
+          pageReady: () => {
+            return MathJax.startup.defaultPageReady().then(() => {
+              if (window.triggerMathTypeset) window.triggerMathTypeset();
+            });
+          }
+        }
       };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" onerror="console.warn('MathJax script failed to load. Operating in offline/plaintext mode.');"></script>
 
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f0f2f5; color: #333; }
-        h1 { text-align: center; color: #1a2a6c; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #666; margin-bottom: 25px; }
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
 
-        .controls-container { text-align: center; padding: 18px; margin-bottom: 25px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: sticky; top: 10px; z-index: 100; }
-        button { padding: 12px 26px; font-size: 1.05em; font-weight: bold; color: white; border: none; border-radius: 6px; cursor: pointer; margin: 5px 8px; transition: 0.2s; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 16px 12px; 
+            background-color: #f0f2f5; 
+            color: #333; 
+            overflow-x: hidden;
+        }
+
+        h1 { 
+            text-align: center; 
+            color: #1a2a6c; 
+            margin-bottom: 4px; 
+            font-size: 1.8em;
+        }
+
+        .subtitle { 
+            text-align: center; 
+            color: #666; 
+            margin-bottom: 20px; 
+            font-size: 0.95em;
+        }
+
+        .controls-container { 
+            text-align: center; 
+            padding: 14px 16px; 
+            margin: 0 auto 20px auto; 
+            max-width: 850px;
+            background-color: #fff; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            position: sticky; 
+            top: 8px; 
+            z-index: 100; 
+        }
+
+        button { 
+            padding: 10px 22px; 
+            font-size: 1em; 
+            font-weight: bold; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin: 4px 6px; 
+            transition: background 0.2s ease, transform 0.1s ease; 
+        }
+        button:active { transform: scale(0.98); }
         #generateBtn { background-color: #3498db; }
         #generateBtn:hover { background-color: #2980b9; }
         #submitBtn { background-color: #27ae60; }
         #submitBtn:hover { background-color: #219653; }
-        .problem-count { font-size: 0.95em; color: #555; margin-top: 8px; font-weight: bold; }
+        
+        .problem-count { 
+            font-size: 0.9em; 
+            color: #555; 
+            margin-top: 8px; 
+            line-height: 1.4;
+        }
 
-        .score-banner { display: none; text-align: center; background: #fff; border: 3px solid #27ae60; padding: 15px; margin: 0 auto 25px auto; max-width: 850px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .score-banner h2 { margin: 0 0 5px 0; color: #27ae60; font-size: 1.6em; }
-        .score-banner p { margin: 0; color: #666; font-size: 0.95em; }
+        .score-banner { 
+            display: none; 
+            text-align: center; 
+            background: #fff; 
+            border: 3px solid #27ae60; 
+            padding: 16px; 
+            margin: 0 auto 20px auto; 
+            max-width: 850px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+        }
+        .score-banner h2 { margin: 0 0 5px 0; color: #27ae60; font-size: 1.5em; }
+        .score-banner p { margin: 0; color: #666; font-size: 0.9em; }
 
-        .problem-list { list-style-type: none; padding-left: 0; max-width: 850px; margin: 0 auto; }
-        .problem-card { margin-bottom: 25px; padding: 22px; border-radius: 12px; background-color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 8px solid #8e44ad; }
+        .problem-list { 
+            list-style-type: none; 
+            padding-left: 0; 
+            max-width: 850px; 
+            margin: 0 auto; 
+        }
 
-        .problem-header { display: flex; align-items: center; gap: 15px; margin-bottom: 18px; flex-wrap: wrap; }
-        .problem-number { font-weight: bold; font-size: 1.25em; color: #8e44ad; }
-        .problem-expression { font-size: 1.4em; color: #2c3e50; overflow-x: auto; padding: 4px 0; }
+        .problem-card { 
+            margin-bottom: 20px; 
+            padding: 18px 20px; 
+            border-radius: 12px; 
+            background-color: #fff; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+            border-left: 6px solid #8e44ad; 
+            width: 100%;
+        }
 
-        .answer-box { display: flex; flex-direction: column; background: #fdfdfd; padding: 14px; border: 1px solid #eee; border-radius: 8px; align-items: center; }
-        .multi-input-row { display: flex; gap: 12px; justify-content: center; align-items: center; }
+        .problem-header { 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            gap: 8px; 
+            margin-bottom: 16px; 
+            width: 100%;
+        }
+
+        .problem-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .problem-number { 
+            font-weight: bold; 
+            font-size: 1.15em; 
+            color: #8e44ad; 
+        }
+
+        .problem-tag { 
+            font-size: 0.75em; 
+            background: #f3e8f8; 
+            color: #8e44ad; 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-weight: 600; 
+        }
+
+        .problem-expression { 
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.25em; 
+            color: #2c3e50; 
+            padding: 8px 4px; 
+            margin: 0 auto;
+            text-align: center;
+            overflow-x: auto; 
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .problem-expression::-webkit-scrollbar {
+            display: none;
+        }
+
+        .answer-box { 
+            display: flex; 
+            flex-direction: column; 
+            background: #fcfdfe; 
+            padding: 14px; 
+            border: 1px solid #eef2f5; 
+            border-radius: 8px; 
+            align-items: center; 
+            width: 100%;
+        }
+
+        .multi-input-row { 
+            display: flex; 
+            gap: 10px; 
+            justify-content: center; 
+            align-items: center; 
+            width: 100%;
+            flex-wrap: wrap;
+        }
         .multi-input-row label { font-size: 1.2em; font-weight: bold; }
-        .multi-input-row input { width: 140px; padding: 9px; font-size: 1.15em; border: 2px solid #ced4da; border-radius: 6px; text-align: center; outline: none; }
+        .multi-input-row input { 
+            width: 130px; 
+            padding: 8px 10px; 
+            font-size: 1.1em; 
+            border: 2px solid #ced4da; 
+            border-radius: 6px; 
+            text-align: center; 
+            outline: none; 
+            transition: border-color 0.2s;
+        }
+        .multi-input-row input:focus { border-color: #8e44ad; }
         .multi-input-row input:disabled { background-color: #e9ecef; color: #495057; cursor: not-allowed; }
 
-        .input-hint { font-size: 0.85em; color: #888; margin-top: 6px; text-align: center; }
+        .input-hint { 
+            font-size: 0.85em; 
+            color: #7f8c8d; 
+            margin-top: 8px; 
+            text-align: center; 
+            font-weight: 500;
+        }
 
-        .solution-area { display: none; margin-top: 18px; padding: 16px; background: #f8f9fa; border-radius: 8px; border-left: 5px solid #27ae60; text-align: left; }
-        .solution-title { font-weight: bold; font-size: 1.1em; color: #27ae60; margin-bottom: 10px; }
-        .step-list { margin: 8px 0 12px 20px; padding: 0; }
-        .step-list li { margin-bottom: 8px; color: #2c3e50; line-height: 1.5; }
+        .solution-area { 
+            display: none; 
+            margin-top: 16px; 
+            padding: 14px 16px; 
+            background: #f8f9fa; 
+            border-radius: 8px; 
+            border-left: 5px solid #27ae60; 
+            text-align: left; 
+        }
+        .solution-title { font-weight: bold; font-size: 1.05em; color: #27ae60; margin-bottom: 8px; }
+        .step-list { margin: 6px 0 10px 18px; padding: 0; }
+        .step-list li { margin-bottom: 8px; color: #2c3e50; line-height: 1.45; }
         .final-ans-tag { display: inline-block; background: #d4edda; color: #155724; padding: 4px 10px; border-radius: 4px; font-weight: bold; margin-top: 4px; }
 
         .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
         .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; font-weight: bold; }
+
+        /* Prevent MathJax elements from creating outer page scrolls */
+        mjx-container {
+            max-width: 100% !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            vertical-align: middle !important;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        mjx-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Mobile Screens Optimization */
+        @media (max-width: 600px) {
+            body { padding: 12px 8px; }
+            h1 { font-size: 1.45em; }
+            .subtitle { font-size: 0.85em; margin-bottom: 15px; }
+            .controls-container { padding: 12px 10px; }
+            button { padding: 9px 16px; font-size: 0.9em; width: 100%; margin: 4px 0; }
+            .problem-card { padding: 14px 12px; }
+            .problem-expression { font-size: 1.05em; padding: 6px 0; }
+            .step-list { margin-left: 14px; }
+            .multi-input-row input { width: 110px; font-size: 1.05em; padding: 7px; }
+        }
+
+        @media (max-width: 380px) {
+            .problem-expression { font-size: 0.92em; }
+            .multi-input-row input { width: 95px; font-size: 1em; }
+        }
     </style>
 </head>
 <body>
@@ -119,6 +321,10 @@
             }
             return Promise.resolve();
         }
+
+        window.triggerMathTypeset = () => {
+            typesetMath([container]);
+        };
 
         // =============================================================
         // UTILITY & MATH ENGINE
@@ -198,10 +404,11 @@
         const EASY_FRACTIONS = [[1,2],[3,2],[1,4],[3,4],[5,4],[1,5],[2,5],[3,5],[4,5]];
         const EASY_DECIMALS = ["0.5", "1.5", "2.5", "0.2", "0.4", "0.6", "0.8", "0.25", "0.75"];
 
+        // FIXED BUG: Fractions used with explicit arithmetic operators must be positive
+        // to prevent ill-formed double negatives like "+ -" or "- -"
         function easyFraction() {
             const [n, d] = getRandomItem(EASY_FRACTIONS);
-            const sign = Math.random() < 0.3 ? -1 : 1;
-            return simplifyFraction(n * sign, d);
+            return simplifyFraction(n, d);
         }
         function easyDecimalStr() { return getRandomItem(EASY_DECIMALS); }
 
@@ -500,22 +707,46 @@
         ];
 
         // =============================================================
-        // INPUT PARSER & ENGINE
+        // INPUT PARSER (TOLERANT & SUPPORTS FRACTIONS, DECIMALS, MIXED)
         // =============================================================
         function parseUserFractionInput(inputStr) {
-            inputStr = String(inputStr).replace(/\s+/g, '').toLowerCase();
-            if (inputStr === "") return NaN;
-            if (inputStr.includes('/')) {
-                const parts = inputStr.split('/');
+            if (!inputStr) return NaN;
+            let str = String(inputStr).trim().toLowerCase().replace(/[()]/g, '');
+            if (str === "") return NaN;
+
+            // Normalize European decimal comma (e.g. "3,5" -> "3.5")
+            str = str.replace(',', '.');
+
+            // Support mixed numbers like "3 1/2", "-2 3/4"
+            const mixedMatch = str.match(/^(-)?(\d+)\s+([0-9.]+)\/([0-9.]+)$/);
+            if (mixedMatch) {
+                const sign = mixedMatch[1] === '-' ? -1 : 1;
+                const whole = parseFloat(mixedMatch[2]);
+                const num = parseFloat(mixedMatch[3]);
+                const den = parseFloat(mixedMatch[4]);
+                if (den !== 0 && !isNaN(whole) && !isNaN(num) && !isNaN(den)) {
+                    return sign * (whole + num / den);
+                }
+            }
+
+            // Remove internal whitespace
+            str = str.replace(/\s+/g, '');
+
+            // Support simple fractions like "7/2", "-3/4", "+1/5"
+            if (str.includes('/')) {
+                const parts = str.split('/');
                 if (parts.length === 2) {
-                    const num = parseFloat(parts[0]), den = parseFloat(parts[1]);
+                    const num = parseFloat(parts[0]);
+                    const den = parseFloat(parts[1]);
                     if (!isNaN(num) && !isNaN(den)) {
                         if (den === 0) return NaN;
                         return num / den;
                     }
                 }
+                return NaN;
             }
-            return parseFloat(inputStr);
+
+            return parseFloat(str);
         }
 
         function generateProblem(templateFn) {
@@ -586,7 +817,10 @@
                 div.className = 'problem-card';
                 div.innerHTML = `
                     <div class="problem-header">
-                        <span class="problem-number">Problem #${i + 1}</span>
+                        <div class="problem-meta">
+                            <span class="problem-number">Problem #${i + 1}</span>
+                            <span class="problem-tag">Multi-Operator</span>
+                        </div>
                         <div class="problem-expression">\\( ${p.problemHTML} \\)</div>
                     </div>
                     <div class="answer-box">
@@ -626,7 +860,7 @@
                         </span>
                     </div>
                     <div class="expression-box">
-                        \\( ${item.problemHTML} \\)
+                        \\[ ${item.problemHTML} \\]
                     </div>
                     <div class="answers-grid">
                         <div class="answer-pill">
@@ -651,44 +885,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order of Operations - Performance Report</title>
     <script>
-      MathJax = {
-        tex: { inlineMath: [['\\\\(', '\\\\)']] },
-        chtml: { scale: 1.05 }
+      window.MathJax = {
+        tex: { inlineMath: [['\\\\(', '\\\\)']], displayMath: [['\\\\[', '\\\\]']] },
+        chtml: { scale: 1.0 }
       };
     <\/script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"><\/script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 25px 15px; background-color: #f4f6f9; color: #333; }
-        .report-wrapper { max-width: 850px; margin: 0 auto; }
-        .header-card { background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); text-align: center; margin-bottom: 25px; }
-        .header-card h1 { margin: 0 0 6px 0; color: #1a2a6c; font-size: 1.85em; }
-        .header-card p { margin: 0 0 18px 0; color: #666; font-size: 0.95em; }
-        .summary-stats { display: flex; justify-content: space-around; background: #f8f9fa; border-radius: 10px; padding: 16px; border: 1px solid #e9ecef; }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 16px 12px; background-color: #f4f6f9; color: #333; overflow-x: hidden; }
+        .report-wrapper { max-width: 850px; margin: 0 auto; width: 100%; }
+        .header-card { background: #fff; border-radius: 12px; padding: 20px 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); text-align: center; margin-bottom: 20px; }
+        .header-card h1 { margin: 0 0 6px 0; color: #1a2a6c; font-size: 1.6em; }
+        .header-card p { margin: 0 0 16px 0; color: #666; font-size: 0.9em; }
+        .summary-stats { display: flex; justify-content: space-around; background: #f8f9fa; border-radius: 10px; padding: 14px; border: 1px solid #e9ecef; }
         .stat-item { text-align: center; }
-        .stat-num { font-size: 1.6em; font-weight: bold; }
+        .stat-num { font-size: 1.5em; font-weight: bold; }
         .stat-pass { color: #27ae60; }
         .stat-neutral { color: #2980b9; }
-        .stat-lbl { font-size: 0.85em; color: #777; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
-        .problem-card { background: #fff; border-radius: 12px; padding: 22px; margin-bottom: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-        .problem-card.is-correct { border-left: 7px solid #27ae60; }
-        .problem-card.is-incorrect { border-left: 7px solid #e74c3c; }
-        .problem-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
-        .problem-num { font-weight: bold; font-size: 1.2em; color: #1a2a6c; }
-        .badge { padding: 5px 14px; border-radius: 20px; font-weight: bold; font-size: 0.85em; }
+        .stat-lbl { font-size: 0.8em; color: #777; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+        .problem-card { background: #fff; border-radius: 10px; padding: 18px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .problem-card.is-correct { border-left: 6px solid #27ae60; }
+        .problem-card.is-incorrect { border-left: 6px solid #e74c3c; }
+        .problem-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+        .problem-num { font-weight: bold; font-size: 1.15em; color: #1a2a6c; }
+        .badge { padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.8em; }
         .badge-correct { background: #d4edda; color: #155724; }
         .badge-incorrect { background: #f8d7da; color: #721c24; }
-        .expression-box { background: #f8fafd; border: 1px solid #e2e8f0; padding: 14px 18px; border-radius: 8px; font-size: 1.35em; margin-bottom: 16px; color: #2c3e50; overflow-x: auto; }
-        .answers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; font-size: 0.95em; }
-        .answer-pill { padding: 10px 14px; border-radius: 8px; background: #f8f9fa; border: 1px solid #edf2f7; }
+        .expression-box { background: #f8fafd; border: 1px solid #e2e8f0; padding: 10px 12px; border-radius: 8px; font-size: 1.25em; margin-bottom: 14px; color: #2c3e50; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; }
+        .expression-box::-webkit-scrollbar { display: none; }
+        .answers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 14px; font-size: 0.95em; }
+        .answer-pill { padding: 10px 12px; border-radius: 8px; background: #f8f9fa; border: 1px solid #edf2f7; }
         .text-correct { color: #27ae60; font-weight: bold; }
         .text-incorrect { color: #e74c3c; font-weight: bold; }
-        .solution-box { background: #fcfcfc; border-left: 4px solid #3498db; padding: 16px; border-radius: 6px; }
-        .solution-title { font-weight: bold; color: #2980b9; margin-bottom: 10px; font-size: 1em; }
-        .solution-box ol { margin: 0 0 10px 20px; padding: 0; }
-        .solution-box li { margin-bottom: 8px; color: #2c3e50; line-height: 1.55; }
-        .final-tag { display: inline-block; background: #d4edda; color: #155724; padding: 4px 10px; border-radius: 4px; font-weight: bold; margin-top: 6px; }
-        .footer-note { text-align: center; color: #888; font-size: 0.85em; margin-top: 25px; }
+        .solution-box { background: #fcfcfc; border-left: 4px solid #3498db; padding: 14px; border-radius: 6px; }
+        .solution-title { font-weight: bold; color: #2980b9; margin-bottom: 8px; font-size: 0.95em; }
+        .solution-box ol { margin: 0 0 10px 18px; padding: 0; }
+        .solution-box li { margin-bottom: 6px; color: #2c3e50; line-height: 1.5; font-size: 0.95em; }
+        .final-tag { display: inline-block; background: #d4edda; color: #155724; padding: 3px 8px; border-radius: 4px; font-weight: bold; margin-top: 4px; }
+        .footer-note { text-align: center; color: #888; font-size: 0.8em; margin-top: 20px; }
+        mjx-container { max-width: 100% !important; overflow-x: auto !important; overflow-y: hidden !important; scrollbar-width: none; -ms-overflow-style: none; }
+        mjx-container::-webkit-scrollbar { display: none; }
         @media print { body { background: #fff; padding: 0; } .problem-card, .header-card { box-shadow: none; } }
+        @media (max-width: 600px) { body { padding: 10px 8px; } .header-card { padding: 16px 12px; } h1 { font-size: 1.35em; } .problem-card { padding: 14px 12px; } }
     </style>
 </head>
 <body>
