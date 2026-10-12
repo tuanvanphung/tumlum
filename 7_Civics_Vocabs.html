@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civics Vocab Master: Drag & Drop Game</title>
+    <style>
+        :root {
+            --primary-blue: #2c3e50;
+            --light-blue: #3498db;
+            --success-green: #2ecc71;
+            --error-red: #e74c3c;
+            --bg-color: #ecf0f1;
+            --highlight: #f39c12;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            
+            /* ANTI-COPY CSS: Prevents text highlighting */
+            -webkit-user-select: none; 
+            -ms-user-select: none; 
+            user-select: none; 
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-blue);
+            margin-bottom: 5px;
+        }
+
+        .header-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .controls-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        select {
+            padding: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            border: 2px solid var(--primary-blue);
+            cursor: pointer;
+            background-color: #fff;
+            color: var(--primary-blue);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--highlight);
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.3s;
+        }
+
+        #resetBtn {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        #resetBtn:hover {
+            background-color: #1a252f;
+        }
+
+        #downloadBtn {
+            display: none;
+            background-color: var(--success-green);
+            color: white;
+        }
+
+        #downloadBtn:hover {
+            background-color: #27ae60;
+        }
+
+        .game-board {
+            display: flex;
+            gap: 20px;
+            height: 72vh;
+        }
+
+        .column {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            border: 2px solid #bdc3c7;
+            scroll-behavior: smooth;
+        }
+
+        #words-column {
+            flex: 0 0 280px; 
+        }
+
+        #defs-column {
+            flex: 1; 
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            color: var(--primary-blue);
+            border-bottom: 2px solid var(--light-blue);
+            padding-bottom: 10px;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        /* Draggable Words */
+        .draggable-word {
+            background-color: var(--light-blue);
+            color: white;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
+            cursor: grab;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        
+        .draggable-word:active {
+            cursor: grabbing;
+        }
+
+        .draggable-word.dragging {
+            opacity: 0.5;
+        }
+
+        /* Drop Zones */
+        .drop-zone {
+            background-color: #f8f9fa;
+            border: 2px dashed #95a5a6;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            min-height: 60px;
+            transition: background 0.3s, border 0.3s;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .drop-zone p {
+            margin: 0;
+            pointer-events: none; 
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .example-text {
+            color: #555;
+            font-style: italic;
+        }
+
+        .drop-zone.hover {
+            background-color: #e8f4f8;
+            border-color: var(--light-blue);
+        }
+
+        .drop-zone.correct {
+            background-color: #eafaf1;
+            border: 2px solid var(--success-green);
+        }
+
+        .drop-zone.incorrect {
+            background-color: #fceae9;
+            border: 2px dashed var(--error-red);
+        }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb { background: #bdc3c7; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #95a5a6; }
+    </style>
+</head>
+<body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
+
+    <h1>🏛️ Ultimate Civics Vocab Master</h1>
+    
+    <div class="header-panel">
+        <div>Score: <span id="scoreDisplay" style="color: var(--light-blue); font-size: 1.5rem;">0</span> / <span id="totalDisplay">0</span></div>
+        <div id="message">Drag the words on the left to their matching definitions on the right!</div>
+        
+        <div class="controls-container">
+            <select id="unitSelect" onchange="resetGame()">
+                <option value="1">Unit 1: Roots of Democracy</option>
+                <option value="2">Unit 2: Road to Independence</option>
+                <option value="3">Unit 3: Creating the Constitution</option>
+                <option value="4">Unit 4: Citizenship</option>
+                <option value="5">Unit 5: Amendments & Civil Rights</option>
+                <option value="6">Unit 6: Justice System & Courts</option>
+                <option value="7">Unit 7: Politics & Foreign Policy</option>
+                <option value="ALL">🌟 Master Exam (All 126 Words)</option>
+            </select>
+            <button id="resetBtn" onclick="resetGame()">🔀 Scramble</button>
+            <button id="downloadBtn" onclick="downloadReport()">📥 Download Report</button>
+        </div>
+    </div>
+
+    <div class="game-board">
+        <div class="column" id="words-column"></div>
+        <div class="column" id="defs-column"></div>
+    </div>
+
+    <script>
+        // MASTER ARRAY: 126 WORDS CATEGORIZED BY UNIT
+        const vocabData = [
+            // UNIT 1: Roots of Democracy & Enlightenment
+            { unit: 1, id: 1, word: "Magna Carta", def: "A document signed in England in 1215 that limited the power of the king and established that even rulers must follow the law.", ex: "King John was forced to sign this so he couldn't just throw people in jail without a fair trial." },
+            { unit: 1, id: 2, word: "Mayflower Compact", def: "An agreement signed by the Pilgrims in 1620 before landing in America, in which they promised to create fair laws and govern themselves.", ex: "Setting up a temporary government and rules for the Plymouth colony before even leaving their ship." },
+            { unit: 1, id: 3, word: "English Bill of Rights", def: "A document from 1689 that protected the rights of English citizens, such as free speech and fair trials, and limited the power of the monarch.", ex: "It gave English citizens the right to bear arms and protected them from cruel and unusual punishments." },
+            { unit: 1, id: 4, word: "Parliament", def: "The legislative (law-making) body of Great Britain, made up of elected representatives who make laws for the nation.", ex: "The British version of the U.S. Congress, where politicians vote on taxes and rules." },
+            { unit: 1, id: 5, word: "Ancient Greece (Athens)", def: "An ancient Greek city-state where citizens voted directly on laws and decisions, rather than electing representatives to decide for them.", ex: "Thousands of citizens gathering in a giant courtyard to vote directly on going to war (Direct Democracy)." },
+            { unit: 1, id: 6, word: "Ancient Rome", def: "An ancient Roman system of government where citizens elected representatives to make laws and decisions on their behalf.", ex: "Romans electing Senators to sit in a room and make the laws for them (Representative Democracy)." },
+            { unit: 1, id: 7, word: "Enlightenment", def: "A period of European history when philosophers emphasized reason, science, and individual rights, which greatly influenced American ideas about government.", ex: "A time in history when big thinkers started saying that kings shouldn't have absolute power over everyone." },
+            { unit: 1, id: 8, word: "Natural Rights", def: "Basic rights that philosophers believed all people are born with, including life, liberty, and the pursuit of happiness; these cannot be taken away by government.", ex: "John Locke's belief that you are born with the right to Life, Liberty, and Property." },
+            { unit: 1, id: 9, word: "Social Contract", def: "An agreement between people and their government in which people give up some freedoms in exchange for protection and order.", ex: "Agreeing to follow the speed limit (giving up freedom) so the police keep the roads safe for everyone (protection)." },
+            { unit: 1, id: 10, word: "Limited Government", def: "A system where government power is restricted by law, and the government cannot do whatever it wants; the Constitution limits U.S. government power.", ex: "The President cannot just declare themselves King because the Constitution absolutely forbids it." },
+            { unit: 1, id: 11, word: "Rule of Law", def: "The principle that everyone, including government officials, is subject to the law and must follow it; no one is above the law.", ex: "If a Senator gets caught stealing a car, they go to jail just like any other citizen would." },
+            { unit: 1, id: 12, word: "John Locke", def: "An English philosopher who wrote that all people have natural rights to life, liberty, and property, which influenced American ideas about government.", ex: "The thinker who inspired Thomas Jefferson's famous quote: 'Life, Liberty, and the pursuit of Happiness.'" },
+            { unit: 1, id: 13, word: "Baron de Montesquieu", def: "A French philosopher who wrote about the separation of powers, the idea that government power should be divided among three branches to prevent tyranny.", ex: "The man who came up with the idea of Checks and Balances so no one person has all the power." },
+            { unit: 1, id: 14, word: "King John", def: "The English king who was forced to sign the Magna Carta in 1215 because nobles were unhappy with his unfair rule and heavy taxes.", ex: "The greedy king from the Robin Hood stories who abused his power until the nobles stopped him." },
+            { unit: 1, id: 15, word: "English Nobles/Barons", def: "Powerful landowners in England who forced King John to sign the Magna Carta to protect their rights and limit his power.", ex: "The wealthy lords who surrounded the King and demanded he start following the law." },
+            { unit: 1, id: 16, word: "Pilgrims", def: "A group of English settlers who sailed on the Mayflower in 1620 seeking religious freedom and established Plymouth Colony in Massachusetts.", ex: "The colonists who wrote the Mayflower Compact and celebrated the first Thanksgiving." },
+
+            // UNIT 2: Road to Independence
+            { unit: 2, id: 17, word: "French and Indian War", def: "A war fought from 1754-1763 between Britain and France over control of North America; Britain's victory led to new taxes on colonists.", ex: "The expensive war that caused Britain to go into debt, leading them to heavily tax the American colonists to pay for it." },
+            { unit: 2, id: 18, word: "Stamp Act", def: "A 1765 law that taxed colonists on every printed item, like newspapers and documents, without their permission or representation in Parliament.", ex: "Colonists having to pay an extra tax just to buy a deck of playing cards or a legal contract." },
+            { unit: 2, id: 19, word: "Quartering Act", def: "Laws passed by Britain requiring colonists to provide food and housing for British soldiers living in their homes.", ex: "Colonists being forced to let an armed British redcoat sleep in their spare bedroom and eat their food." },
+            { unit: 2, id: 20, word: "Declaratory Act", def: "A 1766 British law stating that Parliament had the right to make laws for the colonies in all cases, which angered colonists who wanted self-government.", ex: "Britain telling the colonists, 'We are the boss and we can make any law we want for you!'" },
+            { unit: 2, id: 21, word: "Townshend Acts", def: "Laws passed in 1767 that taxed goods imported into the colonies, such as glass, tea, and paper, leading to increased colonial anger.", ex: "Putting a tax on everyday items the colonists needed to build and paint their houses." },
+            { unit: 2, id: 22, word: "Tea Act", def: "A 1773 law that gave the British East India Company a monopoly on selling tea in the colonies, which sparked the Boston Tea Party.", ex: "Colonists were only allowed to buy tea from one specific British company, which made them furious." },
+            { unit: 2, id: 23, word: "Intolerable Acts", def: "Laws passed by Britain in 1774 to punish Massachusetts after the Boston Tea Party; colonists called them 'intolerable' because they were so harsh.", ex: "Closing down the entire Boston Harbor so no trading ships could come in or out." },
+            { unit: 2, id: 24, word: "Common Sense", def: "A pamphlet written by Thomas Paine in 1776 that convinced many colonists that independence from Great Britain was necessary and reasonable.", ex: "A short, easy-to-read booklet that fired up colonists to break away from King George III." },
+            { unit: 2, id: 25, word: "Declaration of Independence", def: "The document signed on July 4, 1776, in which the thirteen colonies officially declared themselves free and independent from Great Britain.", ex: "Thomas Jefferson writing to King George that the colonies are now their own country." },
+            { unit: 2, id: 26, word: "DOI Grievances", def: "The list of complaints the colonists included in the Declaration of Independence, including unfair taxes without representation, suspension of trials, and quartering soldiers.", ex: "Writing 'For imposing taxes on us without our consent' as a major complaint to the King." },
+            { unit: 2, id: 27, word: "Right of Resistance", def: "The belief that people have the right to rebel against or overthrow a government that is unjust and takes away their rights.", ex: "The American colonists going to war to break away from King George III because he was a tyrant." },
+            { unit: 2, id: 28, word: "Militia", def: "A military force made up of ordinary citizens who are trained to fight when needed, rather than professional soldiers.", ex: "The 'Minutemen' farmers who grabbed their own muskets to fight the British at Lexington and Concord." },
+            { unit: 2, id: 29, word: "Thomas Paine", def: "An American writer who wrote the pamphlet Common Sense to convince colonists that independence from Great Britain was necessary.", ex: "The author whose writings fired up the colonists and made them want to start a revolution." },
+            { unit: 2, id: 30, word: "Thomas Jefferson", def: "A Founding Father and the main author of the Declaration of Independence who believed in individual rights and limited government.", ex: "The man whose writing officially broke America away from Britain, and who later became the 3rd President." },
+            { unit: 2, id: 31, word: "King George III", def: "The British king during the American Revolution who refused to grant the colonists' requests for fair treatment and representation.", ex: "The 'tyrant' king the colonists complained about in the Declaration of Independence." },
+            { unit: 2, id: 32, word: "George Washington", def: "The commander of the Continental Army during the American Revolution and the first President of the United States.", ex: "The general who led the American soldiers to victory against the British." },
+
+            // UNIT 3: Creating the Constitution
+            { unit: 3, id: 33, word: "Articles of Confederation", def: "The first constitution of the United States, written in 1777, which created a weak national government that could not tax or regulate trade.", ex: "The US government could not collect taxes under this, so it couldn't pay its soldiers after the Revolutionary War." },
+            { unit: 3, id: 34, word: "AOC Weaknesses", def: "The problems with the Articles of Confederation that made the national government too weak, including inability to tax, regulate trade, enforce laws, or maintain an army.", ex: "The early US government was so weak it couldn't even force the states to pay taxes or send soldiers to help." },
+            { unit: 3, id: 35, word: "Debt", def: "Money that is owed to someone else; after the Revolutionary War, the U.S. government had large amounts it could not pay.", ex: "The United States owing millions of dollars to France for helping them fight the British." },
+            { unit: 3, id: 36, word: "Shays' Rebellion", def: "An armed revolt in Massachusetts in 1786 by farmers protesting unfair debt laws; it showed the weakness of the Articles of Confederation.", ex: "Angry farmers attacking courthouses, proving the national government was too weak to stop them." },
+            { unit: 3, id: 37, word: "Daniel Shays", def: "A veteran who led a rebellion in Massachusetts in 1786 to protest unfair debt laws, which showed the weakness of the Articles of Confederation.", ex: "A poor farmer who shut down local courts because they were taking away farmers' land." },
+            { unit: 3, id: 38, word: "Federalist Papers", def: "Essays written by James Madison, Alexander Hamilton, and John Jay to convince people to support and ratify the U.S. Constitution.", ex: "Newspaper articles explaining why having a strong President and a strong Congress was a good idea." },
+            { unit: 3, id: 39, word: "Anti-Federalist Papers", def: "Essays written by people who opposed the U.S. Constitution because they feared a strong central government would take away individual freedoms.", ex: "Writers arguing that the new Constitution was dangerous unless a Bill of Rights was added to protect citizens." },
+            { unit: 3, id: 40, word: "U.S. Constitution", def: "The document written in 1787 that outlines the structure of the U.S. government and defines the rights and responsibilities of citizens.", ex: "The ultimate rulebook that sets up our 3 branches of government (Legislative, Executive, Judicial)." },
+            { unit: 3, id: 41, word: "We the People", def: "The opening words of the U.S. Constitution, stating that the government's power comes from the people, not from a king or ruler.", ex: "The first three giant words written on the US Constitution, proving the citizens are in charge." },
+            { unit: 3, id: 42, word: "Preamble", def: "The introduction to the Constitution that lists six purposes of government: forming a more perfect union, establishing justice, ensuring domestic peace, providing defense, promoting general welfare, and securing liberty.", ex: "The famous opening paragraph that explains the goal of the document is to 'form a more perfect Union.'" },
+            { unit: 3, id: 43, word: "Separation of Powers", def: "The principle that government power is divided among three branches—legislative, executive, and judicial—so no single branch becomes too powerful.", ex: "Congress makes the laws, the President enforces the laws, and the Supreme Court judges the laws." },
+            { unit: 3, id: 44, word: "Checks and Balances", def: "A system where each branch of government has the power to limit the actions of the other branches, preventing any one branch from becoming too powerful.", ex: "Congress passes a law, but the President uses a 'Veto' to block it from happening." },
+            { unit: 3, id: 45, word: "Federalists", def: "People who supported the U.S. Constitution and wanted a strong central government with the power to tax and regulate trade.", ex: "Alexander Hamilton and James Madison, who wanted the national government to be powerful." },
+            { unit: 3, id: 46, word: "Anti-Federalists", def: "People who opposed the U.S. Constitution because they feared a strong central government would take away states' rights and individual freedoms.", ex: "Patrick Henry and George Mason, who refused to support the Constitution without a Bill of Rights." },
+            { unit: 3, id: 47, word: "Federalism", def: "Power is shared between the National (Federal) government and the State governments.", ex: "The Federal government runs the military, but the State of Texas runs Texas schools." },
+            { unit: 3, id: 48, word: "Supremacy Clause", def: "The rule that says the U.S. Constitution and Federal laws are the 'supreme law of the land.'", ex: "If a state law completely ignores or breaks a federal law, the federal law wins." },
+            { unit: 3, id: 49, word: "Elastic Clause", def: "Congress can stretch its powers to make any laws that are 'necessary and proper' for the country.", ex: "The Constitution doesn't mention the Air Force or the Internet, but Congress can make laws about them anyway." },
+
+            // UNIT 4: Citizenship & Civic Participation
+            { unit: 4, id: 50, word: "Naturalized Citizen", def: "A person who was born in another country but has completed the process of becoming a U.S. citizen through legal procedures.", ex: "Someone born in Brazil who lives in the US, passes the civics test, and takes the oath to become American." },
+            { unit: 4, id: 51, word: "Permanent Resident", def: "A person who is legally allowed to live in the United States permanently but is not yet a U.S. citizen; also called a 'green card' holder.", ex: "An immigrant who holds a Green Card, works in the US, but cannot legally vote in presidential elections yet." },
+            { unit: 4, id: 52, word: "Naturalization Process", def: "The legal procedure by which a person born in another country can become a U.S. citizen, usually involving an application, test, and oath.", ex: "Filling out paperwork, taking an English and Civics test, and standing up to take an oath to the Constitution." },
+            { unit: 4, id: 53, word: "Alien", def: "A person who is not a citizen of the country where they are living; can be documented (with legal permission) or undocumented (without permission).", ex: "A tourist visiting Disney World from Japan, or a refugee escaping a war." },
+            { unit: 4, id: 54, word: "Immigrant", def: "A person who moves to a new country with the intention of living there permanently.", ex: "A family moving from Italy to New York to start a brand new life." },
+            { unit: 4, id: 55, word: "Law of Blood", def: "The principle that a child's citizenship is determined by the citizenship of their parents, regardless of where they are born.", ex: "A baby born in France to an American mother is automatically a US citizen." },
+            { unit: 4, id: 56, word: "Law of Soil", def: "The principle that a child's citizenship is determined by the country where they are born, regardless of their parents' citizenship.", ex: "A baby born in a Miami hospital to foreign parents is automatically a US citizen because they were born on US land." },
+            { unit: 4, id: 57, word: "Oath of Allegiance", def: "A promise made by people becoming U.S. citizens to be loyal to the United States and to support and defend the Constitution.", ex: "Raising your right hand and swearing to defend the laws of the US at a naturalization ceremony." },
+            { unit: 4, id: 58, word: "Obligation / Civic Duty", def: "Responsibilities that citizens MUST fulfill by law, such as obeying laws, paying taxes, and serving on juries when called.", ex: "Showing up to the courthouse for jury duty when you get a strict letter in the mail." },
+            { unit: 4, id: 59, word: "Civic Responsibility", def: "Actions citizens SHOULD participate in to help their community and government, including voting, attending civic meetings, and running for office.", ex: "Volunteering to clean up a local park or voting for the next mayor." },
+            { unit: 4, id: 60, word: "Common Good", def: "The well-being of the community as a whole; decisions made for the common good benefit everyone, not just individuals.", ex: "Everyone paying taxes to build public schools that help all children learn, even if you don't have kids." },
+
+            // UNIT 5: Amendments & Civil Rights
+            { unit: 5, id: 61, word: "Bill of Rights", def: "The first ten amendments to the U.S. Constitution, added in 1791, which protect important freedoms like speech, religion, and the right to a fair trial.", ex: "The list of rules that guarantees the government cannot stop you from protesting peacefully." },
+            { unit: 5, id: 62, word: "1st Amendment", def: "Protects freedom of religion, speech, press, assembly, and petition; allows people to express themselves and challenge the government.", ex: "Being legally allowed to protest peacefully in front of a government building or post your opinions online." },
+            { unit: 5, id: 63, word: "2nd Amendment", def: "Protects the right of people to own guns; the exact meaning of this amendment is often debated.", ex: "A citizen legally buying a hunting rifle or a handgun for self-defense." },
+            { unit: 5, id: 64, word: "3rd Amendment", def: "Protects people from being forced to house soldiers in their homes during peacetime without permission.", ex: "The US Army cannot force you to let troops sleep on your couch and eat your food." },
+            { unit: 5, id: 65, word: "4th Amendment", def: "Protects people from unfair searches and seizures; police generally need a warrant to search someone's home or property.", ex: "A police officer needs a signed piece of paper from a judge to come in and search your house." },
+            { unit: 5, id: 66, word: "5th Amendment", def: "Protects people from being forced to testify against themselves and protects their right to due process and fair treatment in court.", ex: "'Pleading the Fifth' so you don't have to answer a question that makes you look guilty in court." },
+            { unit: 5, id: 67, word: "6th Amendment", def: "Guarantees the right to a fair trial, including the right to a lawyer, an impartial jury, and the ability to face accusers.", ex: "Having a jury of everyday citizens decide if you are guilty or innocent of a crime, and having a lawyer help you." },
+            { unit: 5, id: 68, word: "7th Amendment", def: "Guarantees the right to a jury trial in civil cases (disputes between people or businesses, not criminal cases).", ex: "Having a jury decide who owes money in a lawsuit after a major car crash." },
+            { unit: 5, id: 69, word: "8th Amendment", def: "Protects people from cruel and unusual punishment; punishments must be fair and not excessively harsh.", ex: "The government cannot sentence someone to be physically tortured just for stealing a candy bar." },
+            { unit: 5, id: 70, word: "9th Amendment", def: "States that people have other rights besides those listed in the Constitution that the government cannot take away.", ex: "You have the right to choose what job you want, even though that right isn't specifically written in the Constitution." },
+            { unit: 5, id: 71, word: "10th Amendment", def: "States that powers not given to the federal government belong to the states or to the people.", ex: "The state of Florida gets to make its own rules for driving ages and school tests, not the Federal Government." },
+            { unit: 5, id: 72, word: "13th Amendment", def: "Abolished slavery in the United States in 1865, making it illegal to own enslaved people anywhere in the country.", ex: "The amendment that officially and permanently ended slavery nationwide after the Civil War." },
+            { unit: 5, id: 73, word: "14th Amendment", def: "Granted citizenship to formerly enslaved people and promised equal protection and due process to all citizens.", ex: "Ensuring that every citizen, no matter their race, gets 'equal protection under the law.'" },
+            { unit: 5, id: 74, word: "15th Amendment", def: "Prohibited the government from denying people the right to vote based on race or color; it was meant to protect Black men's voting rights.", ex: "Allowing Black men to legally cast a ballot for the first time in US History." },
+            { unit: 5, id: 75, word: "19th Amendment", def: "Granted women the right to vote in 1920 after decades of activism and protest by women's suffrage advocates.", ex: "Women finally being able to walk into a voting booth and cast their ballots in the 1920 presidential election." },
+            { unit: 5, id: 76, word: "24th Amendment", def: "Abolished poll taxes (fees people had to pay to vote) in federal elections, which had been used to prevent poor people from voting.", ex: "Making it highly illegal for a voting location to charge someone a $5 fee just to hand in a ballot." },
+            { unit: 5, id: 77, word: "26th Amendment", def: "Lowered the voting age to 18 years old, allowing more young people to participate in elections.", ex: "Allowing 18-year-old high school seniors to vote for the next President." },
+            { unit: 5, id: 78, word: "Emancipation Proclamation", def: "An executive order issued by President Abraham Lincoln in 1863 that declared all enslaved people in Confederate states to be free.", ex: "President Lincoln freeing enslaved people in the South during the middle of the Civil War." },
+            { unit: 5, id: 79, word: "Civil Rights Act of 1964", def: "A federal law that made it illegal to discriminate against people based on race, color, religion, sex, or national origin in public places and employment.", ex: "Making it illegal for a restaurant to refuse to serve someone because of their skin color." },
+            { unit: 5, id: 80, word: "Voting Rights Act of 1965", def: "A federal law that protected the voting rights of Black Americans and eliminated unfair voting requirements that had been used to stop them from voting.", ex: "Making unfair literacy (reading) tests illegal at voting booths." },
+            { unit: 5, id: 81, word: "Civil Rights Act of 1968", def: "A federal law that made it illegal to discriminate in housing and also protected people's rights during protests and civil unrest.", ex: "Making it a crime for a landlord to refuse to rent an apartment to a family because of their race." },
+            { unit: 5, id: 82, word: "Abraham Lincoln", def: "The 16th President of the United States who led the country during the Civil War and issued the Emancipation Proclamation to free enslaved people.", ex: "The President who ended slavery and worked to keep the United States from splitting apart." },
+            { unit: 5, id: 83, word: "Martin Luther King Jr.", def: "A civil rights leader who fought for racial equality and justice through nonviolent protest and is famous for his 'I Have a Dream' speech.", ex: "The man who led the peaceful March on Washington to demand equal rights for all races." },
+            { unit: 5, id: 84, word: "Due Process", def: "The government must treat you fairly and follow all legal steps before taking away your life, liberty, or property.", ex: "If you get arrested, the police must read you your rights, and you get a fair trial with a lawyer." },
+            { unit: 5, id: 85, word: "Suffrage", def: "The right to vote in political elections.", ex: "The 19th Amendment finally gave women suffrage in 1920." },
+
+            // UNIT 6: The Justice System & Supreme Court Cases
+            { unit: 6, id: 86, word: "Impeachment", def: "Formally accusing a high-level government official of a serious crime.", ex: "A President is impeached by the House, and then goes on trial in the Senate to see if they should be removed." },
+            { unit: 6, id: 87, word: "Judicial Review", def: "The power of the Supreme Court to look at a law and declare it 'Unconstitutional' (illegal).", ex: "Congress passes a law banning people from wearing green, but the Supreme Court strikes it down because it violates free expression." },
+            { unit: 6, id: 88, word: "Precedent", def: "A past court decision that judges use to help them decide future, similar cases.", ex: "Because the Supreme Court ruled in 1954 that segregating schools was illegal, all future judges must follow that rule." },
+            { unit: 6, id: 89, word: "Criminal Law", def: "Laws about crimes where someone can go to jail for breaking them.", ex: "Robbing a bank, stealing a car, or assault." },
+            { unit: 6, id: 90, word: "Civil Law", def: "Laws about disputes between people, usually involving money or property. Nobody goes to jail.", ex: "Suing your neighbor because their dog destroyed your expensive fence." },
+            { unit: 6, id: 91, word: "Felony", def: "A major, serious crime.", ex: "Murder, kidnapping, or grand theft." },
+            { unit: 6, id: 92, word: "Misdemeanor", def: "A minor, less serious crime.", ex: "Shoplifting a candy bar, trespassing, or a speeding ticket." },
+            { unit: 6, id: 93, word: "Subpoena", def: "An official court document forcing you to show up to court to testify or provide evidence.", ex: "If you witness a car crash, you might get a subpoena forcing you to tell the judge what you saw." },
+            { unit: 6, id: 94, word: "Marbury v. Madison", def: "A 1803 Supreme Court case that established judicial review, giving the Supreme Court the power to decide if laws are constitutional.", ex: "The very first time the Supreme Court ever struck down a law for being illegal under the Constitution." },
+            { unit: 6, id: 95, word: "Dred Scott v. Sandford", def: "An 1857 Supreme Court case that ruled enslaved people had no rights as citizens, a decision that increased tensions before the Civil War.", ex: "A terrible historical ruling that claimed a Black man was property, heavily contributing to the Civil War." },
+            { unit: 6, id: 96, word: "Plessy v. Ferguson", def: "An 1896 Supreme Court case that allowed 'separate but equal' facilities for different races, which led to decades of racial segregation.", ex: "The ruling that legally allowed states to have separate water fountains and schools for white and black citizens." },
+            { unit: 6, id: 97, word: "Brown v. Board of Education", def: "A 1954 Supreme Court case that ruled 'separate but equal' schools were unconstitutional and ordered schools to desegregate.", ex: "The landmark ruling that finally forced public schools to allow black and white students to learn together." },
+            { unit: 6, id: 98, word: "Gideon v. Wainwright", def: "A 1963 Supreme Court case that ruled everyone has the right to a lawyer in criminal cases, even if they cannot afford one.", ex: "Clarence Gideon proving that if you are too poor to hire an attorney, the government must provide one for you." },
+            { unit: 6, id: 99, word: "Miranda v. Arizona", def: "A 1966 Supreme Court case that required police to inform suspects of their rights before questioning them.", ex: "The reason police officers must say 'You have the right to remain silent' when they arrest someone." },
+            { unit: 6, id: 100, word: "In Re Gault", def: "A 1967 Supreme Court case that extended due process rights to juveniles in the court system, protecting young people's legal rights.", ex: "Proving that a 15-year-old gets the right to have a lawyer and a fair trial, just like an adult would." },
+            { unit: 6, id: 101, word: "United States v. Nixon", def: "A 1974 Supreme Court case that ruled the President was not above the law and had to turn over evidence in the Watergate scandal.", ex: "The Supreme Court forcing the President to hand over secret tape recordings to criminal investigators." },
+            { unit: 6, id: 102, word: "Hazelwood v. Kuhlmeier", def: "A 1988 Supreme Court case that allowed schools to censor student newspapers if they could show a valid educational reason.", ex: "A principal being legally allowed to delete specific articles from a high school student newspaper." },
+            { unit: 6, id: 103, word: "Richard Nixon", def: "The 37th President of the United States who resigned in 1974 due to the Watergate scandal involving abuse of presidential power.", ex: "The only US President to ever quit his job to avoid being impeached and removed." },
+            { unit: 6, id: 104, word: "Jury", def: "A group of ordinary citizens who listen to evidence in a court case and decide whether a defendant is guilty or not guilty in a criminal case.", ex: "12 everyday people sitting in a courtroom deciding if someone actually robbed a bank." },
+            { unit: 6, id: 105, word: "Jury Trial", def: "A trial in which a jury of citizens listens to evidence and decides the outcome, rather than a judge making the decision alone.", ex: "A courtroom trial where your peers judge you, which is a right guaranteed by the 6th Amendment." },
+            { unit: 6, id: 106, word: "Grand Jury", def: "A group of citizens who review evidence to decide whether there is enough proof to charge someone with a crime.", ex: "23 people deciding if the police actually have enough proof to officially arrest someone for a major crime." },
+            { unit: 6, id: 107, word: "Judge", def: "A government official who oversees trials, makes sure the law is followed, and decides cases or sentences in court.", ex: "The person sitting at the front in the black robe who makes sure the lawyers follow the rules in court." },
+            { unit: 6, id: 108, word: "Jurisdiction", def: "The official power to make legal decisions and judgments in a specific geographic area.", ex: "A Florida Highway Patrol officer has the power to give tickets in Florida, but they have no power in Georgia." },
+            { unit: 6, id: 109, word: "Double Jeopardy", def: "You cannot be put on trial for the exact same crime twice after being found 'not guilty.'", ex: "If a jury finds you innocent of a robbery, the police can't arrest you the next day and try again for that exact same robbery." },
+
+            // UNIT 7: Politics, State Government, & Foreign Policy
+            { unit: 7, id: 110, word: "Veto", def: "When the President rejects a bill passed by Congress.", ex: "Congress passes a law to ban TikTok, but the President says 'No' and vetoes it." },
+            { unit: 7, id: 111, word: "Political Party", def: "A group of people with similar ideas about how the government should be run.", ex: "The Democratic Party and the Republican Party." },
+            { unit: 7, id: 112, word: "Platform", def: "A political party’s list of beliefs and promises.", ex: "A party's platform might include promises to lower taxes, protect the environment, and build roads." },
+            { unit: 7, id: 113, word: "Incumbent", def: "The person who already holds the office and is running for re-election.", ex: "If the current Mayor runs for Mayor again, they are the incumbent." },
+            { unit: 7, id: 114, word: "Interest Group", def: "A group of people who care deeply about ONE specific issue and try to influence lawmakers.", ex: "An organization that fights to protect animals tries to get Congress to pass animal rescue laws." },
+            { unit: 7, id: 115, word: "Propaganda", def: "Media designed to manipulate your emotions and make you vote a certain way.", ex: "A commercial showing scary music and a candidate looking evil to make you vote against them." },
+            { unit: 7, id: 116, word: "Electoral College", def: "The group of 538 people (electors) who actually cast the official votes for the President.", ex: "A candidate needs to win 270 'Electoral Votes' by winning individual states, not just the most total votes nationwide." },
+            { unit: 7, id: 117, word: "Domestic Policy", def: "The government's plan to deal with issues INSIDE the United States.", ex: "Passing laws about American schools, fixing U.S. highways, or funding American hospitals." },
+            { unit: 7, id: 118, word: "Foreign Policy", def: "The government's plan to deal with issues OUTSIDE the United States (other countries).", ex: "Sending money to help earthquake victims in Mexico or signing a peace agreement with Japan." },
+            { unit: 7, id: 119, word: "Treaty", def: "A formal, official agreement between two or more countries.", ex: "The U.S. and Canada sign a treaty agreeing not to fish in each other's waters." },
+            { unit: 7, id: 120, word: "Ambassador", def: "An official sent by a country to live in another country and represent their government.", ex: "The U.S. Ambassador to France lives in Paris and helps the U.S. and French governments talk to each other." },
+            { unit: 7, id: 121, word: "Republicans", def: "Members of one of the two major political parties in the United States, generally supporting conservative policies and limited government.", ex: "The political party represented by an Elephant, often favoring lower taxes and fewer business rules." },
+            { unit: 7, id: 122, word: "Democrats", def: "Members of one of the two major political parties in the United States, generally supporting progressive policies and more government involvement in solving problems.", ex: "The political party represented by a Donkey, often favoring government programs to help people." },
+            { unit: 7, id: 123, word: "Florida Constitution", def: "The document that outlines the structure of Florida's state government and protects the rights of Florida citizens.", ex: "The state rulebook that explains how the Governor of Florida gets elected and how state courts operate." },
+            { unit: 7, id: 124, word: "Comprehensive Anti-Apartheid Act of 1986", def: "A U.S. law that imposed sanctions (penalties) on South Africa to pressure the government to end its system of racial separation.", ex: "The US refusing to trade goods with South Africa until they stopped treating Black citizens unfairly." }
+        ];
+
+        let currentData = [];
+        let score = 0;
+        let totalWords = 0;
+        let mistakes = 0; 
+        
+        // Utility: Shuffle Array
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Filter the words based on the Dropdown selection
+        function filterData() {
+            const selectedUnit = document.getElementById('unitSelect').value;
+            if (selectedUnit === "ALL") {
+                currentData = [...vocabData];
+            } else {
+                currentData = vocabData.filter(item => item.unit == selectedUnit);
+            }
+            totalWords = currentData.length;
+            document.getElementById('totalDisplay').innerText = totalWords;
+        }
+
+        // Reset and Scramble the Game
+        function resetGame() {
+            score = 0;
+            mistakes = 0;
+            
+            document.getElementById('scoreDisplay').innerText = score;
+            document.getElementById('message').innerText = "Drag the words on the left to their matching definitions on the right!";
+            document.getElementById('message').style.color = "#333";
+            document.getElementById('downloadBtn').style.display = "none";
+            
+            filterData();
+            initGame();
+        }
+
+        // Initialize Game 
+        function initGame() {
+            const wordsColumn = document.getElementById('words-column');
+            const defsColumn = document.getElementById('defs-column');
+
+            wordsColumn.innerHTML = '<h2>Vocab Words</h2>';
+            defsColumn.innerHTML = '<h2>Definitions & Examples</h2>';
+
+            const shuffledWords = shuffle([...currentData]);
+            const shuffledDefs = shuffle([...currentData]);
+
+            // Render Words
+            shuffledWords.forEach(item => {
+                const wordElement = document.createElement('div');
+                wordElement.classList.add('draggable-word');
+                wordElement.draggable = true;
+                wordElement.id = `word-${item.id}`;
+                wordElement.dataset.id = item.id;
+                wordElement.innerText = item.word;
+
+                wordElement.addEventListener('dragstart', dragStart);
+                wordElement.addEventListener('dragend', dragEnd);
+
+                wordsColumn.appendChild(wordElement);
+            });
+
+            // Render Drop Zones (with Definitions and Examples)
+            shuffledDefs.forEach(item => {
+                const dropZone = document.createElement('div');
+                dropZone.classList.add('drop-zone');
+                dropZone.dataset.id = item.id;
+                
+                // Add Definition
+                const defText = document.createElement('p');
+                defText.innerHTML = `<strong>Definition:</strong> ${item.def}`;
+                dropZone.appendChild(defText);
+
+                // Add Example
+                const exText = document.createElement('p');
+                exText.classList.add('example-text');
+                exText.innerHTML = `<strong>Example:</strong> ${item.ex}`;
+                dropZone.appendChild(exText);
+
+                dropZone.addEventListener('dragover', dragOver);
+                dropZone.addEventListener('dragenter', dragEnter);
+                dropZone.addEventListener('dragleave', dragLeave);
+                dropZone.addEventListener('drop', drop);
+
+                defsColumn.appendChild(dropZone);
+            });
+        }
+
+        // Drag & Drop Functions
+        function dragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.id);
+            setTimeout(() => e.target.classList.add('dragging'), 0);
+        }
+
+        function dragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function dragOver(e) {
+            e.preventDefault(); 
+        }
+
+        function dragEnter(e) {
+            e.preventDefault();
+            if (!e.target.classList.contains('correct')) {
+                e.target.classList.add('hover');
+            }
+        }
+
+        function dragLeave(e) {
+            e.target.classList.remove('hover');
+            e.target.classList.remove('incorrect');
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            const draggedId = e.dataTransfer.getData('text/plain');
+            const dropZone = e.target.closest('.drop-zone'); 
+            
+            dropZone.classList.remove('hover');
+
+            if (dropZone.classList.contains('correct')) return;
+
+            const targetId = dropZone.dataset.id;
+
+            if (draggedId === targetId) {
+                // Correct Match
+                const draggedElement = document.querySelector(`.draggable-word[data-id='${draggedId}']`);
+                
+                dropZone.insertBefore(draggedElement, dropZone.firstChild);
+                
+                dropZone.classList.add('correct');
+                dropZone.classList.remove('incorrect');
+                draggedElement.draggable = false; 
+                draggedElement.style.cursor = "default";
+                draggedElement.style.margin = "0 0 10px 0";
+
+                updateScore();
+            } else {
+                // Incorrect Match
+                dropZone.classList.add('incorrect');
+                mistakes++;
+                setTimeout(() => dropZone.classList.remove('incorrect'), 800);
+            }
+        }
+
+        function updateScore() {
+            score++;
+            document.getElementById('scoreDisplay').innerText = score;
+
+            if (score === totalWords) {
+                document.getElementById('message').innerText = "🎉 Congratulations! You mastered all the words!";
+                document.getElementById('message').style.color = "var(--success-green)";
+                document.getElementById('downloadBtn').style.display = "block";
+            }
+        }
+
+        // Report Generation and Download
+        function downloadReport() {
+            const studentName = prompt("Awesome job! Enter your name for the report:");
+            if (!studentName) return; 
+
+            const selectedUnitText = document.getElementById('unitSelect').options[document.getElementById('unitSelect').selectedIndex].text;
+            const date = new Date().toLocaleDateString();
+            
+            let reportText = `======================================\n`;
+            reportText += `       CIVICS VOCABULARY REPORT       \n`;
+            reportText += `======================================\n\n`;
+            reportText += `Student Name : ${studentName}\n`;
+            reportText += `Date         : ${date}\n`;
+            reportText += `Section      : ${selectedUnitText}\n`;
+            reportText += `Score        : ${score} / ${totalWords} (100%)\n`;
+            reportText += `Mistakes made: ${mistakes} attempt(s)\n\n`;
+            reportText += `--- MASTERED VOCABULARY ---\n\n`;
+
+            const sortedData = [...currentData].sort((a, b) => a.word.localeCompare(b.word));
+
+            sortedData.forEach((item, index) => {
+                reportText += `${index + 1}. ${item.word.toUpperCase()}\n`;
+                reportText += `   Definition: ${item.def}\n`;
+                reportText += `   Example   : ${item.ex}\n\n`;
+            });
+
+            reportText += `======================================\n`;
+            reportText += `End of Report\n`;
+
+            const blob = new Blob([reportText], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${studentName.replace(/\s+/g, '_')}_Civics_Report.txt`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Run game initialization on load
+        window.onload = resetGame;
+
+    </script>
+</body>
+</html>
