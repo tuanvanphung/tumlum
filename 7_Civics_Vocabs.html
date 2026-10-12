@@ -48,6 +48,27 @@
             gap: 15px;
         }
 
+        /* Combined Score and Date/Time on the same line */
+        .score-time-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .date-time {
+            font-size: 0.95rem;
+            color: #7f8c8d;
+            font-weight: 500;
+            border-left: 2px solid #bdc3c7;
+            padding-left: 15px;
+        }
+
+        #message {
+            font-size: 1.05rem;
+            color: var(--success-green);
+            font-weight: bold;
+        }
+
         .controls-container {
             display: flex;
             align-items: center;
@@ -211,8 +232,12 @@
     <h1>🏛️ Ultimate Civics Vocab Master</h1>
     
     <div class="header-panel">
-        <div>Score: <span id="scoreDisplay" style="color: var(--light-blue); font-size: 1.5rem;">0</span> / <span id="totalDisplay">0</span></div>
-        <div id="message">Drag the words on the left to their matching definitions on the right!</div>
+        <div class="score-time-container">
+            <div>Score: <span id="scoreDisplay" style="color: var(--light-blue); font-size: 1.5rem;">0</span> / <span id="totalDisplay">0</span></div>
+            <div class="date-time" id="dateTimeDisplay">--</div>
+        </div>
+
+        <div id="message"></div>
         
         <div class="controls-container">
             <select id="unitSelect" onchange="resetGame()">
@@ -284,7 +309,7 @@
             { unit: 3, id: 39, word: "Anti-Federalist Papers", def: "Essays written by people who opposed the U.S. Constitution because they feared a strong central government would take away individual freedoms.", ex: "Writers arguing that the new Constitution was dangerous unless a Bill of Rights was added to protect citizens." },
             { unit: 3, id: 40, word: "U.S. Constitution", def: "The document written in 1787 that outlines the structure of the U.S. government and defines the rights and responsibilities of citizens.", ex: "The ultimate rulebook that sets up our 3 branches of government (Legislative, Executive, Judicial)." },
             { unit: 3, id: 41, word: "We the People", def: "The opening words of the U.S. Constitution, stating that the government's power comes from the people, not from a king or ruler.", ex: "The first three giant words written on the US Constitution, proving the citizens are in charge." },
-            { unit: 3, id: 42, word: "Preamble", def: "The introduction to the Constitution that lists six purposes of government: forming a more perfect union, establishing justice, ensuring domestic peace, providing defense, promoting general welfare, and securing liberty.", ex: "The famous opening paragraph that explains the goal of the document is to 'form a more perfect Union.'" },
+            { unit: 4, id: 42, word: "Preamble", def: "The introduction to the Constitution that lists six purposes of government: forming a more perfect union, establishing justice, ensuring domestic peace, providing defense, promoting general welfare, and securing liberty.", ex: "The famous opening paragraph that explains the goal of the document is to 'form a more perfect Union.'" },
             { unit: 3, id: 43, word: "Separation of Powers", def: "The principle that government power is divided among three branches—legislative, executive, and judicial—so no single branch becomes too powerful.", ex: "Congress makes the laws, the President enforces the laws, and the Supreme Court judges the laws." },
             { unit: 3, id: 44, word: "Checks and Balances", def: "A system where each branch of government has the power to limit the actions of the other branches, preventing any one branch from becoming too powerful.", ex: "Congress passes a law, but the President uses a 'Veto' to block it from happening." },
             { unit: 3, id: 45, word: "Federalists", def: "People who supported the U.S. Constitution and wanted a strong central government with the power to tax and regulate trade.", ex: "Alexander Hamilton and James Madison, who wanted the national government to be powerful." },
@@ -382,6 +407,25 @@
         let totalWords = 0;
         let mistakes = 0; 
         
+        // Live Date & Time Clock
+        function updateDateTime() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString(undefined, { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
+            const timeStr = now.toLocaleTimeString(undefined, { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('dateTimeDisplay').innerText = `📅 ${dateStr} | ⏰ ${timeStr}`;
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
         // Utility: Shuffle Array
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -409,8 +453,7 @@
             mistakes = 0;
             
             document.getElementById('scoreDisplay').innerText = score;
-            document.getElementById('message').innerText = "Drag the words on the left to their matching definitions on the right!";
-            document.getElementById('message').style.color = "#333";
+            document.getElementById('message').innerText = "";
             document.getElementById('downloadBtn').style.display = "none";
             
             filterData();
@@ -533,7 +576,6 @@
 
             if (score === totalWords) {
                 document.getElementById('message').innerText = "🎉 Congratulations! You mastered all the words!";
-                document.getElementById('message').style.color = "var(--success-green)";
                 document.getElementById('downloadBtn').style.display = "block";
             }
         }
@@ -544,13 +586,13 @@
             if (!studentName) return; 
 
             const selectedUnitText = document.getElementById('unitSelect').options[document.getElementById('unitSelect').selectedIndex].text;
-            const date = new Date().toLocaleDateString();
+            const date = new Date().toLocaleString();
             
             let reportText = `======================================\n`;
             reportText += `       CIVICS VOCABULARY REPORT       \n`;
             reportText += `======================================\n\n`;
             reportText += `Student Name : ${studentName}\n`;
-            reportText += `Date         : ${date}\n`;
+            reportText += `Date & Time  : ${date}\n`;
             reportText += `Section      : ${selectedUnitText}\n`;
             reportText += `Score        : ${score} / ${totalWords} (100%)\n`;
             reportText += `Mistakes made: ${mistakes} attempt(s)\n\n`;
