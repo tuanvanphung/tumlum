@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civics Full Scenario Challenge: Drag & Drop</title>
+    <style>
+        :root {
+            --primary-blue: #2c3e50;
+            --light-blue: #3498db;
+            --success-green: #2ecc71;
+            --error-red: #e74c3c;
+            --bg-color: #ecf0f1;
+            --highlight: #f39c12;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            
+            /* ANTI-COPY CSS: Prevents text highlighting */
+            -webkit-user-select: none; 
+            -ms-user-select: none; 
+            user-select: none; 
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-blue);
+            margin-bottom: 5px;
+        }
+
+        .header-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .score-time-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .date-time {
+            font-size: 0.95rem;
+            color: #7f8c8d;
+            font-weight: 500;
+            border-left: 2px solid #bdc3c7;
+            padding-left: 15px;
+        }
+
+        #message {
+            font-size: 1.05rem;
+            color: var(--success-green);
+            font-weight: bold;
+        }
+
+        .controls-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        select {
+            padding: 10px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border-radius: 5px;
+            border: 2px solid var(--primary-blue);
+            cursor: pointer;
+            background-color: #fff;
+            color: var(--primary-blue);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--highlight);
+        }
+
+        button {
+            padding: 10px 18px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.3s;
+        }
+
+        #resetBtn {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        #resetBtn:hover {
+            background-color: #1a252f;
+        }
+
+        #downloadBtn {
+            display: none;
+            background-color: var(--success-green);
+            color: white;
+        }
+
+        #downloadBtn:hover {
+            background-color: #27ae60;
+        }
+
+        .game-board {
+            display: flex;
+            gap: 20px;
+            height: 73vh;
+        }
+
+        .column {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            border: 2px solid #bdc3c7;
+            scroll-behavior: smooth;
+        }
+
+        #words-column {
+            flex: 0 0 280px; 
+        }
+
+        #scenarios-column {
+            flex: 1; 
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            color: var(--primary-blue);
+            border-bottom: 2px solid var(--light-blue);
+            padding-bottom: 10px;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .draggable-word {
+            background-color: var(--light-blue);
+            color: white;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            cursor: grab;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            transition: transform 0.2s, background 0.2s;
+        }
+        
+        .draggable-word:active {
+            cursor: grabbing;
+        }
+
+        .draggable-word.dragging {
+            opacity: 0.5;
+        }
+
+        .drop-zone {
+            background-color: #fdfefe;
+            border: 2px dashed #95a5a6;
+            padding: 16px;
+            margin: 14px 0;
+            border-radius: 8px;
+            min-height: 80px;
+            transition: background 0.3s, border 0.3s;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .scenario-tag {
+            display: inline-block;
+            background: #e2e8f0;
+            color: #475569;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 4px;
+            width: fit-content;
+            pointer-events: none;
+        }
+
+        .drop-zone p {
+            margin: 0;
+            pointer-events: none; 
+            font-size: 0.98rem;
+            line-height: 1.5;
+            color: #2c3e50;
+        }
+
+        .drop-zone.hover {
+            background-color: #e8f4f8;
+            border-color: var(--light-blue);
+        }
+
+        .drop-zone.correct {
+            background-color: #eafaf1;
+            border: 2px solid var(--success-green);
+        }
+
+        .drop-zone.incorrect {
+            background-color: #fceae9;
+            border: 2px dashed var(--error-red);
+        }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb { background: #bdc3c7; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #95a5a6; }
+    </style>
+</head>
+<body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
+
+    <h1>🏛️ Civics Comprehensive Scenario Challenge</h1>
+    
+    <div class="header-panel">
+        <div class="score-time-container">
+            <div>Score: <span id="scoreDisplay" style="color: var(--light-blue); font-size: 1.5rem;">0</span> / <span id="totalDisplay">0</span></div>
+            <div class="date-time" id="dateTimeDisplay">--</div>
+        </div>
+
+        <div id="message"></div>
+        
+        <div class="controls-container">
+            <select id="unitSelect" onchange="resetGame()">
+                <option value="1">Unit 1: Roots of Democracy (16)</option>
+                <option value="2">Unit 2: Road to Independence (16)</option>
+                <option value="3">Unit 3: Creating the Constitution (17)</option>
+                <option value="4">Unit 4: Citizenship & Civic Life (11)</option>
+                <option value="5">Unit 5: Constitutional Amendments (25)</option>
+                <option value="6">Unit 6: Justice System & Supreme Court (24)</option>
+                <option value="7">Unit 7: Politics, State Gov & Foreign Policy (15)</option>
+                <option value="ALL">🌟 Master Challenge (All 124 Words)</option>
+            </select>
+            <button id="resetBtn" onclick="resetGame()">🔀 Scramble</button>
+            <button id="downloadBtn" onclick="downloadReport()">📥 Download Report</button>
+        </div>
+    </div>
+
+    <div class="game-board">
+        <div class="column" id="words-column"></div>
+        <div class="column" id="scenarios-column"></div>
+    </div>
+
+    <script>
+        // COMPLETE DATASET: 124 SCENARIOS (3 SENTENCES EACH)
+        const scenarioData = [
+            // UNIT 1: Roots of Democracy (16 items)
+            { unit: 1, id: 1, word: "Magna Carta", scenario: "English nobles cornered their ruler in 1215 because he imposed unfair taxes and jailed people without trials. They forced him to sign a charter admitting that royal authority has legal boundaries. This historic agreement established that even a monarch must obey the law." },
+            { unit: 1, id: 2, word: "Mayflower Compact", scenario: "Before stepping ashore in 1620, travelers realized they had no legal government or charter in their new territory. Every adult passenger signed a document promising to make just laws together for the good of the colony. This covenant established self-government based on mutual consent." },
+            { unit: 1, id: 3, word: "English Bill of Rights", scenario: "In 1689, the English legislature forced the monarchy to agree to strict limits on royal authority. The document protected citizens from cruel punishments and guaranteed free elections to lawmakers. It served as a direct model for the protections later written into the American Bill of Rights." },
+            { unit: 1, id: 4, word: "Parliament", scenario: "The British national legislature is made up of elected representatives who debate and vote on laws for the whole country. Colonists grew furious when this overseas body taxed them without giving them an elected voice. It represents the legislative branch of Great Britain." },
+            { unit: 1, id: 5, word: "Ancient Greece (Athens)", scenario: "In this ancient Mediterranean city-state, eligible citizens gathered in a large public assembly to vote on policies themselves. Instead of choosing representatives to decide issues for them, every voter had a direct say on laws and warfare. This civilization gave the modern world the concept of direct democracy." },
+            { unit: 1, id: 6, word: "Ancient Rome", scenario: "As this ancient Mediterranean civilization expanded, it became too populous for every citizen to attend every legislative vote. The people instead elected senators and magistrates to represent them and manage public affairs. This system introduced the model of a representative democracy or republic." },
+            { unit: 1, id: 7, word: "Enlightenment", scenario: "During the 1700s, European thinkers began using reason, science, and logic to challenge the absolute power of kings. Philosophers argued that government authority should protect individual liberties rather than serve divine monarchs. This philosophical movement deeply influenced the American Founders." },
+            { unit: 1, id: 8, word: "Natural Rights", scenario: "John Locke argued that every human being is born with fundamental freedoms granted by nature rather than by a government. He identified these basic protections as life, liberty, and property. These inherent liberties cannot be justly taken away by any king or ruler." },
+            { unit: 1, id: 9, word: "Social Contract", scenario: "Citizens in a community agree to obey laws and pay taxes in exchange for protection from the government. If the governing authorities become oppressive and violate their duties, the people have a right to replace them. This mutual agreement between citizens and rulers is a core political theory." },
+            { unit: 1, id: 10, word: "Limited Government", scenario: "A constitution places strict legal restrictions on what politicians and police officers are allowed to do. Leaders cannot simply do whatever they desire because written laws restrict their power. This foundational concept prevents a democracy from descending into tyranny." },
+            { unit: 1, id: 11, word: "Rule of Law", scenario: "A wealthy senator is pulled over for speeding and reckless driving late at night. Even though he writes the state statutes, the patrol officer writes him a citation because nobody is above the law. This principle guarantees that legal rules apply equally to everyone." },
+            { unit: 1, id: 12, word: "John Locke", scenario: "This 17th-century English philosopher argued that governments exist solely to protect individual freedom and property. He asserted that if a ruler fails to protect those inherent liberties, the people may overthrow the government. His writings heavily inspired Thomas Jefferson when drafting the Declaration of Independence." },
+            { unit: 1, id: 13, word: "Baron de Montesquieu", scenario: "This French Enlightenment thinker warned that combining all governing authority into one person leads directly to tyranny. He proposed splitting government into separate lawmaking, law-enforcing, and judging branches. His ideas led directly to the separation of powers in the U.S. Constitution." },
+            { unit: 1, id: 14, word: "King John", scenario: "This tyrannical 13th-century English monarch heavily taxed his subjects and confiscated lands without legal justification. Angry barons confronted him on the battlefield and forced him to sign a historic charter curbing his abuses. His oppressive reign resulted in the signing of the Magna Carta in 1215." },
+            { unit: 1, id: 15, word: "English Nobles/Barons", scenario: "These wealthy landowners in medieval England grew furious over oppressive taxes and arbitrary arrests by the crown. They rebelled and forced the king to sign a written charter recognizing their legal rights and trial protections. Their historic stand placed the first legal limits on English royal authority." },
+            { unit: 1, id: 16, word: "Pilgrims", scenario: "This religious group sailed across the Atlantic Ocean aboard the Mayflower in 1620 to escape persecution in England. Before establishing Plymouth Colony in Massachusetts, they signed an agreement pledging to govern themselves through fair laws. They are famous for creating the first framework of self-rule in New England." },
+
+            // UNIT 2: Road to Independence (16 items)
+            { unit: 2, id: 17, word: "French and Indian War", scenario: "Britain and France fought a costly military conflict from 1754 to 1763 for control of North American territory. Although Britain emerged victorious, the campaign left the royal treasury burdened with massive financial debts. To recover these funds, the British government began imposing new taxes on the American colonies." },
+            { unit: 2, id: 18, word: "Stamp Act", scenario: "In 1765, Parliament passed a statute requiring colonists to pay a fee on every printed paper, legal document, and newspaper they purchased. Colonists erupted in outrage because they had no elected representatives in the legislature that enacted the tax. This controversial law sparked the famous rallying cry of 'no taxation without representation.'" },
+            { unit: 2, id: 19, word: "Quartering Act", scenario: "British authorities ordered colonists to provide housing, bedding, and meals to royal soldiers stationed in American towns. Homeowners were legally prohibited from turning away troops who demanded shelter in their private lodgings. This hated law directly prompted the Founders to later add the Third Amendment to the Constitution." },
+            { unit: 2, id: 20, word: "Declaratory Act", scenario: "After colonial boycotts forced Britain to repeal a tax on paper goods in 1766, Parliament immediately passed another statute asserting full authority over the colonies. The law declared that the British crown had absolute power to legislate for the colonies in all cases whatsoever. Colonists viewed this aggressive assertion as a direct threat to their local self-government." },
+            { unit: 2, id: 21, word: "Townshend Acts", scenario: "In 1767, Parliament enacted duties on various British manufactured goods imported into colonial harbors, including glass, lead, paint, paper, and tea. Colonists responded with widespread consumer boycotts and street protests against the imported duties. The growing friction eventually led British authorities to dispatch military regiments to occupy Boston." },
+            { unit: 2, id: 22, word: "Tea Act", scenario: "A 1773 British law granted a struggling corporate monopoly the exclusive privilege to sell discounted beverages directly to the colonies. Even though the product was cheaper, colonial merchants were furious at being bypassed by royal favoritism and untaxed competition. This legislation led directly to the Sons of Liberty boarding ships and dumping the cargo into Boston Harbor." },
+            { unit: 2, id: 23, word: "Intolerable Acts", scenario: "To punish Boston after the destruction of commercial tea, Parliament shut down the city's seaport and banned regular town meetings. British military officers were given martial authority over Massachusetts and troops were quartered in private buildings. Colonists found these punitive statutes so oppressive that they convened the First Continental Congress to resist them." },
+            { unit: 2, id: 24, word: "Common Sense", scenario: "In early 1776, a newly published pamphlet argued in plain, forceful language that an island had no right to rule an entire continent. The author urged ordinary Americans to break away from an abusive monarch and establish an independent republic. The runaway bestseller transformed public opinion across the colonies in favor of independence." },
+            { unit: 2, id: 25, word: "Declaration of Independence", scenario: "On July 4, 1776, representatives from the thirteen American colonies officially approved a document dissolving their political bonds with Great Britain. Written primarily by Thomas Jefferson, the text announced that all people possess unalienable rights to life, liberty, and the pursuit of happiness. It announced to the world that the colonies were now free and sovereign states." },
+            { unit: 2, id: 26, word: "DOI Grievances", scenario: "A large section of America's founding proclamation detailed twenty-seven formal complaints against the conduct of the British monarch. The complaints included imposing taxes without colonial consent, depriving citizens of trial by jury, and quartering troops among civilians. This historical catalogue justified the revolutionary decision to overthrow royal authority." },
+            { unit: 2, id: 27, word: "Right of Resistance", scenario: "Enlightenment philosophers taught that when a government repeatedly violates human rights and ignores legal boundaries, citizens are justified in fighting back. Colonists relied on this foundational belief when they chose to rebel against King George III's tyrannical administration. It affirms that people may alter or abolish an unjust government." },
+            { unit: 2, id: 28, word: "Militia", scenario: "During the early days of the Revolution, towns organized armed volunteer forces made up of local shopkeepers, farmers, and tradesmen. These civilian soldiers assembled on village greens with their own firearms to repel British troops at Lexington and Concord. They formed the local defense networks that supported the Continental Army." },
+            { unit: 2, id: 29, word: "Thomas Paine", scenario: "This radical English-born writer arrived in Philadelphia and used plain, persuasive prose to champion American freedom. His 1776 pamphlet inspired thousands of colonists to reject monarchy and demand an independent democratic republic. He is remembered as one of the most influential political writers of the American Revolution." },
+            { unit: 2, id: 30, word: "Thomas Jefferson", scenario: "This Virginia delegate was chosen by the Continental Congress to compose the formal document announcing America's separation from Britain. He drew upon John Locke's philosophy to articulate that governments derive their just powers from the consent of the governed. He later served as the nation's third President." },
+            { unit: 2, id: 31, word: "King George III", scenario: "This British monarch rejected colonial petitions for conciliation and declared the American colonies to be in open rebellion. The Declaration of Independence characterized his administration as an absolute tyranny over the states. He was the royal ruler whom the American revolutionaries fought against." },
+            { unit: 2, id: 32, word: "George Washington", scenario: "This Virginia planter was appointed commander-in-chief of the Continental Army during the Revolutionary War. Through strategic resilience and leadership, he held the revolutionary forces together and secured victory over Great Britain. He later presided over the Constitutional Convention and became the first President of the United States." },
+
+            // UNIT 3: Creating the Constitution (17 items)
+            { unit: 3, id: 33, word: "Articles of Confederation", scenario: "Drafted during the Revolution, this first national constitution established a loose league of sovereign states with an intentionally weak congress. The national government lacked an executive to enforce laws, courts to resolve disputes, and the power to collect taxes. Its severe structural shortcomings convinced national leaders to convene in Philadelphia to replace it." },
+            { unit: 3, id: 34, word: "AOC Weaknesses", scenario: "Under America's first governing framework, Congress had no power to levy taxes, regulate interstate commerce, or compel states to supply troops. Passing any legislation required the approval of nine states, while amending the document required a unanimous vote of all thirteen. These glaring structural flaws left the national government broke and ineffective." },
+            { unit: 3, id: 35, word: "Debt", scenario: "Following the Revolutionary War, the newly formed United States owed millions of dollars to foreign nations and domestic lenders for war loans. Because the confederation Congress had no authority to collect tax revenues, the national treasury was unable to pay its financial obligations. This fiscal crisis contributed to economic unrest and currency inflation across the states." },
+            { unit: 3, id: 36, word: "Shays' Rebellion", scenario: "In 1786, struggling farmers and war veterans in Massachusetts took up arms to physically shut down county courthouses to halt farm foreclosures. Because the national confederation government had no standing army, it was powerless to intervene and restore order. This alarming armed uprising convinced national leaders that the Articles of Confederation were dangerously weak." },
+            { unit: 3, id: 37, word: "Daniel Shays", scenario: "A decorated veteran of the Revolutionary War returned home to Massachusetts only to face heavy state taxes and crushing private debts. Facing the seizure of his property, he led an armed uprising of desperate farmers to shutter state debt courts. His insurrection highlighted the urgent necessity for a stronger national government." },
+            { unit: 3, id: 38, word: "Federalist Papers", scenario: "To persuade reluctant New York citizens to approve the proposed Constitution, three statesmen wrote eighty-five explanatory essays in regional newspapers. The articles systematically explained how checks and balances, federalism, and separated powers would prevent tyranny. Today, these essays serve as an authoritative guide for interpreting constitutional intent." },
+            { unit: 3, id: 39, word: "Anti-Federalist Papers", scenario: "Opponents of the newly drafted Constitution wrote speeches and articles warning that a centralized national government would swallow up state authority. They argued that giving the national government broad taxing powers and a standing army would endanger individual freedom. Their persistent objections ensured that a Bill of Rights was added to the Constitution." },
+            { unit: 3, id: 40, word: "U.S. Constitution", scenario: "Drafted in Philadelphia in 1787, this supreme legal document established the framework of the modern American government. It divided authority among three branches, defined the balance between federal and state powers, and outlined the rights of citizens. It remains the oldest written national constitution still in active use today." },
+            { unit: 3, id: 41, word: "We the People", scenario: "These famous opening words appear in large calligraphy at the very beginning of the national Constitution. They signal that the government's legitimacy originates from ordinary citizens rather than a monarch or state governments. This phrase establishes the principle of popular sovereignty in American law." },
+            { unit: 3, id: 42, word: "Preamble", scenario: "This introductory paragraph outlines six core objectives of the national government, including forming a more perfect union and providing for the common defense. It announces that the Constitution exists to establish justice, promote the general welfare, and secure liberty for future generations. It serves as the opening mission statement of American constitutional government." },
+            { unit: 3, id: 43, word: "Separation of Powers", scenario: "The federal government divides its functional duties between Congress, the President, and the Supreme Court. The legislative branch enacts statutes, the executive branch administers them, and the judicial branch interprets them. This constitutional design ensures that no single department can amass dictatorial authority." },
+            { unit: 3, id: 44, word: "Checks and Balances", scenario: "While Congress has the authority to pass legislation, the President can veto a bill if he considers it unwise. However, Congress can override that veto with a two-thirds majority vote, while the Supreme Court can invalidate the law if it violates the Constitution. This dynamic interaction allows each branch to restrain the power of the other two." },
+            { unit: 3, id: 45, word: "Federalists", scenario: "Politicians such as Alexander Hamilton and James Madison supported the ratification of the newly drafted 1787 Constitution. They argued that a vigorous national government was essential to manage trade, maintain an army, and preserve national unity. They published persuasive articles defending the constitutional framework." },
+            { unit: 3, id: 46, word: "Anti-Federalists", scenario: "Leaders like Patrick Henry and George Mason vigorously opposed the proposed Constitution because they feared an imperial presidency and central taxation. They insisted that individual liberties would be crushed unless a written catalogue of protected rights was formally attached. Their determined resistance forced the addition of the Bill of Rights." },
+            { unit: 3, id: 47, word: "Federalism", scenario: "In the American governing system, constitutional authority is divided and shared between the national government in Washington and state governments. The federal government controls international trade and national defense, while states regulate local schools and driving licenses. This structural partnership prevents excessive centralization of power." },
+            { unit: 3, id: 48, word: "Supremacy Clause", scenario: "Article VI of the Constitution specifies that federal laws, national treaties, and the Constitution itself are the supreme law of the land. When a state statute directly conflicts with a valid federal statute, the state statute must yield. This legal principle ensures nationwide uniformity for federal laws." },
+            { unit: 3, id: 49, word: "Elastic Clause", scenario: "Article I grants Congress the authority to pass all laws that are necessary and proper for carrying out its enumerated constitutional powers. This flexible provision has enabled the national legislature to regulate modern developments like commercial aviation, cybercrime, and national banking. It allows constitutional authority to stretch to meet changing times." },
+
+            // UNIT 4: Citizenship & Civic Life (11 items)
+            { unit: 4, id: 50, word: "Naturalized Citizen", scenario: "An individual who was born in another country completes all legal residency requirements, passes a background investigation, and takes an oath of loyalty. After meeting these rigorous standards, this person enjoys the full rights, duties, and voting privileges of an American citizen. This term describes a foreign-born person who legally becomes a U.S. citizen." },
+            { unit: 4, id: 51, word: "Permanent Resident", scenario: "A foreign citizen receives official authorization from immigration authorities to reside and work permanently in the United States while holding a green card. Although this person must obey all laws and pay taxes, they cannot vote in federal elections or hold elective office. This status allows individuals to live legally in the country without full citizenship." },
+            { unit: 4, id: 52, word: "Naturalization Process", scenario: "A legal resident applies for citizenship, submits fingerprints, and attends an interview with federal immigration officers. The applicant must demonstrate proficiency in basic English and correctly answer questions on an American civics exam. The final step involves swearing an oath of allegiance to the United States in a federal court." },
+            { unit: 4, id: 53, word: "Alien", scenario: "A person lives within the borders of the United States while retaining formal citizenship in another foreign country. This individual may be in the country temporarily on a travel visa, permanently as a resident, or unlawfully without documentation. This legal term describes any non-citizen residing within national borders." },
+            { unit: 4, id: 54, word: "Immigrant", scenario: "A family packs their belongings and permanently relocates from their homeland to settle down and establish a new life in the United States. They go through official customs channels with the intention of remaining in the country indefinitely. This word describes a person who moves permanently to a new country." },
+            { unit: 4, id: 55, word: "Law of Blood", scenario: "Two American citizens are working as engineers in Japan when their baby daughter is born in a hospital in Tokyo. Even though the child was born on foreign territory, she acquires United States citizenship automatically at birth because of her parents' nationality. This legal principle bases citizenship on parentage rather than geography." },
+            { unit: 4, id: 56, word: "Law of Soil", scenario: "A child is born in an Orlando hospital to two vacationing parents who are foreign citizens holding temporary tourist visas. Under the Fourteenth Amendment, the newborn child is automatically an American citizen because the birth occurred within the physical borders of the nation. This doctrine awards citizenship based on place of birth." },
+            { unit: 4, id: 57, word: "Oath of Allegiance", scenario: "During a formal judicial naturalization ceremony, new citizens raise their right hands and solemnly swear to defend the Constitution against all enemies. They pledge to renounce prior loyalty to foreign rulers and promise to bear arms or perform civilian service when required by law. This sworn vow completes the transition into American citizenship." },
+            { unit: 4, id: 58, word: "Obligation / Civic Duty", scenario: "A registered citizen receives a formal court summons requiring her to report for jury duty on Monday morning. Because fulfilling this responsibility is legally mandatory, failing to appear can result in criminal fines or arrest by a judge. This requirement represents an action that citizens must perform by law." },
+            { unit: 4, id: 59, word: "Civic Responsibility", scenario: "A thoughtful resident chooses to volunteer at a community cleanup, research local candidates before an election, and vote on Election Day. Although participating in these civic activities is strongly encouraged, no citizen faces legal sanctions or fines for staying home. These voluntary choices reflect actions good citizens should perform." },
+            { unit: 4, id: 60, word: "Common Good", scenario: "A town council votes to spend local tax dollars to construct a public hurricane shelter and install clean water filtration systems for the entire district. Even though some residents do not use the shelter, the project benefits the health, safety, and security of all neighbors equally. This concept emphasizes the overall welfare of the entire community." },
+
+            // UNIT 5: Constitutional Amendments (25 items)
+            { unit: 5, id: 61, word: "Bill of Rights", scenario: "Ratified in 1791, these first ten amendments to the Constitution were enacted to protect individual freedoms from federal overreach. They guarantee core protections such as religious liberty, fair trials, free speech, and safeguards against unreasonable searches. This famous collection of amendments satisfied Anti-Federalist demands." },
+            { unit: 5, id: 62, word: "1st Amendment", scenario: "A group of citizens peaceably assembles on the sidewalk outside City Hall to criticize a controversial local tax policy. The police chief attempts to break up the gathering, but a judge rules that freedom of speech, assembly, religion, press, and petition are legally protected. This core amendment protects expressive freedom against government censorship." },
+            { unit: 5, id: 63, word: "2nd Amendment", scenario: "A law-abiding citizen purchases a registered rifle for personal defense and target shooting at a regulated range. When a city tries to ban all private firearms within municipal limits, the court strikes down the ban as unconstitutional. This amendment protects the right of the people to keep and bear arms." },
+            { unit: 5, id: 64, word: "3rd Amendment", scenario: "During peacetime, a military officer demands that a suburban family provide beds and home-cooked meals for several soldiers without compensation. The homeowner refuses entry, reminding the officer that the military cannot forcibly quarter troops in private residences without consent. This amendment protects private households from military intrusion." },
+            { unit: 5, id: 65, word: "4th Amendment", scenario: "Police detectives suspect a man possesses stolen property in his apartment, but they observe no immediate emergency. Instead of kicking down the front door, they present sworn evidence to a judge to secure a formal search warrant detailing the place to be searched. This amendment protects citizens against unreasonable searches and seizures." },
+            { unit: 5, id: 66, word: "5th Amendment", scenario: "A criminal defendant decides not to take the witness stand to answer questions from the prosecution during his felony trial. The judge instructs the jury that his silence cannot be used as an admission of guilt because no one can be forced to self-incriminate. This amendment protects the right against self-incrimination and guarantees due process." },
+            { unit: 5, id: 67, word: "6th Amendment", scenario: "An accused burglar is provided with a licensed public defender, a speedy public trial, and the chance to confront the prosecution's witnesses. The court ensures that a panel of impartial local jurors listens to all evidence before deciding the verdict. This amendment guarantees the right to a fair and speedy criminal trial." },
+            { unit: 5, id: 68, word: "7th Amendment", scenario: "Two business owners sue each other over a fifty-thousand-dollar breach of contract regarding commercial building repairs. Rather than having a single judge decide who owes the money, the plaintiff requests a civil jury trial to evaluate the dispute. This amendment guarantees trial by jury in federal civil lawsuits involving monetary disputes." },
+            { unit: 5, id: 69, word: "8th Amendment", scenario: "A teenager caught shoplifting a twenty-dollar jacket is sentenced by an angry judge to ten years of hard labor and a fifty-thousand-dollar fine. An appellate court immediately vacates the sentence because punishments must be proportional and humane. This amendment prohibits excessive bail, excessive fines, and cruel and unusual punishments." },
+            { unit: 5, id: 70, word: "9th Amendment", scenario: "A government agency argues that because the right to travel between states is not specifically mentioned in the Constitution, citizens do not possess it. The Supreme Court rules that citizens retain fundamental rights beyond those specifically enumerated in the Bill of Rights. This amendment clarifies that listing specific rights does not deny other retained rights." },
+            { unit: 5, id: 71, word: "10th Amendment", scenario: "The federal government attempts to dictate municipal traffic speed limits, but the state governor argues that highway regulations belong to local authorities. The court rules that powers not delegated to the United States by the Constitution are reserved to the states or to the people. This amendment protects state authority within the federal system." },
+            { unit: 5, id: 72, word: "13th Amendment", scenario: "Following the conclusion of the Civil War in 1865, the nation ratified a constitutional amendment banning involuntary servitude across all territories. It outlawed the owning, buying, or selling of human beings except as punishment for a convicted crime. This amendment officially and permanently abolished slavery throughout the United States." },
+            { unit: 5, id: 73, word: "14th Amendment", scenario: "After the Civil War, southern state governments attempted to deny legal protections and court standing to newly emancipated African Americans. This constitutional amendment granted citizenship to all persons born in the nation and prohibited states from denying equal protection of the laws. It established that state governments must provide equal civil rights to all residents." },
+            { unit: 5, id: 74, word: "15th Amendment", scenario: "During the Reconstruction era, lawmakers added an amendment to ensure that newly freed Black men were not excluded from elections. It prohibited federal and state governments from denying or abridging the right to vote on account of race, color, or previous condition of servitude. This amendment established racial equality in voting rights." },
+            { unit: 5, id: 75, word: "19th Amendment", scenario: "After decades of picketing the White House, conducting hunger strikes, and organizing national marches, suffragists achieved their goal in 1920. A new constitutional amendment prohibited federal and state governments from denying citizens the right to vote based on sex. This reform expanded the electorate by granting women full voting rights." },
+            { unit: 5, id: 76, word: "24th Amendment", scenario: "Several southern states required poor citizens to pay a special fee at polling precincts before they were allowed to cast a ballot in federal elections. In 1964, the nation ratified an amendment declaring that the right to vote cannot be denied due to failure to pay a poll tax. This amendment removed a major economic obstacle to voting." },
+            { unit: 5, id: 77, word: "26th Amendment", scenario: "During the Vietnam War, critics argued that it was hypocritical to draft eighteen-year-old soldiers into combat while denying them the right to vote for political leaders. In 1971, the nation quickly ratified an amendment lowering the minimum voting age nationwide from twenty-one to eighteen. This amendment expanded the franchise to young adult citizens." },
+            { unit: 5, id: 78, word: "Emancipation Proclamation", scenario: "In 1863, President Abraham Lincoln utilized his wartime authority as commander-in-chief to issue a historic executive order. The decree proclaimed that all enslaved people held within states rebelling against the Union were legally and forever free. This executive directive transformed the Civil War into a moral crusade to eradicate slavery." },
+            { unit: 5, id: 79, word: "Civil Rights Act of 1964", scenario: "This landmark federal statute made it illegal to practice racial discrimination in public accommodations such as hotels, restaurants, and movie theaters. It also prohibited employment discrimination based on race, color, religion, sex, or national origin across the nation. This sweeping law dealt a devastating blow to Jim Crow segregation." },
+            { unit: 5, id: 80, word: "Voting Rights Act of 1965", scenario: "To protect minority voters in the South, Congress passed a federal statute banning discriminatory literacy and comprehension exams at polling booths. It dispatched federal observers to monitor voter registration and prevented discriminatory changes to state election laws. This historic legislation dramatically increased voter participation among African Americans." },
+            { unit: 5, id: 81, word: "Civil Rights Act of 1968", scenario: "Also known as the Fair Housing Act, this federal law made it illegal to refuse to sell or rent a home to someone based on their race, religion, or national origin. It prevented real estate agents and banks from engaging in discriminatory practices against minority buyers. This legislation sought to end racial segregation in American neighborhoods." },
+            { unit: 5, id: 82, word: "Abraham Lincoln", scenario: "As the sixteenth President of the United States, this leader guided the nation through the existential crisis of the Civil War. He issued the Emancipation Proclamation and championed the constitutional amendment that permanently abolished slavery. He is celebrated for preserving the Union and ending human bondage in America." },
+            { unit: 5, id: 83, word: "Martin Luther King Jr.", scenario: "This Baptist minister became the preeminent leader of the civil rights movement by championing nonviolent civil disobedience against racial segregation. He led the historic 1963 March on Washington and delivered the iconic 'I Have a Dream' speech. His tireless leadership contributed directly to the passage of landmark federal civil rights legislation." },
+            { unit: 5, id: 84, word: "Due Process", scenario: "A police department cannot simply seize an individual's vehicle or sentence them to jail without following established legal procedures and granting a fair hearing. The government must provide proper notice, a fair trial, and competent legal defense before depriving anyone of life, liberty, or property. This constitutional protection prevents arbitrary governmental abuse." },
+            { unit: 5, id: 85, word: "Suffrage", scenario: "For generations, disenfranchised groups including women and racial minorities organized protests and petitioned lawmakers to gain access to the ballot box. Participating in democratic elections through casting a ballot represents the bedrock foundation of self-government. This political term refers specifically to the legal right to vote." },
+
+            // UNIT 6: Justice System & Supreme Court (24 items)
+            { unit: 6, id: 86, word: "Impeachment", scenario: "The House of Representatives investigates a high-ranking federal official and votes to approve formal charges of treason, bribery, or high crimes and misdemeanors. The official is then put on trial before the Senate, which decides whether to remove them from office. This constitutional process holds government leaders accountable for serious misconduct." },
+            { unit: 6, id: 87, word: "Judicial Review", scenario: "When Congress passes a federal law that conflicts directly with constitutional protections, the Supreme Court has the power to declare the statute void. This authority enables the federal judiciary to act as an independent referee over legislative and executive actions. It was established as a core constitutional principle in the landmark case Marbury v. Madison." },
+            { unit: 6, id: 88, word: "Precedent", scenario: "When a federal appellate court rules on a legal question, all lower trial courts in that jurisdiction are required to follow that legal principle in future cases. Judges rely on these established past rulings to ensure that statutory interpretations remain fair and consistent over time. This foundational doctrine guides judicial decision-making in common law." },
+            { unit: 6, id: 89, word: "Criminal Law", scenario: "A state prosecutor files charges against an individual accused of armed robbery, assault, and grand theft. If the defendant is convicted by a jury, the judge may sentence him to pay fines to the state or serve time in prison. This branch of law deals with conduct that harms society and threatens public safety." },
+            { unit: 6, id: 90, word: "Civil Law", scenario: "A homeowner sues a building contractor for failing to finish remodeling a kitchen after accepting a ten-thousand-dollar deposit. Because the dispute involves private contracts and monetary damages rather than criminal offenses, nobody faces jail time. This branch of the legal system resolves private disputes between individuals and businesses." },
+            { unit: 6, id: 91, word: "Felony", scenario: "A defendant is convicted of aggravated kidnapping, grand larceny, and armed burglary after a lengthy court trial. Because these crimes involve severe harm and major property loss, the judge sentences the offender to several years in state prison. This legal classification describes serious, major crimes that carry severe penalties." },
+            { unit: 6, id: 92, word: "Misdemeanor", scenario: "An individual is ticketed and arrested for minor trespassing in a public park after hours and spray-painting a park bench. The presiding judge sentences the offender to pay a small fine and complete forty hours of community service. This term describes minor criminal offenses that carry fines or short jail stays." },
+            { unit: 6, id: 93, word: "Subpoena", scenario: "An eyewitness to an armed bank robbery receives an official court order requiring her to appear in court on Tuesday to testify before a jury. If she chooses to ignore the document and fail to show up, a judge can hold her in contempt of court and issue an arrest warrant. This legal writ compels a person to provide testimony or evidence." },
+            { unit: 6, id: 94, word: "Marbury v. Madison", scenario: "In this 1803 landmark case, Chief Justice John Marshall ruled that a section of a congressional statute violated the Constitution and could not be enforced. The decision established that the federal judiciary possesses the final authority to evaluate whether legislative acts are constitutional. This pivotal ruling established the doctrine of judicial review." },
+            { unit: 6, id: 95, word: "Dred Scott v. Sandford", scenario: "An enslaved man sued for his freedom after living in free northern territories with his master, arguing that his residence made him free. In 1857, the Supreme Court ruled that African Americans were not citizens and that Congress had no power to ban slavery in federal territories. This reviled ruling inflamed sectional divisions and accelerated the onset of the Civil War." },
+            { unit: 6, id: 96, word: "Plessy v. Ferguson", scenario: "An African American passenger was arrested in Louisiana after refusing to leave a whites-only railroad passenger car in violation of state law. In 1896, the Supreme Court upheld the state segregation law, declaring that racially segregated facilities were permissible as long as they were separate but equal. This ruling sanctioned state-sponsored segregation for over fifty years." },
+            { unit: 6, id: 97, word: "Brown v. Board of Education", scenario: "A young African American girl in Kansas was barred from attending a nearby neighborhood school solely because of racial segregation policies. In 1954, the Supreme Court unanimously overturned its earlier precedent, declaring that racially separate educational facilities are inherently unequal. This monumental decision ordered public schools across the country to desegregate." },
+            { unit: 6, id: 98, word: "Gideon v. Wainwright", scenario: "A penniless man was charged with a felony in Florida and was denied a court-appointed lawyer because state law only provided free attorneys in capital cases. Representing himself, he was convicted and sentenced to prison, prompting him to petition the Supreme Court on constitutional grounds. The Court ruled unanimously that states must provide free legal counsel to poor defendants." },
+            { unit: 6, id: 99, word: "Miranda v. Arizona", scenario: "A criminal suspect was interrogated by detectives for hours without being informed that he had the right to remain silent or speak with an attorney. His written confession was used to convict him at trial, but the Supreme Court threw out the conviction due to procedural violations. The ruling requires police to inform suspects of their Fifth and Sixth Amendment rights prior to questioning." },
+            { unit: 6, id: 100, word: "In Re Gault", scenario: "A fifteen-year-old youth was arrested for making a prank phone call and was sentenced to several years in a state reformatory without an attorney or formal notice of charges. The Supreme Court overturned the juvenile court's ruling in 1967, holding that minors in delinquency proceedings are entitled to essential due process protections. This decision extended constitutional trial rights to juveniles." },
+            { unit: 6, id: 101, word: "United States v. Nixon", scenario: "During a criminal investigation into political espionage, the President refused to comply with a judicial subpoena seeking audio tapes recorded in the Oval Office. The Supreme Court rejected the President's claim of absolute executive privilege, ruling that the demands of the legal system outweigh presidential confidentiality. This decision reaffirmed that no person, including the President, is above the law." },
+            { unit: 6, id: 102, word: "Hazelwood v. Kuhlmeier", scenario: "Student journalists sued after their school principal censored articles discussing teen pregnancy and divorce in the school-sponsored newspaper. In 1988, the Supreme Court ruled in favor of the school administration, holding that educators may censor student speech in school-sponsored activities for legitimate educational reasons. This decision limited First Amendment protections for school-sponsored student speech." },
+            { unit: 6, id: 103, word: "Richard Nixon", scenario: "This thirty-seventh President of the United States became embroiled in the Watergate scandal involving political espionage and an executive cover-up. After the Supreme Court ordered him to surrender incriminating White House tapes, he faced certain impeachment by Congress. He remains the only American chief executive to resign from the presidency." },
+            { unit: 6, id: 104, word: "Jury", scenario: "A group of impartial, registered citizens is selected from the local community to sit in a courtroom and listen to witness testimony and legal evidence. After closing arguments, they deliberate privately to determine whether a defendant is guilty or liable. This legal body decides the factual verdict in a courtroom proceeding." },
+            { unit: 6, id: 105, word: "Jury Trial", scenario: "A criminal defendant exercises his Sixth Amendment right to have a panel of local citizens, rather than a single judge, evaluate the evidence against him. The proceedings take place publicly in open court, and the jurors must reach a unanimous agreement to convict. This traditional proceeding ensures that citizens are judged by their peers." },
+            { unit: 6, id: 106, word: "Grand Jury", scenario: "A group of citizens convenes in private to examine investigative evidence presented by prosecutors regarding serious criminal allegations. Rather than deciding whether a defendant is guilty, they vote on whether probable cause exists to issue a formal indictment. This legal panel determines whether a suspect should be formally charged with a felony." },
+            { unit: 6, id: 107, word: "Judge", scenario: "An elected or appointed public official presides over a courtroom, rules on evidentiary motions, and ensures that legal procedures are followed properly. In criminal trials, this officer instructs the jury on relevant legal rules and determines sentences for convicted offenders. This official heads the court and administers justice." },
+            { unit: 6, id: 108, word: "Jurisdiction", scenario: "A Florida state trooper stops a speeding motorist on a highway inside the state borders and issues a valid traffic citation. However, the officer has no legal authority to issue tickets across the state line in Georgia because his police powers are legally confined to Florida territory. This term defines the geographical or subject-matter boundary of legal authority." },
+            { unit: 6, id: 109, word: "Double Jeopardy", scenario: "A man accused of armed robbery is found not guilty by a jury after a full criminal trial. Two weeks later, the prosecutor discovers new video footage of the crime but is constitutionally prohibited from putting the man on trial for that exact same offense again. This Fifth Amendment protection shields citizens from being tried twice for the same crime." },
+
+            // UNIT 7: Politics, State Gov & Foreign Policy (15 items)
+            { unit: 7, id: 110, word: "Veto", scenario: "Both chambers of Congress pass an environmental regulation bill and send it to the White House for executive approval. Disagreeing with the bill's economic costs, the President rejects the measure and returns it to Congress unsigned with an explanation of his objections. This presidential power allows the executive branch to block legislative action." },
+            { unit: 7, id: 111, word: "Political Party", scenario: "An organized group of like-minded citizens shares common views regarding the role of government, economic policy, and social programs. They work together to recruit political candidates, craft policy platforms, and run campaigns to win elections and control government. The Democratic and Republican organizations are prominent examples of this type of institution." },
+            { unit: 7, id: 112, word: "Platform", scenario: "During a national convention, delegates from a political party assemble to draft an official manifesto detailing their core beliefs and policy goals. The document outlines where the party stands on issues like taxation, national defense, healthcare, and public education. This formal declaration describes a party's positions and promises to voters." },
+            { unit: 7, id: 113, word: "Incumbent", scenario: "A sitting mayor who has held office for the past four years announces her campaign to run for re-election against three new challengers. She benefits from higher name recognition and past government achievements during the election season. This term refers to an official who currently holds political office and is seeking re-election." },
+            { unit: 7, id: 114, word: "Interest Group", scenario: "An association of citizens and advocates dedicated to marine wildlife conservation hires lobbyists to meet with members of Congress in Washington. They present scientific data to convince lawmakers to pass laws limiting plastic waste in coastal waters. This organization mobilizes public support to influence governmental policy on a specific issue." },
+            { unit: 7, id: 115, word: "Propaganda", scenario: "During a heated campaign, an organization airs misleading commercials featuring scary music and distorted photographs of an opponent to frighten voters. The advertisement uses emotional appeals and selective facts rather than balanced truths to manipulate public opinion. This biased form of communication is engineered to persuade and influence the electorate." },
+            { unit: 7, id: 116, word: "Electoral College", scenario: "When Americans cast ballots in a presidential election, they are choosing state electors pledged to their preferred candidates. A candidate must secure at least 270 of the 538 total electoral votes apportioned among the states to win the presidency. This constitutional institution officially elects the President and Vice President of the United States." },
+            { unit: 7, id: 117, word: "Domestic Policy", scenario: "The federal government passes laws to rebuild interstate highways, improve public school funding, and expand healthcare access within the United States. These governmental plans focus specifically on resolving issues and managing public affairs within national borders. This term describes executive and legislative strategies that deal with internal, home-front matters." },
+            { unit: 7, id: 118, word: "Foreign Policy", scenario: "The President directs the State Department to negotiate security pacts, provide humanitarian disaster relief abroad, and manage diplomatic relations with foreign allies. These strategies define how the United States government interacts with outside countries on the global stage. This term encompasses all international affairs and diplomatic strategies of a nation." },
+            { unit: 7, id: 119, word: "Treaty", scenario: "The President negotiates a formal peace and trade agreement with a foreign nation to resolve border disputes and reduce military tensions. Before the agreement can take legal effect, it must be submitted to the Senate and approved by a two-thirds supermajority vote. This formal bilateral agreement represents a binding contract between sovereign countries." },
+            { unit: 7, id: 120, word: "Ambassador", scenario: "A senior diplomat is appointed by the President and confirmed by the Senate to reside in a foreign capital and represent the United States. This official oversees embassy operations and serves as the primary diplomatic liaison between the U.S. and the host government. This diplomat serves as the nation's highest-ranking representative abroad." },
+            { unit: 7, id: 121, word: "Republicans", scenario: "Members of this major American political party generally advocate for conservative principles, including lower taxes, reduced government regulation of businesses, and a strong national defense. Often symbolized by an elephant, the party traces its historical roots to the election of Abraham Lincoln. They represent one of the two dominant political organizations in the country." },
+            { unit: 7, id: 122, word: "Democrats", scenario: "Members of this major American political organization typically favor progressive policies, including expanded social safety nets, environmental protection regulations, and civil rights expansions. Often symbolized by a donkey, the party traces its historical lineage back to Thomas Jefferson and Andrew Jackson. They represent one of the two dominant political parties in the United States." },
+            { unit: 7, id: 123, word: "Florida Constitution", scenario: "Voters in the Sunshine State establish a supreme governing document detailing the powers of the governor, the state legislature, and the state court system. In addition to organizing county governments, the document includes an explicit right to individual privacy in its Declaration of Rights. This legal framework serves as the supreme law of Florida." },
+            { unit: 7, id: 124, word: "Comprehensive Anti-Apartheid Act of 1986", scenario: "Congress passed a federal statute imposing strict economic penalties and trade sanctions on the South African government to force it to end racial apartheid. When the President vetoed the measure, lawmakers in Congress united to override the veto in support of human rights. This law used economic leverage to push for an end to racial segregation in South Africa." }
+        ];
+
+        let currentData = [];
+        let score = 0;
+        let totalWords = 0;
+        let mistakes = 0; 
+        
+        // Live Date & Time Clock
+        function updateDateTime() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString(undefined, { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
+            const timeStr = now.toLocaleTimeString(undefined, { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('dateTimeDisplay').innerText = `📅 ${dateStr} | ⏰ ${timeStr}`;
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        // Utility: Shuffle Array
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Filter based on Dropdown
+        function filterData() {
+            const selectedUnit = document.getElementById('unitSelect').value;
+            if (selectedUnit === "ALL") {
+                currentData = [...scenarioData];
+            } else {
+                currentData = scenarioData.filter(item => item.unit == selectedUnit);
+            }
+            totalWords = currentData.length;
+            document.getElementById('totalDisplay').innerText = totalWords;
+        }
+
+        // Reset and Scramble
+        function resetGame() {
+            score = 0;
+            mistakes = 0;
+            
+            document.getElementById('scoreDisplay').innerText = score;
+            document.getElementById('message').innerText = "";
+            document.getElementById('downloadBtn').style.display = "none";
+            
+            filterData();
+            initGame();
+        }
+
+        // Initialize Game 
+        function initGame() {
+            const wordsColumn = document.getElementById('words-column');
+            const scenariosColumn = document.getElementById('scenarios-column');
+
+            wordsColumn.innerHTML = '<h2>Concepts & Terms</h2>';
+            scenariosColumn.innerHTML = '<h2>Real-World Scenarios</h2>';
+
+            const shuffledWords = shuffle([...currentData]);
+            const shuffledScenarios = shuffle([...currentData]);
+
+            // Render Words on the Left
+            shuffledWords.forEach(item => {
+                const wordElement = document.createElement('div');
+                wordElement.classList.add('draggable-word');
+                wordElement.draggable = true;
+                wordElement.id = `word-${item.id}`;
+                wordElement.dataset.id = item.id;
+                wordElement.innerText = item.word;
+
+                wordElement.addEventListener('dragstart', dragStart);
+                wordElement.addEventListener('dragend', dragEnd);
+
+                wordsColumn.appendChild(wordElement);
+            });
+
+            // Render Scenarios on the Right
+            shuffledScenarios.forEach((item, index) => {
+                const dropZone = document.createElement('div');
+                dropZone.classList.add('drop-zone');
+                dropZone.dataset.id = item.id;
+                
+                const tag = document.createElement('span');
+                tag.classList.add('scenario-tag');
+                tag.innerText = `Case Study Analysis`;
+                dropZone.appendChild(tag);
+
+                const scenarioText = document.createElement('p');
+                scenarioText.innerText = item.scenario;
+                dropZone.appendChild(scenarioText);
+
+                dropZone.addEventListener('dragover', dragOver);
+                dropZone.addEventListener('dragenter', dragEnter);
+                dropZone.addEventListener('dragleave', dragLeave);
+                dropZone.addEventListener('drop', drop);
+
+                scenariosColumn.appendChild(dropZone);
+            });
+        }
+
+        // Drag & Drop Handlers
+        function dragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.id);
+            setTimeout(() => e.target.classList.add('dragging'), 0);
+        }
+
+        function dragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function dragOver(e) {
+            e.preventDefault(); 
+        }
+
+        function dragEnter(e) {
+            e.preventDefault();
+            if (!e.target.classList.contains('correct')) {
+                e.target.classList.add('hover');
+            }
+        }
+
+        function dragLeave(e) {
+            e.target.classList.remove('hover');
+            e.target.classList.remove('incorrect');
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            const draggedId = e.dataTransfer.getData('text/plain');
+            const dropZone = e.target.closest('.drop-zone'); 
+            
+            dropZone.classList.remove('hover');
+
+            if (dropZone.classList.contains('correct')) return;
+
+            const targetId = dropZone.dataset.id;
+
+            if (draggedId === targetId) {
+                // Correct Match
+                const draggedElement = document.querySelector(`.draggable-word[data-id='${draggedId}']`);
+                
+                dropZone.insertBefore(draggedElement, dropZone.firstChild);
+                
+                dropZone.classList.add('correct');
+                dropZone.classList.remove('incorrect');
+                draggedElement.draggable = false; 
+                draggedElement.style.cursor = "default";
+                draggedElement.style.margin = "0 0 10px 0";
+
+                updateScore();
+            } else {
+                // Incorrect Match
+                dropZone.classList.add('incorrect');
+                mistakes++;
+                setTimeout(() => dropZone.classList.remove('incorrect'), 800);
+            }
+        }
+
+        function updateScore() {
+            score++;
+            document.getElementById('scoreDisplay').innerText = score;
+
+            if (score === totalWords) {
+                document.getElementById('message').innerText = "🎉 Outstanding! You mastered every scenario!";
+                document.getElementById('downloadBtn').style.display = "block";
+            }
+        }
+
+        // Report Generation and Download
+        function downloadReport() {
+            const studentName = prompt("Outstanding work! Please enter your name for the official report:");
+            if (!studentName) return; 
+
+            const selectedUnitText = document.getElementById('unitSelect').options[document.getElementById('unitSelect').selectedIndex].text;
+            const date = new Date().toLocaleString();
+            
+            let reportText = `========================================================\n`;
+            reportText += `        CIVICS SCENARIO MASTERY REPORT CARD             \n`;
+            reportText += `========================================================\n\n`;
+            reportText += `Student Name : ${studentName}\n`;
+            reportText += `Date & Time  : ${date}\n`;
+            reportText += `Section      : ${selectedUnitText}\n`;
+            reportText += `Score        : ${score} / ${totalWords} (100% Mastery)\n`;
+            reportText += `Mistakes Made: ${mistakes} attempt(s)\n\n`;
+            reportText += `--------------------------------------------------------\n`;
+            reportText += `               MASTERED SCENARIO ANALYSIS               \n`;
+            reportText += `--------------------------------------------------------\n\n`;
+
+            const sortedData = [...currentData].sort((a, b) => a.word.localeCompare(b.word));
+
+            sortedData.forEach((item, index) => {
+                reportText += `${index + 1}. CONCEPT: ${item.word.toUpperCase()}\n`;
+                reportText += `   SCENARIO:\n   "${item.scenario}"\n\n`;
+            });
+
+            reportText += `========================================================\n`;
+            reportText += `End of Report - Great Job Preparing for Your Civics Exam!\n`;
+
+            const blob = new Blob([reportText], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${studentName.replace(/\s+/g, '_')}_Scenario_Report.txt`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Start game on window load
+        window.onload = resetGame;
+
+    </script>
+</body>
+</html>
