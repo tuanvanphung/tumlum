@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Civics Full Scenario Challenge: Drag & Drop</title>
+    <title>Civics Tricky Scenario Challenge</title>
     <style>
         :root {
             --primary-blue: #2c3e50;
@@ -12,6 +12,7 @@
             --error-red: #e74c3c;
             --bg-color: #ecf0f1;
             --highlight: #f39c12;
+            --distractor-gray: #95a5a6;
         }
         
         body {
@@ -204,6 +205,11 @@
             pointer-events: none;
         }
 
+        .distractor-badge {
+            background: #cbd5e1 !important;
+            color: #475569 !important;
+        }
+
         .drop-zone p {
             margin: 0;
             pointer-events: none; 
@@ -227,6 +233,12 @@
             border: 2px dashed var(--error-red);
         }
 
+        .drop-zone.unused-distractor {
+            background-color: #f8fafc;
+            border: 2px solid #cbd5e1;
+            opacity: 0.65;
+        }
+
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 5px; }
         ::-webkit-scrollbar-thumb { background: #bdc3c7; border-radius: 5px; }
@@ -235,7 +247,7 @@
 </head>
 <body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
 
-    <h1>🏛️ Civics Comprehensive Scenario Challenge</h1>
+    <h1>🏛️ Civics Tricky Scenario Match-Up</h1>
     
     <div class="header-panel">
         <div class="score-time-container">
@@ -247,14 +259,14 @@
         
         <div class="controls-container">
             <select id="unitSelect" onchange="resetGame()">
-                <option value="1">Unit 1: Roots of Democracy (16)</option>
-                <option value="2">Unit 2: Road to Independence (16)</option>
-                <option value="3">Unit 3: Creating the Constitution (17)</option>
-                <option value="4">Unit 4: Citizenship & Civic Life (11)</option>
-                <option value="5">Unit 5: Constitutional Amendments (25)</option>
-                <option value="6">Unit 6: Justice System & Supreme Court (24)</option>
-                <option value="7">Unit 7: Politics, State Gov & Foreign Policy (15)</option>
-                <option value="ALL">🌟 Master Challenge (All 124 Words)</option>
+                <option value="1">Unit 1: Roots of Democracy (16 + 5 Tricky)</option>
+                <option value="2">Unit 2: Road to Independence (16 + 5 Tricky)</option>
+                <option value="3">Unit 3: Creating the Constitution (17 + 5 Tricky)</option>
+                <option value="4">Unit 4: Citizenship & Civic Life (11 + 5 Tricky)</option>
+                <option value="5">Unit 5: Constitutional Amendments (25 + 5 Tricky)</option>
+                <option value="6">Unit 6: Justice System & Courts (24 + 5 Tricky)</option>
+                <option value="7">Unit 7: Politics, State Gov & Foreign Policy (15 + 5 Tricky)</option>
+                <option value="ALL">🌟 Master Challenge (All 124 Words - Balanced)</option>
             </select>
             <button id="resetBtn" onclick="resetGame()">🔀 Scramble</button>
             <button id="downloadBtn" onclick="downloadReport()">📥 Download Report</button>
@@ -267,7 +279,7 @@
     </div>
 
     <script>
-        // COMPLETE DATASET: 124 SCENARIOS (3 SENTENCES EACH)
+        // OFFICIAL MATCHING SCENARIOS (124 Items)
         const scenarioData = [
             // UNIT 1: Roots of Democracy (16 items)
             { unit: 1, id: 1, word: "Magna Carta", scenario: "English nobles cornered their ruler in 1215 because he imposed unfair taxes and jailed people without trials. They forced him to sign a charter admitting that royal authority has legal boundaries. This historic agreement established that even a monarch must obey the law." },
@@ -340,7 +352,7 @@
             // UNIT 5: Constitutional Amendments (25 items)
             { unit: 5, id: 61, word: "Bill of Rights", scenario: "Ratified in 1791, these first ten amendments to the Constitution were enacted to protect individual freedoms from federal overreach. They guarantee core protections such as religious liberty, fair trials, free speech, and safeguards against unreasonable searches. This famous collection of amendments satisfied Anti-Federalist demands." },
             { unit: 5, id: 62, word: "1st Amendment", scenario: "A group of citizens peaceably assembles on the sidewalk outside City Hall to criticize a controversial local tax policy. The police chief attempts to break up the gathering, but a judge rules that freedom of speech, assembly, religion, press, and petition are legally protected. This core amendment protects expressive freedom against government censorship." },
-            { unit: 5, id: 63, word: "2nd Amendment", scenario: "A law-abiding citizen purchases a registered rifle for personal defense and target shooting at a regulated range. When a city tries to ban all private firearms within municipal limits, the court strikes down the ban as unconstitutional. This amendment protects the right of the people to keep and bear arms." },
+            { unit: 6, id: 63, word: "2nd Amendment", scenario: "A law-abiding citizen purchases a registered rifle for personal defense and target shooting at a regulated range. When a city tries to ban all private firearms within municipal limits, the court strikes down the ban as unconstitutional. This amendment protects the right of the people to keep and bear arms." },
             { unit: 5, id: 64, word: "3rd Amendment", scenario: "During peacetime, a military officer demands that a suburban family provide beds and home-cooked meals for several soldiers without compensation. The homeowner refuses entry, reminding the officer that the military cannot forcibly quarter troops in private residences without consent. This amendment protects private households from military intrusion." },
             { unit: 5, id: 65, word: "4th Amendment", scenario: "Police detectives suspect a man possesses stolen property in his apartment, but they observe no immediate emergency. Instead of kicking down the front door, they present sworn evidence to a judge to secure a formal search warrant detailing the place to be searched. This amendment protects citizens against unreasonable searches and seizures." },
             { unit: 5, id: 66, word: "5th Amendment", scenario: "A criminal defendant decides not to take the witness stand to answer questions from the prosecution during his felony trial. The judge instructs the jury that his silence cannot be used as an admission of guilt because no one can be forced to self-incriminate. This amendment protects the right against self-incrimination and guarantees due process." },
@@ -408,7 +420,60 @@
             { unit: 7, id: 124, word: "Comprehensive Anti-Apartheid Act of 1986", scenario: "Congress passed a federal statute imposing strict economic penalties and trade sanctions on the South African government to force it to end racial apartheid. When the President vetoed the measure, lawmakers in Congress united to override the veto in support of human rights. This law used economic leverage to push for an end to racial segregation in South Africa." }
         ];
 
+        // 35 TRICKY DISTRACTOR SCENARIOS (5 Per Unit - Not in Vocab List)
+        const distractorData = [
+            // Unit 1 Distractors
+            { unit: 1, id: "d1", isDistractor: true, scenario: "An absolute monarch declares that his royal power comes directly from God and that no mortal human has the right to question his decrees. The citizens are told that defying the royal throne is a sin against heaven punishable by death. This ancient doctrine argued that royal authority was absolute and immune to worldly laws." },
+            { unit: 1, id: "d2", isDistractor: true, scenario: "An ancient Babylonian king has hundreds of legal statutes carved into an eight-foot black stone monument placed in the center of the city for all subjects to see. The laws set strict, identical punishments for crimes, popularizing the concept of 'an eye for an eye.' This artifact represents one of the earliest surviving written legal codes in world history." },
+            { unit: 1, id: "d3", isDistractor: true, scenario: "Five Native American nations in the northeastern woodlands establish the Great Law of Peace to govern their alliance and maintain mutual defense. Decision-making is shared among a council of representatives from each clan rather than dictated by a single ruler. Many historians believe this ancient indigenous union helped inspire early American concepts of representative federation." },
+            { unit: 1, id: "d4", isDistractor: true, scenario: "A military dictator abolishes all public elections, shuts down opposing newspapers, and assumes total control over every government agency. No citizen is permitted to vote, speak out, or challenge the ruler's decrees in court. This system of government concentrates unlimited power in the hands of a single authoritarian leader." },
+            { unit: 1, id: "d5", isDistractor: true, scenario: "Residents of a rural Vermont town gather annually at the local gymnasium to debate town road repairs and vote on school budgets in person. Every registered adult in the village casts their own vote on every single line item of the municipal budget. This traditional meeting represents a modern American survival of pure, direct citizen democracy." },
+
+            // Unit 2 Distractors
+            { unit: 2, id: "d6", isDistractor: true, scenario: "Following the French and Indian War, the British crown issued a royal decree forbidding colonists from settling west of the Appalachian Mountains. Royal authorities stationed soldiers along the frontier to keep peace with Native American tribes and prevent westward migration. Colonists were furious because many had already purchased frontier land grants and fought for that territory." },
+            { unit: 2, id: "d7", isDistractor: true, scenario: "In March 1770, an angry crowd of colonists began throwing snowballs, rocks, and oyster shells at a squad of British sentries guarding the custom house. Tensions escalated until the panicked soldiers fired into the crowd, killing five unarmed colonial civilians. The deadly event was widely publicized as proof of British military brutality." },
+            { unit: 2, id: "d8", isDistractor: true, scenario: "In July 1775, delegates of the Second Continental Congress made a final, desperate plea to King George III to halt hostilities and restore peace. They pledged their personal loyalty to the crown and asked the king to repeal abusive parliamentary taxes. The British monarch refused to even read the petition and instead declared the colonies to be in open rebellion." },
+            { unit: 2, id: "d9", isDistractor: true, scenario: "A secretive organization of colonial shopkeepers, artisans, and radicals banded together to organize boycotts and resist British customs collectors. They staged dramatic street demonstrations, burned royal tax collectors in effigy, and intimidated officials who sold tax stamps. This patriot activist group played a leading role in orchestrating colonial resistance." },
+            { unit: 2, id: "d10", isDistractor: true, scenario: "American forces surrounded and captured an entire British army under General Burgoyne in upstate New York in 1777. This stunning military triumph convinced the French government that the American revolutionaries could actually win the war. The resulting French alliance provided crucial naval fleets and troops that turned the tide of the Revolution." },
+
+            // Unit 3 Distractors
+            { unit: 3, id: "d11", isDistractor: true, scenario: "Delegates at the Constitutional Convention were bitterly divided over whether congressional seats should be based on state population or state equality. Roger Sherman proposed a two-house legislature featuring a House of Representatives based on population and a Senate granting two votes to every state. This crucial agreement resolved the convention's biggest dispute and saved the draft Constitution." },
+            { unit: 3, id: "d12", isDistractor: true, scenario: "Northern and southern delegates argued fiercely over how enslaved populations should be counted for taxation and representation in Congress. The convention ultimately agreed that every five enslaved individuals would be counted as three free persons for federal apportionment. This controversial compromise gave southern slaveholders disproportionate political power in early American government." },
+            { unit: 3, id: "d13", isDistractor: true, scenario: "James Madison proposed a bold new national framework featuring a strong bicameral legislature where representation in both chambers was determined by population. Larger states strongly favored the blueprint because their higher numbers would give them dominant influence over national legislation. This proposal formed the initial starting outline debated at the Constitutional Convention." },
+            { unit: 3, id: "d14", isDistractor: true, scenario: "William Paterson presented an alternative constitutional proposal designed to protect the influence of smaller states like Delaware and New Jersey. The plan called for keeping a single-chamber congress where each state received exactly one vote regardless of how many people lived there. Small states rallied behind this idea to prevent being overpowered by large states." },
+            { unit: 3, id: "d15", isDistractor: true, scenario: "During the hot summer of 1787 in Philadelphia, delegates nailed the courthouse windows shut and swore a strict oath of confidentiality. They barred reporters and the public from listening so that leaders could debate freely and change their minds without fear of political backlash. This rule allowed the Framers to scrap the Articles of Confederation and draft an entirely new framework." },
+
+            // Unit 4 Distractors
+            { unit: 4, id: "d16", isDistractor: true, scenario: "Under federal law, virtually all male U.S. citizens and immigrant non-citizens aged eighteen through twenty-five are required to register with the government. Although the nation maintains an all-volunteer military, this registry ensures that a military draft can be enacted during an extreme national emergency. Failing to register can disqualify young men from federal student loans and government jobs." },
+            { unit: 4, id: "d17", isDistractor: true, scenario: "An American adult voluntarily travels to a foreign embassy, completes legal paperwork, and formally renounces his United States citizenship. By executing this irrevocable oath, the person gives up their passport, protection by U.S. embassies abroad, and the right to vote in American elections. This legal procedure describes the voluntary relinquishment of one's citizenship." },
+            { unit: 4, id: "d18", isDistractor: true, scenario: "Foreign citizens from designated allied nations are allowed to travel to the United States for business or tourism for up to ninety days without having to apply for a formal entry visa. Travelers must obtain electronic pre-authorization before boarding their flights and cannot work or seek permanent residency while in the country. This policy facilitates travel and commerce between friendly partner nations." },
+            { unit: 4, id: "d19", isDistractor: true, scenario: "Every ten years, the federal government conducts an official headcount of every resident living across all fifty states and territories. The population data determines how billions of dollars in federal funding are distributed and how congressional seats are apportioned among the states. While answering the survey is legally required by federal law, it is not a test for citizenship." },
+            { unit: 4, id: "d20", isDistractor: true, scenario: "A city government requires land to widen a congested highway and build an overpass for public safety. Under the Fifth Amendment, the government can seize private real estate for public use as long as it pays the property owner fair market compensation. This sovereign power balances private property rights against necessary public infrastructure projects." },
+
+            // Unit 5 Distractors
+            { unit: 5, id: "d21", isDistractor: true, scenario: "In 1919, a nationwide reform movement led by religious and temperance groups succeeded in amending the Constitution to ban the manufacture, sale, and transportation of intoxicating liquors. Supporters believed the measure would reduce crime, poverty, and family violence across the nation. Instead, it fueled illegal bootlegging and organized crime before being repealed fourteen years later." },
+            { unit: 5, id: "d22", isDistractor: true, scenario: "By the early 1930s, the nationwide ban on alcohol had generated widespread disrespect for the law, loss of tax revenue, and dangerous mob violence. In 1933, the nation ratified an amendment that repealed the Eighteenth Amendment, returning liquor regulations to the individual states. This historic amendment remains the only one in American history that repealed a previous constitutional amendment." },
+            { unit: 5, id: "d23", isDistractor: true, scenario: "After President Franklin D. Roosevelt was elected to four consecutive terms in the White House, lawmakers grew concerned about executive overreach and lifelong rulers. In 1951, the nation added an amendment limiting all future Presidents to a maximum of two terms, or ten total years in office. This rule formalized the two-term precedent originally established by George Washington." },
+            { unit: 5, id: "d24", isDistractor: true, scenario: "Following the assassination of President John F. Kennedy, the country recognized the urgent need for a clear legal process if a chief executive dies, resigns, or becomes incapacitated. Ratified in 1967, this amendment outlines how the Vice President formally assumes power and how a new Vice President is nominated. It provides the legal blueprint for presidential succession and disability." },
+            { unit: 5, id: "d25", isDistractor: true, scenario: "Originally proposed by James Madison in 1789, this amendment languished unratified for over two centuries before a college student organized a successful national campaign to pass it in 1992. The amendment mandates that any pay raises Congress votes for itself cannot take effect until after the next congressional election has occurred. This protection prevents lawmakers from instantly enriching themselves with taxpayer dollars." },
+
+            // Unit 6 Distractors
+            { unit: 6, id: "d26", isDistractor: true, scenario: "In 1969, public school students were suspended for wearing black armbands to school to silently protest the ongoing Vietnam War. The Supreme Court ruled in favor of the students, famously declaring that students do not shed their constitutional rights to freedom of speech at the schoolhouse gate. The decision established that student political speech is protected unless it substantially disrupts school operations." },
+            { unit: 6, id: "d27", isDistractor: true, scenario: "During a political protest outside a national convention in 1984, an activist was arrested for dousing an American flag in kerosene and setting it on fire in violation of state law. The Supreme Court overturned the conviction in 1989, ruling that burning the flag constitutes protected symbolic speech under the First Amendment. The Court affirmed that the government cannot ban the expression of an idea simply because society finds it offensive." },
+            { unit: 6, id: "d28", isDistractor: true, scenario: "A security guard challenged a strict municipal ordinance in Washington, D.C., that banned handguns and required licensed long guns to be kept unloaded and disassembled at home. In 2008, the Supreme Court ruled that the Second Amendment protects an individual's right to possess a firearm unconnected with service in a militia, especially for self-defense within the home. This landmark ruling affirmed the personal right to gun ownership." },
+            { unit: 6, id: "d29", isDistractor: true, scenario: "When an unsuccessful party loses an appeal in a lower federal circuit court, they file a formal petition asking the Supreme Court to agree to review their case. If at least four of the nine Supreme Court justices agree that the legal dispute involves a significant constitutional issue, the Court issues this formal order demanding the lower court records. This legal petition is the primary vehicle by which cases reach the highest court." },
+            { unit: 6, id: "d30", isDistractor: true, scenario: "When the Supreme Court issues a landmark decision, the justices who disagree with the final ruling draft a written explanation outlining their legal arguments and objections. While these writings carry no binding force of law, they are frequently cited in future legal challenges and can influence future courts to overturn bad precedents. This document explains why the minority justices believe the majority got the law wrong." },
+
+            // Unit 7 Distractors
+            { unit: 7, id: "d31", isDistractor: true, scenario: "Every ten years after the federal census, state legislators redraw the boundaries of congressional voting districts. A party in power often deliberately draws oddly shaped, sprawling districts to pack opposing voters into single districts and guarantee easy re-election for their own politicians. This controversial practice manipulates legislative map boundaries to create an unfair electoral advantage." },
+            { unit: 7, id: "d32", isDistractor: true, scenario: "A senator opposed to a controversial bill takes the senate floor and delivers an unbroken, marathon speech for fourteen hours to prevent a final vote from taking place. Under Senate procedural rules, debate on a bill can only be brought to an end if a supermajority of sixty senators votes for cloture. This tactical delay maneuver allows a minority faction in the Senate to block legislation." },
+            { unit: 7, id: "d33", isDistractor: true, scenario: "A private interest group or corporation establishes an official financial organization to gather voluntary campaign contributions from members and donate money to favored political candidates. These organizations must register with federal election authorities and comply with campaign spending limitations. This fundraising entity channels private financial donations into political campaigns." },
+            { unit: 7, id: "d34", isDistractor: true, scenario: "Before a general election in November, voters in each state participate in special party elections to choose which candidate will represent their political party on the final ballot. In closed contests, only registered party members can cast ballots, while in open contests, independent voters may participate. This preliminary election selects the official nominees for each political party." },
+            { unit: 7, id: "d35", isDistractor: true, scenario: "The President issues a binding directive to federal departments and executive agencies that carries the full force of law without requiring congressional approval. While these directives allow the President to manage federal operations and enforce existing statutes, they cannot violate constitutional protections or contradict federal laws. This executive directive is a tool the President uses to direct the federal bureaucracy." }
+        ];
+
         let currentData = [];
+        let activeDistractors = [];
         let score = 0;
         let totalWords = 0;
         let mistakes = 0; 
@@ -446,8 +511,10 @@
             const selectedUnit = document.getElementById('unitSelect').value;
             if (selectedUnit === "ALL") {
                 currentData = [...scenarioData];
+                activeDistractors = []; // Master Challenge keeps exact 1-to-1 match!
             } else {
                 currentData = scenarioData.filter(item => item.unit == selectedUnit);
+                activeDistractors = distractorData.filter(item => item.unit == selectedUnit);
             }
             totalWords = currentData.length;
             document.getElementById('totalDisplay').innerText = totalWords;
@@ -475,7 +542,9 @@
             scenariosColumn.innerHTML = '<h2>Real-World Scenarios</h2>';
 
             const shuffledWords = shuffle([...currentData]);
-            const shuffledScenarios = shuffle([...currentData]);
+            // Merge matching scenarios and distractors for the scenario column
+            const combinedScenarios = [...currentData, ...activeDistractors];
+            const shuffledScenarios = shuffle(combinedScenarios);
 
             // Render Words on the Left
             shuffledWords.forEach(item => {
@@ -497,6 +566,9 @@
                 const dropZone = document.createElement('div');
                 dropZone.classList.add('drop-zone');
                 dropZone.dataset.id = item.id;
+                if (item.isDistractor) {
+                    dropZone.dataset.isDistractor = "true";
+                }
                 
                 const tag = document.createElement('span');
                 tag.classList.add('scenario-tag');
@@ -553,6 +625,7 @@
 
             const targetId = dropZone.dataset.id;
 
+            // Check if dragged word matches target scenario
             if (draggedId === targetId) {
                 // Correct Match
                 const draggedElement = document.querySelector(`.draggable-word[data-id='${draggedId}']`);
@@ -567,7 +640,7 @@
 
                 updateScore();
             } else {
-                // Incorrect Match
+                // Incorrect Match (including attempts to drop into distractor boxes!)
                 dropZone.classList.add('incorrect');
                 mistakes++;
                 setTimeout(() => dropZone.classList.remove('incorrect'), 800);
@@ -579,8 +652,21 @@
             document.getElementById('scoreDisplay').innerText = score;
 
             if (score === totalWords) {
-                document.getElementById('message').innerText = "🎉 Outstanding! You mastered every scenario!";
+                document.getElementById('message').innerText = "🎉 Outstanding! You solved the challenge and avoided all distractors!";
                 document.getElementById('downloadBtn').style.display = "block";
+
+                // Reveal unused distractors in subtle gray
+                const allDropZones = document.querySelectorAll('.drop-zone');
+                allDropZones.forEach(zone => {
+                    if (zone.dataset.isDistractor === "true") {
+                        zone.classList.add('unused-distractor');
+                        const tag = zone.querySelector('.scenario-tag');
+                        if (tag) {
+                            tag.classList.add('distractor-badge');
+                            tag.innerText = "⚠️ Unused Distractor / Foil";
+                        }
+                    }
+                });
             }
         }
 
