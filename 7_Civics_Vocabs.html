@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Civics Vocab Master: Drag & Drop Game</title>
+    <title>Civics Vocab Master: Tricky Drag & Drop</title>
     <style>
         :root {
             --primary-blue: #2c3e50;
@@ -12,6 +12,7 @@
             --error-red: #e74c3c;
             --bg-color: #ecf0f1;
             --highlight: #f39c12;
+            --distractor-gray: #95a5a6;
         }
         
         body {
@@ -42,13 +43,12 @@
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             margin-bottom: 20px;
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: bold;
             flex-wrap: wrap;
             gap: 15px;
         }
 
-        /* Combined Score and Date/Time on the same line */
         .score-time-container {
             display: flex;
             align-items: center;
@@ -77,7 +77,7 @@
 
         select {
             padding: 10px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: bold;
             border-radius: 5px;
             border: 2px solid var(--primary-blue);
@@ -92,8 +92,8 @@
         }
 
         button {
-            padding: 10px 20px;
-            font-size: 1rem;
+            padding: 10px 18px;
+            font-size: 0.95rem;
             font-weight: bold;
             border-radius: 5px;
             cursor: pointer;
@@ -124,7 +124,7 @@
         .game-board {
             display: flex;
             gap: 20px;
-            height: 72vh;
+            height: 73vh;
         }
 
         .column {
@@ -157,19 +157,18 @@
             z-index: 10;
         }
 
-        /* Draggable Words */
         .draggable-word {
             background-color: var(--light-blue);
             color: white;
-            padding: 10px;
-            margin: 8px 0;
+            padding: 12px;
+            margin: 10px 0;
             border-radius: 6px;
             cursor: grab;
             text-align: center;
             font-weight: bold;
             font-size: 0.95rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            transition: transform 0.2s, background 0.2s;
         }
         
         .draggable-word:active {
@@ -180,18 +179,31 @@
             opacity: 0.5;
         }
 
-        /* Drop Zones */
         .drop-zone {
-            background-color: #f8f9fa;
+            background-color: #fdfefe;
             border: 2px dashed #95a5a6;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 6px;
-            min-height: 60px;
+            padding: 14px;
+            margin: 12px 0;
+            border-radius: 8px;
+            min-height: 70px;
             transition: background 0.3s, border 0.3s;
             display: flex;
             flex-direction: column;
             gap: 6px;
+        }
+
+        .distractor-tag {
+            display: inline-block;
+            background: #cbd5e1;
+            color: #475569;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 4px;
+            width: fit-content;
+            pointer-events: none;
+            margin-bottom: 4px;
         }
 
         .drop-zone p {
@@ -199,6 +211,7 @@
             pointer-events: none; 
             font-size: 0.95rem;
             line-height: 1.4;
+            color: #2c3e50;
         }
 
         .example-text {
@@ -221,6 +234,12 @@
             border: 2px dashed var(--error-red);
         }
 
+        .drop-zone.unused-distractor {
+            background-color: #f8fafc;
+            border: 2px solid #cbd5e1;
+            opacity: 0.65;
+        }
+
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 5px; }
         ::-webkit-scrollbar-thumb { background: #bdc3c7; border-radius: 5px; }
@@ -229,7 +248,7 @@
 </head>
 <body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
 
-    <h1>🏛️ Ultimate Civics Vocab Master</h1>
+    <h1>🏛️ Civics Vocab Master: Tricky Match-Up</h1>
     
     <div class="header-panel">
         <div class="score-time-container">
@@ -241,14 +260,14 @@
         
         <div class="controls-container">
             <select id="unitSelect" onchange="resetGame()">
-                <option value="1">Unit 1: Roots of Democracy</option>
-                <option value="2">Unit 2: Road to Independence</option>
-                <option value="3">Unit 3: Creating the Constitution</option>
-                <option value="4">Unit 4: Citizenship</option>
-                <option value="5">Unit 5: Amendments & Civil Rights</option>
-                <option value="6">Unit 6: Justice System & Courts</option>
-                <option value="7">Unit 7: Politics & Foreign Policy</option>
-                <option value="ALL">🌟 Master Exam (All 126 Words)</option>
+                <option value="1">Unit 1: Roots of Democracy (16 + 5 Tricky)</option>
+                <option value="2">Unit 2: Road to Independence (16 + 5 Tricky)</option>
+                <option value="3">Unit 3: Creating the Constitution (17 + 5 Tricky)</option>
+                <option value="4">Unit 4: Citizenship & Civic Life (11 + 5 Tricky)</option>
+                <option value="5">Unit 5: Constitutional Amendments (25 + 5 Tricky)</option>
+                <option value="6">Unit 6: Justice System & Courts (24 + 5 Tricky)</option>
+                <option value="7">Unit 7: Politics, State Gov & Foreign Policy (15 + 5 Tricky)</option>
+                <option value="ALL">🌟 Master Challenge (All 124 Words - Balanced)</option>
             </select>
             <button id="resetBtn" onclick="resetGame()">🔀 Scramble</button>
             <button id="downloadBtn" onclick="downloadReport()">📥 Download Report</button>
@@ -261,9 +280,9 @@
     </div>
 
     <script>
-        // MASTER ARRAY: 126 WORDS CATEGORIZED BY UNIT
+        // OFFICIAL MATCHING TERMS (124 Items)
         const vocabData = [
-            // UNIT 1: Roots of Democracy & Enlightenment
+            // UNIT 1: Roots of Democracy & Enlightenment (16 items)
             { unit: 1, id: 1, word: "Magna Carta", def: "A document signed in England in 1215 that limited the power of the king and established that even rulers must follow the law.", ex: "King John was forced to sign this so he couldn't just throw people in jail without a fair trial." },
             { unit: 1, id: 2, word: "Mayflower Compact", def: "An agreement signed by the Pilgrims in 1620 before landing in America, in which they promised to create fair laws and govern themselves.", ex: "Setting up a temporary government and rules for the Plymouth colony before even leaving their ship." },
             { unit: 1, id: 3, word: "English Bill of Rights", def: "A document from 1689 that protected the rights of English citizens, such as free speech and fair trials, and limited the power of the monarch.", ex: "It gave English citizens the right to bear arms and protected them from cruel and unusual punishments." },
@@ -281,7 +300,7 @@
             { unit: 1, id: 15, word: "English Nobles/Barons", def: "Powerful landowners in England who forced King John to sign the Magna Carta to protect their rights and limit his power.", ex: "The wealthy lords who surrounded the King and demanded he start following the law." },
             { unit: 1, id: 16, word: "Pilgrims", def: "A group of English settlers who sailed on the Mayflower in 1620 seeking religious freedom and established Plymouth Colony in Massachusetts.", ex: "The colonists who wrote the Mayflower Compact and celebrated the first Thanksgiving." },
 
-            // UNIT 2: Road to Independence
+            // UNIT 2: Road to Independence (16 items)
             { unit: 2, id: 17, word: "French and Indian War", def: "A war fought from 1754-1763 between Britain and France over control of North America; Britain's victory led to new taxes on colonists.", ex: "The expensive war that caused Britain to go into debt, leading them to heavily tax the American colonists to pay for it." },
             { unit: 2, id: 18, word: "Stamp Act", def: "A 1765 law that taxed colonists on every printed item, like newspapers and documents, without their permission or representation in Parliament.", ex: "Colonists having to pay an extra tax just to buy a deck of playing cards or a legal contract." },
             { unit: 2, id: 19, word: "Quartering Act", def: "Laws passed by Britain requiring colonists to provide food and housing for British soldiers living in their homes.", ex: "Colonists being forced to let an armed British redcoat sleep in their spare bedroom and eat their food." },
@@ -299,7 +318,7 @@
             { unit: 2, id: 31, word: "King George III", def: "The British king during the American Revolution who refused to grant the colonists' requests for fair treatment and representation.", ex: "The 'tyrant' king the colonists complained about in the Declaration of Independence." },
             { unit: 2, id: 32, word: "George Washington", def: "The commander of the Continental Army during the American Revolution and the first President of the United States.", ex: "The general who led the American soldiers to victory against the British." },
 
-            // UNIT 3: Creating the Constitution
+            // UNIT 3: Creating the Constitution (17 items)
             { unit: 3, id: 33, word: "Articles of Confederation", def: "The first constitution of the United States, written in 1777, which created a weak national government that could not tax or regulate trade.", ex: "The US government could not collect taxes under this, so it couldn't pay its soldiers after the Revolutionary War." },
             { unit: 3, id: 34, word: "AOC Weaknesses", def: "The problems with the Articles of Confederation that made the national government too weak, including inability to tax, regulate trade, enforce laws, or maintain an army.", ex: "The early US government was so weak it couldn't even force the states to pay taxes or send soldiers to help." },
             { unit: 3, id: 35, word: "Debt", def: "Money that is owed to someone else; after the Revolutionary War, the U.S. government had large amounts it could not pay.", ex: "The United States owing millions of dollars to France for helping them fight the British." },
@@ -309,7 +328,7 @@
             { unit: 3, id: 39, word: "Anti-Federalist Papers", def: "Essays written by people who opposed the U.S. Constitution because they feared a strong central government would take away individual freedoms.", ex: "Writers arguing that the new Constitution was dangerous unless a Bill of Rights was added to protect citizens." },
             { unit: 3, id: 40, word: "U.S. Constitution", def: "The document written in 1787 that outlines the structure of the U.S. government and defines the rights and responsibilities of citizens.", ex: "The ultimate rulebook that sets up our 3 branches of government (Legislative, Executive, Judicial)." },
             { unit: 3, id: 41, word: "We the People", def: "The opening words of the U.S. Constitution, stating that the government's power comes from the people, not from a king or ruler.", ex: "The first three giant words written on the US Constitution, proving the citizens are in charge." },
-            { unit: 4, id: 42, word: "Preamble", def: "The introduction to the Constitution that lists six purposes of government: forming a more perfect union, establishing justice, ensuring domestic peace, providing defense, promoting general welfare, and securing liberty.", ex: "The famous opening paragraph that explains the goal of the document is to 'form a more perfect Union.'" },
+            { unit: 3, id: 42, word: "Preamble", def: "The introduction to the Constitution that lists six purposes of government: forming a more perfect union, establishing justice, ensuring domestic peace, providing defense, promoting general welfare, and securing liberty.", ex: "The famous opening paragraph that explains the goal of the document is to 'form a more perfect Union.'" },
             { unit: 3, id: 43, word: "Separation of Powers", def: "The principle that government power is divided among three branches—legislative, executive, and judicial—so no single branch becomes too powerful.", ex: "Congress makes the laws, the President enforces the laws, and the Supreme Court judges the laws." },
             { unit: 3, id: 44, word: "Checks and Balances", def: "A system where each branch of government has the power to limit the actions of the other branches, preventing any one branch from becoming too powerful.", ex: "Congress passes a law, but the President uses a 'Veto' to block it from happening." },
             { unit: 3, id: 45, word: "Federalists", def: "People who supported the U.S. Constitution and wanted a strong central government with the power to tax and regulate trade.", ex: "Alexander Hamilton and James Madison, who wanted the national government to be powerful." },
@@ -318,7 +337,7 @@
             { unit: 3, id: 48, word: "Supremacy Clause", def: "The rule that says the U.S. Constitution and Federal laws are the 'supreme law of the land.'", ex: "If a state law completely ignores or breaks a federal law, the federal law wins." },
             { unit: 3, id: 49, word: "Elastic Clause", def: "Congress can stretch its powers to make any laws that are 'necessary and proper' for the country.", ex: "The Constitution doesn't mention the Air Force or the Internet, but Congress can make laws about them anyway." },
 
-            // UNIT 4: Citizenship & Civic Participation
+            // UNIT 4: Citizenship & Civic Life (11 items)
             { unit: 4, id: 50, word: "Naturalized Citizen", def: "A person who was born in another country but has completed the process of becoming a U.S. citizen through legal procedures.", ex: "Someone born in Brazil who lives in the US, passes the civics test, and takes the oath to become American." },
             { unit: 4, id: 51, word: "Permanent Resident", def: "A person who is legally allowed to live in the United States permanently but is not yet a U.S. citizen; also called a 'green card' holder.", ex: "An immigrant who holds a Green Card, works in the US, but cannot legally vote in presidential elections yet." },
             { unit: 4, id: 52, word: "Naturalization Process", def: "The legal procedure by which a person born in another country can become a U.S. citizen, usually involving an application, test, and oath.", ex: "Filling out paperwork, taking an English and Civics test, and standing up to take an oath to the Constitution." },
@@ -331,7 +350,7 @@
             { unit: 4, id: 59, word: "Civic Responsibility", def: "Actions citizens SHOULD participate in to help their community and government, including voting, attending civic meetings, and running for office.", ex: "Volunteering to clean up a local park or voting for the next mayor." },
             { unit: 4, id: 60, word: "Common Good", def: "The well-being of the community as a whole; decisions made for the common good benefit everyone, not just individuals.", ex: "Everyone paying taxes to build public schools that help all children learn, even if you don't have kids." },
 
-            // UNIT 5: Amendments & Civil Rights
+            // UNIT 5: Constitutional Amendments (25 items)
             { unit: 5, id: 61, word: "Bill of Rights", def: "The first ten amendments to the U.S. Constitution, added in 1791, which protect important freedoms like speech, religion, and the right to a fair trial.", ex: "The list of rules that guarantees the government cannot stop you from protesting peacefully." },
             { unit: 5, id: 62, word: "1st Amendment", def: "Protects freedom of religion, speech, press, assembly, and petition; allows people to express themselves and challenge the government.", ex: "Being legally allowed to protest peacefully in front of a government building or post your opinions online." },
             { unit: 5, id: 63, word: "2nd Amendment", def: "Protects the right of people to own guns; the exact meaning of this amendment is often debated.", ex: "A citizen legally buying a hunting rifle or a handgun for self-defense." },
@@ -358,7 +377,7 @@
             { unit: 5, id: 84, word: "Due Process", def: "The government must treat you fairly and follow all legal steps before taking away your life, liberty, or property.", ex: "If you get arrested, the police must read you your rights, and you get a fair trial with a lawyer." },
             { unit: 5, id: 85, word: "Suffrage", def: "The right to vote in political elections.", ex: "The 19th Amendment finally gave women suffrage in 1920." },
 
-            // UNIT 6: The Justice System & Supreme Court Cases
+            // UNIT 6: Justice System & Supreme Court (24 items)
             { unit: 6, id: 86, word: "Impeachment", def: "Formally accusing a high-level government official of a serious crime.", ex: "A President is impeached by the House, and then goes on trial in the Senate to see if they should be removed." },
             { unit: 6, id: 87, word: "Judicial Review", def: "The power of the Supreme Court to look at a law and declare it 'Unconstitutional' (illegal).", ex: "Congress passes a law banning people from wearing green, but the Supreme Court strikes it down because it violates free expression." },
             { unit: 6, id: 88, word: "Precedent", def: "A past court decision that judges use to help them decide future, similar cases.", ex: "Because the Supreme Court ruled in 1954 that segregating schools was illegal, all future judges must follow that rule." },
@@ -384,7 +403,7 @@
             { unit: 6, id: 108, word: "Jurisdiction", def: "The official power to make legal decisions and judgments in a specific geographic area.", ex: "A Florida Highway Patrol officer has the power to give tickets in Florida, but they have no power in Georgia." },
             { unit: 6, id: 109, word: "Double Jeopardy", def: "You cannot be put on trial for the exact same crime twice after being found 'not guilty.'", ex: "If a jury finds you innocent of a robbery, the police can't arrest you the next day and try again for that exact same robbery." },
 
-            // UNIT 7: Politics, State Government, & Foreign Policy
+            // UNIT 7: Politics, State Gov & Foreign Policy (15 items)
             { unit: 7, id: 110, word: "Veto", def: "When the President rejects a bill passed by Congress.", ex: "Congress passes a law to ban TikTok, but the President says 'No' and vetoes it." },
             { unit: 7, id: 111, word: "Political Party", def: "A group of people with similar ideas about how the government should be run.", ex: "The Democratic Party and the Republican Party." },
             { unit: 7, id: 112, word: "Platform", def: "A political party’s list of beliefs and promises.", ex: "A party's platform might include promises to lower taxes, protect the environment, and build roads." },
@@ -402,7 +421,60 @@
             { unit: 7, id: 124, word: "Comprehensive Anti-Apartheid Act of 1986", def: "A U.S. law that imposed sanctions (penalties) on South Africa to pressure the government to end its system of racial separation.", ex: "The US refusing to trade goods with South Africa until they stopped treating Black citizens unfairly." }
         ];
 
+        // 35 TRICKY DISTRACTOR DEFINITIONS & EXAMPLES (5 Per Unit - Not in Vocab List)
+        const distractorData = [
+            // Unit 1 Distractors
+            { unit: 1, id: "d1", isDistractor: true, def: "The belief that a monarch’s authority comes directly from God, meaning subjects have no right to question or limit the king's power.", ex: "An absolute king telling his subjects that criticizing royal taxes is a sin against God punishable by death." },
+            { unit: 1, id: "d2", isDistractor: true, def: "An ancient written legal code carved onto public stone monuments that established strict punishments based on direct retaliation.", ex: "The famous ancient legal rule that if someone breaks another person's arm, their own arm will be broken ('an eye for an eye')." },
+            { unit: 1, id: "d3", isDistractor: true, def: "A system of government where a single individual holds complete, unchecked power over the entire country without citizen input.", ex: "A military dictator banning all political parties, shutting down independent courts, and making all national laws alone." },
+            { unit: 1, id: "d4", isDistractor: true, def: "An alliance of Native American nations governed by a representative council using the Great Law of Peace to maintain unity and mutual defense.", ex: "Five clan leaders meeting in a council to discuss peace treaties instead of answering to a single ruler." },
+            { unit: 1, id: "d5", isDistractor: true, def: "A form of government in which religious leaders rule in the name of God and religious laws serve as the official legal code.", ex: "A nation where religious leaders make all laws based entirely on ancient religious scriptures rather than a civil constitution." },
+
+            // Unit 2 Distractors
+            { unit: 2, id: "d6", isDistractor: true, def: "A royal decree issued by King George III that prohibited American colonists from settling west of the Appalachian Mountains.", ex: "British troops turning back colonial families who had already purchased farmland in the Ohio Valley." },
+            { unit: 2, id: "d7", isDistractor: true, def: "A deadly clash in 1770 where British soldiers fired into a crowd of protesting colonists, killing five civilians.", ex: "An angry crowd throwing snowballs and oyster shells at sentries outside the Boston custom house until shots were fired." },
+            { unit: 2, id: "d8", isDistractor: true, def: "A final peace offer sent by the Continental Congress to King George III in 1775, asking to halt fighting and repeal unfair taxes.", ex: "Colonial leaders pledging their loyalty to the King if he agreed to stop British troops from firing on towns." },
+            { unit: 2, id: "d9", isDistractor: true, def: "A grassroots patriot organization founded in Boston that organized boycotts, protests, and resistance against British tax collectors.", ex: "A group of colonial shopkeepers and artisans gathering to burn tax stamps in effigy and harass royal officials." },
+            { unit: 2, id: "d10", isDistractor: true, def: "A decisive 1777 military victory for the Continental Army that convinced France to enter the war as an official ally of the Americans.", ex: "Surrounding an entire British army in New York, proving to European powers that the colonies could actually defeat Britain." },
+
+            // Unit 3 Distractors
+            { unit: 3, id: "d11", isDistractor: true, def: "The agreement at the Constitutional Convention that established a bicameral legislature with proportional representation in the House and equal representation in the Senate.", ex: "Small states getting 2 senators each, while large states get more members in the House of Representatives based on population." },
+            { unit: 3, id: "d12", isDistractor: true, def: "An agreement reached in 1787 that counted three out of every five enslaved individuals toward a state's population for representation and taxation.", ex: "Southern states getting extra seats in the House of Representatives by partially counting enslaved people who could not vote." },
+            { unit: 3, id: "d13", isDistractor: true, def: "A constitutional proposal by James Madison that called for a strong national government with representation based entirely on state population.", ex: "Big states like Virginia and Pennsylvania demanding more votes in Congress because they had more people." },
+            { unit: 3, id: "d14", isDistractor: true, def: "A constitutional proposal by William Paterson that called for a single-chamber legislature where every state received exactly one equal vote.", ex: "Small states like Delaware and New Jersey insisting on having the exact same legislative voting power as large states." },
+            { unit: 3, id: "d15", isDistractor: true, def: "A lawmaking body made up of two separate chambers or houses.", ex: "The U.S. Congress being divided into the Senate and the House of Representatives." },
+
+            // Unit 4 Distractors
+            { unit: 4, id: "d16", isDistractor: true, def: "A federal government agency that requires almost all male U.S. citizens and immigrant men aged 18 to 25 to register for a potential military draft.", ex: "An 18-year-old young man registering with the government so he remains eligible for federal college student loans." },
+            { unit: 4, id: "d17", isDistractor: true, def: "The voluntary legal process of giving up or renouncing one's citizenship in a country.", ex: "An adult citizen visiting a foreign embassy and signing legal documents to formally surrender their U.S. passport and voting rights." },
+            { unit: 4, id: "d18", isDistractor: true, def: "A federal policy that allows citizens from certain allied countries to visit the United States for business or tourism for up to 90 days without obtaining a formal visa.", ex: "A tourist from Japan flying to Florida for a two-week vacation without having to interview at an American consulate beforehand." },
+            { unit: 4, id: "d19", isDistractor: true, def: "An official nationwide population count conducted by the federal government every ten years to determine congressional representation and federal funding.", ex: "Every household in America filling out a questionnaire counting how many people live in their home on April 1st." },
+            { unit: 4, id: "d20", isDistractor: true, def: "The legal power of the government to take private property for public use, provided that fair market compensation is paid to the owner.", ex: "A state government buying out three private homes to widen a congested public highway." },
+
+            // Unit 5 Distractors
+            { unit: 5, id: "d21", isDistractor: true, def: "A constitutional amendment ratified in 1919 that prohibited the manufacture, sale, and transportation of alcoholic beverages across the United States.", ex: "Federal agents shutting down breweries and pouring illegal barrels of alcohol into the street." },
+            { unit: 5, id: "d22", isDistractor: true, def: "A constitutional amendment ratified in 1933 that repealed the 18th Amendment, officially ending the nationwide ban on alcohol.", ex: "The only constitutional amendment in American history passed specifically to cancel out a previous amendment." },
+            { unit: 5, id: "d23", isDistractor: true, def: "A constitutional amendment ratified in 1951 that limits an individual to serving a maximum of two terms (or ten total years) as President of the United States.", ex: "Preventing popular modern presidents from running for a third term in office." },
+            { unit: 5, id: "d24", isDistractor: true, def: "A constitutional amendment ratified in 1967 that establishes the procedures for filling a vacancy in the vice presidency and handling presidential disability.", ex: "The Vice President officially taking over executive powers while the President is under general anesthesia during surgery." },
+            { unit: 5, id: "d25", isDistractor: true, def: "A constitutional amendment ratified in 1992 that prevents any pay raise voted on by Congress from taking effect until after the next congressional election.", ex: "Lawmakers passing a salary increase, but having to face the voters in an election before seeing any extra money in their paychecks." },
+
+            // Unit 6 Distractors
+            { unit: 6, id: "d26", isDistractor: true, def: "A 1969 Supreme Court case that ruled students do not lose their First Amendment rights to free speech at school, as long as their actions do not substantially disrupt learning.", ex: "Students successfully defending their right to wear black armbands to school to peacefully protest a war." },
+            { unit: 6, id: "d27", isDistractor: true, def: "A 1989 Supreme Court case that ruled burning the American flag during a political protest is protected symbolic speech under the First Amendment.", ex: "Overturning an arrest because the government cannot ban the expression of an idea simply because society finds it offensive." },
+            { unit: 6, id: "d28", isDistractor: true, def: "A 2008 Supreme Court case that affirmed the Second Amendment protects an individual's right to possess a firearm unconnected with service in a militia, especially for self-defense at home.", ex: "Striking down a city law that completely banned private citizens from owning handguns for home protection." },
+            { unit: 6, id: "d29", isDistractor: true, def: "A formal legal order issued by the Supreme Court agreeing to review and hear an appeal from a lower court case.", ex: "Four of the nine Supreme Court justices agreeing that a controversial constitutional question deserves a hearing." },
+            { unit: 6, id: "d30", isDistractor: true, def: "A written statement prepared by Supreme Court justices who disagree with the majority ruling, explaining their legal arguments and objections.", ex: "A judge writing why she believes the majority made a mistake, creating an argument that future courts might use to overturn the decision." },
+
+            // Unit 7 Distractors
+            { unit: 7, id: "d31", isDistractor: true, def: "The controversial practice of redrawing legislative voting district boundaries in bizarre shapes to give one political party an unfair electoral advantage.", ex: "State lawmakers drawing a snake-shaped voting district to pack all their political opponents into one single area." },
+            { unit: 7, id: "d32", isDistractor: true, def: "A legislative tactic in the U.S. Senate where a senator delivers a prolonged speech to delay or prevent a vote on a bill unless a 60-vote supermajority ends debate.", ex: "A senator speaking on the Senate floor for twelve straight hours to block a controversial bill from passing." },
+            { unit: 7, id: "d33", isDistractor: true, def: "An organization established by an interest group, corporation, or labor union to raise voluntary funds and spend money to support political candidates.", ex: "A business group collecting money from members to buy television campaign ads supporting a friendly candidate." },
+            { unit: 7, id: "d34", isDistractor: true, def: "A preliminary election in which registered voters in each state select which candidate will represent their political party on the general election ballot.", ex: "Republican voters in March deciding whether Candidate A or Candidate B will run against the Democrat in November." },
+            { unit: 7, id: "d35", isDistractor: true, def: "A directive issued by the President of the United States to executive branch agencies that carries the force of law without requiring congressional approval.", ex: "A President directing federal agencies to establish new safety standards for artificial intelligence." }
+        ];
+
         let currentData = [];
+        let activeDistractors = [];
         let score = 0;
         let totalWords = 0;
         let mistakes = 0; 
@@ -435,19 +507,21 @@
             return array;
         }
 
-        // Filter the words based on the Dropdown selection
+        // Filter based on Dropdown
         function filterData() {
             const selectedUnit = document.getElementById('unitSelect').value;
             if (selectedUnit === "ALL") {
                 currentData = [...vocabData];
+                activeDistractors = []; // Master Challenge keeps exact 1-to-1 match!
             } else {
                 currentData = vocabData.filter(item => item.unit == selectedUnit);
+                activeDistractors = distractorData.filter(item => item.unit == selectedUnit);
             }
             totalWords = currentData.length;
             document.getElementById('totalDisplay').innerText = totalWords;
         }
 
-        // Reset and Scramble the Game
+        // Reset and Scramble
         function resetGame() {
             score = 0;
             mistakes = 0;
@@ -469,9 +543,11 @@
             defsColumn.innerHTML = '<h2>Definitions & Examples</h2>';
 
             const shuffledWords = shuffle([...currentData]);
-            const shuffledDefs = shuffle([...currentData]);
+            // Merge matching terms and distractors for the right column
+            const combinedDefinitions = [...currentData, ...activeDistractors];
+            const shuffledDefs = shuffle(combinedDefinitions);
 
-            // Render Words
+            // Render Words on the Left
             shuffledWords.forEach(item => {
                 const wordElement = document.createElement('div');
                 wordElement.classList.add('draggable-word');
@@ -486,11 +562,14 @@
                 wordsColumn.appendChild(wordElement);
             });
 
-            // Render Drop Zones (with Definitions and Examples)
-            shuffledDefs.forEach(item => {
+            // Render Drop Zones on the Right
+            shuffledDefs.forEach((item, index) => {
                 const dropZone = document.createElement('div');
                 dropZone.classList.add('drop-zone');
                 dropZone.dataset.id = item.id;
+                if (item.isDistractor) {
+                    dropZone.dataset.isDistractor = "true";
+                }
                 
                 // Add Definition
                 const defText = document.createElement('p');
@@ -512,7 +591,7 @@
             });
         }
 
-        // Drag & Drop Functions
+        // Drag & Drop Handlers
         function dragStart(e) {
             e.dataTransfer.setData('text/plain', e.target.dataset.id);
             setTimeout(() => e.target.classList.add('dragging'), 0);
@@ -549,6 +628,7 @@
 
             const targetId = dropZone.dataset.id;
 
+            // Check if dragged word matches target definition
             if (draggedId === targetId) {
                 // Correct Match
                 const draggedElement = document.querySelector(`.draggable-word[data-id='${draggedId}']`);
@@ -563,7 +643,7 @@
 
                 updateScore();
             } else {
-                // Incorrect Match
+                // Incorrect Match (including attempts to drop into distractor boxes!)
                 dropZone.classList.add('incorrect');
                 mistakes++;
                 setTimeout(() => dropZone.classList.remove('incorrect'), 800);
@@ -575,39 +655,53 @@
             document.getElementById('scoreDisplay').innerText = score;
 
             if (score === totalWords) {
-                document.getElementById('message').innerText = "🎉 Congratulations! You mastered all the words!";
+                document.getElementById('message').innerText = "🎉 Outstanding! You mastered every word and avoided all distractors!";
                 document.getElementById('downloadBtn').style.display = "block";
+
+                // Reveal unused distractors in subtle gray
+                const allDropZones = document.querySelectorAll('.drop-zone');
+                allDropZones.forEach(zone => {
+                    if (zone.dataset.isDistractor === "true") {
+                        zone.classList.add('unused-distractor');
+                        const tag = document.createElement('span');
+                        tag.classList.add('distractor-tag');
+                        tag.innerText = "⚠️ Unused Distractor / Foil";
+                        zone.insertBefore(tag, zone.firstChild);
+                    }
+                });
             }
         }
 
         // Report Generation and Download
         function downloadReport() {
-            const studentName = prompt("Awesome job! Enter your name for the report:");
+            const studentName = prompt("Outstanding work! Please enter your name for the official report:");
             if (!studentName) return; 
 
             const selectedUnitText = document.getElementById('unitSelect').options[document.getElementById('unitSelect').selectedIndex].text;
             const date = new Date().toLocaleString();
             
-            let reportText = `======================================\n`;
-            reportText += `       CIVICS VOCABULARY REPORT       \n`;
-            reportText += `======================================\n\n`;
+            let reportText = `========================================================\n`;
+            reportText += `        CIVICS VOCABULARY MASTERY REPORT CARD           \n`;
+            reportText += `========================================================\n\n`;
             reportText += `Student Name : ${studentName}\n`;
             reportText += `Date & Time  : ${date}\n`;
             reportText += `Section      : ${selectedUnitText}\n`;
-            reportText += `Score        : ${score} / ${totalWords} (100%)\n`;
-            reportText += `Mistakes made: ${mistakes} attempt(s)\n\n`;
-            reportText += `--- MASTERED VOCABULARY ---\n\n`;
+            reportText += `Score        : ${score} / ${totalWords} (100% Mastery)\n`;
+            reportText += `Mistakes Made: ${mistakes} attempt(s)\n\n`;
+            reportText += `--------------------------------------------------------\n`;
+            reportText += `               MASTERED VOCABULARY ANALYSIS             \n`;
+            reportText += `--------------------------------------------------------\n\n`;
 
             const sortedData = [...currentData].sort((a, b) => a.word.localeCompare(b.word));
 
             sortedData.forEach((item, index) => {
-                reportText += `${index + 1}. ${item.word.toUpperCase()}\n`;
+                reportText += `${index + 1}. CONCEPT: ${item.word.toUpperCase()}\n`;
                 reportText += `   Definition: ${item.def}\n`;
                 reportText += `   Example   : ${item.ex}\n\n`;
             });
 
-            reportText += `======================================\n`;
-            reportText += `End of Report\n`;
+            reportText += `========================================================\n`;
+            reportText += `End of Report - Great Job Preparing for Your Civics Exam!\n`;
 
             const blob = new Blob([reportText], { type: 'text/plain' });
             const link = document.createElement('a');
@@ -619,7 +713,7 @@
             document.body.removeChild(link);
         }
 
-        // Run game initialization on load
+        // Start game on window load
         window.onload = resetGame;
 
     </script>
