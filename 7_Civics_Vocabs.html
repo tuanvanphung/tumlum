@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Civics Vocab Master: Tricky Drag & Drop</title>
+    <!-- Touchscreen Drag & Drop Polyfill for iPads, Chromebooks, and Phones -->
+    <script src="https://bernardo-castilho.github.io/DragDropTouch/DragDropTouch.js"></script>
     <style>
         :root {
             --primary-blue: #2c3e50;
@@ -134,7 +136,7 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             overflow-y: auto;
             border: 2px solid #bdc3c7;
-            scroll-behavior: smooth;
+            /* Removed scroll-behavior: smooth so auto-scroll while dragging works smoothly */
         }
 
         #words-column {
@@ -169,6 +171,11 @@
             font-size: 0.95rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.15);
             transition: transform 0.2s, background 0.2s;
+            
+            /* Fixes WebKit/Chrome bug where user-select: none blocks HTML5 dragging */
+            -webkit-user-drag: element;
+            user-select: none;
+            touch-action: none;
         }
         
         .draggable-word:active {
@@ -553,7 +560,7 @@
                 wordElement.classList.add('draggable-word');
                 wordElement.draggable = true;
                 wordElement.id = `word-${item.id}`;
-                wordElement.dataset.id = item.id;
+                wordElement.dataset.id = String(item.id);
                 wordElement.innerText = item.word;
 
                 wordElement.addEventListener('dragstart', dragStart);
@@ -563,10 +570,10 @@
             });
 
             // Render Drop Zones on the Right
-            shuffledDefs.forEach((item, index) => {
+            shuffledDefs.forEach((item) => {
                 const dropZone = document.createElement('div');
                 dropZone.classList.add('drop-zone');
-                dropZone.dataset.id = item.id;
+                dropZone.dataset.id = String(item.id);
                 if (item.isDistractor) {
                     dropZone.dataset.isDistractor = "true";
                 }
@@ -591,40 +598,49 @@
             });
         }
 
-        // Drag & Drop Handlers
+        // Drag & Drop Handlers (Fixed with e.currentTarget and effectAllowed)
         function dragStart(e) {
-            e.dataTransfer.setData('text/plain', e.target.dataset.id);
-            setTimeout(() => e.target.classList.add('dragging'), 0);
+            const wordEl = e.currentTarget;
+            if (!wordEl) return;
+            e.dataTransfer.setData('text/plain', wordEl.dataset.id);
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => wordEl.classList.add('dragging'), 0);
         }
 
         function dragEnd(e) {
-            e.target.classList.remove('dragging');
+            e.currentTarget.classList.remove('dragging');
         }
 
         function dragOver(e) {
             e.preventDefault(); 
+            e.dataTransfer.dropEffect = 'move';
         }
 
         function dragEnter(e) {
             e.preventDefault();
-            if (!e.target.classList.contains('correct')) {
-                e.target.classList.add('hover');
+            const dropZone = e.currentTarget;
+            if (!dropZone.classList.contains('correct')) {
+                dropZone.classList.add('hover');
             }
         }
 
         function dragLeave(e) {
-            e.target.classList.remove('hover');
-            e.target.classList.remove('incorrect');
+            const dropZone = e.currentTarget;
+            // Prevent flickering if moving over child elements inside the drop-zone
+            if (dropZone.contains(e.relatedTarget)) return;
+            dropZone.classList.remove('hover');
+            dropZone.classList.remove('incorrect');
         }
 
         function drop(e) {
             e.preventDefault();
-            const draggedId = e.dataTransfer.getData('text/plain');
-            const dropZone = e.target.closest('.drop-zone'); 
-            
+            const dropZone = e.currentTarget;
             dropZone.classList.remove('hover');
 
             if (dropZone.classList.contains('correct')) return;
+
+            const draggedId = e.dataTransfer.getData('text/plain');
+            if (!draggedId) return;
 
             const targetId = dropZone.dataset.id;
 
@@ -632,6 +648,7 @@
             if (draggedId === targetId) {
                 // Correct Match
                 const draggedElement = document.querySelector(`.draggable-word[data-id='${draggedId}']`);
+                if (!draggedElement) return;
                 
                 dropZone.insertBefore(draggedElement, dropZone.firstChild);
                 
