@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Civics Tricky Scenario Challenge</title>
+    <!-- Touchscreen Drag & Drop Polyfill for iPads, Chromebooks, and Phones -->
+    <script src="https://bernardo-castilho.github.io/DragDropTouch/DragDropTouch.js"></script>
     <style>
         :root {
             --primary-blue: #2c3e50;
@@ -134,7 +136,7 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             overflow-y: auto;
             border: 2px solid #bdc3c7;
-            scroll-behavior: smooth;
+            /* Removed scroll-behavior: smooth so auto-scroll while dragging works smoothly */
         }
 
         #words-column {
@@ -169,6 +171,11 @@
             font-size: 0.95rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.15);
             transition: transform 0.2s, background 0.2s;
+
+            /* Fixes WebKit/Chrome bug where user-select: none blocks HTML5 dragging */
+            -webkit-user-drag: element;
+            user-select: none;
+            touch-action: none;
         }
         
         .draggable-word:active {
@@ -352,7 +359,7 @@
             // UNIT 5: Constitutional Amendments (25 items)
             { unit: 5, id: 61, word: "Bill of Rights", scenario: "Ratified in 1791, these first ten amendments to the Constitution were enacted to protect individual freedoms from federal overreach. They guarantee core protections such as religious liberty, fair trials, free speech, and safeguards against unreasonable searches. This famous collection of amendments satisfied Anti-Federalist demands." },
             { unit: 5, id: 62, word: "1st Amendment", scenario: "A group of citizens peaceably assembles on the sidewalk outside City Hall to criticize a controversial local tax policy. The police chief attempts to break up the gathering, but a judge rules that freedom of speech, assembly, religion, press, and petition are legally protected. This core amendment protects expressive freedom against government censorship." },
-            { unit: 6, id: 63, word: "2nd Amendment", scenario: "A law-abiding citizen purchases a registered rifle for personal defense and target shooting at a regulated range. When a city tries to ban all private firearms within municipal limits, the court strikes down the ban as unconstitutional. This amendment protects the right of the people to keep and bear arms." },
+            { unit: 5, id: 63, word: "2nd Amendment", scenario: "A law-abiding citizen purchases a registered rifle for personal defense and target shooting at a regulated range. When a city tries to ban all private firearms within municipal limits, the court strikes down the ban as unconstitutional. This amendment protects the right of the people to keep and bear arms." },
             { unit: 5, id: 64, word: "3rd Amendment", scenario: "During peacetime, a military officer demands that a suburban family provide beds and home-cooked meals for several soldiers without compensation. The homeowner refuses entry, reminding the officer that the military cannot forcibly quarter troops in private residences without consent. This amendment protects private households from military intrusion." },
             { unit: 5, id: 65, word: "4th Amendment", scenario: "Police detectives suspect a man possesses stolen property in his apartment, but they observe no immediate emergency. Instead of kicking down the front door, they present sworn evidence to a judge to secure a formal search warrant detailing the place to be searched. This amendment protects citizens against unreasonable searches and seizures." },
             { unit: 5, id: 66, word: "5th Amendment", scenario: "A criminal defendant decides not to take the witness stand to answer questions from the prosecution during his felony trial. The judge instructs the jury that his silence cannot be used as an admission of guilt because no one can be forced to self-incriminate. This amendment protects the right against self-incrimination and guarantees due process." },
@@ -552,7 +559,7 @@
                 wordElement.classList.add('draggable-word');
                 wordElement.draggable = true;
                 wordElement.id = `word-${item.id}`;
-                wordElement.dataset.id = item.id;
+                wordElement.dataset.id = String(item.id);
                 wordElement.innerText = item.word;
 
                 wordElement.addEventListener('dragstart', dragStart);
@@ -562,10 +569,10 @@
             });
 
             // Render Scenarios on the Right
-            shuffledScenarios.forEach((item, index) => {
+            shuffledScenarios.forEach((item) => {
                 const dropZone = document.createElement('div');
                 dropZone.classList.add('drop-zone');
-                dropZone.dataset.id = item.id;
+                dropZone.dataset.id = String(item.id);
                 if (item.isDistractor) {
                     dropZone.dataset.isDistractor = "true";
                 }
@@ -588,40 +595,49 @@
             });
         }
 
-        // Drag & Drop Handlers
+        // Drag & Drop Handlers (Fixed with e.currentTarget and effectAllowed)
         function dragStart(e) {
-            e.dataTransfer.setData('text/plain', e.target.dataset.id);
-            setTimeout(() => e.target.classList.add('dragging'), 0);
+            const wordEl = e.currentTarget;
+            if (!wordEl) return;
+            e.dataTransfer.setData('text/plain', wordEl.dataset.id);
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => wordEl.classList.add('dragging'), 0);
         }
 
         function dragEnd(e) {
-            e.target.classList.remove('dragging');
+            e.currentTarget.classList.remove('dragging');
         }
 
         function dragOver(e) {
             e.preventDefault(); 
+            e.dataTransfer.dropEffect = 'move';
         }
 
         function dragEnter(e) {
             e.preventDefault();
-            if (!e.target.classList.contains('correct')) {
-                e.target.classList.add('hover');
+            const dropZone = e.currentTarget;
+            if (!dropZone.classList.contains('correct')) {
+                dropZone.classList.add('hover');
             }
         }
 
         function dragLeave(e) {
-            e.target.classList.remove('hover');
-            e.target.classList.remove('incorrect');
+            const dropZone = e.currentTarget;
+            // Prevent flickering if moving over child elements inside the drop-zone
+            if (dropZone.contains(e.relatedTarget)) return;
+            dropZone.classList.remove('hover');
+            dropZone.classList.remove('incorrect');
         }
 
         function drop(e) {
             e.preventDefault();
-            const draggedId = e.dataTransfer.getData('text/plain');
-            const dropZone = e.target.closest('.drop-zone'); 
-            
+            const dropZone = e.currentTarget;
             dropZone.classList.remove('hover');
 
             if (dropZone.classList.contains('correct')) return;
+
+            const draggedId = e.dataTransfer.getData('text/plain');
+            if (!draggedId) return;
 
             const targetId = dropZone.dataset.id;
 
@@ -629,6 +645,7 @@
             if (draggedId === targetId) {
                 // Correct Match
                 const draggedElement = document.querySelector(`.draggable-word[data-id='${draggedId}']`);
+                if (!draggedElement) return;
                 
                 dropZone.insertBefore(draggedElement, dropZone.firstChild);
                 
