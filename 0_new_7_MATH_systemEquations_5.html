@@ -261,8 +261,8 @@
             margin-top: 4px; 
         }
         
-        .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
-        .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; font-weight: bold; }
+        .correct-input { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724 !important; font-weight: bold; }
+        .incorrect-input { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24 !important; font-weight: bold; }
 
         /* Ensure MathJax scales seamlessly without causing card overflow */
         mjx-container {
@@ -405,7 +405,7 @@
         function term(coeff, v, first=false) {
             if (coeff === 0) return "";
             let absC = Math.abs(coeff);
-            let cStr = absC === 1 ? "" : `${absC}`;
+            let cStr = (absC === 1 && v !== "") ? "" : `${absC}`;
             if (first) {
                 return coeff < 0 ? `-${cStr}${v}` : `${cStr}${v}`;
             }
@@ -445,7 +445,7 @@
             const hh = pad(date.getHours());
             const min = pad(date.getMinutes());
             const ss = pad(date.getSeconds());
-            return `${yyyy}${mm}${dd}_${hh}${ss}`;
+            return `${yyyy}${mm}${dd}_${hh}${min}${ss}`;
         }
 
         // =============================================================
@@ -508,14 +508,14 @@
 
                     steps.push(
                         `<strong>Step 2: Eliminate \\(x\\) by linear combination</strong><br>
-                         Multiply Eq (1') by \\(${mult1}\\) and subtract \\(${mult2}\\) times Eq (2'):
-                         <span class="algebra-line">\\((${mult1 * A1}x ${term(mult1 * B1, 'y', false)}) - (${mult2 * A2}x ${term(mult2 * B2, 'y', false)}) = ${mult1 * C1} - (${mult2 * C2})\\)</span>
-                         <span class="algebra-line">\\(${elimY}y = ${elimConst} \\implies y = ${y}\\)</span>`
+                         Multiply Eq (1') by \\(${mult1}\\) and subtract \\((${mult2})\\) times Eq (2'):
+                         <span class="algebra-line">\\((${term(mult1 * A1, 'x', true)} ${term(mult1 * B1, 'y', false)}) - (${term(mult2 * A2, 'x', true)} ${term(mult2 * B2, 'y', false)}) = ${mult1 * C1} - (${mult2 * C2})\\)</span>
+                         <span class="algebra-line">\\(${term(elimY, 'y', true)} = ${elimConst} \\implies y = ${y}\\)</span>`
                     );
                     steps.push(
                         `<strong>Step 3: Back-substitute \\(y = ${y}\\) to solve for \\(x\\)</strong><br>
                          Substitute into Eq (1'):
-                         <span class="algebra-line">\\(${term(A1, 'x', true)} ${term(B1, '', false)}(${y}) = ${C1} \\implies ${A1}x = ${C1 - B1 * y} \\implies x = ${x}\\)</span>`
+                         <span class="algebra-line">\\(${term(A1, 'x', true)} ${term(B1, '', false)}(${y}) = ${C1} \\implies ${term(A1, 'x', true)} = ${C1 - B1 * y} \\implies x = ${x}\\)</span>`
                     );
                     break;
                 }
@@ -524,11 +524,11 @@
                     y = getRnd(-6, 6, [0]);
 
                     let a1_left = getRnd(2, 5);
-                    let a1_right = getRnd(-4, 4, [a1_left]);
+                    let a1_right = getRnd(-4, 4, [0, a1_left]);
                     let A1 = a1_left - a1_right;
 
                     let b1_right = getRnd(2, 6);
-                    let b1_left = getRnd(-3, 3, [b1_right]);
+                    let b1_left = getRnd(-3, 3, [0, b1_right]);
                     let B1 = b1_left - b1_right;
 
                     let C1 = A1 * x + B1 * y;
@@ -541,7 +541,7 @@
                         B2 = getRnd(-5, 5, [0]);
                     }
                     let C2 = A2 * x + B2 * y;
-                    let k2 = getRnd(-4, 4, [0]);
+                    let k2 = getRnd(-4, 4, [0, A2]);
 
                     let eq1LHS = `${term(a1_left, 'x', true)} ${term(b1_left, 'y', false)} ${constant(c1_left, false)}`;
                     let eq1RHS = `${term(a1_right, 'x', true)} ${term(b1_right, 'y', false)} ${constant(c1_right, false)}`.trim();
@@ -563,12 +563,12 @@
                     steps.push(
                         `<strong>Step 2: Solve the aligned system via elimination</strong><br>
                          Multiply Eq (1') by \\(${B2}\\) and Eq (2') by \\(${B1}\\):
-                         <span class="algebra-line">\\(${B2}(${term(A1, 'x', true)} ${term(B1, 'y', false)}) - ${B1}(${term(A2, 'x', true)} ${term(B2, 'y', false)}) = ${B2}(${C1}) - ${B1}(${C2})\\)</span>
-                         <span class="algebra-line">\\(${det}x = ${det * x} \\implies x = ${x}\\)</span>`
+                         <span class="algebra-line">\\(${B2}(${term(A1, 'x', true)} ${term(B1, 'y', false)}) - (${B1})(${term(A2, 'x', true)} ${term(B2, 'y', false)}) = ${B2}(${C1}) - (${B1})(${C2})\\)</span>
+                         <span class="algebra-line">\\(${term(det, 'x', true)} = ${det * x} \\implies x = ${x}\\)</span>`
                     );
                     steps.push(
                         `<strong>Step 3: Substitute \\(x = ${x}\\) to determine \\(y\\)</strong><br>
-                         <span class="algebra-line">\\(${term(A1, '', true)}(${x}) ${term(B1, 'y', false)} = ${C1} \\implies ${B1}y = ${C1 - A1 * x} \\implies y = ${y}\\)</span>`
+                         <span class="algebra-line">\\(${term(A1, '', true)}(${x}) ${term(B1, 'y', false)} = ${C1} \\implies ${term(B1, 'y', true)} = ${C1 - A1 * x} \\implies y = ${y}\\)</span>`
                     );
                     break;
                 }
@@ -621,7 +621,7 @@
                         `<strong>Step 2: Solve the cleared system</strong><br>
                          Eliminating \\(y\\):
                          <span class="algebra-line">\\(${B2}(${term(A1, 'x', true)} ${term(B1, 'y', false)}) - (${B1})(${term(A2, 'x', true)} ${term(B2, 'y', false)}) = ${B2 * C1} - (${B1 * C2})\\)</span>
-                         <span class="algebra-line">\\(${det}x = ${det * x} \\implies x = ${x}\\)</span>`
+                         <span class="algebra-line">\\(${term(det, 'x', true)} = ${det * x} \\implies x = ${x}\\)</span>`
                     );
                     steps.push(
                         `<strong>Step 3: Solve for \\(y\\)</strong><br>
@@ -667,10 +667,13 @@
                     let e3_z = mat[2][2] * mat[0][0] - mat[0][2] * mat[2][0];
                     let e3_c = c3 * mat[0][0] - c1 * mat[2][0];
 
+                    let eqA_LHS = `${term(e2_y, 'y', true)} ${term(e2_z, 'z', e2_y === 0)}`.trim();
+                    let eqB_LHS = `${term(e3_y, 'y', true)} ${term(e3_z, 'z', e3_y === 0)}`.trim();
+
                     steps.push(
                         `<strong>Step 1: Eliminate \\(x\\) using Eq (1)</strong><br>
                          Combine Eq (1) with Eq (2), and Eq (1) with Eq (3) to eliminate \\(x\\):
-                         <span class="algebra-line">\\(\\begin{cases} ${term(e2_y, 'y', true)} ${term(e2_z, 'z', false)} = ${e2_c} \\quad \\text{--- (A)} \\\\[4pt] ${term(e3_y, 'y', true)} ${term(e3_z, 'z', false)} = ${e3_c} \\quad \\text{--- (B)} \\end{cases}\\)</span>`
+                         <span class="algebra-line">\\(\\begin{cases} ${eqA_LHS} = ${e2_c} \\quad \\text{--- (A)} \\\\[4pt] ${eqB_LHS} = ${e3_c} \\quad \\text{--- (B)} \\end{cases}\\)</span>`
                     );
                     steps.push(
                         `<strong>Step 2: Solve the 2-variable system for \\(y\\) and \\(z\\)</strong><br>
@@ -705,10 +708,11 @@
                         B2 = b2;
                     }
 
-                    let numConst1 = getRnd(-4, 4);
+                    let numConst1 = getRnd(-5, 5, [0]);
                     let numVal1 = a1 * x + b1 * y + numConst1;
-                    while (numVal1 % d1 !== 0) {
+                    while (numVal1 % d1 !== 0 || numConst1 === 0) {
                         numConst1++;
+                        if (numConst1 === 0) numConst1++;
                         numVal1 = a1 * x + b1 * y + numConst1;
                     }
                     let C1_val = numVal1 / d1;
@@ -733,7 +737,7 @@
                         `<strong>Step 2: Solve the linear system</strong><br>
                          Eliminating \\(y\\):
                          <span class="algebra-line">\\(${B2}(${term(A1, 'x', true)} ${term(B1, 'y', false)}) - (${B1})(${term(A2, 'x', true)} ${term(B2, 'y', false)}) = ${B2 * C1} - (${B1 * C2})\\)</span>
-                         <span class="algebra-line">\\(${det}x = ${det * x} \\implies x = ${x}\\)</span>`
+                         <span class="algebra-line">\\(${term(det, 'x', true)} = ${det * x} \\implies x = ${x}\\)</span>`
                     );
                     steps.push(
                         `<strong>Step 3: Back-substitute to find \\(y\\)</strong><br>
@@ -956,7 +960,10 @@
             if (btn) btn.remove();
 
             let score = 0;
-            const clean = str => (str || '').toLowerCase().replace(/\s+/g, '');
+            const clean = str => {
+                let s = (str || '').toLowerCase().replace(/\s+/g, '').replace(/^\+/, '');
+                return s === '-0' ? '0' : s;
+            };
             const resultsList = [];
 
             currentProblems.forEach(p => {
@@ -964,32 +971,19 @@
                 const correctAnswers = data.answers;
                 
                 let isCorrect = true;
-                let inputElements = [];
                 let userAnswers = {};
+                const vars = p.type === 'three_var' ? ['x', 'y', 'z'] : ['x', 'y'];
 
-                if (p.type === 'three_var') {
-                    const ix = document.getElementById(`input-${p.id}-x`);
-                    const iy = document.getElementById(`input-${p.id}-y`);
-                    const iz = document.getElementById(`input-${p.id}-z`);
-                    inputElements = [ix, iy, iz];
-                    userAnswers = { x: ix.value.trim(), y: iy.value.trim(), z: iz.value.trim() };
+                vars.forEach(v => {
+                    const el = document.getElementById(`input-${p.id}-${v}`);
+                    const val = el.value.trim();
+                    userAnswers[v] = val;
 
-                    if (clean(ix.value) !== correctAnswers.x || clean(iy.value) !== correctAnswers.y || clean(iz.value) !== correctAnswers.z) {
+                    const varCorrect = clean(val) === correctAnswers[v];
+                    if (!varCorrect) {
                         isCorrect = false;
                     }
-                } else {
-                    const ix = document.getElementById(`input-${p.id}-x`);
-                    const iy = document.getElementById(`input-${p.id}-y`);
-                    inputElements = [ix, iy];
-                    userAnswers = { x: ix.value.trim(), y: iy.value.trim() };
-
-                    if (clean(ix.value) !== correctAnswers.x || clean(iy.value) !== correctAnswers.y) {
-                        isCorrect = false;
-                    }
-                }
-
-                inputElements.forEach(el => {
-                    el.classList.add(isCorrect ? 'correct-input' : 'incorrect-input');
+                    el.classList.add(varCorrect ? 'correct-input' : 'incorrect-input');
                     el.disabled = true;
                 });
                 
